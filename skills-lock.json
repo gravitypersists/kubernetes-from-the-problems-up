@@ -1,0 +1,11 @@
+{
+  "version": 1,
+  "skills": {
+    "didactician": {
+      "source": "gravitypersists/didactician",
+      "sourceType": "github",
+      "skillPath": "skills/didactician/SKILL.md",
+      "computedHash": "7d1c7702ad7d64a19441983785c3ed656a0383d78ea0ebabbac0f59ed491d751"
+    }
+  }
+}
