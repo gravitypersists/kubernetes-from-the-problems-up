@@ -1,0 +1,253 @@
+/* w-samecode · W-01 Same code, two machines. Every rule is scoped to the mount; every colour is a token.
+   Adapted from Ch 1's w-rebuild index.css (chrome, stage-4 comparison rows, in-widget checks).
+   Reuses the page's check treatment (cp-check__head, cp-chip, cp-option, cp-feedback, cp-retry,
+   cp-why, cp-reveal), status words (st, lamp) and the image chip (cp-img) from assets/page.css,
+   so the reader meets one check pattern and one visual grammar.
+   Visual grammar (plan ## Visual grammar): machine names head the two value columns; code in c1;
+   things the app needs as c2 rows under mono category labels; IN THE IMAGE drawn as an image frame
+   (c1 stroke on c1-soft) with the image chip in its header; bands that aren't an image are dashed;
+   every status is a word plus a colour (IDENTICAL, SAME, DIFFERENT, PASS, FAIL). */
+
+[data-widget="w-samecode"] .ws {
+  --ws-inset: calc(var(--sp-1) + var(--stroke));
+  --ws-cols: minmax(0, 1fr) 88px 88px;
+  --ws-gap: var(--sp-2);
+  background: var(--surface);
+  border: var(--stroke) solid var(--ink);
+  border-radius: var(--radius-1);
+  box-shadow: var(--shadow-1);
+  font: 400 var(--fs-small)/var(--lh-small) var(--font-sans);
+  color: var(--ink);
+}
+[data-widget="w-samecode"] p { margin: 0; }
+[data-widget="w-samecode"] .ws ul { margin: 0; padding: 0; list-style: none; }
+[data-widget="w-samecode"] .ws button { font-family: inherit; }
+[data-widget="w-samecode"] .ws-sr {
+  position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0;
+  overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0;
+}
+[data-widget="w-samecode"] .ws-lc { text-transform: none; letter-spacing: 0; }
+
+/* ---------- chrome: bar, state header ---------- */
+[data-widget="w-samecode"] .ws__bar {
+  display: flex; flex-wrap: wrap; align-items: center; gap: 0 var(--sp-1);
+  padding: var(--sp-1) var(--sp-2);
+  border-bottom: var(--stroke) solid var(--ink);
+}
+[data-widget="w-samecode"] .ws__bar .cp-label:first-of-type { color: var(--ink); }
+[data-widget="w-samecode"] .ws__lamp { width: var(--sp-1); height: var(--sp-1); background: var(--accent); flex: none; }
+[data-widget="w-samecode"] .ws__headwrap { display: grid; position: relative; }
+[data-widget="w-samecode"] .ws__head {
+  display: flex; flex-wrap: wrap; align-items: center; gap: 0 var(--sp-2);
+  padding: 0 var(--sp-2) 0 var(--sp-3);
+  border-bottom: 1px solid var(--line);
+}
+[data-widget="w-samecode"] .ws__name {
+  margin: 0; padding: var(--sp-1) 0; color: var(--ink);
+  font: 700 var(--fs-caption)/var(--lh-caption) var(--font-mono); letter-spacing: .08em; text-transform: uppercase;
+  font-variant-numeric: tabular-nums;
+}
+[data-widget="w-samecode"] .ws__name:focus { outline: none; }
+[data-widget="w-samecode"] .ws__name:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+[data-widget="w-samecode"] .ws__pips { display: flex; gap: var(--sp-half); }
+[data-widget="w-samecode"] .ws__pip {
+  width: var(--sp-3); height: var(--sp-1);
+  border: var(--stroke) solid var(--ink-4); border-radius: var(--radius-1);
+}
+[data-widget="w-samecode"] .ws__pip.is-done { background: var(--ink-3); border-color: var(--ink-3); }
+[data-widget="w-samecode"] .ws__pip.is-on { background: var(--ink); border-color: var(--ink); }
+[data-widget="w-samecode"] .ws__restart {
+  margin-left: auto; min-height: var(--tap); padding: 0 var(--sp-1); white-space: nowrap;
+  background: none; border: 0; color: var(--ink); cursor: pointer;
+  font: 700 var(--fs-caption)/1 var(--font-mono); letter-spacing: .08em; text-transform: uppercase;
+  text-decoration: underline; text-decoration-thickness: var(--stroke); text-underline-offset: 3px;
+}
+[data-widget="w-samecode"] .ws__restart:hover { color: var(--accent); }
+
+/* ---------- states: stacked in one cell; index.js reserves the tallest state's height ---------- */
+[data-widget="w-samecode"] .ws__states { display: grid; }
+[data-widget="w-samecode"] .ws-panel {
+  grid-area: 1 / 1; align-self: start; min-width: 0;
+  padding: var(--sp-3) var(--sp-3) var(--sp-4);
+  visibility: hidden;
+}
+[data-widget="w-samecode"] .ws-panel.is-on { visibility: visible; }
+/* phones (< 600px, course rule): only the current state takes space, so each state has its own height */
+[data-widget="w-samecode"] .ws--narrow .ws-panel:not(.is-on) { display: none; }
+[data-widget="w-samecode"] .ws-panel.is-entering { animation: w-samecode-fade var(--dur-3) var(--ease-out); }
+[data-widget="w-samecode"] .ws-lead {
+  margin-bottom: var(--sp-3); max-width: var(--measure);
+  font: 400 var(--fs-body)/var(--lh-body) var(--font-serif); color: var(--ink);
+}
+[data-widget="w-samecode"] .ws-cols {
+  display: grid; gap: var(--sp-3); align-items: start;
+  grid-template-columns: minmax(0, 1fr);
+}
+[data-widget="w-samecode"] .ws-left,
+[data-widget="w-samecode"] .ws-right { display: grid; gap: var(--sp-2); min-width: 0; align-content: start; }
+[data-widget="w-samecode"] .ws-gowrap { display: flex; }
+[data-widget="w-samecode"] .ws-go { gap: var(--sp-2); text-align: left; padding-block: var(--sp-1); line-height: var(--lh-caption); }
+[data-widget="w-samecode"] .ws-follow {
+  font: italic 400 var(--fs-small)/var(--lh-small) var(--font-serif); color: var(--ink-2);
+}
+[data-widget="w-samecode"] .ws-summary {
+  padding-top: var(--sp-2); border-top: var(--stroke) solid var(--ink);
+  font: 600 var(--fs-body)/var(--lh-body) var(--font-serif); color: var(--ink);
+}
+
+/* ---------- the comparison table (adapted from w-rebuild stage 4) ---------- */
+[data-widget="w-samecode"] .ws-tbl { display: grid; gap: var(--sp-1); }
+[data-widget="w-samecode"] .ws-row {
+  display: grid; grid-template-columns: var(--ws-cols);
+  column-gap: var(--ws-gap); row-gap: var(--sp-half); align-items: start;
+  padding: var(--sp-1) 0; border-top: 1px solid var(--line);
+}
+/* rows outside a band get the band's inset, so every column lines up */
+[data-widget="w-samecode"] .ws-row--head,
+[data-widget="w-samecode"] .ws-row--result { padding-inline: var(--ws-inset); }
+[data-widget="w-samecode"] .ws-row--head { border-top: 0; padding-block: 0; align-items: end; grid-template-rows: auto; }
+[data-widget="w-samecode"] .ws-row.ws-row--head > * { grid-row: 1; }
+[data-widget="w-samecode"] .ws-row .ws-m1 { grid-column: 2; }
+[data-widget="w-samecode"] .ws-row .ws-m2 { grid-column: 3; }
+[data-widget="w-samecode"] .ws-col { padding-bottom: var(--sp-half); border-bottom: var(--stroke) solid var(--ink); text-align: center; }
+[data-widget="w-samecode"] .ws-col .cp-label { display: block; color: var(--ink); }
+[data-widget="w-samecode"] .ws-row--result { border-top: var(--stroke) solid var(--ink); padding-top: var(--sp-1); }
+/* grid lines per row: [category across the row, first row of a group only] / label spanning the
+   value line and the marker line. .has-cat shifts everything down one line. */
+[data-widget="w-samecode"] .ws-cat { grid-column: 1 / -1; grid-row: 1; }
+[data-widget="w-samecode"] .ws-item { grid-column: 1; grid-row: 1 / span 2; display: grid; gap: var(--sp-half); justify-items: start; align-content: start; min-width: 0; }
+[data-widget="w-samecode"] .ws-chip {
+  display: inline-block; max-width: 100%; padding: 2px var(--sp-1);
+  border: var(--stroke) solid var(--c2); border-radius: var(--radius-1);
+  background: var(--c2-soft); color: var(--ink);
+  font: 500 var(--fs-small)/var(--lh-small) var(--font-sans);
+}
+[data-widget="w-samecode"] .ws-chip--c1 { background: var(--c1-soft); border-color: var(--c1); }
+[data-widget="w-samecode"] .ws-note { font: italic 400 var(--fs-caption)/var(--lh-caption) var(--font-sans); color: var(--ink-2); }
+[data-widget="w-samecode"] .ws-test { font: 700 var(--fs-small)/var(--lh-small) var(--font-sans); padding: 2px 0; }
+/* values sit on the chip's line (padding centres them on its first text line) */
+[data-widget="w-samecode"] .ws-cell { grid-row: 1; display: grid; gap: var(--sp-half); justify-items: center; align-content: start; min-width: 0; padding-top: 5px; text-align: center; }
+[data-widget="w-samecode"] .ws-cell--span { grid-column: 2 / span 2; }
+/* SAME / DIFFERENT: one marker for the row, spanning both machine columns, on the category line */
+[data-widget="w-samecode"] .ws-row .ws-cell--mk { grid-column: 2 / span 2; grid-row: 2; padding-top: 0; }
+[data-widget="w-samecode"] .ws-row.has-cat .ws-item { grid-row: 2 / span 2; }
+[data-widget="w-samecode"] .ws-row.has-cat .ws-cell { grid-row: 2; }
+[data-widget="w-samecode"] .ws-row.has-cat .ws-cell--mk { grid-row: 3; }
+[data-widget="w-samecode"] .ws-row .ws-follow { grid-column: 1 / -1; grid-row: 4; padding: var(--sp-half) 0 0; }
+[data-widget="w-samecode"] .ws-res.is-hypo .st { padding: 0 var(--sp-half); border: var(--stroke) dashed var(--bad); border-radius: var(--radius-1); }
+[data-widget="w-samecode"] .ws-band--image .ws-chip--c1 { background: var(--surface); }
+[data-widget="w-samecode"] .ws-ver {
+  display: inline-block; border-radius: var(--radius-1);
+  font: 700 var(--fs-caption)/var(--lh-caption) var(--font-mono); color: var(--ink);
+}
+/* the value that changed since the previous state keeps a 3px ink frame (the active change) */
+[data-widget="w-samecode"] .ws-ver.is-changed { padding: 0 var(--sp-half); outline: 3px solid var(--ink); outline-offset: 0; }
+[data-widget="w-samecode"] .is-flash { animation: w-samecode-flash var(--dur-2) var(--ease-out); }
+[data-widget="w-samecode"] .ws-ident {
+  display: inline-block; padding: 0 var(--sp-1);
+  background: var(--c1-soft); border: var(--stroke) solid var(--c1); border-radius: var(--radius-1);
+  font: 700 var(--fs-caption)/var(--lh-caption) var(--font-mono); letter-spacing: .08em; text-transform: uppercase; color: var(--ink);
+}
+[data-widget="w-samecode"] .ws-res { display: inline-block; padding: 0 2px; border-radius: var(--radius-1); }
+[data-widget="w-samecode"] .ws-err { font: 400 var(--fs-caption)/var(--lh-caption) var(--font-mono); color: var(--ink-2); }
+[data-widget="w-samecode"] .ws-tag { font: italic 600 var(--fs-caption)/var(--lh-caption) var(--font-sans); color: var(--ink); }
+[data-widget="w-samecode"] .ws-tag::before { content: "↑ "; font-style: normal; }
+[data-widget="w-samecode"] .ws-q {
+  display: inline-grid; place-items: center; min-width: var(--sp-4); padding: 0 var(--sp-half);
+  border: var(--stroke) dashed var(--ink-3); border-radius: var(--radius-1);
+  font: 700 var(--fs-caption)/var(--lh-caption) var(--font-mono); color: var(--ink-3);
+}
+
+/* bands: a mono header across both machine columns, holding the rows it groups */
+[data-widget="w-samecode"] .ws-band {
+  padding: 0 var(--sp-1) var(--sp-half);
+  border: var(--stroke) dashed var(--ink-4); border-radius: var(--radius-1);
+  background: var(--surface);
+}
+[data-widget="w-samecode"] .ws-band__hd { padding: var(--sp-1) 0 var(--sp-half); }
+[data-widget="w-samecode"] .ws-band__hd > span { display: flex; flex-wrap: wrap; align-items: center; gap: var(--sp-half) var(--sp-1); }
+[data-widget="w-samecode"] .ws-band__sep { font: 700 var(--fs-caption)/var(--lh-caption) var(--font-mono); color: var(--ink-3); }
+[data-widget="w-samecode"] .ws-band .ws-row:first-of-type { border-top-color: var(--ink-4); }
+[data-widget="w-samecode"] .ws-band--image { border: var(--stroke) solid var(--c1); background: var(--c1-soft); }
+[data-widget="w-samecode"] .ws-band--image .ws-band__label { color: var(--ink); }
+[data-widget="w-samecode"] .ws-band--image .ws-row { border-top-color: var(--c1); }
+[data-widget="w-samecode"] .ws-band--image .cp-img { background: var(--surface); }
+[data-widget="w-samecode"] .ws-band.is-entering { animation: w-samecode-in var(--dur-3) var(--ease-out); }
+
+/* ---------- checks inside the widget (page check pattern, without a second shadow) ---------- */
+[data-widget="w-samecode"] .ws-check {
+  background: var(--surface);
+  border: var(--stroke) solid var(--ink); border-radius: var(--radius-1);
+  padding: var(--sp-2);
+}
+[data-widget="w-samecode"] .cp-check__head { margin-bottom: var(--sp-1); }
+[data-widget="w-samecode"] .ws-q-text { margin: 0 0 var(--sp-2); font: 600 var(--fs-small)/var(--lh-small) var(--font-serif); color: var(--ink); }
+[data-widget="w-samecode"] .cp-option { min-height: var(--tap); padding-block: var(--sp-half); font-size: var(--fs-small); line-height: var(--lh-small); gap: var(--sp-1); padding-inline: var(--sp-1); }
+/* the check column is never wider than ~400px: the option's tag goes under its text (as Ch 1 did on phones) */
+[data-widget="w-samecode"] .cp-option { grid-template-columns: var(--sp-4) minmax(0, 1fr); row-gap: 0; }
+[data-widget="w-samecode"] .cp-option__tag { grid-column: 2; padding-bottom: var(--sp-half); }
+[data-widget="w-samecode"] .cp-option__tag:empty { display: none; }
+[data-widget="w-samecode"] .cp-option.is-right,
+[data-widget="w-samecode"] .cp-option.is-wrong { padding-inline: calc(var(--sp-1) - 1.5px); }
+[data-widget="w-samecode"] .cp-feedback p { margin: 0 0 var(--sp-1); }
+[data-widget="w-samecode"] .cp-feedback p:last-child { margin-bottom: 0; }
+[data-widget="w-samecode"] .cp-feedback:focus { outline: none; }
+[data-widget="w-samecode"] .cp-feedback:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+[data-widget="w-samecode"] .cp-why li b { margin-right: var(--sp-1); }
+
+/* ---------- layout classes, set from ctx.onResize (container width) ----------
+   ws--two (>= 700px): table left, check right. ws--compact (< 860px): tighter table columns.
+   ws--narrow (< 600px, phones): tighter chrome. Below 700px everything is one column. */
+[data-widget="w-samecode"] .ws--two .ws-cols { grid-template-columns: minmax(0, 11fr) minmax(0, 9fr); grid-template-rows: auto 1fr; }
+[data-widget="w-samecode"] .ws--two .ws-left { grid-column: 1; grid-row: 1; }
+[data-widget="w-samecode"] .ws--two .ws-right { grid-column: 2; grid-row: 1 / span 2; }
+[data-widget="w-samecode"] .ws--two .ws-gowrap { grid-column: 1; grid-row: 2; align-self: start; }
+[data-widget="w-samecode"] .ws.ws--compact {
+  --ws-cols: minmax(0, 1fr) 84px 84px;
+  --ws-gap: var(--sp-1);
+  --ws-inset: calc(var(--sp-half) + var(--stroke));
+}
+[data-widget="w-samecode"] .ws--compact .ws-band { padding-inline: var(--sp-half); }
+[data-widget="w-samecode"] .ws--compact .ws-chip,
+[data-widget="w-samecode"] .ws--compact .ws-test { font-size: var(--fs-caption); line-height: var(--lh-caption); }
+[data-widget="w-samecode"] .ws--compact .ws-cell { padding-top: 3px; }
+[data-widget="w-samecode"] .ws--compact .ws-row .ws-cell--mk { padding-top: 0; }
+[data-widget="w-samecode"] .ws--compact .ws-cat { white-space: nowrap; }
+[data-widget="w-samecode"] .ws--compact .ws-row:not(.ws-row--head) { padding-block: var(--sp-half); }
+[data-widget="w-samecode"] .ws--compact .ws-err { font-family: var(--font-sans); }
+[data-widget="w-samecode"] .ws--compact .ws-col .cp-label { letter-spacing: .02em; }
+[data-widget="w-samecode"] .ws--compact .ws-ident,
+[data-widget="w-samecode"] .ws--compact .ws-cat { letter-spacing: .04em; }
+
+[data-widget="w-samecode"] .ws--narrow .ws__bar { padding-inline: var(--sp-1); }
+[data-widget="w-samecode"] .ws--narrow .ws__head { padding-left: var(--sp-1); padding-right: var(--sp-half); gap: 0 var(--sp-1); }
+[data-widget="w-samecode"] .ws--narrow .ws__name { flex: 1 1 100%; padding-bottom: 0; }
+[data-widget="w-samecode"] .ws--narrow .ws__pip { width: var(--sp-2); }
+[data-widget="w-samecode"] .ws--narrow .ws-panel { padding: var(--sp-2) var(--sp-1) var(--sp-3); }
+[data-widget="w-samecode"] .ws--narrow .ws-lead { margin-bottom: var(--sp-2); padding-inline: var(--sp-half); font-size: var(--fs-small); line-height: var(--lh-small); }
+[data-widget="w-samecode"] .ws--narrow .ws-check { padding: var(--sp-1) var(--sp-1) var(--sp-2); }
+[data-widget="w-samecode"] .ws--narrow .ws-summary { font-size: var(--fs-small); line-height: var(--lh-small); }
+
+@keyframes w-samecode-in { from { opacity: 0; transform: translateY(-8px); } to { opacity: 1; transform: none; } }
+@keyframes w-samecode-fade { from { opacity: 0; } to { opacity: 1; } }
+@keyframes w-samecode-flash { from { background: var(--accent); color: var(--accent-ink); } to { background: transparent; } }
+@media (prefers-reduced-motion: reduce) {
+  [data-widget="w-samecode"] .ws-panel.is-entering,
+  [data-widget="w-samecode"] .ws-band.is-entering,
+  [data-widget="w-samecode"] .is-flash { animation: none; }
+}
+
+/* last state: the way on, at the foot of the reserved frame */
+[data-widget="w-samecode"] .ws-panel.is-on[data-state="3"] { align-self: stretch; display: flex; flex-direction: column; }
+[data-widget="w-samecode"] .ws-exit { margin-top: auto; padding-top: var(--sp-1); display: flex; justify-content: flex-end; }
+[data-widget="w-samecode"] .ws-exit a {
+  display: inline-flex; align-items: center; min-height: var(--tap); color: var(--ink);
+  font: 700 var(--fs-caption)/1 var(--font-mono); letter-spacing: .08em; text-transform: uppercase;
+  text-decoration: underline; text-decoration-thickness: var(--stroke); text-underline-offset: 3px;
+}
+[data-widget="w-samecode"] .ws-exit a:hover { color: var(--accent); }
+
+/* wide (>= 860px): a group's first row carries its marker on the category line, saving a line */
+[data-widget="w-samecode"] .ws:not(.ws--compact) .ws-row.has-cat .ws-cat { grid-column: 1; }
+[data-widget="w-samecode"] .ws:not(.ws--compact) .ws-row.has-cat .ws-cell--mk { grid-row: 1; }
+[data-widget="w-samecode"] .ws:not(.ws--compact) .ws-row.has-cat .ws-item { grid-row: 2; }

@@ -1,0 +1,259 @@
+{
+  "version": 1,
+  "slug": "ch-02-containers",
+  "created": "2026-10-21T09:13:20-04:00",
+  "depth": "light",
+  "minutes": 14,
+  "stage": "done",
+  "caps": {
+    "spawns": 18,
+    "agent_minutes": 310,
+    "loops": {
+      "research": 2,
+      "checkpoint": 4,
+      "gate": 6,
+      "review": 2
+    }
+  },
+  "seq": 12,
+  "dispatches": [
+    {
+      "nn": 1,
+      "role": "researcher",
+      "loop": "research",
+      "label": "ch2-light-research",
+      "writes": [
+        "run/research"
+      ],
+      "exclude": [],
+      "opened": "2026-10-21T09:13:56-04:00",
+      "closed": "2026-10-21T09:23:03-04:00",
+      "status": "done_with_concerns",
+      "ns_ok": true,
+      "pivot": false,
+      "reason": null,
+      "changed": 9
+    },
+    {
+      "nn": 2,
+      "role": "instructional-designer",
+      "loop": "checkpoint",
+      "label": "ch2-plan",
+      "writes": [
+        "run/plan"
+      ],
+      "exclude": [],
+      "opened": "2026-10-21T09:23:03-04:00",
+      "closed": "2026-10-21T09:37:39-04:00",
+      "status": "done_with_concerns",
+      "ns_ok": true,
+      "pivot": false,
+      "reason": null,
+      "changed": 8
+    },
+    {
+      "nn": 3,
+      "role": "page-builder",
+      "loop": "gate:page",
+      "label": "ch2-page",
+      "writes": [
+        "site"
+      ],
+      "exclude": [
+        "site/widgets/*/*"
+      ],
+      "opened": "2026-10-21T09:42:27-04:00",
+      "closed": "2026-10-21T09:53:11-04:00",
+      "status": "done_with_concerns",
+      "ns_ok": true,
+      "pivot": false,
+      "reason": null,
+      "changed": 28
+    },
+    {
+      "nn": 4,
+      "role": "widget-builder",
+      "loop": "gate:w-samecode",
+      "label": "w-samecode",
+      "writes": [
+        "site/widgets/w-samecode"
+      ],
+      "exclude": [],
+      "opened": "2026-10-21T09:53:11-04:00",
+      "closed": "2026-10-21T10:14:47-04:00",
+      "status": "done_with_concerns",
+      "ns_ok": true,
+      "pivot": false,
+      "reason": null,
+      "changed": 40
+    },
+    {
+      "nn": 5,
+      "role": "accuracy-reviewer",
+      "loop": "review:accuracy",
+      "label": "review-accuracy-r1",
+      "writes": [
+        "run/review/round-1"
+      ],
+      "exclude": [],
+      "opened": "2026-10-21T10:15:24-04:00",
+      "closed": "2026-10-21T10:20:49-04:00",
+      "status": "done",
+      "ns_ok": true,
+      "pivot": false,
+      "reason": null,
+      "changed": 90
+    },
+    {
+      "nn": 6,
+      "role": "pedagogy-ux-reviewer",
+      "loop": "review:pedagogy-ux",
+      "label": "review-pux-r1",
+      "writes": [
+        "run/review/round-1"
+      ],
+      "exclude": [],
+      "opened": "2026-10-21T10:15:24-04:00",
+      "closed": "2026-10-21T13:37:02-04:00",
+      "status": "done_with_concerns",
+      "ns_ok": true,
+      "pivot": false,
+      "reason": null,
+      "changed": 127
+    },
+    {
+      "nn": 7,
+      "role": "page-builder",
+      "loop": "gate:page",
+      "label": "r1-fixes-page",
+      "writes": [
+        "site"
+      ],
+      "exclude": [
+        "site/widgets/*/*"
+      ],
+      "opened": "2026-10-21T13:38:41-04:00",
+      "closed": "2026-10-21T13:40:50-04:00",
+      "status": "done",
+      "ns_ok": true,
+      "pivot": false,
+      "reason": null,
+      "changed": 14
+    },
+    {
+      "nn": 8,
+      "role": "widget-builder",
+      "loop": "gate:w-samecode",
+      "label": "r1-fixes-widget",
+      "writes": [
+        "site/widgets/w-samecode"
+      ],
+      "exclude": [],
+      "opened": "2026-10-21T13:38:41-04:00",
+      "closed": "2026-10-21T13:45:32-04:00",
+      "status": "done_with_concerns",
+      "ns_ok": true,
+      "pivot": false,
+      "reason": null,
+      "changed": 28
+    },
+    {
+      "nn": 9,
+      "role": "accuracy-reviewer",
+      "loop": "review:accuracy",
+      "label": "review-accuracy-r2",
+      "writes": [
+        "run/review/round-2"
+      ],
+      "exclude": [],
+      "opened": "2026-10-21T13:46:04-04:00",
+      "closed": "2026-10-21T13:48:59-04:00",
+      "status": "done",
+      "ns_ok": true,
+      "pivot": false,
+      "reason": null,
+      "changed": 68
+    },
+    {
+      "nn": 10,
+      "role": "pedagogy-ux-reviewer",
+      "loop": "review:pedagogy-ux",
+      "label": "review-pux-r2",
+      "writes": [
+        "run/review/round-2"
+      ],
+      "exclude": [],
+      "opened": "2026-10-21T13:46:04-04:00",
+      "closed": "2026-10-21T13:50:12-04:00",
+      "status": "done_with_concerns",
+      "ns_ok": true,
+      "pivot": false,
+      "reason": null,
+      "changed": 70
+    },
+    {
+      "nn": 11,
+      "role": "widget-builder",
+      "loop": "gate:w-samecode",
+      "label": "phone-height-rule",
+      "writes": [
+        "site/widgets/w-samecode"
+      ],
+      "exclude": [],
+      "opened": "2026-10-21T13:56:21-04:00",
+      "closed": "2026-10-21T13:58:10-04:00",
+      "status": "done",
+      "ns_ok": true,
+      "pivot": false,
+      "reason": null,
+      "changed": 10
+    },
+    {
+      "nn": 12,
+      "role": "page-builder",
+      "loop": "gate:page",
+      "label": "relabel-reserve",
+      "writes": [
+        "site"
+      ],
+      "exclude": [
+        "site/widgets/*/*"
+      ],
+      "opened": "2026-10-21T13:58:10-04:00",
+      "closed": "2026-10-21T13:59:10-04:00",
+      "status": "done",
+      "ns_ok": true,
+      "pivot": false,
+      "reason": null,
+      "changed": 11
+    }
+  ],
+  "loops": {
+    "research": 1,
+    "checkpoint": 1,
+    "gate:page": 3,
+    "gate:w-samecode": 3,
+    "review:accuracy": 2,
+    "review:pedagogy-ux": 2
+  },
+  "gate_history": {
+    "gate:page": [
+      [],
+      [],
+      [],
+      [],
+      [],
+      [],
+      []
+    ],
+    "gate:w-samecode": [
+      [],
+      [],
+      [],
+      [],
+      [],
+      []
+    ]
+  },
+  "noprogress": {}
+}

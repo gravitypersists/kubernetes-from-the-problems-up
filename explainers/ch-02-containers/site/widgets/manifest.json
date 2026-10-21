@@ -1,0 +1,26 @@
+{
+  "data_origins": [],
+  "cdn": [
+    "https://fonts.googleapis.com (Control Plane fonts, via assets/tokens.css)",
+    "https://fonts.gstatic.com"
+  ],
+  "widgets": {
+    "w-samecode": {
+      "segment": "s-02",
+      "mount": "[data-widget=\"w-samecode\"]",
+      "complexity": "high",
+      "size": {
+        "desktop": "≤960×1000 (.d-wide; constant height, 1001px at 1280 and 1045px at 768; min-height 1000px reserved at ≥900px and 1040px at 600–899px in assets/page.css while the mount is empty; two columns: row table ~58%, check panel ~42%; state lead across the top)",
+        "mobile": "100% wide under 600px; each state takes its own height (course rule, CURRICULUM.md §8 step 5; d-08). First state 1240px at 360 before an answer; min-height 1200px reserved while the mount is empty. Single column: bar, state header, lead, row table, result row, check panel."
+      },
+      "files": [
+        "data.js",
+        "index.js",
+        "index.css"
+      ],
+      "cdn": [],
+      "data_origins": [],
+      "notes": "index.html loads widgets/w-samecode/index.css, data.js, then index.js after assets/widget.js. Adapted from Ch 1's w-rebuild stage 4 (copy, never edit Ch 1). Checks k-02 and k-03 live inside the widget (Check 02 / 07, Check 03 / 07); their text is final in run/plan/learning-plan.md and must be used verbatim. The widget may reuse the page's check classes in assets/page.css (.cp-check, .cp-option, .cp-feedback, .cp-why, .cp-retry) and status classes (.st, .st--good/--bad/--warn, .lamp), as w-rebuild did. Reuse candidates: Ch 15, possibly Ch 9."
+    }
+  }
+}

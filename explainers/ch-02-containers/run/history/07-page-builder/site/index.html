@@ -1,0 +1,275 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>“Works on my machine”: containers</title>
+<meta name="description" content="Chapter 02. A year on, Fennel has a bug that happens in production and nowhere else. How packing the app with everything it needs moves that bug onto a laptop, and what it leaves unsolved.">
+<link rel="stylesheet" href="assets/tokens.css">
+<link rel="stylesheet" href="assets/components.css">
+<link rel="stylesheet" href="assets/page.css">
+</head>
+<body class="d-body">
+
+<header class="cp-hero cp-blueprint">
+  <div class="cp-hero__inner">
+    <p class="cp-hero__kicker"><span class="cp-hero__idx">CHAPTER 02</span><span class="cp-label">Part I · Fennel, year 1</span></p>
+    <h1 class="cp-hero__title">“Works on my machine”: containers</h1>
+    <p class="cp-hero__standfirst">A year on, Fennel has six engineers and a new kind of bug: it happens in production and nowhere else. How packing the app with everything it needs makes that bug show up on a laptop instead, and what it still doesn’t fix.</p>
+    <dl class="cp-meta">
+      <div><dt>Read</dt><dd>14 MIN</dd></div>
+      <div><dt>For</dt><dd>TECHNICAL MANAGERS</dd></div>
+      <div><dt>Chapter</dt><dd>02 / 15</dd></div>
+      <div><dt>Widgets</dt><dd>01</dd></div>
+      <div><dt>Checks</dt><dd>07</dd></div>
+    </dl>
+  </div>
+</header>
+
+<div class="d-page">
+  <aside class="d-rail" data-toc data-minutes="14"></aside>
+  <main class="d-main" id="main">
+    <details class="d-toc-mobile" data-toc-mobile></details>
+
+    <!-- s-01 · A year later · o-1 · claims c-03 (Ch 1 claims 01, 06 by reference) · k-01 retrieval -->
+    <section id="s-01" data-segment="s-01">
+      <h2 id="a-year-later"><span class="cp-sec">§ 01</span>A year later</h2>
+
+      <div class="cp-check" role="group" aria-labelledby="k-01-q" data-check="k-01" data-after="A year on, that kind of gap isn’t on one server. It’s on every laptop.">
+        <div class="cp-check__head"><span class="cp-chip">RETRIEVE</span><span class="cp-label">Check 01 / 07</span></div>
+        <p class="cp-check__q" id="k-01-q">In the last chapter you rebuilt Sam’s server from Sam’s notes, with exactly the same code. Why did uploading a product photo fail on the new machine?</p>
+        <ul class="cp-options">
+          <li><button type="button" class="cp-option" data-fb="The code was identical on both machines; that was the point of the rebuild. The difference was on the machine."><span class="cp-option__key">A</span><span>The notes installed an older copy of the code, from before the photo feature was added.</span><span class="cp-option__tag"></span></button></li>
+          <li><button type="button" class="cp-option" data-ok data-fb="Right. The tool lived only on Sam’s server, added by hand in May. That’s a snowflake server: part of its real setup exists only on the machine itself."><span class="cp-option__key">B</span><span>Sam had installed the photo-resizing tool by hand, and the notes never mentioned it.</span><span class="cp-option__tag"></span></button></li>
+          <li><button type="button" class="cp-option" data-fb="Memory wasn’t it. The new machine was missing a program altogether: the photo-resizing tool Sam installed by hand in May."><span class="cp-option__key">C</span><span>The new machine had less memory than Sam’s, so resizing large photos ran out of room.</span><span class="cp-option__tag"></span></button></li>
+        </ul>
+        <div class="cp-feedback" role="status" hidden></div>
+      </div>
+
+      <p>That gap, a year on, is on six laptops. Fennel now has six engineers, and each of them set up their own laptop by hand. Riley joined last month and spent the whole first week installing tools from a page on the team wiki. The page was months out of date: Sam’s notes all over again.</p>
+      <p>Fennel also has a second machine now, called staging, where each release is tried out before customers see it. Production still runs on one rented machine. Both were set up by hand, at different times, by different people.</p>
+      <p>From Jordan’s seat, none of this looks like a server problem. It shows up in three other places:</p>
+      <ul>
+        <li><b>Onboarding takes a week.</b> A new engineer’s first days go to installing things, not to working on Fennel.</li>
+        <li><b>Some bugs happen only in production.</b> A customer reports one, an engineer tries the same thing on their laptop, and it works. “Can’t reproduce” turns into a regular line in the weekly update.</li>
+        <li><b>Releases pass on staging and then fail in production.</b> Staging was supposed to catch exactly these.</li>
+      </ul>
+      <p>Nobody is being careless. This is last chapter’s drift, now on every machine Fennel has. Each laptop, the staging machine and production was set up by hand, and each has quietly become a little different from the others. When the software installed on two machines differs, small incompatibilities appear, and code that passed its tests on one machine can fail on the other. Here’s what one of those bugs looks like up close.</p>
+    </section>
+
+    <!-- s-02 · Same code, two machines · o-1 · claims c-01, c-02, c-03, c-04 · widget w-samecode (complexity high; built in widgets/w-samecode/) · checks k-02, k-03 live inside it -->
+    <section id="s-02" data-segment="s-02">
+      <h2 id="same-code-two-machines"><span class="cp-sec">§ 02</span>Same code, two machines</h2>
+      <p>Below are Riley’s laptop and Fennel’s production machine, side by side, row by row. Predict what happens at each step before you see it; the whole thing takes about three minutes.</p>
+      <div data-widget="w-samecode" class="d-wide" aria-label="Interactive: the same code on two machines, first installed by hand, then from one image"></div>
+    </section>
+
+    <!-- s-03 · What goes in the image, and what doesn't · o-1, o-2 · claims c-01, c-02, c-04, c-06 · m-19 revisited (new trap: "the image is the whole app") · analogy A1 -->
+    <section id="s-03" data-segment="s-03">
+      <h2 id="what-goes-in-the-image"><span class="cp-sec">§ 03</span>What goes in the image, and what doesn’t</h2>
+      <p>The sealed package you just used has a name. An <dfn>image</dfn> is the app’s code packed together with what it needs to run: the language runtime, the libraries, tools like the photo resizer, and the files the app starts with. Those are the rows inside the IN THE IMAGE band. They’re built into the image once, and everyone who runs that image gets exactly those versions. That’s why, in the second state, the photo tool row read 6.2 on Riley’s laptop too: the app used the tool inside the image, not the 7.0 Riley had installed.</p>
+      <p>That also answers Riley’s first week. Instead of following a wiki page to install a runtime, libraries and tools one at a time, a new engineer downloads the image and runs it, and starts with the same versions everyone else has.</p>
+      <p>Two things stay out of the image on purpose, and you saw both in the NOT IN THE IMAGE band. Settings that differ from place to place, like the database address and its password, are handed to the app when it starts, which is why one image can run in both staging and production. The data the app writes, like orders, is kept outside as well, so replacing the app doesn’t wipe it out. In the last chapter you found that the code isn’t the whole app. The image isn’t the whole app either: it’s the code plus what it needs to run, without the settings and data that make each place different.</p>
+      <p>Once an image is built, it can’t be changed; engineers say images are <em>immutable</em>. To change anything inside one, such as the photo tool, you build a new image with a new version label. That’s what Riley did with v43, and v42 stayed exactly as it was. This is why an image can’t drift the way Sam’s server did. Sam’s server drifted because people changed it by hand, one sensible fix at a time. Nobody can change a built image by hand, so the image that passed the tests is exactly the image that ships.</p>
+      <div class="cp-aside">
+        <p><b>ANALOGY</b>Many companies don’t hand a new hire a setup checklist. IT gives them a laptop copied from one master setup, so everyone starts the same.</p>
+        <p class="cp-breaks"><b>WHERE THIS ANALOGY BREAKS</b>An IT laptop starts drifting on day one, as people install things on it. An image can’t be changed at all: every time it runs, it starts from the same contents, and any change means a new image. And IT’s master copy includes the core of the operating system. An image leaves that out, which matters later in this chapter.</p>
+      </div>
+    </section>
+
+    <!-- s-04 · Build once, run many · o-2 · claims c-05, c-06, c-07, c-02, c-03, c-09 · f-01 · analogy A2 (plants m-24) · k-04 -->
+    <section id="s-04" data-segment="s-04">
+      <h2 id="build-once-run-many"><span class="cp-sec">§ 04</span>Build once, run many: images and containers</h2>
+      <p>An image is a package. It does nothing until a machine runs it. Here is how one image gets from Riley’s laptop to every machine that needs it.</p>
+
+      <!-- f-01: registry chips and machine frames rendered by assets/page.js from CH02_REGISTRY / CH02_MACHINES (reusable) -->
+      <figure class="cp-fig d-wide" id="f-01" aria-labelledby="f-01-cap">
+        <div class="cp-fig__plate">
+          <div class="cp-fig__bar"><span class="cp-label">Fig. 01</span><span class="cp-label">One image, many containers</span></div>
+          <div class="cp-blueprint flow">
+            <div class="flow__grid">
+              <div class="cp-machine">
+                <div class="cp-machine__bar"><span class="cp-label">Machine · Riley’s laptop</span><span class="cp-label">Build</span></div>
+                <div class="cp-machine__body"><span class="cp-code">build fennel-app:v43</span></div>
+              </div>
+              <div class="flow__arrow" aria-hidden="true"><span>push</span><span class="flow__glyph"><span class="wide">→</span><span class="narrow">↓</span></span></div>
+              <div class="cp-machine">
+                <div class="cp-machine__bar"><span class="cp-label">Registry</span></div>
+                <div class="cp-machine__body">
+                  <div class="flow__reg-chips" data-registry="ch02"></div>
+                  <p class="flow__reg-note">every version kept as it was</p>
+                </div>
+              </div>
+              <div class="flow__arrow flow__pull-one" aria-hidden="true"><span>pull</span><span class="flow__glyph">↓</span></div>
+              <div class="flow__machines" data-machines="ch02"></div>
+            </div>
+          </div>
+        </div>
+        <figcaption id="f-01-cap"><span class="cp-label">Fig. 01</span><span>Build the image once and keep it in the registry. Every machine runs containers from that same package, and one image can run as several containers.</span></figcaption>
+      </figure>
+
+      <p>Riley builds fennel-app:v43 once and uploads it to a <dfn>registry</dfn>, a shared store of images that Fennel’s machines can reach. Engineers call that upload a push. The laptop, the staging machine and production then each download, or pull, the same image from it.</p>
+      <p>Running an image gives you a <dfn>container</dfn>: the app running as a process, walled off by the operating system so that it has its own files, which come from the image, and its own view of what’s running. Last chapter called a running app a process. A container is that process, packaged and walled off. One image can run as several containers, on one machine or on many; in Fig. 01, production runs two.</p>
+      <p>A running container can write files, and someone can even change things inside it by hand. But containers don’t last. Every release replaces the running containers with new ones, started from the new image, and when a container is replaced, the changes made inside it go with it. Each new container starts fresh, with exactly what the image holds.</p>
+      <div class="cp-aside">
+        <p><b>ANALOGY</b>The name comes from shipping containers. Before them, cargo was loaded piece by piece, and differently at every port. After them, any ship, crane or truck could move the same sealed box without caring what was inside. Engineers call the software version of that promise “build once, run anywhere.”</p>
+        <p class="cp-breaks"><b>WHERE THIS ANALOGY BREAKS</b>A shipping container doesn’t care which ship carries it. A software container does: it needs a machine with the right kind of processor, and its settings are handed in when it arrives. Outside services, like the database, may differ too. “Run anywhere” means the inside is the same everywhere, not everything around it.</p>
+      </div>
+      <p>You’ll hear the name Docker in conversations like these. The next chapter places it.</p>
+
+      <div class="cp-check" role="group" aria-labelledby="k-04-q" data-check="k-04">
+        <div class="cp-check__head"><span class="cp-chip cp-chip--apply">APPLY</span><span class="cp-label">Check 04 / 07</span></div>
+        <p class="cp-check__q" id="k-04-q">Saturday night, photo uploads break in production. Riley connects to the running container and fixes the problem by hand, inside it. It works. On Tuesday, Fennel releases its next version. What happens to Riley’s fix?</p>
+        <ul class="cp-options">
+          <li><button type="button" class="cp-option" data-ok data-fb="Right. A container starts fresh from its image, and changes made inside it disappear when it’s replaced. To keep a fix, put it in a new image. That’s also why containers don’t drift the way Sam’s server did."><span class="cp-option__key">A</span><span>It’s gone: Tuesday’s release starts new containers from the image, and the image never had the fix.</span><span class="cp-option__tag"></span></button></li>
+          <li><button type="button" class="cp-option" data-fb="On Sam’s server it would have stayed, and that’s exactly how drift built up. Here the fix lived inside one container, and the release replaces it with fresh ones from the image."><span class="cp-option__key">B</span><span>It stays: the fix was made on the production machine, so it remains there for the next release.</span><span class="cp-option__tag"></span></button></li>
+          <li><button type="button" class="cp-option" data-fb="An image never changes after it’s built. Nothing flows back from a container into its image. A fix has to go into a new image, built on purpose."><span class="cp-option__key">C</span><span>It spreads: changes made inside a running container are saved back into its image for next time.</span><span class="cp-option__tag"></span></button></li>
+        </ul>
+        <div class="cp-feedback" role="status" hidden></div>
+      </div>
+    </section>
+
+    <!-- s-05 · Not a small VM · o-3 · claims c-10, c-11 (hedged), c-12 · m-01 owned · k-05 before the kernel gloss and f-02 · analogy A3 -->
+    <section id="s-05" data-segment="s-05">
+      <h2 id="not-a-small-vm"><span class="cp-sec">§ 05</span>Not a small VM</h2>
+      <p>Sam has a one-line summary of all this, and it’s one you’ll hear often: “a container is basically a small VM.” Last chapter’s virtual machine was a whole computer made in software, with its own operating system. Before reading on, decide whether that’s what a container is.</p>
+
+      <div class="cp-check" role="group" aria-labelledby="k-05-q" data-check="k-05">
+        <div class="cp-check__head"><span class="cp-chip">PREDICT</span><span class="cp-label">Check 05 / 07</span></div>
+        <p class="cp-check__q" id="k-05-q">Sam says a container is basically a small VM. Before you read on, which of these is closest to what a container actually is?</p>
+        <ul class="cp-options">
+          <li><button type="button" class="cp-option" data-fb="That’s the common picture, and it’s why containers get drawn like little VMs. But a container doesn’t boot an operating system of its own; it runs on the machine’s operating system core. That’s exactly why it’s small and quick to start."><span class="cp-option__key">A</span><span>A small virtual machine: it boots its own trimmed-down operating system, just a lighter one.</span><span class="cp-option__tag"></span></button></li>
+          <li><button type="button" class="cp-option" data-fb="That’s closer to last chapter’s VM snapshot, clutter and all. An image holds only the app and what it needs, and a container is that image running as a process."><span class="cp-option__key">B</span><span>A compressed copy of a whole machine: it unpacks on any machine into an exact clone of the original.</span><span class="cp-option__tag"></span></button></li>
+          <li><button type="button" class="cp-option" data-ok data-fb="Right. A container is a process, like any running app, with walls around it: its own files from the image, its own view of what’s running. Underneath, it shares the machine’s operating system core with every other container there."><span class="cp-option__key">C</span><span>A walled-off process: it carries the app’s own files but uses the machine’s operating system core.</span><span class="cp-option__tag"></span></button></li>
+        </ul>
+        <div class="cp-feedback" role="status" hidden></div>
+      </div>
+
+      <p>The core of the operating system has a name, the <dfn>kernel</dfn>: the part that runs the hardware and every process on it. Here is the same machine running three apps two ways.</p>
+
+      <figure class="cp-fig d-wide" id="f-02" aria-labelledby="f-02-cap">
+        <div class="cp-fig__plate">
+          <div class="cp-fig__bar"><span class="cp-label">Fig. 02</span><span class="cp-label">One machine, two ways</span></div>
+          <div class="cp-blueprint ways">
+            <div class="ways__grid">
+              <div class="ways__panel">
+                <div class="cp-machine">
+                  <div class="cp-machine__bar"><span class="cp-label">Machine · Running 3 VMs</span></div>
+                  <div class="cp-machine__body">
+                    <div class="ways__top">
+                      <div class="ways__box ways__box--vm"><span class="ways__boxlabel">VM</span><span class="mrow mrow--c1">app</span><span class="mrow mrow--c2">runtime, libraries</span><span class="mrow mrow--c2">OS + kernel</span></div>
+                      <div class="ways__box ways__box--vm"><span class="ways__boxlabel">VM</span><span class="mrow mrow--c1">app</span><span class="mrow mrow--c2">runtime, libraries</span><span class="mrow mrow--c2">OS + kernel</span></div>
+                      <div class="ways__box ways__box--vm"><span class="ways__boxlabel">VM</span><span class="mrow mrow--c1">app</span><span class="mrow mrow--c2">runtime, libraries</span><span class="mrow mrow--c2">OS + kernel</span></div>
+                    </div>
+                    <div class="ways__band ways__band--plain">VM SOFTWARE</div>
+                    <div class="ways__band">HARDWARE: processor, memory, disk</div>
+                  </div>
+                </div>
+                <p class="ways__label">↑ each VM: a whole operating system · typically gigabytes · boots in tens of seconds to minutes</p>
+              </div>
+              <div class="ways__panel">
+                <div class="cp-machine">
+                  <div class="cp-machine__bar"><span class="cp-label">Machine · Running 3 containers</span></div>
+                  <div class="cp-machine__body">
+                    <div class="ways__top ways__top--ctr">
+                      <div class="ways__room">room for more</div>
+                      <div class="ways__box ways__box--ctr"><span class="ways__boxlabel"><span class="lamp" aria-hidden="true"></span>CONTAINER</span><span class="mrow mrow--c1">app</span><span class="mrow mrow--c2">runtime, libraries</span></div>
+                      <div class="ways__box ways__box--ctr"><span class="ways__boxlabel"><span class="lamp" aria-hidden="true"></span>CONTAINER</span><span class="mrow mrow--c1">app</span><span class="mrow mrow--c2">runtime, libraries</span></div>
+                      <div class="ways__box ways__box--ctr"><span class="ways__boxlabel"><span class="lamp" aria-hidden="true"></span>CONTAINER</span><span class="mrow mrow--c1">app</span><span class="mrow mrow--c2">runtime, libraries</span></div>
+                    </div>
+                    <div class="ways__band ways__band--kernel">OS KERNEL · SHARED BY ALL<span class="cp-ann">one shared core: lighter, and a thinner wall between containers</span></div>
+                    <div class="ways__band">HARDWARE</div>
+                  </div>
+                </div>
+                <p class="ways__label">↑ each container: the app and what it needs · typically tens to hundreds of MB · starts in seconds</p>
+              </div>
+            </div>
+          </div>
+        </div>
+        <figcaption id="f-02-cap"><span class="cp-label">Fig. 02</span><span>Each VM carries a whole operating system. Containers share the machine’s one kernel, so each is smaller and quicker to start, and the walls between them are thinner. Sizes and times are typical, not guarantees.</span></figcaption>
+      </figure>
+
+      <p>That one difference explains the rest. A VM has to carry a whole operating system and boot it, the way a computer starts up. A container skips both: starting one just starts a process on a kernel that’s already running. So a container is <a href="https://cloud.google.com/discover/containers-vs-vms">typically</a> tens to hundreds of megabytes and starts in seconds, while a VM is typically gigabytes and takes tens of seconds to minutes to boot. Those are rough orders of magnitude, not measurements; the real numbers depend on the app and the setup.</p>
+      <p>Without a copy of the operating system for every app, the same machine has room for many more apps. How many more depends on the apps themselves.</p>
+      <p>The price is a thinner wall. Every container on a machine shares one kernel, so a flaw in that kernel is shared by all of them, while each VM has its own. That’s why cloud providers that run many different customers’ containers on the same machines put each customer’s containers inside a <a href="https://www.usenix.org/conference/nsdi20/presentation/agache">lightweight VM of its own</a>; AWS does this for some of its services. Containers are still walled off from each other, though. The wall is thinner than a VM’s, not missing, and for a company running only its own code, that trade-off is usually fine.</p>
+      <p>Nor is it one or the other. In the cloud, the machine running your containers is usually a VM itself. Containers and VMs are layers, not rivals.</p>
+      <div class="cp-aside">
+        <p><b>ANALOGY</b>A VM is a house: its own foundation, plumbing and wiring. A container is an apartment: its own locked door, sharing the building’s foundation and plumbing. Apartments are cheaper and pack more people into the same land, and a burst main pipe reaches every flat.</p>
+        <p class="cp-breaks"><b>WHERE THIS ANALOGY BREAKS</b>In the cloud, containers usually run inside a VM, which would mean apartments built inside a house; the picture can’t show that. And it says nothing about how fast a container starts.</p>
+      </div>
+    </section>
+
+    <!-- s-06 · The conversation · o-4 · claims c-05, c-06, c-02, c-03 · k-06 (distractors m-24, m-01), k-07 (m-23) · what's left · recap -->
+    <section id="s-06" data-segment="s-06">
+      <h2 id="the-conversation"><span class="cp-sec">§ 06</span>The conversation</h2>
+      <p>After the photo bug, Sam brings a proposal to the next planning meeting.</p>
+      <blockquote class="cp-quote"><p>“Let’s containerize everything.”</p><cite>Sam</cite></blockquote>
+
+      <div class="cp-check" role="group" aria-labelledby="k-06-q" data-check="k-06">
+        <div class="cp-check__head"><span class="cp-chip cp-chip--apply">APPLY</span><span class="cp-label">Check 06 / 07</span></div>
+        <p class="cp-check__q" id="k-06-q">At the planning meeting, Sam says: “Let’s containerize everything.” What’s the most useful thing Jordan can ask?</p>
+        <ul class="cp-options">
+          <li><button type="button" class="cp-option" data-fb="The image is identical in staging and production. But settings handed in at start, outside services like the database, and the machine’s processor can still differ. Passing staging is strong evidence, not proof."><span class="cp-option__key">A</span><span>“Great for consistency. So once a release passes staging, can we skip checking production?”</span><span class="cp-option__tag"></span></button></li>
+          <li><button type="button" class="cp-option" data-ok data-fb="Right. It welcomes the consistency, then asks about the one thing containers don’t change: they still run on a machine, and machines die."><span class="cp-option__key">B</span><span>“Great for consistency. And what happens when the machine running those containers dies?”</span><span class="cp-option__tag"></span></button></li>
+          <li><button type="button" class="cp-option" data-fb="Containers’ walls are thinner than a VM’s, and in the cloud your containers usually run inside VMs anyway. It’s not one or the other."><span class="cp-option__key">C</span><span>“Great for isolation. If containers are walled off like VMs, can we stop paying for VMs?”</span><span class="cp-option__tag"></span></button></li>
+        </ul>
+        <div class="cp-feedback" role="status" hidden></div>
+      </div>
+
+      <div class="cp-check" role="group" aria-labelledby="k-07-q" data-check="k-07">
+        <div class="cp-check__head"><span class="cp-chip">PREDICT</span><span class="cp-label">Check 07 / 07</span></div>
+        <p class="cp-check__q" id="k-07-q">So ask it. Saturday, 3 a.m.: the production machine running all of Fennel’s containers dies for good. What happens?</p>
+        <ul class="cp-options">
+          <li><button type="button" class="cp-option" data-fb="The walls are between containers, not between a container and its machine. A container is a process on that machine; when the machine goes, so do its containers."><span class="cp-option__key">A</span><span>The containers keep running: each is walled off from the machine, so its failure doesn’t reach them.</span><span class="cp-option__tag"></span></button></li>
+          <li><button type="button" class="cp-option" data-fb="Half right. Re-creating a container from its image really does take seconds. But nothing in an image or a container notices the machine died, picks another one and starts them there. Someone has to."><span class="cp-option__key">B</span><span>The containers restart on another machine within seconds, since each can be re-created from its image.</span><span class="cp-option__tag"></span></button></li>
+          <li><button type="button" class="cp-option" data-ok data-fb="Right. Containers turn a day of rebuilding into minutes of restarting, a real improvement on Year 0. But someone still has to wake up, know what was running there, and start each one somewhere else. And anything written only on that machine is at risk."><span class="cp-option__key">C</span><span>Everything on it stops, until someone starts each of its containers again on another machine.</span><span class="cp-option__tag"></span></button></li>
+        </ul>
+        <div class="cp-feedback" role="status" hidden></div>
+      </div>
+
+      <p>So containers settle what runs on each machine. They leave open what happens to the machines themselves:</p>
+      <ul>
+        <li>Who notices the machine died?</li>
+        <li>Who starts its containers again, and on which machine?</li>
+        <li>What happens to anything written only on that machine?</li>
+        <li>Once there are many machines, who decides what runs where?</li>
+      </ul>
+      <p>Those jobs have a name. We’ll name it in the next chapter.</p>
+
+      <div class="cp-recap">
+        <p class="cp-label">In short</p>
+        <ul>
+          <li>An image packs the app with what it needs, so every machine runs the same thing, and a version gap shows up on your laptop instead of in production.</li>
+          <li>An image never changes; containers are copies of it, running, and they start fresh each time.</li>
+          <li>Containers share the machine’s operating system core: lighter than VMs, with thinner walls, and they still die with their machine.</li>
+        </ul>
+        <p>Who starts the containers again when a machine dies? A year from now, Fennel runs its containers on eight machines, and that question becomes Sam’s 3 a.m. job.</p>
+      </div>
+    </section>
+
+    <footer class="cp-sources" data-toc-skip>
+      <p class="cp-label">Sources</p>
+      <ol>
+        <li>Docker documentation, <a href="https://docs.docker.com/get-started/docker-concepts/the-basics/what-is-an-image/">“What is an image?”</a>: what an image contains, and that images are immutable.</li>
+        <li>Docker documentation, <a href="https://docs.docker.com/get-started/docker-concepts/the-basics/what-is-a-container/">“What is a container?”</a>: a container as an isolated process; containers and VMs sharing or not sharing a kernel.</li>
+        <li>Docker documentation, <a href="https://docs.docker.com/get-started/docker-concepts/running-containers/persisting-container-data/">“Persisting container data”</a>: settings handed in at start, and files that vanish with the container.</li>
+        <li>Docker documentation, <a href="https://docs.docker.com/reference/cli/docker/image/pull/"><code>docker image pull</code> reference</a>: registries and pulling images.</li>
+        <li>Docker documentation, <a href="https://docs.docker.com/build/building/multi-platform/">“Multi-platform builds”</a>: why an image needs the right kind of processor.</li>
+        <li>The Twelve-Factor App, <a href="https://12factor.net/dev-prod-parity">“Dev/prod parity”</a>, <a href="https://12factor.net/dependencies">“Dependencies”</a> and <a href="https://12factor.net/config">“Config”</a>: why code that passed on one machine fails on another, and settings kept outside the code.</li>
+        <li>Google Cloud, <a href="https://cloud.google.com/discover/containers-vs-vms">“Containers vs VMs”</a>: typical sizes and start-up times.</li>
+        <li>Alexandru Agache et al., <a href="https://www.usenix.org/conference/nsdi20/presentation/agache">“Firecracker: Lightweight Virtualization for Serverless Applications”</a>, NSDI ’20: container isolation, and why AWS wraps customers’ containers in lightweight VMs.</li>
+      </ol>
+      <p>Fennel, its people, its tool versions, its image names and its incidents are fiction, made up to illustrate the mechanisms above.</p>
+    </footer>
+  </main>
+</div>
+
+<script src="assets/toc.js"></script>
+<script src="assets/replay.js"></script>
+<script src="assets/page.js"></script>
+<script src="assets/widget.js"></script>
+<link rel="stylesheet" href="widgets/w-samecode/index.css">
+<script src="widgets/w-samecode/data.js"></script>
+<script src="widgets/w-samecode/index.js"></script>
+</body>
+</html>

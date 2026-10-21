@@ -1,0 +1,12 @@
+segments:
+  s-01   A year later
+  s-02   Same code, two machines
+  s-03   What goes in the image, and what doesn't
+  s-04   Build once, run many: images and containers
+  s-05   Not a small VM
+  s-06   The conversation
+objectives: 4 · segments: 6 · reader's time: 14 min
+widgets: w-samecode (high)
+checks: 7 · acceptance criteria: 16
+info  claims not used by any segment: c-08 (should appear in cut-list.md)
+RESULT: PASS

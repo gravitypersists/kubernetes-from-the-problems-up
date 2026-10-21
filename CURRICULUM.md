@@ -36,7 +36,7 @@ This is the course bible and chapter plan. Each chapter is built in its own dida
 7. **Every chapter ends with "the conversation."** A realistic thing an engineer might say, and the questions a well-informed manager would ask in response. These become `apply`-type comprehension items, and they rehearse CO-4 throughout the course.
 8. **Every chapter opens with retrieval.** One or two quick questions on earlier chapters, preferably ones that need the loop lens. Later chapters mix in items from several earlier chapters. Ch 1 has no retrieval opener; a pre-question may take its place.
 9. **Confront misconceptions from the catalog (§6).** Each chapter owns the misconceptions assigned to it. State each one fairly, show a case where it predicts wrongly, then give the correct model.
-10. **Sizing.** There is no fixed time budget. Each chapter is sized in ideas, aiming for 3–5 objectives. Set `time_budget_minutes` at intake for each run, based on the chapter's objectives. If a chapter plans out too big, split it rather than compress it.
+10. **Sizing.** There is no fixed time budget. Each chapter is sized in ideas, aiming for 3–5 objectives. Set `time_budget_minutes` at intake for each run, based on the chapter's objectives. If a chapter plans out too big, split it rather than compress it. Designers give an honest minutes table per part (including widget time) in the plan's `## Shape`, so overruns show at the checkpoint.
 
 ---
 
@@ -54,6 +54,7 @@ Every chapter takes place at a point on Fennel's timeline. Later chapters can re
 **Established story facts** (keep consistent; add to this list after each chapter ships):
 
 - **Ch 1, the Friday disk outage (Year 0):** the dinner rush fills the disk with logs; it hits 100% at 18:12 and orders fail; Sam is at dinner across town; orders go through again at 20:10. Afterwards Sam sets up, by hand, a nightly 23:00 job that deletes old logs. Sam's server notes were written at setup and last edited 14 months before the outage. Things added by hand and never written down: the photo-resizing tool (May, when product photos launched), the email provider's key (August, when order emails launched), and a web-server setting from a holiday sale that nobody, Sam included, can explain. Rebuilding from the notes produces a server where photo upload and confirmation email fail and the log clean-up is silently missing.
+- **Ch 2, "works on my machine" (Year 1):** production runs on one rented machine, plus a staging machine. The photo-resizing tool is 6.2 in production and 7.0 on Riley's laptop; Riley's change works on the laptop and fails in production ("can't reproduce"). Sam's first image is `fennel-app:v42` (with 6.2), so the failure shows on the laptop before release; Riley's `v43` (with 7.0) passes on both. One Saturday night Riley hand-fixes photo uploads inside a running production container; Tuesday's release replaces the container and the fix vanishes.
 
 ### Timeline
 
@@ -71,6 +72,7 @@ Every chapter takes place at a point on Fennel's timeline. Later chapters can re
 - **Sam**, the founding engineer. Built the first server by hand and remembers every fire.
 - **Jordan**, a co-founder in Year 0 (the non-infrastructure one), later the engineering manager. The reader's stand-in: technical enough, never on call for infrastructure.
 - **Ari**, the platform lead, hired in Year 3. The senior engineer Jordan learns to have discussions with.
+- **Riley**, an engineer who joins in Year 1 and spends their first week installing tools (introduced in Ch 2).
 - **Morgan**, the other co-founder in Year 0, handling money; later the finance lead. Asks about the cloud bill.
 
 ### Fennel's services (introduced as the company grows)
@@ -119,7 +121,7 @@ A term is introduced in the listed chapter and may be used freely afterward. A c
 | ---------------------------------------------------------------------------------------------------------------------- | ------- | ----------------------------------------- |
 | server / machine, process, deploy, dependency, "snowflake" server, (configuration) drift, runbook, single point of failure | 1 | Machine = outlined frame with a mono `MACHINE · NAME` bar; the code row in `c1`; other contents as `c2` rows grouped RUNTIME / LIBRARIES & TOOLS / CONFIG / DISK & DATA; clutter and unknowns in `c6` dashed; status as word + colour (PRESENT, MISSING, UNKNOWN, PASS, FAIL, IDENTICAL). Two machines compared row by row (`w-rebuild` stage 4; content in `site/widgets/w-rebuild/data.js`). Incident timeline as a data-driven list with a status band (f-01, `CH01_OUTAGE_TIMELINE` in `assets/page.js`). |                                           |
 | virtual machine (VM), briefly                                                                                          | 1       |                                           |
-| container, image, registry, immutability                                                                               | 2       |                                           |
+| container, image, registry, immutability, (operating system) kernel, briefly | 2 | Extends Ch 1. Image = frame in `c1` stroke on `c1-soft` with a mono `IMAGE · fennel-app:v42` header holding its rows; compact form a chip with no lamp. Container = the same chip plus a square lamp and RUNNING, inside a machine frame (Ch 1's process row, packaged). Registry = frame with a `REGISTRY` bar holding a vertical stack of image chips, older versions at reduced opacity. Kernel = full-width `c2` band `OS KERNEL`, `SHARED BY ALL` under containers; per-VM "whole OS + kernel" inside each `VM` frame. Comparison markers SAME (`good`), DIFFERENT (`warn`), IDENTICAL; mono uppercase band labels spanning both machine columns (INSTALLED BY HAND…, IN THE IMAGE…, NOT IN THE IMAGE). Reusable chips `.cp-machine` / `.cp-img` / `.cp-ctr` in Ch 2's `assets/page.css`; f-01 drawn from `CH02_REGISTRY` / `CH02_MACHINES` in `assets/page.js`. |
 | orchestration, orchestrator, Kubernetes (by name), cluster                                                             | 3       |                                           |
 | node, pod, desired state, declarative vs. imperative, reconcile loop / controller, control plane, API server, manifest | 4       |                                           |
 | replica set (lightly), self-healing                                                                                    | 4       |                                           |
@@ -164,6 +166,8 @@ Each misconception is owned by one chapter, which confronts it. Later chapters m
 | m-20 | "A runbook removes the single-person risk." Runbooks help, but drift means they fall behind the real server          | 1     |
 | m-21 | "A bigger server fixes it." Still one hand-built box: no more reproducible, still a single point of failure         | 1     |
 | m-22 | "With VMs we can recreate the server any time." A snapshot copies the snowflake, cruft and all; it doesn't explain it | 1     |
+| m-23 | "Once everything is containerized, a machine failure is no longer a problem." Containers run on one machine; when it dies, so do they, until something re-creates them elsewhere (Ch 3–4). Container-level precursor of m-05 | 2     |
+| m-24 | "If an image passed in staging, it will behave identically in production." The image is identical; settings, secrets, outside services and processor type can still differ. Ch 9 revisits it | 2 (Ch 9 revisits) |
 
 ---
 
@@ -203,7 +207,7 @@ Each entry is a draft brief. At intake, the didactician orchestrator should copy
   - o-2 Distinguish an image from a running container.
   - o-3 Contrast containers with VMs well enough to see why many containers fit on one machine, and the isolation that costs.
   - o-4 Identify which problems containers _don't_ solve: what happens when the machine dies.
-- **Misconceptions:** m-01; revisits m-19 with the fix.
+- **Misconceptions:** m-01, m-23, m-24; revisits m-19 with the fix.
 - **Prerequisites:** Ch 1.
 - **Out of scope:** Dockerfile syntax; container internals (namespaces/cgroups) beyond a single sentence; orchestration.
 - **Retrieval from:** Ch 1 (snowflake servers). Suggested opener: why did photo uploads fail on the rebuilt server? (It needs the snowflake idea.)
@@ -224,7 +228,9 @@ Each entry is a draft brief. At intake, the didactician orchestrator should copy
 - **Misconceptions:** m-02.
 - **Prerequisites:** Ch 1–2.
 - **Out of scope:** how Kubernetes works (Ch 4); alternatives compared in depth (Ch 14).
-- **Retrieval from:** Ch 2 (what containers don't solve).
+- **Retrieval from:** Ch 2 (what containers don't solve). Suggested opener: Ch 2's "the machine running the containers dies at 3 a.m.; what happens?" (m-23).
+- **Docker:** Ch 2 says once "you'll hear the name Docker; the next chapter places it", so this chapter must place Docker alongside m-02.
+- **Widget reuse:** the placement widget should reuse Ch 2's f-01 container chip and machine frame, adding chip size, rather than adapt `w-rebuild` or `w-samecode`.
 - **The conversation:** "We should move to Kubernetes." The question to ask: "Which of these jobs is hurting us most today, and is that worth the cost of the platform?" (Ch 14 gives the full answer.)
 - **Research depth:** light.
 
@@ -288,6 +294,7 @@ _The central chapter of the course. Everything after it uses its model._
 - **Prerequisites:** Ch 4.
 - **Out of scope:** canary/blue-green in depth (name them); CI/CD tooling; database migrations (Ch 10 touches state).
 - **Retrieval from:** Ch 4 (declare vs. command), Ch 2 (immutable images).
+- **Picked up from Ch 2 (cut there for time):** tags vs. digests: a version label like `latest` can be moved to a newer image; only a digest pins one exact image. And old images can be deleted from a registry, so rolling back assumes someone kept them. Both answer "which exact image is in production, and can we go back to it?"
 - **The conversation:** "The rollout passed health checks, so it wasn't the deploy." The question to ask: "What do our health checks actually test? Would they catch wrong behavior, or only crashes?"
 - **Research depth:** light.
 
@@ -346,7 +353,7 @@ _The central chapter of the course. Everything after it uses its model._
 - **Misconceptions:** m-12.
 - **Prerequisites:** Ch 2, Ch 4, Ch 6.
 - **Out of scope:** cryptography; specific secret-manager products.
-- **Retrieval from:** Ch 2 (immutable images), Ch 6 (rollouts).
+- **Retrieval from:** Ch 2 (immutable images), Ch 6 (rollouts). Ch 2 already said settings are handed to a container at start, so one image serves staging and production; point back to it. Revisit m-24.
 - **The conversation:** "Credentials are in Kubernetes Secrets, so we're fine for the audit." The questions to ask: "Are they encrypted at rest? Who has read access? Should they live in our cloud's secret manager?"
 - **Research depth:** standard (security defaults vary by provider and version).
 
@@ -364,7 +371,7 @@ _The central chapter of the course. Everything after it uses its model._
 - **Misconceptions:** m-13.
 - **Prerequisites:** Ch 4, Ch 5.
 - **Out of scope:** storage drivers; database replication internals; operators (Ch 13 refers back here).
-- **Retrieval from:** Ch 4 (pods are disposable), Ch 6 (rollouts; schema migrations as a risk). Note: Ch 1 glossed over data in the rebuild ("copy the data over from last night's backup") and noted that restoring a whole-disk snapshot loses orders taken since; point back to that rather than contradicting it.
+- **Retrieval from:** Ch 4 (pods are disposable), Ch 6 (rollouts; schema migrations as a risk). Ch 2 said data written inside a container vanishes when it's replaced and must live outside it (without naming "volume"); point back to it. Note: Ch 1 glossed over data in the rebuild ("copy the data over from last night's backup") and noted that restoring a whole-disk snapshot loses orders taken since; point back to that rather than contradicting it.
 - **The conversation:** "Let's run Postgres in the cluster. It'll save money." The questions to ask: "Who owns backups, failover and upgrades? What does the managed service cost compared with our people's time?"
 - **Research depth:** standard.
 
@@ -484,7 +491,8 @@ _The central chapter of the course. Everything after it uses its model._
    - follow `design/control-plane/README.md` (voice, colour rules, type, space, figure and widget conventions) and the token usage notes in `tokens.json`;
    - use the treatments in `design/control-plane/components/` (hero, prose, figure plate, slider widget, check) as the reference for those elements, copying from `components/bundle.css`.
      The reviewer checks the page against the style guide as part of the UX review.
-5. After each chapter ships:
+5. **Widget height rule (course-wide, user decision in Ch 2's run, d-08).** On screens 600px and wider, a multi-state widget reserves the height of its tallest state, so moving between states never moves the page. Below 600px it does not: each state takes its own height, and on a state change the widget scrolls the new state's header to the top of the viewport. Plans still estimate phone heights honestly. Ch 1's `w-rebuild` predates this rule and still reserves its tallest state on phones; bring it in line in a later pass.
+6. After each chapter ships:
    - fill in the **Visuals** column of the term ledger;
    - note any change to Fennel's story (new events, numbers, names) in §3;
    - move anything the chapter cut that a later chapter should pick up into that chapter's entry.

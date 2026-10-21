@@ -1,0 +1,418 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mockup: "Works on my machine": containers</title>
+<!--
+  Checkpoint wireframe for Ch 2. Low-fidelity on purpose: grey boxes, real words.
+  Prose lines are draft wording (the page builder writes the final prose); check prompts, options
+  and answers are final.
+-->
+<style>
+  :root {
+    --bg: #fafaf9; --panel: #fff; --ink: #1c1917; --ink-2: #57534e; --ink-3: #a8a29e;
+    --line: #e7e5e4; --fill: #f5f5f4; --accent: #2563eb; --warn: #b45309; --ok: #15803d;
+    --s1: 8px; --s2: 16px; --s3: 24px; --s4: 32px; --s6: 48px;
+    --mono: ui-monospace, SFMono-Regular, Menlo, monospace;
+    --sans: system-ui, -apple-system, "Segoe UI", sans-serif;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg:#0c0a09; --panel:#1c1917; --ink:#fafaf9; --ink-2:#d6d3d1; --ink-3:#78716c;
+            --line:#292524; --fill:#292524; --accent:#60a5fa; --warn:#f59e0b; --ok:#4ade80; }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--ink); font: 16px/1.5 var(--sans); }
+  .bar { position: sticky; top: 0; z-index: 2; display: flex; gap: var(--s2); align-items: center;
+         flex-wrap: wrap; padding: var(--s1) var(--s2); background: var(--panel); border-bottom: 1px solid var(--line);
+         font: 13px/1.4 var(--mono); }
+  .bar b { font-weight: 600; }
+  .bar .sp { flex: 1; }
+  .bar button { font: inherit; padding: 4px 8px; border: 1px solid var(--line); background: var(--fill);
+                color: var(--ink); border-radius: 4px; cursor: pointer; }
+  .bar button[aria-pressed="true"] { border-color: var(--accent); color: var(--accent); }
+  main { max-width: 1040px; margin: 0 auto; padding: var(--s4) var(--s2) var(--s6); }
+  body.mobile main { max-width: 360px; padding-left: 0; padding-right: 0; }
+  body.mobile .seg { grid-template-columns: 1fr; }
+  h1 { font-size: 28px; line-height: 1.2; margin: 0 0 var(--s1); }
+  h2 { font: 600 13px/1.4 var(--mono); letter-spacing: .04em; text-transform: uppercase; color: var(--ink-2);
+       margin: var(--s6) 0 var(--s2); }
+  .meta { color: var(--ink-2); font-size: 14px; }
+  .panel { background: var(--panel); border: 1px solid var(--line); border-radius: 8px; padding: var(--s2); }
+  .seg { display: grid; grid-template-columns: minmax(0, 3fr) minmax(0, 2fr); gap: var(--s2);
+         margin-bottom: var(--s3); }
+  .seg header { grid-column: 1 / -1; display: flex; gap: var(--s1); align-items: baseline; flex-wrap: wrap; }
+  .seg header .id { font: 12px var(--mono); color: var(--ink-3); }
+  .seg header h3 { margin: 0; font-size: 18px; }
+  .tag { font: 11px/1 var(--mono); padding: 3px 6px; border-radius: 3px; background: var(--fill); color: var(--ink-2); }
+  .intent { font-style: italic; color: var(--ink-2); margin: 0 0 var(--s1); }
+  .prose { color: var(--ink-2); font-size: 14px; }
+  .prose p { margin: 0 0 var(--s1); }
+  .prose ul { margin: 0 0 var(--s1); padding-left: 20px; }
+  .fig { min-height: 160px; border: 2px dashed var(--ink-3); border-radius: 8px; background: var(--fill);
+         padding: var(--s2); font-size: 14px; color: var(--ink-2); display: flex; flex-direction: column; gap: var(--s1); }
+  .fig .kind { font: 600 11px var(--mono); letter-spacing: .04em; text-transform: uppercase; color: var(--ink); }
+  .fig pre { font: 12px/1.45 var(--mono); color: var(--ink); background: var(--panel); border: 1px solid var(--line);
+             padding: var(--s1); margin: 0; overflow-x: auto; white-space: pre; }
+  .check { border-left: 3px solid var(--accent); padding: var(--s1) var(--s2); background: var(--panel); margin-top: var(--s1); font-size: 14px; }
+  .check .kind { font: 600 11px var(--mono); text-transform: uppercase; color: var(--accent); }
+  .check ol { margin: 4px 0; padding-left: 20px; }
+  .check .ans { color: var(--ok); font-weight: 600; }
+  .aside { border: 1px solid var(--line); border-radius: 6px; padding: var(--s1) var(--s2); background: var(--panel); margin: var(--s1) 0; font-size: 14px; }
+  .aside .kind { font: 600 11px var(--mono); text-transform: uppercase; color: var(--ink-3); }
+  table { width: 100%; border-collapse: collapse; font-size: 14px; }
+  th, td { text-align: left; padding: var(--s1); border-bottom: 1px solid var(--line); vertical-align: top; }
+  th { font: 600 12px var(--mono); color: var(--ink-2); }
+  .needs-user { color: var(--warn); font-weight: 600; }
+  .license { color: var(--ok); }
+  .warn { color: var(--warn); }
+  @media (max-width: 720px) { .seg { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body>
+<div class="bar">
+  <b>MOCKUP</b><span>Ch 2 · “Works on my machine”: containers</span><span class="sp"></span>
+  <button type="button" id="vw-desk" aria-pressed="true">desktop</button>
+  <button type="button" id="vw-mob" aria-pressed="false">mobile 360</button>
+</div>
+<main>
+  <section id="overview">
+    <h1>“Works on my machine”: containers</h1>
+    <p class="meta">For technical managers (novice for infrastructure) · about 14 minutes of the reader’s time (estimate 14.5, see sizing) · narrative article with one contrasting-case widget, two figures, seven checks</p>
+    <div class="panel">
+      <p><b>Hero.</b> Kicker <code>CHAPTER 02 · Part I · Fennel, year 1</code>. Standfirst (draft): “A year on, Fennel has six engineers and a new kind of bug: it happens in production and nowhere else. How packing the app with everything it needs fixes that, and what it leaves unfixed.” Meta row: Read 14 MIN · For TECHNICAL MANAGERS · Chapter 02 / 15 · Widgets 01 · Checks 07. ToC rail on desktop, collapsed “Contents” on mobile.</p>
+      <p><b>Shape:</b> one contrast carries the chapter: the same code on two machines, first with the photo tool installed by hand on each, then with both running one image. The reader predicts each outcome. The surprise is that the image doesn’t fix Riley’s bug; it makes it show up on the laptop, before release. Prose then names image, registry and container after the reader has met them, then covers containers vs VMs, then the conversation. o-4 shares the conversation segment (d-01’s merge option) instead of having its own. Rejected: a free sandbox (dilutes the one contrast, too long), full reuse of Ch 1’s w-rebuild (replays Ch 1, ~5 min), scrollytelling for build → registry → container (three steps, nothing to manipulate), plain article (no pain in the page).</p>
+      <p><b>Honest sizing:</b> hero + s-01 1.5 · widget 3.5 · s-03 2.0 · s-04 2.5 · s-05 2.5 · s-06 2.5 = <b>about 14.5 min</b>. That’s the top of the budget. Cuts 1–3 in “If it runs long” recover about 2 min without losing an objective.</p>
+      <p><b>Objectives:</b></p>
+      <ul>
+        <li><b>o-1</b> Explain how packaging the app with its dependencies removes the “works on my machine” class of problem, and connect it to Ch 1’s rebuild. <span class="meta">checks: k-01, k-02, k-03</span></li>
+        <li><b>o-2</b> Distinguish an image (packaged, immutable, versioned, kept in a registry) from a running container. <span class="meta">checks: k-04</span></li>
+        <li><b>o-3</b> Contrast containers with VMs: why many fit on one machine, and what isolation that costs. <span class="meta">checks: k-05</span></li>
+        <li><b>o-4</b> Identify what containers don’t solve, starting with the machine dying. <span class="meta">checks: k-06, k-07 (folded into the conversation)</span></li>
+      </ul>
+      <p><b>Widget reuse decision:</b> adapt Ch 1’s <code>w-rebuild</code> stage-4 two-machine row comparison (copied into this run as <code>w-samecode</code>; stages 1–3 dropped). Same machine frames and rows as Ch 1, so the retrieval is visual too. Fewer states and taps than Ch 1. Ch 3’s placement widget should reuse f-01’s container chip, not this widget.</p>
+      <p><b>Misconceptions:</b> m-01 (owned: k-05, f-02, k-06 C) · m-19 revisited (fix: w-samecode, k-02 B; new trap “the image is the whole app”: state 3 + s-03) · local-01 (k-07 B) · local-02 (A2 breaks note, k-06 A). Recommendations: add local-01 as m-23 (owner Ch 2) and local-02 as m-24 (owner Ch 2, Ch 9 revisits).</p>
+      <p><b>New story facts (for your OK):</b> Riley (they/them), a new engineer in Year 1. Production photo tool 6.2, Riley’s laptop 7.0. Images <code>fennel-app:v42</code> (Sam, built to match production) then <code>v43</code> (Riley). Year 1 production still runs on one rented machine, plus staging.</p>
+      <p class="meta">check_plan warnings: none (info: c-08 unused, listed in the cut list).</p>
+    </div>
+  </section>
+
+  <section id="segments">
+    <h2>Segments</h2>
+    <p class="meta">Prose is draft wording: it shows what each segment says and in what order. The final prose is written for the reader at build time. Check prompts, options and answers are final.</p>
+
+    <article class="seg" id="s-01">
+      <header>
+        <span class="id">s-01 · § 01</span><h3>A year later</h3>
+        <span class="tag">retrieval → story</span><span class="tag">o-1</span><span class="tag">~1.5 min</span>
+      </header>
+      <div>
+        <p class="intent">Reconnect to Ch 1’s snowflake lesson, then let the reader feel Year 1’s symptoms as a manager sees them, before any new idea.</p>
+        <div class="check">
+          <div class="kind">RETRIEVE · Check 01 / 07</div>
+          In the last chapter you rebuilt Sam’s server from Sam’s notes, with exactly the same code. Why did uploading a product photo fail on the new machine?
+          <ol type="A">
+            <li>The notes installed an older copy of the code, from before the photo feature was added.</li>
+            <li class="ans">Sam had installed the photo-resizing tool by hand, and the notes never mentioned it. (key)</li>
+            <li>The new machine had less memory than Sam’s, so resizing large photos ran out of room.</li>
+          </ol>
+          Feedback B: “Right. The tool lived only on Sam’s server, added by hand in May. That’s a snowflake server: part of its real setup exists only on the machine itself.” All three end with: “A year on, that kind of gap isn’t on one server. It’s on every laptop.”
+        </div>
+        <div class="prose">
+          <p>“A year later, Fennel has six engineers. Riley joined last month and spent the first week installing tools from a wiki page that was out of date, much like Sam’s notes.”</p>
+          <ul>
+            <li>What Jordan sees: onboarding takes a week; a bug happens in production that nobody can reproduce on their laptop; releases pass in staging and fail in production.</li>
+            <li>Why: every laptop, the staging machine and production were each set up by hand, and each has drifted a little differently (Ch 1’s drift, now on every machine).</li>
+            <li>Bridge: “Here is one of those bugs.”</li>
+          </ul>
+        </div>
+      </div>
+      <div class="fig">
+        <span class="kind">No figure</span>
+        Check card, then about six short paragraphs of scene. At 360px the options stack full width.
+      </div>
+    </article>
+
+    <article class="seg" id="s-02">
+      <header>
+        <span class="id">s-02 · § 02</span><h3>Same code, two machines</h3>
+        <span class="tag">contrasting cases · predict ×2</span><span class="tag">o-1</span><span class="tag">~3.5 min</span>
+      </header>
+      <div>
+        <p class="intent">The reader predicts how one dependency version difference makes a “can’t reproduce” bug. Then the reader sees that one image on both machines makes them behave identically, so the bug surfaces on the laptop before release.</p>
+        <div class="prose">
+          <p>“Riley’s change works on the laptop. Here are the two machines, row by row. Predict, then see.” (Two sentences only; the widget carries the segment.)</p>
+        </div>
+        <div class="check">
+          <div class="kind">PREDICT · Check 02 / 07 · inside the widget, state 1</div>
+          Riley’s change passes every test on the laptop. The code is identical on both machines. What happens when the change ships to production?
+          <ol type="A">
+            <li class="ans">Photo upload fails in production, while on Riley’s laptop it keeps working, so nobody can reproduce it. (key)</li>
+            <li>Photo upload works in production too: the code is identical, and it passed every test on the laptop. (m-19)</li>
+            <li>The release refuses to install on production at all, because the two machines’ tools don’t match.</li>
+          </ol>
+          Feedback B: “That’s ‘the code is the app’ again. The tests ran on Riley’s laptop, with photo tool 7.0. Production has 6.2, which doesn’t know the option Riley’s code uses.”
+        </div>
+        <div class="check">
+          <div class="kind">PREDICT · Check 03 / 07 · inside the widget, state 2</div>
+          Both machines now run the same image, fennel-app:v42, which contains photo tool 6.2. Riley tests the same change on the laptop. What happens?
+          <ol type="A">
+            <li>The tests pass on the laptop and photo upload fails in production, just as it did before the image.</li>
+            <li>Photo upload works on both: the image packages the tool, so the version problem is solved. (tempting)</li>
+            <li class="ans">The tests fail on Riley’s laptop, the same way the change would have failed in production. (key)</li>
+          </ol>
+          Feedback B: “The image doesn’t change what’s inside it. It holds 6.2, and Riley’s code needs 7.0. What it changes is where you find out.” Feedback C: “Right. Same image, same photo tool, same failure, but now on Riley’s laptop, before release, where it costs Riley ten minutes instead of costing customers a broken feature.”
+        </div>
+      </div>
+      <div class="fig">
+        <span class="kind">WIDGET · w-samecode · W-01 Same code, two machines · complexity high</span>
+        Adapted from Ch 1’s w-rebuild stage 4: same machine columns, category rows and status words. Three states, step-locked; “Start over” always available.
+<pre>STATE 1 / 3 · INSTALLED BY HAND
+                       RILEY'S LAPTOP  PRODUCTION
+CODE  Fennel app code  ── IDENTICAL ──  Same code.
+-- INSTALLED BY HAND ON EACH MACHINE --
+RUNTIME  Python         3.12     3.12    SAME
+LIBS     Libraries      same     same    SAME
+LIBS     Photo tool     7.0      6.2     DIFFERENT
+TEST  Upload a photo    PASS     ?    → k-02 → FAIL
+"Riley runs it again on the laptop: it works.
+ 'Can't reproduce.'"   [Next: pack it in an image]
+
+STATE 2 / 3 · ONE IMAGE
+-- IN THE IMAGE · fennel-app:v42 (image frame) --
+CODE     Fennel app code ── IDENTICAL ──
+RUNTIME  Python         3.12     3.12    SAME
+LIBS     Libraries      same     same    SAME
+LIBS     Photo tool     6.2      6.2     SAME
+TEST  Upload a photo     ?        ?   → k-03 →
+                        FAIL     FAIL
+              (caught before release)
+         [Build fennel-app:v43 with photo tool 7.0]
+
+STATE 3 / 3 · A NEW IMAGE
+-- IN THE IMAGE · fennel-app:v43 --
+LIBS     Photo tool     7.0      7.0     SAME
+TEST  Upload a photo    PASS     PASS
+-- NOT IN THE IMAGE --
+CONFIG   Settings       test     prod    DIFFERENT
+         handed in at start, by design
+DATA     Data (orders)  test     real    DIFFERENT
+         kept outside the container
+"Same image on both machines, so the photo tool
+ can't differ. What's outside the image still can,
+ and that's on purpose."</pre>
+        Desktop (.d-wide ≤ 960): rows on the left (~58%), check panel on the right; reserve 600px. Mobile 360: one column (bar, state header, lead, rows with SAME/DIFFERENT as a tag under each label, two 72px status columns, result row, then the check directly below it); reserve ~960px, the tallest state. All states share one reserved height, so the page never jumps. Every status is a word plus colour, and aria-live announces each reveal.
+      </div>
+    </article>
+
+    <article class="seg" id="s-03">
+      <header>
+        <span class="id">s-03 · § 03</span><h3>What goes in the image, and what doesn’t</h3>
+        <span class="tag">name-after-meeting</span><span class="tag">o-1</span><span class="tag">o-2</span><span class="tag">~2 min</span>
+      </header>
+      <div>
+        <p class="intent">Name what the reader just used (an image), say exactly what it contains and what it leaves out, and explain immutability as why it can’t drift.</p>
+        <div class="prose">
+          <p>“The sealed package in the widget is called an <b>image</b>: the app’s code packed together with what it needs to run, meaning the runtime, the libraries, tools like the photo resizer, and the files it starts with.”</p>
+          <ul>
+            <li>Anyone who runs it gets exactly those versions. A new engineer runs the image instead of spending a week installing things.</li>
+            <li>Left out on purpose: settings that differ between places (database address, passwords) are handed in when the app starts, so one image serves staging and production. The data the app writes, like orders, is kept outside. “The code wasn’t the whole app, and the image isn’t either.” (m-19 revisit; config ≤ 2 sentences.)</li>
+            <li>Immutable: once built, it can’t be changed. A change means a new image with a new version label (v42 → v43), and the old one stays as it was. Nobody can hand-edit a built image, so it can’t drift like Sam’s server, and what was tested is exactly what ships.</li>
+          </ul>
+        </div>
+        <div class="aside">
+          <div class="kind">ANALOGY · A1</div>
+          Many companies don’t hand a new hire a setup checklist. IT gives them a laptop copied from one master setup, so everyone starts the same.
+          <div class="kind">WHERE THIS ANALOGY BREAKS</div>
+          An IT laptop starts drifting on day one, as people install things on it. An image can’t be changed at all; each copy starts fresh from it, and any change means a new image. And IT’s master copy includes the operating system’s core. An image leaves it out, which matters in a moment.
+        </div>
+      </div>
+      <div class="fig">
+        <span class="kind">No figure</span>
+        The widget’s state 3 is this section’s figure: the prose refers to its rows by name (“the photo tool row”, “the settings row”). No check here: o-1 was just checked twice, and immutability is checked in k-04.
+      </div>
+    </article>
+
+    <article class="seg" id="s-04">
+      <header>
+        <span class="id">s-04 · § 04</span><h3>Build once, run many: images and containers</h3>
+        <span class="tag">figure → apply</span><span class="tag">o-2</span><span class="tag">~2.5 min</span>
+      </header>
+      <div>
+        <p class="intent">Tell the image (a package kept in a registry) apart from containers (the image running). One image runs as many containers, and changes made inside a container vanish when it’s replaced.</p>
+        <div class="prose">
+          <p>“Riley builds v43 once and puts it in a <b>registry</b>, a shared store of images. The laptop, staging and production each download (‘pull’) that same image.”</p>
+          <ul>
+            <li>Running an image gives you a <b>container</b>: the app running as a process, walled off by the operating system with its own files from the image and its own view of what’s running. That’s the only sentence on internals.</li>
+            <li>One image can run as many containers. Production in Fig. 01 runs two.</li>
+            <li>A container can write files, but when it’s replaced, which every release does, those changes go with it.</li>
+            <li>(Optional, one line) “You’ll hear the name Docker in these conversations. The next chapter places it.”</li>
+          </ul>
+        </div>
+        <div class="aside">
+          <div class="kind">ANALOGY · A2</div>
+          The name comes from shipping containers. Before them, cargo was loaded piece by piece, differently at every port. After them, any ship, crane or truck moves the same sealed box without caring what’s inside. Engineers call the software version “build once, run anywhere.”
+          <div class="kind">WHERE THIS ANALOGY BREAKS</div>
+          A shipping container doesn’t care which ship carries it. A software container does: it needs a machine with the right kind of processor, and its settings are handed in when it arrives. Outside services, like the database, may differ too. “Run anywhere” means the inside is the same everywhere, not everything around it.
+        </div>
+        <div class="check">
+          <div class="kind">APPLY · Check 04 / 07</div>
+          Saturday night, photo uploads break in production. Riley connects to the running container and fixes the problem by hand, inside it. It works. On Tuesday, Fennel releases its next version. What happens to Riley’s fix?
+          <ol type="A">
+            <li class="ans">It’s gone: Tuesday’s release starts new containers from the image, and the image never had the fix. (key)</li>
+            <li>It stays: the fix was made on the production machine, so it remains there for the next release. (tempting: Ch 1 thinking)</li>
+            <li>It spreads: changes made inside a running container are saved back into its image for next time.</li>
+          </ol>
+          Feedback A: “Right. A container starts fresh from its image, and changes made inside it disappear when it’s replaced. To keep a fix, put it in a new image. That’s also why containers don’t drift the way Sam’s server did.” Feedback B: “On Sam’s server it would have stayed, and that’s exactly how drift built up…”
+        </div>
+      </div>
+      <div class="fig">
+        <span class="kind">FIGURE · f-01 · One image, many containers · static (HTML/CSS plate)</span>
+        Left to right: [MACHINE · RILEY’S LAPTOP “build fennel-app:v43”] → push → [REGISTRY: chips v41, v42 (faded), <b>v43</b> (c1), label “image: the package, never changes”, “every version kept as it was”] → pull → three stacked machine frames: LAPTOP (1 container chip v43 ● RUNNING), STAGING (1 chip), PRODUCTION (2 chips, “two containers, one image”). Direct label on a chip: “container: the image, running”. Each machine has a small row “settings: test / staging / production”, with “handed in at start” on production.
+        <br>Caption: “Fig. 01. Build the image once and keep it in the registry. Every machine runs containers from that same package, and one image can run as several containers.”
+        <br>Mobile: stacked vertically (build → push ↓ → registry chips in a row → pull ↓ → three machine frames), about 640px tall. Built as HTML/CSS so the container chip and machine frame can be copied by Ch 3’s placement widget.
+      </div>
+    </article>
+
+    <article class="seg" id="s-05">
+      <header>
+        <span class="id">s-05 · § 05</span><h3>Not a small VM</h3>
+        <span class="tag">predict → figure</span><span class="tag">o-3</span><span class="tag">m-01</span><span class="tag">~2.5 min</span>
+      </header>
+      <div>
+        <p class="intent">Confront “a container is just a small VM”: containers share the machine’s operating system core, each VM carries its own. So containers are smaller, quicker to start and denser, with a thinner wall.</p>
+        <div class="check">
+          <div class="kind">PREDICT · Check 05 / 07</div>
+          Sam says a container is basically a small VM. Before you read on, which of these is closest to what a container actually is?
+          <ol type="A">
+            <li>A small virtual machine: it boots its own trimmed-down operating system, just a lighter one. (m-01)</li>
+            <li>A compressed copy of a whole machine: it unpacks on any machine into an exact clone of the original.</li>
+            <li class="ans">A walled-off process: it carries the app’s own files but uses the machine’s operating system core. (key)</li>
+          </ol>
+          Feedback A: “That’s the common picture, and it’s why containers get drawn like little VMs. But a container doesn’t boot an operating system of its own; it runs on the machine’s operating system core. That’s exactly why it’s small and quick to start.”
+        </div>
+        <div class="prose">
+          <p>“That core is called the <b>kernel</b>: the part of the operating system that runs the hardware and every process on it.” (Gloss sits after k-05’s reveal, just before Fig. 02.)</p>
+          <ul>
+            <li>Smaller and faster, typically: tens to hundreds of MB, starting in seconds, against a VM’s gigabytes and tens of seconds to minutes. Always hedged.</li>
+            <li>More per machine, because there’s no operating-system copy each. No number or multiple is given.</li>
+            <li>Thinner wall: one shared kernel, so a flaw in it is shared. Providers that run many customers’ containers side by side wrap each customer’s in a lightweight VM. For a company running its own code the trade-off is usually fine. Never “containers are insecure”.</li>
+            <li>In the cloud, the machine running your containers is usually itself a VM: layers, not rivals.</li>
+          </ul>
+        </div>
+        <div class="aside">
+          <div class="kind">ANALOGY · A3</div>
+          A VM is a house: its own foundation, plumbing and wiring. A container is an apartment: its own locked door, sharing the building’s foundation and plumbing. Cheaper and denser, and a burst main pipe reaches every flat.
+          <div class="kind">WHERE THIS ANALOGY BREAKS</div>
+          Containers usually run inside a VM, apartments inside a house, which the picture can’t show. And it says nothing about how fast a container starts.
+        </div>
+      </div>
+      <div class="fig">
+        <span class="kind">FIGURE · f-02 · One machine, two ways · static</span>
+        Two equal machine panels. <b>Left, MACHINE · RUNNING 3 VMS:</b> HARDWARE band → VM SOFTWARE band → three VM frames, each with “OS + kernel” (c2), “runtime, libraries” (c2) and “app” (c1). Label: “each VM: a whole operating system · typically gigabytes · boots in tens of seconds to minutes”. <b>Right, MACHINE · RUNNING 3 CONTAINERS:</b> HARDWARE band → one wide emphasised band “OS KERNEL · SHARED BY ALL” → three shorter container chips (“runtime, libraries”, “app”; no OS), leaving a dashed region labelled “room for more” (no number). Label: “each container: the app and what it needs · typically tens to hundreds of MB · starts in seconds”. Callout on the band: “one shared core: lighter, and a thinner wall between containers”.
+        <br>Caption: “Fig. 02. Each VM carries a whole operating system. Containers share the machine’s one kernel, so each is smaller and quicker to start, and the walls between them are thinner. Sizes and times are typical, not guarantees.”
+        <br>Mobile: the panels stack (VMs, then containers), each full width and about 300px tall, with labels as two-line captions under each frame.
+      </div>
+    </article>
+
+    <article class="seg" id="s-06">
+      <header>
+        <span class="id">s-06 · § 06</span><h3>The conversation</h3>
+        <span class="tag">apply → predict</span><span class="tag">o-4</span><span class="tag">local-01</span><span class="tag">~2.5 min</span>
+      </header>
+      <div>
+        <p class="intent">Answer “Let’s containerize everything” with the machine-dies question, find out what does happen, and leave with the list of jobs containers don’t do, as the open question for Ch 3.</p>
+        <div class="prose"><p>Quoted line, attributed to Sam: <b>“Let’s containerize everything.”</b></p></div>
+        <div class="check">
+          <div class="kind">APPLY · Check 06 / 07</div>
+          At the planning meeting, Sam says: “Let’s containerize everything.” What’s the most useful thing Jordan can ask?
+          <ol type="A">
+            <li>“Great for consistency. So once a release passes staging, can we skip checking production?” (local-02)</li>
+            <li class="ans">“Great for consistency. And what happens when the machine running those containers dies?” (key)</li>
+            <li>“Great for isolation. If containers are walled off like VMs, can we stop paying for VMs?” (m-01)</li>
+          </ol>
+          Feedback A: “The image is identical in staging and production. But settings handed in at start, outside services like the database, and the machine’s processor can still differ. Passing staging is strong evidence, not proof.”
+        </div>
+        <div class="check">
+          <div class="kind">PREDICT · Check 07 / 07</div>
+          So ask it. Saturday, 3 a.m.: the production machine running all of Fennel’s containers dies for good. What happens?
+          <ol type="A">
+            <li>The containers keep running: each is walled off from the machine, so its failure doesn’t reach them.</li>
+            <li>The containers restart on another machine within seconds, since each can be re-created from its image. (local-01)</li>
+            <li class="ans">Everything on it stops, until someone starts each of its containers again on another machine. (key)</li>
+          </ol>
+          Feedback B: “Half right. Re-creating a container from its image really does take seconds. But nothing in an image or a container notices the machine died, picks another one and starts them there. Someone has to.” Feedback C: “Right. Containers turn a day of rebuilding into minutes of restarting, a real improvement on Year 0. But someone still has to wake up, know what was running there, and start each one somewhere else. And anything written only on that machine is at risk.”
+        </div>
+        <div class="prose">
+          <ul>
+            <li>What’s left, as questions: Who notices the machine died? Who starts its containers again, and on which machine? What happens to anything written only on that machine? Once there are many machines, who decides what runs where? “Those jobs have a name. We’ll name it in the next chapter.”</li>
+            <li>In short (three lines): an image packs the app with what it needs, so a version gap shows up on your laptop, not in production · an image never changes; containers are copies of it, running, and start fresh each time · containers share the machine’s core: lighter than VMs, thinner walls, and they still die with their machine.</li>
+            <li>Closing line: “A year from now, Fennel runs its containers on eight machines, and that question becomes Sam’s 3 a.m. job.”</li>
+            <li>Sources list (Docker docs: image, container, persisting data, pull, multi-platform; Twelve-Factor dev/prod parity, dependencies, config; Google Cloud containers vs VMs; Agache et al., Firecracker, NSDI ’20) and a fiction note: Fennel, Riley, the versions and incidents are made up.</li>
+          </ul>
+        </div>
+      </div>
+      <div class="fig">
+        <span class="kind">No figure</span>
+        Quoted line, two check cards, a four-question list, a three-line “In short” box, the closing line, sources. At 360px everything stacks.
+      </div>
+    </article>
+  </section>
+
+  <section id="cuts">
+    <h2>Cut list (researched, deliberately left out)</h2>
+    <table>
+      <thead><tr><th>What</th><th>Why it’s out</th><th>Cost to add back</th></tr></thead>
+      <tbody>
+        <tr><td>Tags vs digests: “latest” can be moved; a digest pins one image (c-08, x-05)</td><td>A whole extra idea, and the 14 minutes are full. Fits Ch 6 rollbacks (R6).</td><td>A paragraph plus an analogy in s-04, ~0.75 min</td></tr>
+        <tr><td>Analogy x-02 (installed app vs open window)</td><td>f-01 already shows one image as many containers; three analogies are enough.</td><td>A two-line aside, ~0.4 min</td></tr>
+        <tr><td>Ch 1-style “what answer should worry you” think-then-reveal</td><td>k-06 and k-07 already rehearse the conversation.</td><td>One item in s-06, ~0.75 min</td></tr>
+        <tr><td>Staging as a third widget column</td><td>A contrasting case needs two cases; a third column costs 360px width.</td><td>A column of values; layout risk</td></tr>
+        <tr><td>Full reuse of w-rebuild (rebuild stages)</td><td>Replays Ch 1, ~5 min.</td><td>n/a</td></tr>
+        <tr><td>Density slider / “N times more containers”</td><td>No sourced number; f-02 says “room for more” qualitatively.</td><td>Needs a sourced figure first</td></tr>
+        <tr><td>Processor-type predict check (c-09)</td><td>Another idea to chunk; kept as a clause in A2’s breaks note and k-06 A’s feedback.</td><td>A check in s-04, ~0.75 min</td></tr>
+        <tr><td>Image layers; registry vs repository; Docker Hub trust tiers; pinning vs security updates</td><td>Engineer-level or off-objective.</td><td>A sentence each; not recommended</td></tr>
+        <tr><td>Docker vs containers, OCI (m-02)</td><td>Ch 3 owns it; Ch 2 says “the next chapter places it”.</td><td>Ch 3</td></tr>
+        <tr><td>Restart policies (same-machine restart)</td><td>Unverified; would blur k-07.</td><td>One sentence after research</td></tr>
+        <tr><td>Firecracker figures; Docker Desktop’s Linux VM; dev containers; time/personnel gaps; old images deleted</td><td>Unsourced here, off-objective, or later chapters (Ch 6).</td><td>See cut-list.md</td></tr>
+        <tr><td>Namespaces/cgroups; Dockerfile syntax</td><td>Out of scope per brief (one sentence on internals kept).</td><td>n/a</td></tr>
+      </tbody>
+    </table>
+
+    <h2>If it runs long (in the plan now; cut in this order)</h2>
+    <p class="meta">The prose is written at whatever length clarity needs. If the built page runs long, you pick cuts from here. Items 1–3 recover about 2 minutes without losing an objective.</p>
+    <table>
+      <thead><tr><th>#</th><th>Cut</th><th>What the reader loses</th></tr></thead>
+      <tbody>
+        <tr><td>1</td><td>The c-12 paragraph in s-05 (providers wrap containers in lightweight VMs)</td><td>Why clouds run containers inside VMs; the isolation cost stays as one sentence</td></tr>
+        <tr><td>2</td><td>Analogy A3, houses and apartments (s-05)</td><td>A memorable image for the shared kernel; f-02 carries the structure</td></tr>
+        <tr><td>3</td><td>w-samecode state 3 (build v43, NOT IN THE IMAGE rows), folded into k-03’s feedback</td><td>The visible immutability moment and the widget’s view of the m-19 boundary; s-03 still states both</td></tr>
+        <tr><td>4</td><td>Analogy A2, shipping containers (s-04); its breaks note stays as one plain sentence</td><td>The name’s origin and the “run anywhere” framing</td></tr>
+        <tr><td>5</td><td>Analogy A1, the pre-imaged laptop (s-03)</td><td>The onboarding hook, and the chapter’s one management analogy (§2.1)</td></tr>
+        <tr><td>6</td><td>k-01 as a choice → think-then-reveal</td><td>The retrieval commitment (the retrieval itself stays)</td></tr>
+      </tbody>
+    </table>
+    <p class="meta">Not cuttable without losing an objective, the pain in the page, or an owned misconception: w-samecode states 1–2, k-02 to k-07, f-01, f-02, the s-03 in/out boundary, the conversation.</p>
+  </section>
+
+  <section id="assets">
+    <h2>Third-party assets</h2>
+    <table>
+      <thead><tr><th>#</th><th>Asset</th><th>Used in</th><th>Licence</th><th>Clearance</th></tr></thead>
+      <tbody>
+        <tr><td>–</td><td>No third-party assets. Every figure and the widget are drawn for this page; fonts come from the course style guide (Google Fonts, already in use in Ch 1).</td><td>–</td><td>–</td><td class="license">nothing to clear</td></tr>
+      </tbody>
+    </table>
+    <p class="meta">No third-party assets in this chapter.</p>
+  </section>
+</main>
+<script>
+  const d = document.getElementById('vw-desk'), m = document.getElementById('vw-mob');
+  function set(mobile) {
+    document.body.classList.toggle('mobile', mobile);
+    d.setAttribute('aria-pressed', String(!mobile)); m.setAttribute('aria-pressed', String(mobile));
+  }
+  d.onclick = () => set(false); m.onclick = () => set(true);
+</script>
+</body>
+</html>
