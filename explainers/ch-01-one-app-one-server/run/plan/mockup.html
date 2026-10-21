@@ -1,0 +1,448 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mockup: One app, one server</title>
+<!--
+  Checkpoint wireframe for Ch 1 of "Kubernetes for Technical Managers".
+  Low-fidelity on purpose: grey boxes, real words. Accent colour and fonts borrow from the
+  Control Plane style guide only where cheap. The built page uses the full style.
+-->
+<style>
+  :root {
+    --bg: #eeeee8; --panel: #f9f9f6; --ink: #111110; --ink-2: #353533; --ink-3: #595955;
+    --line: #c3c3bb; --fill: #e2e2db; --accent: #c43c00; --warn: #8a6200; --ok: #007357; --bad: #b0004c;
+    --c2: #00468c;
+    --s1: 8px; --s2: 16px; --s3: 24px; --s4: 32px; --s6: 48px;
+    --mono: "Space Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+    --sans: "Archivo", system-ui, -apple-system, "Segoe UI", sans-serif;
+    --serif: "Source Serif 4", Georgia, serif;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg:#0c0c0b; --panel:#161615; --ink:#ecece6; --ink-2:#c6c6bf; --ink-3:#9c9c95;
+            --line:#34342f; --fill:#222220; --accent:#ff7433; --warn:#f0c03c; --ok:#3ccb9e; --bad:#ff6b98; --c2:#3d8cff; }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--ink); font: 16px/1.5 var(--sans); }
+  .bar { position: sticky; top: 0; z-index: 2; display: flex; gap: var(--s2); align-items: center;
+         flex-wrap: wrap; padding: var(--s1) var(--s2); background: var(--panel); border-bottom: 1px solid var(--line);
+         font: 13px/1.4 var(--mono); }
+  .bar b { font-weight: 600; }
+  .bar .sp { flex: 1; }
+  .bar button { font: inherit; padding: 4px 8px; border: 1px solid var(--line); background: var(--fill);
+                color: var(--ink); border-radius: 2px; cursor: pointer; }
+  .bar button[aria-pressed="true"] { border-color: var(--accent); color: var(--accent); }
+  main { max-width: 1040px; margin: 0 auto; padding: var(--s4) var(--s2) var(--s6); }
+  body.mobile main { max-width: 360px; padding-left: 0; padding-right: 0; }
+  body.mobile .seg { grid-template-columns: 1fr; }
+  h1 { font-size: 28px; line-height: 1.2; margin: 0 0 var(--s1); }
+  h2 { font: 600 13px/1.4 var(--mono); letter-spacing: .04em; text-transform: uppercase; color: var(--ink-2);
+       margin: var(--s6) 0 var(--s2); }
+  .meta { color: var(--ink-2); font-size: 14px; }
+  .panel { background: var(--panel); border: 1px solid var(--line); border-radius: 2px; padding: var(--s2); }
+  .seg { display: grid; grid-template-columns: minmax(0, 3fr) minmax(0, 2fr); gap: var(--s2);
+         margin-bottom: var(--s3); }
+  .seg.full { grid-template-columns: 1fr; }
+  .seg header { grid-column: 1 / -1; display: flex; gap: var(--s1); align-items: baseline; flex-wrap: wrap;
+                border-top: 1.5px solid var(--ink); padding-top: var(--s1); }
+  .seg header .id { font: 12px var(--mono); color: var(--accent); }
+  .seg header h3 { margin: 0; font-size: 18px; }
+  .tag { font: 11px/1 var(--mono); padding: 3px 6px; border-radius: 2px; background: var(--fill); color: var(--ink-2); }
+  .intent { font-style: italic; color: var(--ink-2); margin: 0 0 var(--s1); }
+  .prose { color: var(--ink-2); font: 15px/1.55 var(--serif); }
+  .prose p { margin: 0 0 var(--s1); }
+  .prose ul { margin: 0 0 var(--s1); padding-left: 20px; }
+  .fig { min-height: 160px; border: 2px dashed var(--ink-3); border-radius: 2px; background: var(--fill);
+         padding: var(--s2); font-size: 14px; color: var(--ink-2); display: flex; flex-direction: column; gap: var(--s1); }
+  .fig .kind { font: 600 11px var(--mono); letter-spacing: .04em; text-transform: uppercase; color: var(--ink); }
+  .fig ol, .fig ul { margin: 0; padding-left: 20px; }
+  .fig table { font-size: 12px; }
+  .check { border-left: 3px solid var(--accent); padding: var(--s1) var(--s2); background: var(--panel); margin-top: var(--s1); font-size: 14px; }
+  .check .kind { font: 600 11px var(--mono); text-transform: uppercase; color: var(--accent); }
+  .check .ans { color: var(--ok); font-weight: 600; }
+  .check .fb { color: var(--ink-3); font-size: 13px; margin-top: 4px; }
+  .aside { border: 1px solid var(--line); background: var(--panel); padding: var(--s1) var(--s2); font-size: 13px; margin-top: var(--s1); }
+  .aside .kind { font: 600 11px var(--mono); text-transform: uppercase; color: var(--ink-3); }
+  .breaks { color: var(--warn); }
+  table { width: 100%; border-collapse: collapse; font-size: 14px; }
+  th, td { text-align: left; padding: var(--s1); border-bottom: 1px solid var(--line); vertical-align: top; }
+  th { font: 600 12px var(--mono); color: var(--ink-2); }
+  .st { font: 600 11px var(--mono); }
+  .st.ok { color: var(--ok); } .st.bad { color: var(--bad); } .st.warn { color: var(--warn); }
+  .needs-user { color: var(--warn); font-weight: 600; }
+  .license { color: var(--ok); }
+  .warn { color: var(--warn); }
+  .stage { border-top: 1px dashed var(--ink-3); padding-top: var(--s1); }
+  .stage b { font: 600 11px var(--mono); text-transform: uppercase; color: var(--ink); }
+  @media (max-width: 720px) { .seg { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body>
+<div class="bar">
+  <b>MOCKUP</b><span>One app, one server · Ch 1</span><span class="sp"></span>
+  <button type="button" id="vw-desk" aria-pressed="true">desktop</button>
+  <button type="button" id="vw-mob" aria-pressed="false">mobile 360</button>
+</div>
+<main>
+  <section id="overview">
+    <p class="meta" style="font-family: var(--mono); font-size: 12px; letter-spacing: .04em;">MOD 01 · PART I · BEFORE KUBERNETES</p>
+    <h1>One app, one server</h1>
+    <p class="meta"><i>Standfirst (draft):</i> Fennel's site went down for two hours on a Friday night, and nobody had touched the code. What lives on a server besides the code, and why that should worry anyone who depends on it.</p>
+    <p class="meta">For a somewhat technical manager (novice in infrastructure) · about 12 minutes of the reader's time · narrative article built around one hands-on widget · ToC: yes (7 sections) · READ 12 MIN · WIDGETS 01 · CHECKS 09</p>
+    <div class="panel">
+      <p><b>Shape:</b> the chapter's lesson is a discovery: the code isn't the whole app, and the notes aren't the whole server. So the centre of the page is one widget in which you rebuild Sam's server from Sam's notes and watch identical code break. Prose carries the outage story, names things after you've met them, and holds the analogies and the business consequences. o-3 ("bigger server" or "VMs") is a pair of misconceptions, so it gets predict-then-reveal checks and one figure, not a second widget. Rejected: a free sandbox (you could miss the gaps; too long for 12 minutes) and a plain article (reading about gaps isn't finding them).</p>
+      <p><b>Objectives:</b></p>
+      <ul>
+        <li><b>o-1</b> Explain why an app's behavior depends on the machine it runs on (runtime, libraries, config, disk), not just its code. <span class="meta">checks: k-01, k-02, k-03, k-04</span></li>
+        <li><b>o-2</b> Predict what happens to the business when a single hand-built server fails, and ask: "If this box vanished tonight, how long until we're back, and who has to be awake?" <span class="meta">checks: k-05, k-08, k-09</span></li>
+        <li><b>o-3</b> Explain why "just get a bigger server" or "add VMs" doesn't fix reproducibility. <span class="meta">checks: k-06, k-07</span></li>
+      </ul>
+      <p class="meta">check_plan warnings: none (PASS)</p>
+      <p class="meta"><b>Story assumption to confirm:</b> in Year 0, Jordan (the reader's stand-in) and Morgan are Fennel's two founders, and Sam is the one engineer. The app is "the Fennel app"; <code>storefront</code> is named in Ch 3. Fennel times and details are story, not statistics.</p>
+    </div>
+  </section>
+
+  <section id="segments">
+    <h2>Segments</h2>
+    <p class="meta">Prose is draft wording: it shows what each segment says and in what order. The final prose is written for the reader at build time. Check prompts, options and answers are final.</p>
+
+    <!-- s-01 -->
+    <article class="seg" id="s-01">
+      <header>
+        <span class="id">§ 01 · s-01</span><h3>Friday, dinner rush</h3>
+        <span class="tag">story → pre-question → timeline</span><span class="tag">o-2</span><span class="tag">o-1</span>
+      </header>
+      <div>
+        <p class="intent">Feel the outage as a manager does (orders failing, one person scrambling), and guess why before any infrastructure idea appears.</p>
+        <div class="prose">
+          <p>"At 6:12 on a Friday evening, the busiest hour of Fennel's week, customers start seeing an error at checkout. Nobody has deployed anything since Tuesday."</p>
+          <ul><li>Jordan forwards the first angry email to Sam, who is at dinner across town.</li></ul>
+        </div>
+        <div class="check">
+          <div class="kind">PREDICT · k-01 · think, then reveal</div>
+          Nobody has changed a line of Fennel's code since Tuesday. So what could break checkout on Friday evening?
+          <div class="fb"><b>Answer shown:</b> Something about the machine the code runs on. Fennel's code was fine. The server's disk had filled up, and the database could no longer record new orders.</div>
+        </div>
+        <div class="prose" style="margin-top:8px"><p>After the timeline: "Deleting the logs took fifteen minutes. The other hour and forty-five went to reaching the one person who knew the server, and to that person finding the cause." Ends on the 23:00 fix: Sam sets up a nightly log clean-up by hand, "so this never happens again", and doesn't write it down.</p></div>
+      </div>
+      <div class="fig">
+        <span class="kind">FIG. 01 · Friday outage timeline · static</span>
+        A vertical list in the prose column. Columns: time · event · who. A band on the left marks <b>NO ORDERS</b> from 18:12 to 20:10. Lamps read DOWN (red plus word) and UP (green plus word).
+        <ol style="font-size:12px">
+          <li>For months: log files grow; nobody set them to be cleaned up (nobody)</li>
+          <li>18:05 the dinner rush starts (customers)</li>
+          <li>18:12 disk hits 100%; the database can't record orders; checkout errors (server)</li>
+          <li>18:20 first customer emails reach Jordan (Jordan)</li>
+          <li>18:35 Sam, at dinner, picks up the phone (Sam)</li>
+          <li>19:05 Sam home, logged in; still down (Sam)</li>
+          <li>19:40 finds the cause: months of logs (Sam)</li>
+          <li>19:55 deletes old logs, restarts the app (Sam)</li>
+          <li>20:10 orders flow again (Sam)</li>
+          <li>23:00 Sam sets up a nightly log clean-up by hand, never written down (Sam)</li>
+        </ol>
+        Mobile: the same list, single column.
+      </div>
+    </article>
+
+    <!-- s-02 -->
+    <article class="seg" id="s-02">
+      <header>
+        <span class="id">§ 02 · s-02</span><h3>What "the server" is</h3>
+        <span class="tag">description → labelled diagram</span><span class="tag">o-1</span>
+      </header>
+      <div>
+        <p class="intent">A picture of the machine before its contents: the app is a process on one machine, and deploying means getting new code onto it.</p>
+        <div class="prose">
+          <p>"Fennel's app runs on one rented computer in a data centre: the server. While it runs, the app is a <i>process</i>: the code loaded into the machine's memory, answering customers' requests, writing orders and log lines to the disk."</p>
+          <p>"To ship a change, Sam copies the new code onto that machine and restarts the process. That's a <i>deploy</i>."</p>
+          <p>"So far that sounds like code plus a computer. Look closer, and the code turns out to need a lot of help from the machine."</p>
+        </div>
+      </div>
+      <div class="fig">
+        <span class="kind">FIG. 02 · one machine, one process · static</span>
+        A box with the header <b>MACHINE · FENNEL'S SERVER (RENTED)</b>. Inside: an orange block "Fennel app: running", labelled "process: the code, running", with a RUNNING lamp. Below it, a gauge labelled DISK, "orders, logs, uploads". Left: "customers' requests →" into the process. Top: a small CODE REPO box with an arrow into the machine labelled "deploy: copy new code, restart the app".
+        Caption: "The app is the code <i>running</i>, as a process on one particular machine."
+        Mobile: stacked. Repo on top, deploy arrow down, machine below.
+      </div>
+    </article>
+
+    <!-- s-03 -->
+    <article class="seg full" id="s-03">
+      <header>
+        <span class="id">§ 03 · s-03</span><h3>What's on Sam's server, and can you rebuild it?</h3>
+        <span class="tag">predict → step-through → predict → diagnose → compare</span><span class="tag">B1 + B4</span><span class="tag">o-1</span><span class="tag">o-2</span>
+      </header>
+      <div>
+        <p class="intent">Find out by doing that the server holds far more than the code. Then rebuild it from Sam's notes and watch the same code misbehave on a machine missing a few things.</p>
+        <div class="prose"><p>"Here's Sam's server as most people picture it: the code, running. Your job is to work out what else is on it, and then whether you could build another one."</p></div>
+      </div>
+      <div class="fig">
+        <span class="kind">WIDGET · w-rebuild · complexity high · W-01 · REBUILD SAM'S SERVER · about 3–4 min</span>
+        <p>A Control Plane widget panel (lamp, mono bar, hard shadow), full <code>.d-wide</code> width. Stage counter <code>STAGE n / 4</code>. Height reserved for the tallest stage (desktop 600px, mobile about 820px), so nothing below moves. "Start over" is always visible.</p>
+
+        <div class="stage"><b>Stage 1 / 4 · Sam's server, as most people picture it</b>
+          <p>The machine shows only <b>CODE · Fennel app code · RUNNING</b>. Below it, seven tappable cards, unordered.</p>
+          <div class="check">
+            <div class="kind">PREDICT · k-02 · select all you think apply</div>
+            Besides the code, what has to be on this machine for a customer to order and get a confirmation email? Tap everything you think is there, then reveal.
+            <br>Cards: language runtime · libraries the code uses · image-resizing tool · config file (database address, site name, payment key) · email service key · nightly log-cleanup job · database and its data.
+            <div class="fb"><b>Reveal:</b> all seven slide into the machine under RUNTIME / LIBRARIES &amp; TOOLS / CONFIG / DISK &amp; DATA, each with "without it: …". "You picked N of 7. All seven are on Sam's server, and the site needs every one." Unpicked rows are tagged "you missed this. Most people picture the code and maybe a database."</div>
+          </div>
+        </div>
+
+        <div class="stage"><b>Stage 2 / 4 · Rebuild from the notes</b>
+          <p>"Monday. Jordan asks Sam: if this server died, could we build another? Sam hands over the notes." Sam's server collapses to a header: "Sam's server: still running (hidden for now)". Left: <b>SAM'S NOTES · WRITTEN AT SETUP, LAST EDITED 14 MONTHS AGO</b>. Right: an empty <b>MACHINE · NEW</b>.</p>
+          <ol style="font-size:13px">
+            <li>Rent a server with a fresh operating system</li>
+            <li>Install the language runtime</li>
+            <li>Install the database; copy the data over from last night's backup</li>
+            <li>Download the Fennel code from the repo; install its libraries</li>
+            <li>Create the config file: database address, site name, payment key</li>
+            <li>Start the app</li>
+          </ol>
+          <p>"Run step n of 6" adds rows to the new machine, highlighted briefly. Afterwards: "All six steps ran without an error." Mobile: one step card at a time above the rows; the full list sits in a <code>&lt;details&gt;</code>.</p>
+          <div class="check">
+            <div class="kind">PREDICT · k-03</div>
+            All six steps in Sam's notes ran without an error, and the code is the same version as on Sam's server. Will the new machine work like the old one?
+            <br>A) Yes. Same code, and every step in the notes done. · B) No. It won't even start. · <span class="ans">C) It will start and mostly work, but some things will be broken or missing.</span>
+            <div class="fb">Tempting: A. Feedback A: "That's the trap. The notes list what Sam remembered to write down at setup. The code was never the problem; the question is what else was on Sam's server." B: "It does start: runtime, libraries, config and database are all in the notes." C: "Right. Anything added by hand since setup isn't in them. Run the checks."</div>
+          </div>
+        </div>
+
+        <div class="stage"><b>Stage 3 / 4 · Launch checks</b>
+          <table>
+            <tr><td>Home page loads</td><td class="st ok">PASS</td></tr>
+            <tr><td>Search products</td><td class="st ok">PASS</td></tr>
+            <tr><td>Place a test order</td><td class="st ok">PASS</td></tr>
+            <tr><td>Upload a product photo: "error: resize failed"</td><td class="st bad">FAIL · tap to diagnose</td></tr>
+            <tr><td>Order confirmation email: "not sent"</td><td class="st bad">FAIL · tap to diagnose</td></tr>
+          </table>
+          <div class="check">
+            <div class="kind">APPLY · k-04 · on each FAIL row</div>
+            Photo upload fails with "resize failed". What's missing on the new machine? / Order confirmation emails aren't sent. What's missing?
+            <br>Options: The code · Something installed on the machine · A setting or key in the config. <span class="ans">Photo → installed on the machine. Email → config.</span>
+            <div class="fb">"The code": "The code is identical on both machines, so it can't be the difference. The difference is on the machine." Photo correct: "The code hands photos to an image-resizing tool Sam installed by hand in May. The notes never mentioned it." Email correct: "The email service key was added when order emails launched. The notes were written before that."</div>
+          </div>
+        </div>
+
+        <div class="stage"><b>Stage 4 / 4 · Compare</b>
+          <table>
+            <thead><tr><th>Row</th><th>Sam's</th><th>New</th><th>Note on the row</th></tr></thead>
+            <tr><td>CODE · Fennel app code</td><td class="st ok" colspan="2">IDENTICAL</td><td>Same code.</td></tr>
+            <tr><td>RUNTIME · language runtime</td><td class="st ok">PRESENT</td><td class="st ok">PRESENT</td><td></td></tr>
+            <tr><td>LIBRARIES · libraries the code uses</td><td class="st ok">PRESENT</td><td class="st ok">PRESENT</td><td></td></tr>
+            <tr><td>TOOLS · image-resizing tool</td><td class="st ok">PRESENT</td><td class="st bad">MISSING</td><td>Installed by hand in May. Without it, photo uploads fail.</td></tr>
+            <tr><td>CONFIG · config file</td><td class="st ok">PRESENT</td><td class="st ok">PRESENT</td><td></td></tr>
+            <tr><td>CONFIG · email service key</td><td class="st ok">PRESENT</td><td class="st bad">MISSING</td><td>Added in August. Without it, no confirmation emails.</td></tr>
+            <tr><td>CONFIG · nightly log-cleanup job</td><td class="st ok">PRESENT</td><td class="st bad">MISSING</td><td><b>No check caught this one.</b> It's the fix for Friday's outage. In a few months the disk fills again.</td></tr>
+            <tr><td>DISK &amp; DATA · database and data</td><td class="st ok">PRESENT</td><td class="st ok">PRESENT</td><td>Disk: 31% / 9%</td></tr>
+            <tr><td>CONFIG · web-server setting (holiday sale)</td><td class="st ok">PRESENT</td><td>not installed</td><td><span class="st warn">UNKNOWN</span> Sam: "I think that was for the sale. Not sure it still matters."</td></tr>
+          </table>
+          <p>Summary line: "Same code. Every step in the notes ran. Three things missing, and one nobody can explain." Mobile: the same rows with two 72px status columns; labels wrap, never shrink.</p>
+        </div>
+        <p class="meta">Reuse (invisible to the reader): item, notes and check data live in <code>data.js</code>. The stage-4 two-machine comparison is a candidate for Ch 2's "same code, one dependency version different" case. Ch 3 shares only the machine-frame look.</p>
+      </div>
+    </article>
+
+    <!-- s-04 -->
+    <article class="seg" id="s-04">
+      <header>
+        <span class="id">§ 04 · s-04</span><h3>Why the notes fell behind</h3>
+        <span class="tag">name after meeting → explain → analogy</span><span class="tag">o-1</span><span class="tag">o-2</span>
+      </header>
+      <div>
+        <p class="intent">Name what you just saw (dependency, drift, snowflake server) and explain "don't touch it", so the gaps read as how hand-built servers work, not as Sam's carelessness.</p>
+        <div class="prose">
+          <p>"Everything on that list besides the code is something the app depends on: its <b>dependencies</b>. That's the runtime it's written for, the libraries and tools it calls, and the config that tells it where things are. Same code, different machine, different behaviour."</p>
+          <p>"The notes weren't wrong when Sam wrote them. Then came the photo tool in May, the email key in August, and Friday night's fix: each a change made by hand and never written down. Engineers call this <b>drift</b>."</p>
+          <p>"And the holiday-sale setting? Even Sam can't say whether it matters. That's why you hear 'don't touch it' about servers like this one."</p>
+          <p>"A server made unique by years of hand-made changes is a <b>snowflake server</b>. Martin Fowler's phrase: 'good for a ski resort, bad for a data center.'"</p>
+        </div>
+      </div>
+      <div class="aside">
+        <span class="kind">ANALOGY · A1 · the original job description</span>
+        <p>Rebuilding from the notes is like replacing a long-tenured employee using only the job description they were hired with. The replacement does what's written. The duties that piled up over the years surface only when something goes undone.</p>
+        <p class="breaks"><b>Where this analogy breaks:</b> a new hire notices gaps, asks around and uses judgment. A new machine does exactly what the notes say and fails silently. And the old server can't explain itself; even Sam doesn't know which settings still matter.</p>
+      </div>
+    </article>
+
+    <!-- s-05 -->
+    <article class="seg" id="s-05">
+      <header>
+        <span class="id">§ 05 · s-05</span><h3>If this box vanished tonight</h3>
+        <span class="tag">apply → explain → analogy</span><span class="tag">o-2</span>
+      </header>
+      <div>
+        <p class="intent">From the server's side to the business's side: when the one hand-built machine is gone, the outage lasts until someone finds what the notes left out, and only one person can.</p>
+        <div class="prose"><p>"Friday, the server was sick. Now imagine it's gone."</p></div>
+        <div class="check">
+          <div class="kind">APPLY · k-05</div>
+          Saturday, 2 a.m. The rented server's hardware fails for good. The code is safe in the repo, and Sam has the notes. When is Fennel fully back to normal?
+          <br>A) As soon as someone copies the code onto a new server. · B) As soon as Sam has worked through the notes on a new server. · <span class="ans">C) Only after Sam has also tracked down everything the notes leave out, often when customers hit the broken features.</span>
+          <div class="fb">A: "Your rebuilt machine had identical code, and photo uploads still failed." B: "You just did exactly that. The notes ran without an error, and three things were still missing, one of them the fix for Friday's outage." C: "Right. Two things set how long this takes: how much is missing from the notes, and whether the one person who can find it is awake."</div>
+        </div>
+        <div class="prose" style="margin-top:8px"><p>After the reveal: the two factors, stated plainly. Rebuilding a snowflake is hard by nature (Fowler).</p></div>
+      </div>
+      <div>
+        <div class="aside">
+          <span class="kind">ANALOGY · A2 · bus factor</span>
+          <p>Managers know "bus factor": how many people could disappear before work stalls. Fennel's server has a bus factor of one: Sam.</p>
+          <p class="breaks"><b>Where this analogy breaks:</b> here part of the knowledge isn't in anyone's head at all. It lives only on the machine, and even Sam doesn't know all of it.</p>
+        </div>
+        <div class="aside">
+          <span class="kind">WHY RECOVERY TIME · x-02</span>
+          <p>Martin Fowler once joked about a "certification" in which someone attacks your servers with a baseball bat, and the team is graded on how long until everything runs again. Recovery time, not uptime, is the measure.</p>
+        </div>
+      </div>
+    </article>
+
+    <!-- s-06 -->
+    <article class="seg" id="s-06">
+      <header>
+        <span class="id">§ 06 · s-06</span><h3>"Couldn't we just…"</h3>
+        <span class="tag">predict → reveal (×2) → figure</span><span class="tag">o-3</span>
+      </header>
+      <div>
+        <p class="intent">The two fixes a manager reaches for each help with something real. Neither makes the server reproducible.</p>
+        <div class="check">
+          <div class="kind">PREDICT · k-06</div>
+          After Friday, Morgan offers to pay for a much bigger server, with ten times the disk. Which of Friday's problems does that solve?
+          <br>A) All of them. The outage was caused by a full disk. · <span class="ans">B) It pushes this particular failure months away, but Fennel still runs on one machine that only Sam can rebuild.</span> · C) None. Disk space had nothing to do with it.
+          <div class="fb">A: "More disk really does postpone this failure. But everything still runs on one machine, so any problem with it takes the whole site down. And that machine still can't be rebuilt from the notes. A bigger snowflake is still a snowflake." C: "Too harsh. Disk was the trigger."</div>
+        </div>
+        <div class="prose" style="margin-top:8px">
+          <p>"Bigger machines also have a ceiling, and their price climbs steeply near the top." (one sentence, c-11)</p>
+          <p>"Sam's idea: move to a cloud provider's <b>virtual machine</b>. That's a computer simulated in software, one of several sharing a big physical machine, each with its own operating system, and a new one is ready in minutes. The provider can also save a snapshot of its whole disk every night."</p>
+        </div>
+        <div class="check">
+          <div class="kind">PREDICT · k-07</div>
+          Sam suggests moving Fennel to a virtual machine at a cloud provider, with a snapshot of its disk taken every night. If that VM vanished tonight, what would getting back look like?
+          <br>A) Click a button for a new VM, and you're done in minutes. · <span class="ans">B) Restore last night's snapshot. You're back much faster, but the old clutter comes back too, anything changed by hand since the snapshot is lost, and still nobody is sure which settings matter.</span> · C) No better than today. A VM is just a server with a different name.
+          <div class="fb">A: "A new VM arrives blank. Someone still has to set it up, by hand unless something automates it (we'll name that later)." C: "Too harsh. A snapshot is an exact, bootable copy, so recovery really is faster."</div>
+        </div>
+      </div>
+      <div>
+        <div class="fig">
+          <span class="kind">FIG. 03 · snapshot of a snowflake · static, 3 panels</span>
+          <ol style="font-size:13px">
+            <li><b>Monday 01:00: snapshot taken.</b> The live VM and its SNAPSHOT copy hold the same rows, including dashed grey clutter: "40 GB of old logs", "holiday-sale setting (UNKNOWN)". Note: "exact copy, clutter included".</li>
+            <li><b>Wednesday: Sam fixes something by hand.</b> The live VM gains "new email setting", tagged "hand-made, not in notes". The snapshot is unchanged.</li>
+            <li><b>Friday: the VM dies; restore the snapshot.</b> RUNNING, "back in minutes". "New email setting": MISSING. The clutter is back.</li>
+          </ol>
+          Only the changing row is at full ink in each panel. Caption: "A snapshot gets you back fast. It also brings back the clutter, misses every hand-made change since, and tells you nothing about which settings matter." Mobile: the panels stack with ↓ between them.
+        </div>
+        <div class="aside">
+          <span class="kind">ANALOGY · A3 · photocopying a cluttered desk</span>
+          <p>A snapshot is like photocopying Sam's desk: you get a copy fast, coffee stains and wrong notes included, and you still don't know which papers matter.</p>
+          <p class="breaks"><b>Where this analogy breaks:</b> a snapshot is an exact, working copy, so it really does get you back faster than a photocopy would. The weakness is understanding the server, and the copy going stale as the real desk changes.</p>
+        </div>
+        <div class="prose" style="margin-top:8px"><p>"VMs give you more machines, faster. They don't tell you what should be on them."</p></div>
+      </div>
+    </article>
+
+    <!-- s-07 -->
+    <article class="seg" id="s-07">
+      <header>
+        <span class="id">§ 07 · s-07</span><h3>The conversation</h3>
+        <span class="tag">apply ×2 → recap → open question</span><span class="tag">o-2</span>
+      </header>
+      <div>
+        <p class="intent">Rehearse the chapter's discussion move: answer "we should keep a runbook" with the question that measures the risk, and know which answer to listen for.</p>
+        <div class="prose"><p><i>The Monday after the outage, Sam says: "We should keep a runbook for the server."</i></p></div>
+        <div class="check">
+          <div class="kind">APPLY · k-08</div>
+          The Monday after the outage, Sam says: "We should keep a runbook for the server." What's the most useful thing Jordan can say?
+          <br>A) "Great. Once it's written, we're no longer dependent on you." · <span class="ans">B) "Yes. And let's test it: if this box vanished tonight, how long until we're back, and who has to be awake?"</span> · C) "Runbooks always go out of date. Let's not spend time on it."
+          <div class="fb">A: "Written-down steps do help. Google's SRE team found they made repairs roughly three times faster than improvising. But every change made by hand afterwards puts the runbook behind the server, and the same team says no playbook is a substitute for engineers who can think on the fly." C: "They do drift, but they're much better than nothing. Test them, don't skip them."</div>
+        </div>
+        <div class="check">
+          <div class="kind">APPLY · k-09 · think, then reveal</div>
+          Sam answers your question. What answer should worry you, and what answer would reassure you?
+          <div class="fb"><b>Answer shown:</b> Worrying: "Depends. If I'm reachable, a few hours, I think." A guess that depends on one person. Reassuring: "We rehearsed it last month. Jordan followed the notes on a spare machine while I watched without helping. Fifty minutes; we found two gaps and added them." A measured time from a real rebuild that didn't rely on Sam's memory.</div>
+        </div>
+      </div>
+      <div class="prose">
+        <p><b>Recap (three lines):</b></p>
+        <ul>
+          <li>The app is the code plus everything it depends on, on one particular machine.</li>
+          <li>A hand-built server drifts away from its notes, and only rebuilding it shows how far.</li>
+          <li>Bigger servers and VMs help, but neither tells you what should be on the machine.</li>
+        </ul>
+        <p><b>Open question (not answered):</b> "If the app is the code plus everything on the machine, how do you ship all of it? A year later, Fennel has six engineers, and that question turns up every day." (Leads into Ch 2.)</p>
+      </div>
+    </article>
+  </section>
+
+  <section id="cuts">
+    <h2>Cut list (researched, deliberately left out)</h2>
+    <table>
+      <thead><tr><th>What</th><th>Why it's out</th><th>Cost to add back</th></tr></thead>
+      <tbody>
+        <tr><td>"Cattle, not pets" metaphor</td><td>A second name for "snowflake"; extra load</td><td>One sentence; better in Ch 4</td></tr>
+        <tr><td>Phoenix servers (rebuild regularly)</td><td>It's the cure, which belongs to later chapters</td><td>A paragraph; would pre-empt Ch 4</td></tr>
+        <tr><td>Automated recipes (Puppet, Chef)</td><td>Later-chapter territory; only "we'll name that later" in k-07</td><td>Don't add</td></tr>
+        <tr><td>Chaos Monkey</td><td>Off-objective</td><td>Ch 12 or Ch 15</td></tr>
+        <tr><td>Config in environment variables</td><td>Ch 9 owns config practice</td><td>Ch 9</td></tr>
+        <tr><td>Horizontal scaling as the real fix</td><td>Ch 3 and Ch 8 material</td><td>Ch 3 and Ch 8</td></tr>
+        <tr><td>PostgreSQL write-ahead-log panic detail</td><td>Engineer-level</td><td>One sentence; not recommended</td></tr>
+        <tr><td>RTO / MTTR acronyms</td><td>Plain "how long until we're back" fits the reader</td><td>A one-line gloss in Ch 12</td></tr>
+        <tr><td>"Try a fix" mode in w-rebuild (bigger machine / VM)</td><td>Checks plus f-03 teach it in about 1 minute instead of 2–3</td><td>A fifth widget stage, about 2 more minutes for the reader</td></tr>
+        <tr><td>Free-text "list everything on the server"</td><td>No free-text boxes; replaced by k-02 and k-04 (recommendation R7)</td><td>A think-then-reveal; low value</td></tr>
+        <tr><td>Distractor cards in k-02</td><td>An off-objective boundary; extra elements</td><td>Two cards plus feedback</td></tr>
+        <tr><td>Backups and data recovery in the rebuild</td><td>Ch 10 owns backups</td><td>A sixth gap row; pulls in Ch 10</td></tr>
+        <tr><td>OS depth; containers vs VMs</td><td>Out of scope / Ch 2</td><td>n/a</td></tr>
+      </tbody>
+    </table>
+
+    <h2>If it runs long (in the plan now; cut in this order)</h2>
+    <p class="meta">The prose is written at whatever length clarity needs. If the built page runs long, you pick cuts from here.</p>
+    <table>
+      <thead><tr><th>#</th><th>Cut</th><th>What the reader loses</th></tr></thead>
+      <tbody>
+        <tr><td>1</td><td>Fowler recovery-test aside (s-05)</td><td>A memorable framing of "recovery time is the measure". The s-07 question still carries it.</td></tr>
+        <tr><td>2</td><td>k-09 (worry or reassure)</td><td>What a good answer sounds like. o-2 is still checked by k-05 and k-08.</td></tr>
+        <tr><td>3</td><td>Analogy A2, bus factor (s-05)</td><td>A people-management hook for "who has to be awake". Two analogies remain.</td></tr>
+        <tr><td>4</td><td>The UNKNOWN holiday-sale row and the "don't touch it" paragraph</td><td>The concrete case that even Sam doesn't know which settings matter (c-07).</td></tr>
+        <tr><td>5</td><td>Fig. 03 snapshot strip</td><td>The visual of a snapshot going stale. k-07 feedback still says it in words.</td></tr>
+        <tr><td>6</td><td>Analogy A3, photocopied desk (only after #5)</td><td>Any concrete image of the snapshot's limits.</td></tr>
+      </tbody>
+    </table>
+    <p class="meta">Not cuttable without losing an objective or the pain-in-the-page: w-rebuild stages 1–4, k-01 to k-08, Fig. 01, Fig. 02, s-04's three terms, analogy A1.</p>
+  </section>
+
+  <section id="assets">
+    <h2>Third-party assets</h2>
+    <table>
+      <thead><tr><th>#</th><th>Asset</th><th>Used in</th><th>Licence</th><th>Clearance</th></tr></thead>
+      <tbody>
+        <tr><td>n/a</td><td>No third-party assets. All figures and the widget are drawn inline (SVG and HTML). Short quoted phrases (Fowler, Google SRE) are attributed in the text.</td><td>n/a</td><td>n/a</td><td class="license">nothing to clear</td></tr>
+      </tbody>
+    </table>
+    <p class="meta">No third-party assets. Fonts come from Google Fonts via the course style's <code>control-plane.css</code> (already part of the user-supplied style).</p>
+  </section>
+
+  <section>
+    <h2>Curriculum recommendations (summary; full list in learning-plan.md)</h2>
+    <ul class="meta">
+      <li>R1: add "the code is the app" to the misconception catalog, owned by Ch 1 (the problem side), revisited by Ch 2 (the fix).</li>
+      <li>R2: catalogue Ch 1's runbook, bigger-server and VM misconceptions, and stop research IDs colliding with catalog IDs.</li>
+      <li>R3: add "drift", "runbook" and "single point of failure" to the Ch 1 ledger row.</li>
+      <li>R4: record Ch 1's machine visual grammar in the Visuals column.</li>
+      <li>R5: say who Jordan and Morgan are in Year 0 (assumed: the two founders).</li>
+      <li>R6: record Ch 1 story facts (outage times, the 23:00 fix, the photo tool, the email key) for later callbacks.</li>
+      <li>R7: reword Ch 1's pain-in-the-page to the designed activity (predict, rebuild, diagnose, compare).</li>
+      <li>R8–R11: Ch 2 reuse and retrieval hook; Ch 4 calls back the Ch 1 question; Ch 10 notes the glossed-over data copy; §2.8 exception for Ch 1.</li>
+    </ul>
+  </section>
+</main>
+<script>
+  const d = document.getElementById('vw-desk'), m = document.getElementById('vw-mob');
+  function set(mobile) {
+    document.body.classList.toggle('mobile', mobile);
+    d.setAttribute('aria-pressed', String(!mobile)); m.setAttribute('aria-pressed', String(mobile));
+  }
+  d.onclick = () => set(false); m.onclick = () => set(true);
+</script>
+</body>
+</html>

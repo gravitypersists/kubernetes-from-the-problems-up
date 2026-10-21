@@ -1,0 +1,12 @@
+segments:
+  s-01   Friday, dinner rush
+  s-02   What "the server" is
+  s-03   What's on Sam's server, and can you rebuild it?
+  s-04   Why the notes fell behind
+  s-05   If this box vanished tonight
+  s-06   "Couldn't we just…"
+  s-07   The conversation
+objectives: 3 · segments: 7 · reader's time: 12 min
+widgets: w-rebuild (high)
+checks: 9 · acceptance criteria: 18
+RESULT: PASS

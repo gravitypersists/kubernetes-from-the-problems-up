@@ -1,0 +1,22 @@
+{
+  "data_origins": [],
+  "cdn": [
+    "https://fonts.googleapis.com (Control Plane fonts, via assets/tokens.css)",
+    "https://fonts.gstatic.com"
+  ],
+  "widgets": {
+    "w-rebuild": {
+      "segment": "s-03",
+      "mount": "[data-widget=\"w-rebuild\"]",
+      "complexity": "high",
+      "size": {
+        "desktop": "≤960×600 (.d-wide; min-height 600px reserved in assets/page.css; two columns: notes/checks ~40%, machine rows ~60%)",
+        "mobile": "100%×820 at 360px (min-height 820px under 600px; single column: stage header, instruction, current notes step card, machine rows, checks)"
+      },
+      "files": ["data.js", "index.js", "index.css"],
+      "cdn": [],
+      "data_origins": [],
+      "notes": "index.html loads widgets/w-rebuild/index.css, data.js, then index.js after assets/widget.js. data.js holds the plan's items, notes steps and checks (reuse candidates: Ch 2, Ch 15). Checks k-02, k-03, k-04 live inside the widget."
+    }
+  }
+}

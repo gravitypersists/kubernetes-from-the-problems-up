@@ -1,0 +1,143 @@
+# Findings: round 2
+
+_Ingested 2026-10-21T08:21:44-04:00 from accuracy.md, pedagogy-ux.md._
+
+### A-01 · blocking · closed
+criterion: o-3
+location: figure f-03 "Snapshot of a snowflake" (panels "1 · Mon 01:00", "2 · Wednesday", "3 · Friday"), read against s-06 paragraph "take a snapshot of the VM's whole disk every night" and k-07 (question "with a snapshot of its disk taken every night"; option B "Restore last night's snapshot")
+verdict: contradicted
+evidence: The figure shows a single snapshot taken Mon 01:00, a hand-made fix on Wednesday, then on Friday "The VM dies; restore the snapshot … Back in minutes. Wednesday's fix is gone." The page has just told the reader snapshots are taken every night. Under that setup, the Wednesday-night and Thursday-night snapshots both contain Wednesday's fix, so restoring last night's snapshot on Friday would bring it back. As drawn, the figure shows a regime where its own claim is false, and it overstates the loss from days to hours. The real point (anything changed by hand since the latest snapshot is lost, c-10 note, c-06) survives only with a consistent timeline. A careful reader will notice the contradiction, and someone who doesn't will take away a wrong idea of the loss window.
+expected_fix: Put all three panels on one day relative to last night's snapshot. For example: "1 · Thu 01:00 · Last night's snapshot taken", "2 · Thu 15:00 · Sam fixes something by hand", "3 · Thu 22:00 · The VM dies; restore last night's snapshot … Back in minutes. This afternoon's fix is gone." Keep the "UNKNOWN" and clutter rows as they are. The alternative of dropping "every night" from s-06 and k-07 would also need k-07 option B reworded, so fixing the figure is the cheaper change.
+closure_evidence: Probe (1280, `scroll:#f-03`, `shot:f03@#f-03` → run/screenshots/probe/a-r2-f03.png). The panels now read "1 · THU 01:00 Last night's snapshot taken.", "2 · THU 15:00 Sam fixes something by hand.", "3 · THU 22:00 The VM dies; restore last night's snapshot." Panel 3's note says "Back in minutes. This afternoon's fix is gone, and so are today's orders." All three panels fall between one nightly snapshot and the next, so the figure no longer contradicts "every night". The loss window it shows (hours since last night) is the right one.
+
+### A-02 · should · closed
+criterion: o-3
+location: k-07 option B and its feedback; f-03 panel 3; s-06 paragraph introducing snapshots
+verdict: misleading-simplification
+evidence: The page defines the snapshot as a copy of "the VM's whole disk", and Fig. 02 and the widget put the orders database on that disk ("DISK: orders, logs, uploads"; "Database and its data (orders, customers)"). Restoring a whole-disk snapshot therefore also rolls back the database: orders taken since the snapshot are lost unless the database is kept somewhere else. Option B lists what a restore loses as "anything changed by hand since the snapshot". A manager will come away thinking a snapshot restore costs only some hand-made settings, when for a one-machine shop it can also cost up to a day of orders. CURRICULUM §3 names orders as "data that must never be lost". facts.md doesn't cover this. It is standard behaviour of disk snapshots.
+expected_fix: Add the data loss in one short phrase. In option B: "…anything changed since the snapshot is lost (hand-made fixes, and any orders taken since then), and still nobody is sure which settings matter." Add a matching phrase to f-03 panel 3's note if space allows. No new section is needed. Ch 10 owns state in depth.
+closure_evidence: Option B now reads "Restore last night's snapshot: back fast, clutter included, but everything since is lost, hand-made fixes and orders alike." Its feedback says "it loses everything that changed after it was taken (hand-made fixes, and any orders placed since)". The f-03 note says "so are today's orders". A reader now learns that restoring a whole-disk snapshot also rolls back the database on that disk.
+
+### A-03 · should · closed
+criterion: o-1; CURRICULUM §5 term ledger ("dependency", introduced in Ch 1)
+location: s-04 first paragraph: "Each one is a dependency: the language runtime, the libraries and tools the code calls, the config that tells it where its database is and which keys to use, and the data on the disk."
+verdict: misleading-simplification
+evidence: This is where the page defines the ledger term "dependency", and the definition includes "the data on the disk". Engineering usage, and the sources, treat these as different kinds of thing. Twelve-Factor separates dependencies (c-01) from config (c-02), and it separates both from backing services such as the database. CURRICULUM §7 Ch 1 lists dependencies as "the runtime, libraries, config", with no data. The definition will mislead later: Ch 2 teaches that "an image packages the app with its dependencies", and a reader who counts the orders data as a dependency will conclude the image contains the database, which is the misconception Ch 10 has to undo. The surrounding o-1 point (the app needs things that live on the machine, including its data) is right. Only the label is too broad.
+expected_fix: Keep the list but separate the data. For example: "Most of them are dependencies: the language runtime, the libraries and tools the code calls, and the config that tells it where its database is and which keys to use. The app also relies on the data on the disk, its orders and customers, which changes every minute." The rest of the paragraph can stay.
+closure_evidence: The paragraph now says "Most of them are dependencies: the language runtime, the libraries and tools the code calls, and the config that tells it where its database is and which keys to use. The app also relies on the data on the disk, its orders and customers, which changes every minute." The data is no longer labelled a dependency. That matches c-01/c-02 and the §7 Ch 1 wording ("runtime, libraries, config"), and it won't mislead Ch 2's "image packages the app with its dependencies".
+
+### A-04 · should · closed
+criterion: o-1
+location: widget w-rebuild, k-02 (data.js `k02.prompt`, `k02.picked`)
+verdict: misleading-simplification
+evidence: The prompt reads "Besides the code, what has to be on this machine for a customer to order and get a confirmation email?" and the answer reads "All seven are on Sam's server, and the site needs every one." Two of the seven aren't needed for that task. The photo-resizing tool is only used for product photo uploads ("without it: product photo uploads fail"). The nightly log-cleanup job is, in the widget's own stage-4 words, something without which "nothing fails today". Probe step: complete k-02, then reach stage 4. The comparison table contradicts the k-02 answer. The answer teaches a reader who picked only the order-path items that they were wrong, when they were right.
+expected_fix: Widen the prompt to match the answer: "Besides the code, what has to be on this machine for the Fennel site to keep working?" Soften the answer to "All seven are on Sam's server, and the site relies on every one: some today, one only when the disk next fills up." The alternative is to keep the prompt and say that the photo tool and log job serve other jobs.
+closure_evidence: Probe (1280: pick runtime and db, then `click:[data-act=reveal]`, run/screenshots/probe/a-r2-k02.png). The prompt renders "Besides the code, what has to be on this machine for the Fennel site to keep working?" and the answer renders "…the site relies on every one: some today, one only when the disk next fills up." That now matches the rows: photo tool "product photo uploads fail" (today), email key "order confirmation emails don't send" (today), log-cleanup job "nothing fails today; in a few months the disk fills" (later). The stage-4 comparison no longer contradicts the answer.
+
+### A-05 · nit · closed
+criterion: o-3
+location: s-06 paragraph defining VM: linked text "a computer simulated in software" (href Red Hat)
+verdict: ok-but-uncited
+evidence: The linked Red Hat page never defines a VM as simulated. It says "an isolated computing environment with its own CPU, memory, network interface, and storage" (checked live, 2026-10-21). The link reads as if Red Hat said it. Strictly, virtualization runs the code directly on the real processor and is not simulation. Engineers draw that line, but it doesn't change anything the reader needs here.
+expected_fix: Reword the linked text closer to the source, for example "an isolated computer created in software, carved out of a physical one".
+closure_evidence: The linked text now reads "an isolated computer created in software, with its own processor, memory, disk and operating system. Several of them can run on one physical machine". That is close to Red Hat's "an isolated computing environment with its own CPU, memory, network interface, and storage", and it no longer claims "simulated".
+
+### A-06 · nit · closed
+criterion: o-2
+location: s-04 third paragraph: "The only way to find out is to remove it and see what breaks, on the server that takes every order."
+verdict: misleading-simplification
+evidence: "The only way" is too absolute. Engineers can also investigate a setting by reading it, checking logs, or trying the change on a copy. c-07 supports uncertainty about which settings matter, not the claim that removing a setting is the sole test. A manager who repeats "the only way is to try it in production" to a senior engineer will be corrected.
+expected_fix: "With no second machine to try it on, the surest way to find out is to remove it and see what breaks, on the server that takes every order."
+closure_evidence: The sentence now reads "With no second machine to try it on, the surest way to find out is to remove it and see what breaks, on the server that takes every order." The absolute "only way" is gone, and the claim is now conditional on Fennel's single-machine setup, which c-07 supports.
+
+### A-07 · nit · closed
+criterion: o-3
+location: k-06 option A feedback: "Everything still runs on one machine, so any problem with it takes the whole site down."
+verdict: misleading-simplification
+evidence: c-12 (Google Cloud) says any problem "can cause … a system-wide outage". Not every problem with the machine takes the site down.
+expected_fix: "…so a problem with it can take the whole site down."
+closure_evidence: The feedback now reads "Everything still runs on one machine, so a problem with it can take the whole site down." That matches c-12's "can cause … a system-wide outage". The new s-06 definition, "a single point of failure: when something goes wrong with it, the whole site can go down with it", and the k-06 A feedback ("It's still a single point of failure") are also hedged correctly against c-12.
+
+### P-01 · should · open
+criterion: engagement where intended / ac-18 (checks must require retrieval)
+location: k-03 (widget data.js), k-05, k-06, k-07, k-08 (index.html s-05, s-06, s-07)
+evidence: In all five single-answer checks the correct option is the longest and the only hedged "X, but Y" option. It is never option A. Word counts by option: k-03 A 9 / B 5 / C✓ 13; k-05 A 11 / B 13 / C✓ 19; k-06 A 11 / B✓ 19 / C 9; k-07 A 12 / B✓ 32 / C 14; k-08 A 10 / B✓ 21 / C 12. Every distractor is an extreme ("All of them", "None", "No better than today", "Yes. Same code…"). A reader can score 5 of 5 by picking the long, nuanced option without reasoning about the content, which empties the predict-then-reveal confrontations of m-20 to m-22.
+expected_fix: Balance the options. Give each distractor the same length and the same "partly right" shape as the key. For example, k-07 A could become "Click a button for a new VM and restore last night's snapshot; it comes back exactly as it was, so nothing is lost." Shorten k-07 B to about 15 words and move the caveats into its feedback. Put the key at A in at least one check. Check text was approved as final at d-03, so raise this with the user at the next checkpoint.
+closure_evidence: The length and position cues are fixed. Keys are now B, C, A, B and B (k-03, k-05, k-06, k-07, k-08). Word counts are close: k-03 14/11✓/12, k-05 18/19/17✓, k-06 17✓/17/16, k-07 18/18✓/19. Only k-08 is still noticeably longer (15/21✓/17), which ac-15's verbatim question forces. Picking the longest option now scores 1 of 5. The second half of the round-1 issue is still there: "Every distractor is an extreme." In k-03, A is "Yes…" and C is "No… it won't start" around B, "It will start, but some features…". In k-06, B is "All of them" and C is "None of them" around A, "It postpones this failure… but". In k-07, A is "back where it was" and C is "No better than today" around B, "back fast… but everything since is lost". In k-08, A is "no longer dependent on you" and C is "let's not spend time on it" around B, "Yes. And let's test it". The reasons attached to the distractors are now partly true, but their verdicts are still all-or-nothing, so "pick the hedged middle" still scores 4 of 5 without engaging with the content. Only k-05 resists it, because all three of its options share the same "As soon as… / Only after…" shape. k-03 A also reads as a constructed option ("same code and every step leaves nothing missing" is ungrammatical), which makes it easier to rule out. Probes: r2-w1280-s2-k03-wrong.png, r2-w1280-k07-why.png, r2-w390-k06-wrong.png, r2-w390-k08-wrong.png.
+
+### P-02 · should · closed
+criterion: misconception handling / check validity (k-02)
+location: w-rebuild stage 1, k-02 prompt (data.js `k02.prompt`) and feedback (`k02.picked`, `k02.missedText`)
+evidence: The prompt reads "what has to be on this machine for a customer to order and get a confirmation email?" Neither the photo-resizing tool (staff uploading product photos) nor the nightly log-cleanup job (needed months from now) is needed for a customer to order and get an email. A reader who reasons carefully from the prompt leaves those two unpicked and is then told "You missed this … the site needs every one". The check punishes careful reasoning at the moment that sets up o-1.
+expected_fix: Widen the prompt to match the answer key, for example: "Besides the code, what's on this machine that the site needs to keep working? Tap everything you think is there, then reveal." Alternatively, keep the prompt and change the feedback line to "…and the site needs every one, some of them for things beyond ordering (product photos, keeping the disk clear)." Either change touches approved check text, so raise it with the user.
+closure_evidence: The prompt now reads "Besides the code, what has to be on this machine for the Fennel site to keep working? Tap everything you think is there, then reveal." After a 1-card pick at 390, the reveal says "All seven are on Sam's server, and the site relies on every one: some today, one only when the disk next fills up." (r2-w390-s1-revealed.png). The answer now matches the question. The photo tool falls under "the site keeping working", and the log-cleanup job is explicitly marked as "only when the disk next fills up", so a careful reader isn't penalised.
+
+### P-03 · should · closed
+criterion: mobile UX / ac-09 (controls and effect visible together)
+location: w-rebuild, stage 1 → stage 2 transition at < 600px (index.js `goStage` / `render` focus with `preventScroll:false` on `name2`)
+evidence: At 390×800, after tapping "Next: rebuild it" the page lands with the stage name at 403px. The step card is at 572 to 714px and the new machine starts at 799px, below the fold (probe span.mjs; pux-w390-light-s2-step3.png shows the step card with no machine in view). The first "Run step 1 of 6" adds the machine frame off screen, so a novice sees only the card text change. Once the reader scrolls the step card to the top, card and rows fit together. At step 3 the card top to machine bottom is 510px (pux-w360x640-s2-step3-cardtop.png), and the newest rows stay in view at 360×640.
+expected_fix: On stage change under 600px, scroll the stage header to the top of the viewport (`scrollIntoView({block:'start'})` on the panel or `.wr__head`), not focus-centred. Also consider moving the "All six notes" disclosure below the machine, so the step card sits directly above the rows as the plan specifies ("the current notes step sits directly above (mobile)… the machine rows").
+closure_evidence: At 360×740 (dark), `.wr__head` is at 24px after "Next: rebuild it". At 390, the step card (STEP 1 OF 6 with its run button) sits directly above the "NO MACHINE YET" frame, both on screen (r2-w390-s2-start.png). At step 4 the card, the four installed rows and the disk bar all fit in one viewport (r2-w390-s2-step3.png). "All six notes" has moved below the machine.
+
+### P-04 · should · closed
+criterion: misconception handling (m-22) / internal consistency of f-03 with k-07
+location: s-06, f-03 (index.html `#f-03` panel labels "1 · Mon 01:00", "2 · Wednesday", "3 · Friday")
+evidence: The prose and k-07 set up "a snapshot of its disk taken every night", and k-07 B says "Restore last night's snapshot". f-03, though, restores a Monday 01:00 snapshot on Friday and loses Wednesday's fix. With nightly snapshots, Friday's restore would come from Thursday night and keep Wednesday's fix. A careful manager will notice. The figure also overstates staleness (days instead of under a day), which works against the honest partial truth the plan wants kept.
+expected_fix: Keep the story inside one day. For example: "1 · 01:00 nightly snapshot taken", "2 · 15:00 Sam changes the email setting by hand", "3 · 22:00 the VM dies; restore last night's snapshot", with panel 3's note "Back in minutes. This afternoon's fix is gone." Alternatively, say explicitly that the snapshot in the figure is weekly. Prefer the first option, because it matches k-07. Flag this to the accuracy reviewer too.
+closure_evidence: The panels are "1 · THU 01:00 Last night's snapshot taken.", "2 · THU 15:00 Sam fixes something by hand." and "3 · THU 22:00 The VM dies; restore last night's snapshot." The note reads "Back in minutes. This afternoon's fix is gone, and so are today's orders." This matches "every night" in the s-06 prose and k-07 B (r2-w1280-f03.png, r2-w390-f03.png, r2-w360-dark-f03.png).
+
+### P-05 · should · closed
+criterion: course design principle §2.6 / term ledger §5 (Ch 1 introduces "single point of failure")
+location: s-06 (index.html, after k-06; currently only in k-06 option B's feedback)
+evidence: CURRICULUM §5 now lists "single point of failure" as a Ch 1 term, and Ch 3 and Ch 4 will rely on it. On the page it appears only in k-06 B's feedback ("It's still a single point of failure…"). A reader who picks A or C sees it only by opening the collapsed "What the other answers say". The concept is in A's feedback ("Everything still runs on one machine, so any problem with it takes the whole site down"), but the term is not reliably introduced.
+expected_fix: Name it once in prose after k-06, pointing back to Friday. For example, in the "Bigger machines also run out" paragraph: "Engineers call a machine like this a single point of failure: when it breaks, everything breaks." Keep k-06 B's feedback as it is. Spelling it out once in prose is consistent with ac-16.
+closure_evidence: The prose now reads "Engineers call a machine like this a <dfn>single point of failure</dfn>: when something goes wrong with it, the whole site can go down with it." Every reader sees it, whichever k-06 option they picked, and it points back to Friday ("the real objection is Friday's").
+
+### P-06 · should · closed
+criterion: clarity of interaction (every interactive element signals it is interactive)
+location: `.cp-why summary` (assets/page.css:312), `.wr-all summary` (widgets/w-rebuild/index.css:221), `.wr-m__more > summary`
+evidence: These summaries use `display:flex`, which removes the native disclosure triangle, and no replacement marker exists (a grep for marker or summary pseudo-elements finds none). "WHAT THE OTHER ANSWERS SAY", "WHY THE OTHER ANSWERS MISS" and "ALL SIX NOTES" render as bold mono labels, indistinguishable from headings (pux-w1280-light-s2-k03-wrong.png, pux-w360-dark-rm-s2-step6.png). The why-disclosures hold the explanations of the other options that ac-18 relies on, and readers who answer correctly won't know they're there.
+expected_fix: Add a visible marker that flips when open, for example `summary::before { content: "▸"; margin-right: var(--sp-1) }` and `details[open] > summary::before { content: "▾" }`, using ink, not accent. Optionally underline the summary as "Start over" is underlined, so it reads as a control.
+closure_evidence: Every summary shows an ink ▸ that turns to ▾ when open. Seen in page checks (▾ WHAT THE OTHER ANSWERS SAY, r2-w1280-k07-why.png; ▸ in r2-w390-k08-wrong.png; dark mode in r2-w360-dark-k05-why.png) and in the widget (▸ ALL SIX NOTES, r2-w390-s2-start.png; ▸ WHAT THE OTHER ANSWERS SAY in k-04, r2-w390-s3-code-wrong.png). The marker is ink, not accent. The page and widget rules set the same pseudo-element, so only one marker renders.
+
+### P-07 · nit · closed
+criterion: split attention and redundancy
+location: s-01 before k-01, s-06 before k-06 and k-07, s-07 before k-08 (index.html)
+evidence: Each check's prompt repeats the sentence just before it. s-01: "Nobody has touched Fennel's code since Tuesday…" is followed by k-01: "Nobody has changed a line of Fennel's code since Tuesday…". s-07: "The Monday after the outage, Sam raises it with Jordan. 'We should keep a runbook…'" is followed by k-08: "The Monday after the outage, Sam says: 'We should keep a runbook for the server.'" The same happens for "After Friday… Morgan" before k-06 and "Sam has a different idea: move Fennel onto a virtual machine at a cloud provider" before k-07.
+expected_fix: The check text is final, so trim the lead-ins instead. Cut "Here's the strange part. Nobody has touched…" to "Here's the strange part." Cut "The Monday after the outage, Sam raises it with Jordan." and keep the quote. Start the s-06 lead-in with "After Friday, everyone reaches for a fix." without naming Morgan's offer.
+closure_evidence: s-01 now ends "Here's the strange part.", s-06 opens "After Friday, everyone reaches for a fix." and the VM paragraph opens "Sam's idea uses a different kind of server." None of them restates its check's prompt any more. Two leftovers, below the bar for a new finding: "Sam's idea" now refers ahead to an idea first stated in k-07's prompt, and the s-07 pull quote is repeated verbatim in k-08's prompt (the round-1 fix said to keep the quote). If anyone touches s-06 again, "Sam has another idea, and it uses a different kind of server." would remove the dangling reference.
+
+### P-08 · nit · closed
+criterion: split attention and redundancy / clarity
+location: w-rebuild stage 1 (s-03 intro paragraph, `stages[0].name` and `lead` in data.js)
+evidence: Stage 1 is introduced three times: the prose ("Below is Sam's server as most people picture it: the code, running."), the stage name "SAM'S SERVER", and the lead "Sam's server, as most people picture it.". After the reveal the lead still says "as most people picture it" while the machine shows all eight rows.
+expected_fix: Give the stage a name that states the task, for example "What's on Sam's server". Swap the lead after the reveal to something like "Sam's server, as it really is." Alternatively, drop the phrase from the prose paragraph.
+closure_evidence: The stage name is now "WHAT'S ON SAM'S SERVER". After the reveal the lead reads "Sam's server, as it really is." (probe: `text:.wr__lead` → "Sam's server, as it really is."). The stale "as most people picture it" no longer sits over the eight-row machine.
+
+### P-09 · nit · closed
+criterion: visual consistency and polish / ac-07 (IDENTICAL "on both")
+location: w-rebuild stage 4, code row (`.wr-cmp__st--span`)
+evidence: IDENTICAL renders as a chip under the SAM'S SERVER column only, with the NEW MACHINE column empty (pux-w1280-light-s4-widget.png, pux-w768-s4-table.png). It reads as a value for Sam's server alone. The plan says "reads IDENTICAL on both".
+expected_fix: Make the cell span both status columns visually (`grid-column: span 2` and centre the chip across them), or show IDENTICAL in each column.
+closure_evidence: IDENTICAL is one chip stretched across both status columns and centred, at 1280, 390 and 360 dark (r2-w1280-s4-cmp.png, r2-w390-s4-cmp.png, r2-w360-dark-s4-cmp.png).
+
+### P-10 · nit · closed
+criterion: audience fit (unglossed jargon)
+location: k-08 option A feedback (index.html s-07): "Google's SRE team found…"
+evidence: "SRE" is an unexplained acronym for a reader who has never operated infrastructure. ac-15 and ac-16 ban MTTR, RTO and SPOF in the same spirit.
+expected_fix: Write "Google's site reliability engineers found…", or "Google's operations engineers found…".
+closure_evidence: It now reads "Google's site reliability engineers found they made repairs roughly three times faster… the same engineers add that no playbook is a substitute for people who can think on the fly" (r2-w390-k08-wrong.png). There's no acronym.
+
+### P-11 · nit · closed
+criterion: visual consistency and polish (Control Plane colour rules)
+location: `.cp-aside .cp-breaks b { color: var(--warn) }` (assets/page.css:94); f-03 panels at ≥ 900px
+evidence:  - The style guide says status colours "always travel with a word (CORRECT, NOT QUITE, PENDING)". Here `warn`, which means UNKNOWN in f-03 and the widget, colours the decorative label WHERE THIS ANALOGY BREAKS. Separately, a 1280 viewport over s-03 shows the accent four times (§ numeral, the W-01 lamp, the PREDICT chip, TRY AGAIN), against the "at most once per viewport" guidance. - In f-03 at 1280, the three panels are narrow enough that "hand-made, not in notes" wraps to three mono lines inside the hot row, and the context rows at 40% opacity are hard to read (f03 at 1280 in the gate screenshot).
+expected_fix:  - Colour the breaks label `ink-3` or `ink`, not `warn`. - Optionally make the stage-internal PREDICT chips outlined rather than filled. - In f-03, put the tag on its own line under the row label, or shorten it to "by hand", and raise the context opacity to about .55.
+closure_evidence: The WHERE THIS ANALOGY BREAKS label renders in ink-3 grey, no longer in warn amber, so warn now means only UNKNOWN (r2-w1280-aside.png). At 1280 the f-03 tag "hand-made, not in notes" sits in italic sans under the row label, on two lines. Context rows at 0.55 opacity are legible in light and dark (r2-w1280-f03.png, r2-w360-dark-f03.png). The optional point about how often the accent appears in the widget wasn't taken up. It was optional, so this doesn't keep the finding open.
+
+### P-12 · nit · dispute-upheld
+criterion: mobile UX
+location: w-rebuild at < 600px (reserved height via stacked panels plus `holdHeight`)
+evidence: At 360 the widget is 1,491px tall from load (1,543px once a why-disclosure is opened). In stage 1, about 470px of the panel below the machine is empty (gate w360.png, the crop around the widget), so the reader scrolls through blank space to reach s-04. The plan estimated about 820px.
+expected_fix: Optional. Reduce the tallest stage at narrow widths, for example by folding stage 4's "In the notes · step n" meta into the row, or by collapsing the PRESENT/PRESENT rows behind "Show the 4 rows the notes covered" so stage 4 shows the gaps first. That lets the reserved height come down without reintroducing reflow.
+closure_evidence: The builder disputed this: three stages are close in height, so trimming stage 4's meta would save about 30px, and real savings would mean hiding rows, which d-07 rules out. My measurements at 360 agree: `.wr__stages` is 1,409px at load (stage 4 is the tallest) and 1,420px after stage 4. Stage 1 at 390 still shows blank space below the machine (r2-w390-s1-start.png), but nothing reflows, and ac-09's reserved height requires the space. The original fix was marked optional, and the remaining options cost content that the user chose to keep.

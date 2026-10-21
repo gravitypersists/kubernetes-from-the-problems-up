@@ -1,0 +1,371 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>One app, one server</title>
+<meta name="description" content="Chapter 01. Fennel’s site went down for two hours and nobody had touched the code. What lives on a server besides the code, and why a hand-built server is a business risk.">
+<link rel="stylesheet" href="assets/tokens.css">
+<link rel="stylesheet" href="assets/components.css">
+<link rel="stylesheet" href="assets/page.css">
+</head>
+<body class="d-body">
+
+<header class="cp-hero cp-blueprint">
+  <div class="cp-hero__inner">
+    <p class="cp-hero__kicker"><span class="cp-hero__idx">CHAPTER 01</span><span class="cp-label">Part I · Fennel, year 0</span></p>
+    <h1 class="cp-hero__title">One app, one server</h1>
+    <p class="cp-hero__standfirst">On a Friday night Fennel’s site went down for two hours, and nobody had touched the code. What else lives on a server, and why a server built by hand is a risk to the business that runs on it.</p>
+    <dl class="cp-meta">
+      <div><dt>Read</dt><dd>12 MIN</dd></div>
+      <div><dt>For</dt><dd>TECHNICAL MANAGERS</dd></div>
+      <div><dt>Chapter</dt><dd>01 / 15</dd></div>
+      <div><dt>Widgets</dt><dd>01</dd></div>
+      <div><dt>Checks</dt><dd>09</dd></div>
+    </dl>
+  </div>
+</header>
+
+<div class="d-page">
+  <aside class="d-rail" data-toc data-minutes="12"></aside>
+  <main class="d-main" id="main">
+    <details class="d-toc-mobile" data-toc-mobile></details>
+
+    <!-- s-01 · Friday, dinner rush · o-2, o-1 · claims c-03 -->
+    <section id="s-01" data-segment="s-01">
+      <h2 id="friday-dinner-rush"><span class="cp-sec">§ 01</span>Friday, dinner rush</h2>
+      <p>Fennel is a grocery-delivery startup with three people. Jordan and Morgan founded it, and Morgan handles the money. Sam is the only engineer, and built the one server the Fennel app runs on. In this chapter you’re in Jordan’s seat: you know roughly what a server and a deploy are, and you’ve never had to fix either.</p>
+      <p>It’s Friday evening, the dinner rush, the busiest hour of Fennel’s week. At 18:12 customers start seeing an error at checkout, and orders stop coming in. A few minutes later the first annoyed emails reach Jordan. Sam is at dinner across town and doesn’t pick up.</p>
+      <p>Here’s the strange part. Nobody has touched Fennel’s code since Tuesday, and it has worked all week.</p>
+
+      <div class="cp-check" role="group" aria-labelledby="k-01-q" data-check="k-01" data-reveal>
+        <div class="cp-check__head"><span class="cp-chip">PREDICT</span><span class="cp-label">Check 01 / 09 · think, then reveal</span></div>
+        <p class="cp-check__q" id="k-01-q">Nobody has changed a line of Fennel’s code since Tuesday. So what could break checkout on Friday evening?</p>
+        <p class="cp-think">Settle on an answer in your head first.</p>
+        <button type="button" class="cp-reveal" aria-expanded="false" aria-controls="k-01-a">Show the answer</button>
+        <div class="cp-feedback" id="k-01-a" role="status" hidden>
+          <p><b>ANSWER</b>Something about the machine the code runs on. Fennel’s code was fine. The server’s disk had filled up, and the database could no longer record new orders.</p>
+          <p>If your first thought was “a bug in the code”, that’s the usual instinct, and the rest of this chapter is about everything else an app depends on.</p>
+        </div>
+      </div>
+
+      <!-- f-01: rows rendered by assets/page.js from CH01_OUTAGE_TIMELINE (reusable data structure) -->
+      <figure class="cp-fig" id="f-01" aria-labelledby="f-01-cap">
+        <div class="cp-fig__plate">
+          <div class="cp-fig__bar"><span class="cp-label">Fig. 01</span><span class="cp-label">Fennel’s Friday outage</span></div>
+          <div class="cp-blueprint">
+            <ol class="tl" data-timeline="ch01-friday" aria-label="Timeline of Fennel’s Friday outage"></ol>
+          </div>
+        </div>
+        <figcaption id="f-01-cap"><span class="cp-label">Fig. 01</span><span>Deleting the logs took fifteen minutes. Most of the two hours went to reaching the one person who knew the server, and to that person finding the cause.</span></figcaption>
+      </figure>
+
+      <p>The disk had filled with log files, the running diary the app and its web server keep of every request. They had been growing for months, because nobody had set anything up to clear out the old ones. With no space left, the database couldn’t save new orders. Nothing already stored was damaged, but nothing new could be written.</p>
+      <p>Look at the last row, too. At 23:00 Sam set up a nightly job that deletes old logs, so the disk can’t fill up the same way again. It’s a good fix. Sam made it by hand, directly on the server, and didn’t write it down anywhere. That row comes back later.</p>
+    </section>
+
+    <!-- s-02 · What "the server" is · o-1 · claims c-01, c-03 -->
+    <section id="s-02" data-segment="s-02">
+      <h2 id="what-the-server-is"><span class="cp-sec">§ 02</span>What “the server” is</h2>
+      <p>The server is one computer that Fennel rents in a data centre. Like a laptop, it has a processor, memory and a disk. Unlike a laptop, it runs day and night, and customers reach it over the internet.</p>
+
+      <figure class="cp-fig" id="f-02" aria-labelledby="f-02-cap">
+        <div class="cp-fig__plate">
+          <div class="cp-fig__bar"><span class="cp-label">Fig. 02</span><span class="cp-label">One machine, one process</span></div>
+          <div class="cp-blueprint">
+            <svg class="cp-svg only-wide" id="f-02-wide" viewBox="0 0 600 304" role="img" aria-labelledby="f-02-wt f-02-wd">
+              <title id="f-02-wt">Fennel’s server: one machine running the Fennel app as a process.</title>
+              <desc id="f-02-wd">A machine labelled Fennel’s server, rented. Inside it, the Fennel app is running, labelled process: the code, running. Beside it, the disk holds orders, logs and uploads. Customers’ requests arrive at the process from the left. From the code repo above, an arrow labelled deploy: copy new code, restart the app points into the machine.</desc>
+              <rect class="plate" x="264" y="16" width="144" height="40" rx="2"/>
+              <text class="t-label" x="336" y="41" text-anchor="middle">CODE REPO</text>
+              <text x="348" y="80">deploy: copy new code,</text>
+              <text x="348" y="96">restart the app</text>
+              <rect class="plate" x="152" y="112" width="432" height="176" rx="2"/>
+              <path class="k" d="M152 140 H584"/>
+              <text class="t-label" x="164" y="131">MACHINE · FENNEL’S SERVER (RENTED)</text>
+              <rect class="c1" x="176" y="160" width="224" height="64" rx="2"/>
+              <text class="t-bold" x="192" y="184">Fennel app</text>
+              <rect class="lamp-good" x="192" y="198" width="8" height="8"/>
+              <text class="t-label" x="208" y="206">RUNNING</text>
+              <text x="176" y="248">process: the code, running</text>
+              <rect class="plate" x="424" y="160" width="136" height="112" rx="2"/>
+              <text class="t-label" x="436" y="180">DISK</text>
+              <rect class="well" x="436" y="190" width="112" height="14"/>
+              <rect class="s2" x="437" y="191" width="44" height="12"/>
+              <text x="436" y="228">orders, logs,</text>
+              <text x="436" y="246">uploads</text>
+              <text x="16" y="186">customers’</text>
+              <text x="16" y="202">requests</text>
+              <g class="f-02-arrows" data-arrows='[[336,56,336,112],[104,192,176,192]]'></g>
+            </svg>
+            <svg class="cp-svg only-narrow" id="f-02-narrow" viewBox="0 0 320 456" role="img" aria-labelledby="f-02-nt f-02-wd">
+              <title id="f-02-nt">Fennel’s server: one machine running the Fennel app as a process.</title>
+              <rect class="plate" x="16" y="16" width="128" height="40" rx="2"/>
+              <text class="t-label" x="80" y="41" text-anchor="middle">CODE REPO</text>
+              <text x="96" y="80">deploy: copy new</text>
+              <text x="96" y="96">code, restart the app</text>
+              <rect class="plate" x="16" y="120" width="288" height="320" rx="2"/>
+              <path class="k" d="M16 166 H304"/>
+              <text class="t-label" x="28" y="139">MACHINE · FENNEL’S</text>
+              <text class="t-label" x="28" y="157">SERVER (RENTED)</text>
+              <text x="56" y="198">customers’ requests</text>
+              <rect class="c1" x="32" y="216" width="256" height="64" rx="2"/>
+              <text class="t-bold" x="48" y="240">Fennel app</text>
+              <rect class="lamp-good" x="48" y="254" width="8" height="8"/>
+              <text class="t-label" x="64" y="262">RUNNING</text>
+              <text x="32" y="304">process: the code, running</text>
+              <rect class="plate" x="32" y="320" width="256" height="104" rx="2"/>
+              <text class="t-label" x="44" y="340">DISK</text>
+              <rect class="well" x="44" y="350" width="232" height="14"/>
+              <rect class="s2" x="45" y="351" width="90" height="12"/>
+              <text x="44" y="392">orders, logs, uploads</text>
+              <g class="f-02-arrows" data-arrows='[[80,56,80,120],[40,180,40,216]]'></g>
+            </svg>
+          </div>
+        </div>
+        <figcaption id="f-02-cap"><span class="cp-label">Fig. 02</span><span>The app is the code <em>running</em>, as a process on one particular machine. Deploying means getting new code onto that machine.</span></figcaption>
+      </figure>
+
+      <p>The orange block is the Fennel app while it runs. A running program is called a <dfn>process</dfn>: the code, loaded into the machine’s memory, answering customers’ requests and writing orders and log lines to the disk. On Friday the process kept running. It just couldn’t do its job, because the disk it writes to was full.</p>
+      <p>When Sam ships a change, Sam copies the new code onto this machine and restarts the process. That copy-and-restart is a <dfn>deploy</dfn>, the arrow at the top of the figure.</p>
+      <p>So far the app sounds like code plus a computer. But code can’t run on just any computer. At the very least it needs the language runtime it was written for, such as Python, and that runtime is installed on the machine, not shipped with the code. What else does it need? You’re about to find out by hand.</p>
+    </section>
+
+    <!-- s-03 · What's on Sam's server · o-1, o-2 · widget w-rebuild (complexity high; built in widgets/w-rebuild/) · checks k-02..k-04 live inside it -->
+    <section id="s-03" data-segment="s-03">
+      <h2 id="whats-on-sams-server"><span class="cp-sec">§ 03</span>What’s on Sam’s server, and can you rebuild it?</h2>
+      <p>Below is Sam’s server as most people picture it: the code, running. First, work out what else is on it. Then try to build a second one using only Sam’s notes, and check whether it behaves like the first. It takes three or four minutes.</p>
+      <div data-widget="w-rebuild" class="d-wide" aria-label="Interactive: rebuild Sam’s server from Sam’s notes"></div>
+    </section>
+
+    <!-- s-04 · Why the notes fell behind · o-1, o-2 · claims c-01, c-02, c-04, c-05, c-06, c-07 -->
+    <section id="s-04" data-segment="s-04">
+      <h2 id="why-the-notes-fell-behind"><span class="cp-sec">§ 04</span>Why the notes fell behind</h2>
+      <p>Everything you found on Sam’s server besides the code is something the app needs in order to work. Each one is a <dfn>dependency</dfn>: the language runtime, the libraries and tools the code calls, the config that tells it where its database is and which keys to use, and the data on the disk. Many of them live on the machine, not in the code, and a different machine may not have them. That’s how identical code broke photo uploads on your new machine.</p>
+      <p>Sam’s notes weren’t wrong when Sam wrote them. They described the server on the day it was set up. Then the photo tool went on in May, the email key in August, and the nightly log clean-up last Friday. Each was a sensible change, made by hand on the live server, and none of them reached the notes. Engineers call this <dfn>drift</dfn> (in full, configuration drift): changes to a system’s setup that go unrecorded. Every unrecorded change widens the gap between the notes and the server, so notes like Sam’s fall behind as a matter of course. Nobody has to be careless for it to happen.</p>
+      <p>Then there’s the holiday-sale setting. Sam changed it during a sale and can’t say whether it still matters. The only way to find out is to remove it and see what breaks, on the server that takes every order. Martin Fowler, a well-known writer on software design, describes exactly this state of an old, hand-tended server: <a href="https://martinfowler.com/bliki/SnowflakeServer.html">“You’re not sure what parts of the configuration are important.”</a> That’s where “don’t touch it” comes from. Nobody knows which settings the app relies on, so every change is a gamble.</p>
+      <p>A server made unique by years of changes like these is a <dfn>snowflake server</dfn>. Fowler popularised the term in 2012: the result of all that hand-applied patching and tweaking is “a unique snowflake - good for a ski resort, bad for a data center.” Its first problem, he writes, is that it’s difficult to reproduce.</p>
+      <div class="cp-aside">
+        <p><b>ANALOGY</b>Rebuilding a server from its notes is like replacing a long-serving employee using only the job description they were hired with. The replacement does everything that’s written down. The duties that piled up over the years show up only when something doesn’t get done.</p>
+        <p class="cp-breaks"><b>WHERE THIS ANALOGY BREAKS</b>A new hire notices gaps, asks around and uses judgment. A new machine does exactly what the notes say and fails without comment. And the old server can’t explain itself: even Sam doesn’t know which settings still matter.</p>
+      </div>
+    </section>
+
+    <!-- s-05 · If this box vanished tonight · o-2 · claims c-05, c-07 · x-02, x-04 -->
+    <section id="s-05" data-segment="s-05">
+      <h2 id="if-this-box-vanished-tonight"><span class="cp-sec">§ 05</span>If this box vanished tonight</h2>
+      <p>On Friday the server was sick, and Sam could nurse it back. Now suppose it’s gone.</p>
+
+      <div class="cp-check" role="group" aria-labelledby="k-05-q" data-check="k-05">
+        <div class="cp-check__head"><span class="cp-chip cp-chip--apply">APPLY</span><span class="cp-label">Check 05 / 09</span></div>
+        <p class="cp-check__q" id="k-05-q">Saturday, 2 a.m. The rented server’s hardware fails for good. The code is safe in the repo, and Sam has the notes. When is Fennel fully back to normal?</p>
+        <ul class="cp-options">
+          <li><button type="button" class="cp-option" data-fb="Your rebuilt machine had identical code, and photo uploads still failed. The code is only part of what has to come back."><span class="cp-option__key">A</span><span>As soon as someone copies the code onto a new server.</span><span class="cp-option__tag"></span></button></li>
+          <li><button type="button" class="cp-option" data-fb="You just did exactly that. The notes ran without an error, and three things were still missing, one of them the fix for Friday’s outage."><span class="cp-option__key">B</span><span>As soon as Sam has worked through the notes on a new server.</span><span class="cp-option__tag"></span></button></li>
+          <li><button type="button" class="cp-option" data-ok data-fb="Right. Two things set how long this takes: how much is missing from the notes, and whether the one person who can find it is awake."><span class="cp-option__key">C</span><span>Only after Sam has also tracked down everything the notes leave out, often when customers hit the broken features.</span><span class="cp-option__tag"></span></button></li>
+        </ul>
+        <div class="cp-feedback" role="status" hidden></div>
+      </div>
+
+      <p>So the length of an outage like this isn’t set by how fast someone can copy the code. It depends on how much is missing from the notes, and on whether the one person who knows the server is awake and reachable. Neither shows up in advance. The notes can’t list what they leave out, so the gaps surface as broken features. And the knowledge that fills them is mostly in Sam’s head, with some of it only on the machine that just died. That’s the practical meaning of Fowler’s warning about snowflakes: <a href="https://martinfowler.com/bliki/SnowflakeServer.html">if the hardware fails, “it’s difficult to fire up another server to support the same functions.”</a></p>
+      <div class="cp-aside">
+        <p><b>ANALOGY</b>Managers know the bus factor: how many people could disappear before a project stalls. Formally, it’s <a href="https://en.wikipedia.org/wiki/Bus_factor">“a measurement of the risk resulting from information and capabilities not being shared among team members.”</a> Fennel’s server has a bus factor of one: Sam.</p>
+        <p class="cp-breaks"><b>WHERE THIS ANALOGY BREAKS</b>A bus factor is about what’s in people’s heads. Here part of the knowledge isn’t in anyone’s head. It exists only on the machine, and even Sam doesn’t know all of it.</p>
+      </div>
+      <div class="cp-aside">
+        <p><b>WHY RECOVERY TIME</b>Fowler once joked about a “certification” for operations teams: someone walks into the data centre and attacks the production servers <a href="https://martinfowler.com/bliki/PhoenixServer.html">“with a baseball bat, a chainsaw, and a water pistol”</a>, and the team is graded on “how long it would take for the operations team to get all the applications up and running again.” He suggests forgoing the baseball bats. The measure is the serious part: what counts is how long until you’re back when the server fails.</p>
+      </div>
+    </section>
+
+    <!-- s-06 · Couldn't we just… · o-3 · claims c-05, c-09, c-10, c-11, c-12 -->
+    <section id="s-06" data-segment="s-06">
+      <h2 id="couldnt-we-just"><span class="cp-sec">§ 06</span>“Couldn’t we just…”</h2>
+      <p>After Friday, the founders and Sam each reach for a fix. Morgan, who handles the money, goes first.</p>
+
+      <div class="cp-check" role="group" aria-labelledby="k-06-q" data-check="k-06">
+        <div class="cp-check__head"><span class="cp-chip">PREDICT</span><span class="cp-label">Check 06 / 09</span></div>
+        <p class="cp-check__q" id="k-06-q">After Friday, Morgan offers to pay for a much bigger server, with ten times the disk. Which of Friday’s problems does that solve?</p>
+        <ul class="cp-options">
+          <li><button type="button" class="cp-option" data-fb="More disk really does postpone this failure, and that’s worth something. But Friday exposed two other risks a bigger disk doesn’t touch. Everything still runs on one machine, so any problem with it takes the whole site down. And that machine still can’t be rebuilt from the notes. A bigger snowflake is still a snowflake."><span class="cp-option__key">A</span><span>All of them. The outage was caused by a full disk.</span><span class="cp-option__tag"></span></button></li>
+          <li><button type="button" class="cp-option" data-ok data-fb="Right. A bigger box buys time on disk and nothing else. It’s still a single point of failure, and it was still built by hand."><span class="cp-option__key">B</span><span>It pushes this particular failure months away, but Fennel still runs on one machine that only Sam can rebuild.</span><span class="cp-option__tag"></span></button></li>
+          <li><button type="button" class="cp-option" data-fb="Too harsh. Disk was the trigger, and more of it does delay a repeat. It just leaves the other two risks where they were."><span class="cp-option__key">C</span><span>None. Disk space had nothing to do with it.</span><span class="cp-option__tag"></span></button></li>
+        </ul>
+        <div class="cp-feedback" role="status" hidden></div>
+      </div>
+
+      <p>Bigger machines also run out. There’s a limit to how large a single machine can get, and near the top of the range <a href="https://docs.cloud.google.com/architecture/framework/reliability/horizontal-scalability">the price climbs steeply</a>. Fennel is nowhere near that ceiling, so for now the real objection is the one above: a bigger server is still one server, built by hand.</p>
+      <p>Sam has a different idea: move Fennel onto a virtual machine at a cloud provider. A <dfn>virtual machine</dfn>, or VM, is <a href="https://www.redhat.com/en/topics/virtualization/what-is-a-virtual-machine">a computer simulated in software</a>. It has its own processor, memory, disk and operating system, but it’s one of several running on a single physical machine, and a new one can be created in minutes. The provider can also take a snapshot of the VM’s whole disk every night: an exact copy you can start again later.</p>
+
+      <div class="cp-check" role="group" aria-labelledby="k-07-q" data-check="k-07">
+        <div class="cp-check__head"><span class="cp-chip">PREDICT</span><span class="cp-label">Check 07 / 09</span></div>
+        <p class="cp-check__q" id="k-07-q">Sam suggests moving Fennel to a virtual machine at a cloud provider, with a snapshot of its disk taken every night. If that VM vanished tonight, what would getting back look like?</p>
+        <ul class="cp-options">
+          <li><button type="button" class="cp-option" data-fb="A new VM does arrive in minutes, but it arrives blank. Someone still has to set it up, and that means by hand unless something automates it (we’ll name that later). The snapshot is what makes recovery fast, and it comes with caveats."><span class="cp-option__key">A</span><span>Click a button for a new VM, and you’re done in minutes.</span><span class="cp-option__tag"></span></button></li>
+          <li><button type="button" class="cp-option" data-ok data-fb="Right. The snapshot is a real improvement: an exact copy you can start. What it can’t give you is understanding of the server, and it starts going stale the moment someone changes the live machine by hand."><span class="cp-option__key">B</span><span>Restore last night’s snapshot. You’re back much faster, but the old clutter comes back too, anything changed by hand since the snapshot is lost, and still nobody is sure which settings matter.</span><span class="cp-option__tag"></span></button></li>
+          <li><button type="button" class="cp-option" data-fb="Too harsh. A snapshot is an exact, bootable copy, so recovery really is faster. The problem it leaves is the snowflake itself."><span class="cp-option__key">C</span><span>No better than today. A VM is just a server with a different name.</span><span class="cp-option__tag"></span></button></li>
+        </ul>
+        <div class="cp-feedback" role="status" hidden></div>
+      </div>
+
+      <figure class="cp-fig d-wide" id="f-03" aria-labelledby="f-03-cap">
+        <div class="cp-fig__plate">
+          <div class="cp-fig__bar"><span class="cp-label">Fig. 03</span><span class="cp-label">Snapshot of a snowflake</span></div>
+          <div class="cp-blueprint snap">
+            <ol class="snap__panels">
+              <li class="snap__panel">
+                <p class="snap__when"><span class="cp-label">1 · Mon 01:00</span>Snapshot taken.</p>
+                <div class="snap__boxes">
+                  <div class="mbox">
+                    <div class="mbox__bar"><span class="cp-label">Live VM</span></div>
+                    <ul class="mbox__rows">
+                      <li class="mrow mrow--c1 is-ctx">app code</li>
+                      <li class="mrow mrow--c2 is-ctx">runtime</li>
+                      <li class="mrow mrow--c2 is-ctx">libraries, tools</li>
+                      <li class="mrow mrow--c2 is-ctx">config file</li>
+                      <li class="mrow mrow--c6">40 GB of old logs</li>
+                      <li class="mrow mrow--c6">holiday-sale setting <span class="st st--warn">UNKNOWN</span></li>
+                    </ul>
+                  </div>
+                  <div class="mbox">
+                    <div class="mbox__bar"><span class="cp-label">Snapshot</span></div>
+                    <ul class="mbox__rows">
+                      <li class="mrow mrow--c1 is-ctx">app code</li>
+                      <li class="mrow mrow--c2 is-ctx">runtime</li>
+                      <li class="mrow mrow--c2 is-ctx">libraries, tools</li>
+                      <li class="mrow mrow--c2 is-ctx">config file</li>
+                      <li class="mrow mrow--c6">40 GB of old logs</li>
+                      <li class="mrow mrow--c6">holiday-sale setting <span class="st st--warn">UNKNOWN</span></li>
+                    </ul>
+                  </div>
+                </div>
+                <p class="snap__note">Exact copy, clutter included.</p>
+              </li>
+              <li class="snap__arrow" aria-hidden="true"><span class="wide">→</span><span class="narrow">↓</span></li>
+              <li class="snap__panel">
+                <p class="snap__when"><span class="cp-label">2 · Wednesday</span>Sam fixes something by hand.</p>
+                <div class="snap__boxes">
+                  <div class="mbox">
+                    <div class="mbox__bar"><span class="cp-label">Live VM</span></div>
+                    <ul class="mbox__rows">
+                      <li class="mrow mrow--c1 is-ctx">app code</li>
+                      <li class="mrow mrow--c2 is-ctx">runtime</li>
+                      <li class="mrow mrow--c2 is-ctx">libraries, tools</li>
+                      <li class="mrow mrow--c2 is-ctx">config file</li>
+                      <li class="mrow mrow--c2 is-hot">new email setting <span class="mrow__tag">hand-made, not in notes</span></li>
+                      <li class="mrow mrow--c6 is-ctx">40 GB of old logs</li>
+                      <li class="mrow mrow--c6 is-ctx">holiday-sale setting <span class="st st--warn">UNKNOWN</span></li>
+                    </ul>
+                  </div>
+                  <div class="mbox">
+                    <div class="mbox__bar"><span class="cp-label">Snapshot</span></div>
+                    <ul class="mbox__rows">
+                      <li class="mrow mrow--c1 is-ctx">app code</li>
+                      <li class="mrow mrow--c2 is-ctx">runtime</li>
+                      <li class="mrow mrow--c2 is-ctx">libraries, tools</li>
+                      <li class="mrow mrow--c2 is-ctx">config file</li>
+                      <li class="mrow mrow--c6 is-ctx">40 GB of old logs</li>
+                      <li class="mrow mrow--c6 is-ctx">holiday-sale setting <span class="st st--warn">UNKNOWN</span></li>
+                    </ul>
+                  </div>
+                </div>
+                <p class="snap__note">The snapshot doesn’t change.</p>
+              </li>
+              <li class="snap__arrow" aria-hidden="true"><span class="wide">→</span><span class="narrow">↓</span></li>
+              <li class="snap__panel">
+                <p class="snap__when"><span class="cp-label">3 · Friday</span>The VM dies; restore the snapshot.</p>
+                <div class="snap__boxes snap__boxes--one">
+                  <div class="mbox">
+                    <div class="mbox__bar"><span class="cp-label">Restored VM</span><span class="st st--good"><span class="lamp" aria-hidden="true"></span>RUNNING</span></div>
+                    <ul class="mbox__rows">
+                      <li class="mrow mrow--c1 is-ctx">app code</li>
+                      <li class="mrow mrow--c2 is-ctx">runtime</li>
+                      <li class="mrow mrow--c2 is-ctx">libraries, tools</li>
+                      <li class="mrow mrow--c2 is-ctx">config file</li>
+                      <li class="mrow mrow--gone is-hot">new email setting <span class="st st--bad">MISSING</span></li>
+                      <li class="mrow mrow--c6">40 GB of old logs <span class="mrow__tag">back</span></li>
+                      <li class="mrow mrow--c6">holiday-sale setting <span class="st st--warn">UNKNOWN</span></li>
+                    </ul>
+                  </div>
+                </div>
+                <p class="snap__note">Back in minutes. Wednesday’s fix is gone.</p>
+              </li>
+            </ol>
+          </div>
+        </div>
+        <figcaption id="f-03-cap"><span class="cp-label">Fig. 03</span><span>A snapshot gets you back fast. It also brings back the clutter, misses every hand-made change since it was taken, and tells you nothing about which settings matter.</span></figcaption>
+      </figure>
+
+      <div class="cp-aside">
+        <p><b>ANALOGY</b>A snapshot is like photocopying Sam’s desk. You get a copy fast, coffee stains and wrong notes included, and you still don’t know which papers matter.</p>
+        <p class="cp-breaks"><b>WHERE THIS ANALOGY BREAKS</b>A snapshot is an exact, working copy, so it really does get you back faster than a photocopy gets you a working desk. Its weaknesses lie elsewhere: it doesn’t help you understand or change the server, and it goes stale as soon as someone changes the live machine by hand.</p>
+      </div>
+      <p>VMs give you more machines, faster. They don’t tell you what should be on them.</p>
+    </section>
+
+    <!-- s-07 · The conversation · o-2 · claims c-06, c-08 -->
+    <section id="s-07" data-segment="s-07">
+      <h2 id="the-conversation"><span class="cp-sec">§ 07</span>The conversation</h2>
+      <p>The Monday after the outage, Sam raises it with Jordan.</p>
+      <blockquote class="cp-quote"><p>“We should keep a runbook for the server.”</p><cite>Sam</cite></blockquote>
+      <p>A runbook is a written, step-by-step guide to setting up and repairing a system: think of Sam’s notes, kept current. It’s a good instinct. What matters is how Jordan answers.</p>
+
+      <div class="cp-check" role="group" aria-labelledby="k-08-q" data-check="k-08">
+        <div class="cp-check__head"><span class="cp-chip cp-chip--apply">APPLY</span><span class="cp-label">Check 08 / 09</span></div>
+        <p class="cp-check__q" id="k-08-q">The Monday after the outage, Sam says: “We should keep a runbook for the server.” What’s the most useful thing Jordan can say?</p>
+        <ul class="cp-options">
+          <li><button type="button" class="cp-option" data-fb="Written-down steps do help. Google’s SRE team found they made repairs roughly three times faster than improvising. But every change made by hand after the runbook is written puts it behind the server, and Google’s same team says no playbook is a substitute for engineers who can think on the fly. The runbook reduces the dependence on Sam; it doesn’t remove it."><span class="cp-option__key">A</span><span>“Great. Once it’s written, we’re no longer dependent on you.”</span><span class="cp-option__tag"></span></button></li>
+          <li><button type="button" class="cp-option" data-ok data-fb="Right. It welcomes the runbook and asks for the two numbers that tell you whether it’s enough: the time to recover, and how many people can do it."><span class="cp-option__key">B</span><span>“Yes. And let’s test it: if this box vanished tonight, how long until we’re back, and who has to be awake?”</span><span class="cp-option__tag"></span></button></li>
+          <li><button type="button" class="cp-option" data-fb="They do drift, but they’re much better than nothing. The fix is to test them, not skip them."><span class="cp-option__key">C</span><span>“Runbooks always go out of date. Let’s not spend time on it.”</span><span class="cp-option__tag"></span></button></li>
+        </ul>
+        <div class="cp-feedback" role="status" hidden></div>
+      </div>
+
+      <div class="cp-check" role="group" aria-labelledby="k-09-q" data-check="k-09" data-reveal>
+        <div class="cp-check__head"><span class="cp-chip cp-chip--apply">APPLY</span><span class="cp-label">Check 09 / 09 · think, then reveal</span></div>
+        <p class="cp-check__q" id="k-09-q">Sam answers your question. What answer should worry you, and what answer would reassure you? Think about it, then show the answer.</p>
+        <button type="button" class="cp-reveal" aria-expanded="false" aria-controls="k-09-a">Show the answer</button>
+        <div class="cp-feedback" id="k-09-a" role="status" hidden>
+          <p><span class="st st--warn"><span class="lamp" aria-hidden="true"></span>WORRYING</span>“Depends. If I’m reachable, a few hours, I think.” That’s a guess, and it depends entirely on one person.</p>
+          <p><span class="st st--good"><span class="lamp" aria-hidden="true"></span>REASSURING</span>“We rehearsed it last month. Jordan followed the notes on a spare machine while I watched without helping. It took fifty minutes, we found two gaps, and we added them to the notes.” That’s a measured time, from a real rebuild, that didn’t rely on Sam’s memory.</p>
+          <p>The point is what to listen for: a measured recovery time from an actual rebuild beats a confident estimate.</p>
+        </div>
+      </div>
+
+      <div class="cp-recap">
+        <p class="cp-label">In short</p>
+        <ul>
+          <li>The app is the code plus everything it depends on, on one particular machine.</li>
+          <li>A hand-built server drifts away from its notes, and only a rebuild shows how far.</li>
+          <li>Bigger servers and VMs help, but neither tells you what should be on the machine.</li>
+        </ul>
+        <p>One question stays open. If the app is the code plus everything on the machine, how do you ship all of it? A year from now Fennel has six engineers, and that question comes up every day.</p>
+      </div>
+    </section>
+
+    <footer class="cp-sources" data-toc-skip>
+      <p class="cp-label">Sources</p>
+      <ol>
+        <li>Martin Fowler, <a href="https://martinfowler.com/bliki/SnowflakeServer.html">“SnowflakeServer”</a> (2012): snowflake servers, why they are hard to reproduce and understand, and the limits of disk copies.</li>
+        <li>Martin Fowler, <a href="https://martinfowler.com/bliki/PhoenixServer.html">“PhoenixServer”</a>: configuration drift, and the recovery-time “certification”.</li>
+        <li>The Twelve-Factor App, <a href="https://12factor.net/dependencies">“Dependencies”</a> and <a href="https://12factor.net/config">“Config”</a>: tools and settings an app relies on outside its code.</li>
+        <li>PostgreSQL documentation, <a href="https://www.postgresql.org/docs/18/diskusage.html">“Monitoring Disk Usage”</a>: what a full disk does to a database.</li>
+        <li>Google, <a href="https://sre.google/sre-book/introduction/"><cite>Site Reliability Engineering</cite>, introduction</a>: written response steps and repair time.</li>
+        <li>Red Hat, <a href="https://www.redhat.com/en/topics/virtualization/what-is-a-virtual-machine">“What is a virtual machine?”</a></li>
+        <li>Google Cloud Architecture Framework, <a href="https://docs.cloud.google.com/architecture/framework/reliability/horizontal-scalability">“Horizontal scalability”</a>: the limits of a bigger machine.</li>
+        <li>Wikipedia, <a href="https://en.wikipedia.org/wiki/Bus_factor">“Bus factor”</a>.</li>
+      </ol>
+      <p>Fennel, its people, its times and its settings are fiction, made up to illustrate the mechanisms above.</p>
+    </footer>
+  </main>
+</div>
+
+<script src="assets/arrow.js"></script>
+<script src="assets/toc.js"></script>
+<script src="assets/replay.js"></script>
+<script src="assets/page.js"></script>
+<script src="assets/widget.js"></script>
+<link rel="stylesheet" href="widgets/w-rebuild/index.css">
+<script src="widgets/w-rebuild/data.js"></script>
+<script src="widgets/w-rebuild/index.js"></script>
+</body>
+</html>
