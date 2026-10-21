@@ -1,0 +1,92 @@
+<!-- @dsCard height=288 -->
+<!doctype html>
+<html lang="en">
+<head><link rel="stylesheet" href="../../control-plane.css"><link rel="stylesheet" href="../bundle.css">
+<meta charset="utf-8">
+<title>Control Plane</title>
+<style>
+  html, body { margin:0; height:100%; }
+  body { background:var(--bg); color:var(--ink); font-family:var(--font-sans); overflow:hidden; }
+  .cover { position:relative; width:960px; height:288px; overflow:hidden; }
+  .art { position:absolute; top:0; left:480px; width:480px; height:288px; overflow:hidden; }
+  .art svg { display:block; width:480px; height:288px; }
+  .deep { fill:var(--ink); }
+  .hot { fill:var(--accent); }
+  .tint { fill:var(--ink-4); }
+  .blk { rx:var(--radius-1); }
+  .mark { fill:none; stroke:var(--bg); stroke-width:var(--stroke); }
+  .words { position:absolute; left:var(--sp-4); bottom:var(--sp-4); max-width:440px; }
+  .name { margin:0; font-size:88px; line-height:.95; font-weight:800; font-stretch:112%; letter-spacing:-.02em; color:var(--ink); }
+  .tag { margin:var(--sp-2) 0 0 2px; font:400 13px/18px var(--font-mono); color:var(--ink-3); }
+</style>
+</head>
+<body>
+<div class="cover">
+<div class="art" aria-hidden="true">
+<svg viewBox="0 0 480 288" width="480" height="288">
+<!--
+  blocks      ink slab 280×216 bled off top and right (the instrument housing) · accent 160×168 (the one signal colour) · ink-4 strip 280×64 bled off bottom-right (relief) — ≈36% of 960×288
+  arrangement one dark slab with an orange satellite and a grey base strip, flush modular grid, sp-3 gutters
+  pattern     plus-grid from "precise, technical, mono, blueprint": 48 crosshairs at an sp-4 pitch cut into the slab in bg, arms sp-half, stroke --stroke
+  scales      sides in sp-1 multiples; gutters sp-2/sp-3; pitch sp-4; corners radius-1
+-->
+<rect class="deep blk" x="200" y="-8" width="288" height="216" rx="2"/>
+<rect class="hot blk" x="24" y="96" width="160" height="168" rx="2"/>
+<rect class="tint blk" x="200" y="224" width="288" height="72" rx="2"/>
+<path class="mark" d="M228 24 H236 M232 20 V28"/>
+<path class="mark" d="M228 56 H236 M232 52 V60"/>
+<path class="mark" d="M228 88 H236 M232 84 V92"/>
+<path class="mark" d="M228 120 H236 M232 116 V124"/>
+<path class="mark" d="M228 152 H236 M232 148 V156"/>
+<path class="mark" d="M228 184 H236 M232 180 V188"/>
+<path class="mark" d="M260 24 H268 M264 20 V28"/>
+<path class="mark" d="M260 56 H268 M264 52 V60"/>
+<path class="mark" d="M260 88 H268 M264 84 V92"/>
+<path class="mark" d="M260 120 H268 M264 116 V124"/>
+<path class="mark" d="M260 152 H268 M264 148 V156"/>
+<path class="mark" d="M260 184 H268 M264 180 V188"/>
+<path class="mark" d="M292 24 H300 M296 20 V28"/>
+<path class="mark" d="M292 56 H300 M296 52 V60"/>
+<path class="mark" d="M292 88 H300 M296 84 V92"/>
+<path class="mark" d="M292 120 H300 M296 116 V124"/>
+<path class="mark" d="M292 152 H300 M296 148 V156"/>
+<path class="mark" d="M292 184 H300 M296 180 V188"/>
+<path class="mark" d="M324 24 H332 M328 20 V28"/>
+<path class="mark" d="M324 56 H332 M328 52 V60"/>
+<path class="mark" d="M324 88 H332 M328 84 V92"/>
+<path class="mark" d="M324 120 H332 M328 116 V124"/>
+<path class="mark" d="M324 152 H332 M328 148 V156"/>
+<path class="mark" d="M324 184 H332 M328 180 V188"/>
+<path class="mark" d="M356 24 H364 M360 20 V28"/>
+<path class="mark" d="M356 56 H364 M360 52 V60"/>
+<path class="mark" d="M356 88 H364 M360 84 V92"/>
+<path class="mark" d="M356 120 H364 M360 116 V124"/>
+<path class="mark" d="M356 152 H364 M360 148 V156"/>
+<path class="mark" d="M356 184 H364 M360 180 V188"/>
+<path class="mark" d="M388 24 H396 M392 20 V28"/>
+<path class="mark" d="M388 56 H396 M392 52 V60"/>
+<path class="mark" d="M388 88 H396 M392 84 V92"/>
+<path class="mark" d="M388 120 H396 M392 116 V124"/>
+<path class="mark" d="M388 152 H396 M392 148 V156"/>
+<path class="mark" d="M388 184 H396 M392 180 V188"/>
+<path class="mark" d="M420 24 H428 M424 20 V28"/>
+<path class="mark" d="M420 56 H428 M424 52 V60"/>
+<path class="mark" d="M420 88 H428 M424 84 V92"/>
+<path class="mark" d="M420 120 H428 M424 116 V124"/>
+<path class="mark" d="M420 152 H428 M424 148 V156"/>
+<path class="mark" d="M420 184 H428 M424 180 V188"/>
+<path class="mark" d="M452 24 H460 M456 20 V28"/>
+<path class="mark" d="M452 56 H460 M456 52 V60"/>
+<path class="mark" d="M452 88 H460 M456 84 V92"/>
+<path class="mark" d="M452 120 H460 M456 116 V124"/>
+<path class="mark" d="M452 152 H460 M456 148 V156"/>
+<path class="mark" d="M452 184 H460 M456 180 V188"/>
+</svg>
+</div>
+<div class="words">
+<h1 class="name">Control<br>Plane</h1>
+<p class="tag">Explainer system for a Kubernetes course.</p>
+</div>
+</div>
+</body>
+</html>

@@ -1,0 +1,40 @@
+<!-- @dsCard group="Explainer" height=520 subtitle="PREDICT / EXPLAIN / APPLY with inline feedback" -->
+<!doctype html>
+<html lang="en">
+<head><link rel="stylesheet" href="../../control-plane.css"><link rel="stylesheet" href="../bundle.css"><meta charset="utf-8"><title>Check — preview</title>
+<style>html,body{margin:0}body{padding:8px 16px 16px}.cp-check{margin:var(--sp-1) auto var(--sp-2)}</style></head>
+<body class="cp-page">
+<section class="cp-check" aria-labelledby="q1">
+  <div class="cp-check__head">
+    <span class="cp-chip">PREDICT</span>
+    <span class="cp-label">Check 02 / 04</span>
+  </div>
+  <p class="cp-check__q" id="q1">You scale <code style="font:400 .8em var(--font-mono)">web</code> to 10 replicas, but the three nodes only have room for 9 Pods. What happens to the tenth?</p>
+  <ul class="cp-options" id="opts">
+    <li><button class="cp-option" data-fb="The Deployment accepts any replica count. It records intent; capacity is someone else’s problem."><span class="cp-option__key">A</span><span>The API server rejects the change</span><span class="cp-option__tag"></span></button></li>
+    <li><button class="cp-option" data-ok data-fb="The ReplicaSet creates it, the scheduler finds no feasible node, and it waits as Pending until room appears."><span class="cp-option__key">B</span><span>It is created and waits as Pending</span><span class="cp-option__tag"></span></button></li>
+    <li><button class="cp-option" data-fb="Eviction to make room only happens with Pod priority and preemption configured. Equal-priority Pods don’t push each other out."><span class="cp-option__key">C</span><span>The scheduler evicts an older Pod</span><span class="cp-option__tag"></span></button></li>
+    <li><button class="cp-option" data-fb="The kubelet only runs Pods already bound to its node. An unscheduled Pod never reaches it."><span class="cp-option__key">D</span><span>A kubelet runs it over capacity</span><span class="cp-option__tag"></span></button></li>
+  </ul>
+  <div class="cp-feedback" id="fb" role="status" hidden></div>
+</section>
+<script>
+(function(){
+  var opts=[].slice.call(document.querySelectorAll('#opts .cp-option')), fb=document.getElementById('fb');
+  function reset(){opts.forEach(function(b){b.disabled=false;b.classList.remove('is-right','is-wrong');b.querySelector('.cp-option__tag').textContent=''});fb.hidden=true;fb.className='cp-feedback';opts[0].focus()}
+  opts.forEach(function(btn){
+    btn.addEventListener('click',function(){
+      var ok=btn.hasAttribute('data-ok');
+      opts.forEach(function(b){b.disabled=true});
+      btn.classList.add(ok?'is-right':'is-wrong');
+      btn.querySelector('.cp-option__tag').textContent=ok?'CORRECT':'NO';
+      if(!ok){var r=opts.filter(function(b){return b.hasAttribute('data-ok')})[0];r.classList.add('is-right');r.querySelector('.cp-option__tag').textContent='ANSWER'}
+      fb.hidden=false; fb.className='cp-feedback '+(ok?'is-right':'is-wrong');
+      fb.innerHTML='<b>'+(ok?'CORRECT':'NOT QUITE')+'</b>'+btn.getAttribute('data-fb')+(ok?'':' <button class="cp-retry" type="button">TRY AGAIN</button>');
+      var t=fb.querySelector('.cp-retry'); if(t) t.addEventListener('click',reset);
+    });
+  });
+})();
+</script>
+</body>
+</html>

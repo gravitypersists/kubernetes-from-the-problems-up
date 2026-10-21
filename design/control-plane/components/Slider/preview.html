@@ -1,0 +1,61 @@
+<!-- @dsCard group="Explainer" height=420 subtitle="Range input with a live mono readout" -->
+<!doctype html>
+<html lang="en">
+<head><link rel="stylesheet" href="../../control-plane.css"><link rel="stylesheet" href="../bundle.css"><meta charset="utf-8"><title>Slider — preview</title>
+<style>html,body{margin:0}body{padding:8px 16px 16px}.cp-widget{margin:var(--sp-1) auto var(--sp-2)}
+.pods{display:grid;grid-template-columns:repeat(3,1fr);gap:var(--sp-1)}
+.node{border:var(--stroke) solid var(--ink);border-radius:var(--radius-1);padding:var(--sp-1);min-height:96px;display:flex;flex-direction:column;gap:var(--sp-1)}
+.slots{display:flex;flex-wrap:wrap;gap:var(--sp-half)}
+.pod{width:var(--sp-3);height:var(--sp-3);background:var(--c1-soft);border:var(--stroke) solid var(--c1);border-radius:var(--radius-1);animation:pop var(--dur-2) var(--ease-out)}
+.pod.pending{background:var(--c6-soft);border-color:var(--c6);border-style:dashed}
+
+.queue{grid-column:1/-1;display:flex;align-items:center;gap:var(--sp-1);min-height:var(--sp-4);padding-top:var(--sp-1);border-top:var(--stroke) dashed var(--ink-4)}
+@keyframes pop{from{transform:scale(.4);opacity:0}to{transform:none;opacity:1}}
+</style></head>
+<body class="cp-page">
+<section class="cp-widget" aria-labelledby="w1">
+  <div class="cp-widget__bar"><span class="cp-lamp" aria-hidden="true"></span><span class="cp-label" id="w1">Widget 01 — Scale a Deployment</span><span class="cp-label">Live</span></div>
+  <div class="cp-widget__body">
+    <div class="cp-readout">
+      <span class="cp-label">replicas</span>
+      <output class="cp-readout__value" id="out" for="r" aria-live="polite">03</output>
+      <span class="cp-label" id="sub">3 running</span>
+    </div>
+    <div class="pods" id="nodes" aria-hidden="true"></div>
+    <div class="cp-range-wrap">
+      <label class="cp-label" for="r" style="display:block">Replicas</label>
+      <input class="cp-range" id="r" type="range" min="0" max="12" step="1" value="3" aria-describedby="note">
+      <div class="cp-scale" aria-hidden="true"><span>0</span><span>3</span><span>6</span><span>9</span><span>12</span></div>
+    </div>
+    <p class="cp-widget__note" id="note">Each node fits <b>3</b> Pods. Drag past 9 and watch the extras wait as <b>Pending</b>.</p>
+  </div>
+</section>
+<script>
+(function(){
+  var r=document.getElementById('r'), out=document.getElementById('out'), sub=document.getElementById('sub'), nodes=document.getElementById('nodes');
+  var CAP=3, N=3;
+  function render(){
+    var v=+r.value, pct=(v-r.min)/(r.max-r.min)*100;
+    r.style.setProperty('--pct', pct+'%');
+    out.textContent=String(v).padStart(2,'0');
+    var running=Math.min(v,CAP*N), pending=v-running;
+    sub.textContent=running+' running'+(pending?' · '+pending+' pending':'');
+    nodes.innerHTML='';
+    for(var n=0;n<N;n++){
+      var d=document.createElement('div'); d.className='node';
+      d.innerHTML='<span class="cp-label">node-'+'abc'[n]+'</span><div class="slots"></div>';
+      var s=d.lastChild, k=Math.max(0,Math.min(CAP, Math.ceil((running-n)/N)));
+      for(var i=0;i<k;i++){var p=document.createElement('span');p.className='pod';s.appendChild(p)}
+      nodes.appendChild(d);
+    }
+    var qd=document.createElement('div'); qd.className='queue';
+    qd.innerHTML='<span class="cp-label">unscheduled</span><div class="slots"></div>';
+    for(var j=0;j<pending;j++){var q=document.createElement('span');q.className='pod pending';qd.lastChild.appendChild(q)}
+    if(!pending){var e=document.createElement('span');e.className='cp-label';e.textContent='— none';qd.lastChild.appendChild(e)}
+    nodes.appendChild(qd);
+  }
+  r.addEventListener('input',render); render();
+})();
+</script>
+</body>
+</html>

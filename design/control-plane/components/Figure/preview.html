@@ -1,0 +1,54 @@
+<!-- @dsCard group="Explainer" height=520 subtitle="Plate, header bar, directly labeled SVG, caption" -->
+<!doctype html>
+<html lang="en">
+<head><link rel="stylesheet" href="../../control-plane.css"><link rel="stylesheet" href="../bundle.css"><meta charset="utf-8"><title>Figure — preview</title>
+<style>html,body{margin:0}body{padding:8px 0}.cp-fig{margin:var(--sp-2) auto}</style></head>
+<body class="cp-page">
+<figure class="cp-fig" style="max-width:648px">
+  <div class="cp-fig__plate">
+    <div class="cp-fig__bar"><span class="cp-label">Fig. 02</span><span class="cp-label">Deployment → Pods → Nodes</span></div>
+    <div class="cp-blueprint">
+      <svg class="cp-svg" viewBox="0 0 600 300" role="img" aria-labelledby="f2t f2d">
+        <title id="f2t">A Deployment owns a ReplicaSet, which creates four Pods.</title>
+        <desc id="f2d">Pods web-1 and web-2 run on node-a, web-3 runs on node-b, and web-4 is Pending because no node has room.</desc>
+        <defs>
+          <marker id="ah" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path class="arrow" d="M0 0 L8 4 L0 8 z"/></marker>
+        </defs>
+        <!-- controllers -->
+        <rect class="c2" x="16" y="24" width="136" height="52" rx="2"/>
+        <text class="t-label" x="28" y="46">DEPLOYMENT</text>
+        <text class="t-mute" x="28" y="64">web ×4</text>
+        <path class="k" d="M84 76 V128" marker-end="url(#ah)"/>
+        <text class="t-mute" x="92" y="106">owns</text>
+        <rect class="c3" x="16" y="132" width="136" height="52" rx="2"/>
+        <text class="t-label" x="28" y="154">REPLICASET</text>
+        <text class="t-mute" x="28" y="172">web-7d9f</text>
+        <!-- nodes -->
+        <rect class="plate" x="200" y="24" width="180" height="168" rx="2"/>
+        <text class="t-label" x="212" y="46">NODE-A</text>
+        <text class="t-mute" x="212" y="64">2 CPU free</text>
+        <rect class="plate" x="404" y="24" width="180" height="168" rx="2"/>
+        <text class="t-label" x="416" y="46">NODE-B</text>
+        <text class="t-mute" x="416" y="64">0.5 CPU free</text>
+        <!-- pods -->
+        <rect class="c1" x="216" y="88" width="56" height="56" rx="2"/>
+        <rect class="c1" x="296" y="88" width="56" height="56" rx="2"/>
+        <rect class="c1" x="420" y="88" width="56" height="56" rx="2"/>
+        <text x="216" y="166">web-1</text>
+        <text x="296" y="166">web-2</text>
+        <text x="420" y="166">web-3</text>
+        <!-- creates (drawn over the node plates) -->
+        <path class="k" d="M152 158 H176 V116 H212" marker-end="url(#ah)"/>
+        <path class="k" d="M176 158 V252 H400" marker-end="url(#ah)"/>
+        <text class="t-mute" x="184" y="222">creates ×4</text>
+        <rect class="c6" x="404" y="224" width="56" height="56" rx="2"/>
+        <text x="472" y="246">web-4</text>
+        <text class="t-mute" x="472" y="264">Pending</text>
+        <text class="t-mute" x="472" y="280">no node fits</text>
+      </svg>
+    </div>
+  </div>
+  <figcaption><span class="cp-label">Fig. 02</span><span>The Deployment only states intent. Its ReplicaSet creates Pods; the scheduler places three of them and leaves the fourth Pending until a node frees up 1 CPU.</span></figcaption>
+</figure>
+</body>
+</html>

@@ -1,0 +1,18 @@
+<!-- @dsCard group="Explainer" height=620 subtitle="Body prose with h2 / h3" -->
+<!doctype html>
+<html lang="en">
+<head><link rel="stylesheet" href="../../control-plane.css"><link rel="stylesheet" href="../bundle.css"><meta charset="utf-8"><title>Prose — preview</title>
+<style>html,body{margin:0}body{padding:8px 0 32px}</style></head>
+<body class="cp-page">
+<article class="cp-prose">
+  <p>A <dfn>Deployment</dfn> never touches a node directly. It writes down what it wants — three copies of this container, please — and walks away. Everything after that is other controllers noticing the gap between what was asked for and what exists, and closing it.</p>
+  <h2><span class="cp-sec">§ 02</span>The scheduler’s two passes</h2>
+  <p>When a new Pod appears with an empty <code>nodeName</code>, the scheduler picks it up. It doesn’t start the Pod; it only decides <em>where</em> the Pod should run, then writes that decision back to the API server. The <a href="#">kubelet</a> on the chosen node does the rest.</p>
+  <h3>Filtering</h3>
+  <p>First, every node that <strong>cannot</strong> run the Pod is crossed off: not enough free memory, a taint the Pod doesn’t tolerate, a port already in use. What survives is the feasible set.</p>
+  <div class="cp-aside"><b>NOTE</b>If the feasible set is empty, the Pod stays <code>Pending</code> and the scheduler tries again later. Nothing is wrong with the Pod; the cluster is simply full.</div>
+  <h3>Scoring</h3>
+  <p>Then each feasible node gets a score from a handful of plugins, and the highest wins. Ties are broken at random, which is why identical Pods don’t all pile onto one machine.</p>
+</article>
+</body>
+</html>
