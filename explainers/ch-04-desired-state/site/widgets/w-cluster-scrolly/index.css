@@ -1,0 +1,287 @@
+/* w-cluster-scrolly · scoped styles for the §04 / §05 lane drawing (renderCluster) and the step kicker.
+   Copied from Ch 03's w-fleet-scrolly/index.css and extended. The page owns the scrolly layout (.cs-* in
+   assets/page.css); this file styles only what the widget renders into [data-canvas], [data-step-snap]
+   and [data-step-text], plus the measured inline fallback (data-cs-fit on the mount). Every value is a
+   token. Grammar (plan ## Visual grammar), matching the page's .cp-rec / .cp-loop / .cp-pod /
+   .cp-machine / .cp-ctr: things different in kind look different.
+     a written intention  the cluster's record: c4 stroke on c4-soft, mono rows
+     an actor (a loop)    c3 pill on c3-soft with a typographic ↻; idle loops at 0.35 opacity
+     a running thing      Ch 02's c1 chip inside an inset ink ring (the Pod), height = size
+     only a record        a Pod not started: dashed, no fill, no lamp
+     reality              a dead machine: dashed ink-3 frame, DOWN in its body, its Pods LOST
+   Status is always a word plus colour. No arrows on the canvas; the step highlight (3px ink outline)
+   marks what changed. No shadow: the drawing isn't interactive. */
+
+[data-widget="w-cluster-scrolly"] .wc,
+[data-widget="w-cluster-scrolly"] .wc * { box-sizing: border-box; }
+
+[data-widget="w-cluster-scrolly"] .wc {
+  position: relative;
+  background: var(--surface);
+  border: var(--stroke) solid var(--ink);
+  border-radius: var(--radius-1);
+  color: var(--ink);
+  font: 700 var(--fs-caption)/16px var(--font-mono);
+}
+
+/* header bar: W-01 · THE CLUSTER · LANE … CLOCK  STEP n / N */
+[data-widget="w-cluster-scrolly"] .wc__bar {
+  display: flex; align-items: center; gap: var(--sp-1);
+  min-height: 26px; padding: 3px var(--sp-1);
+  border-bottom: var(--stroke) solid var(--ink);
+  font: 700 var(--fs-caption)/var(--lh-caption) var(--font-mono);
+  letter-spacing: .08em; text-transform: uppercase; white-space: nowrap;
+}
+[data-widget="w-cluster-scrolly"] .wc--narrow .wc__bar { min-height: 22px; padding: 1px 6px; gap: 6px; }
+/* an inline snapshot on a phone bleeds into the step card's padding (see drawSnaps) */
+[data-widget="w-cluster-scrolly"] .wc--bleed { margin-inline: -10px; }
+[data-widget="w-cluster-scrolly"] .wc__title { flex: 1 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; color: var(--ink); }
+[data-widget="w-cluster-scrolly"] .wc__clock { flex: none; color: var(--ink); font-variant-numeric: tabular-nums; }
+[data-widget="w-cluster-scrolly"] .wc__step { flex: none; color: var(--ink-3); font-variant-numeric: tabular-nums; }
+
+/* blueprint ground (the style guide's .cp-blueprint, scoped) */
+[data-widget="w-cluster-scrolly"] .wc__ground {
+  display: flex; flex-direction: column; gap: var(--wc-row, 8px);
+  padding: var(--wc-pad, 8px);
+  background-color: var(--surface);
+  background-image:
+    linear-gradient(var(--line) 1px, transparent 1px),
+    linear-gradient(90deg, var(--line) 1px, transparent 1px);
+  background-size: var(--sp-4) var(--sp-4);
+  background-position: -1px -1px;
+}
+[data-widget="w-cluster-scrolly"] .wc__ground > * { margin: 0; }
+
+/* "what if" banner (Ch 03's; unused in Ch 04) */
+[data-widget="w-cluster-scrolly"] .wc__banner { display: flex; align-items: flex-start; }
+[data-widget="w-cluster-scrolly"] .wc__banner-t {
+  padding: 2px var(--sp-1);
+  background: var(--surface); border: var(--stroke) dashed var(--ink); border-radius: var(--radius-1);
+  font: 700 var(--fs-caption)/var(--lh-caption) var(--font-mono); letter-spacing: .08em; text-transform: uppercase;
+}
+
+/* ---- the cluster's record: a written intention (page .cp-rec) ---- */
+[data-widget="w-cluster-scrolly"] .wc-rec {
+  min-width: 0;
+  background: var(--c4-soft); border: var(--stroke) solid var(--c4); border-radius: var(--radius-1);
+  color: var(--ink);
+}
+[data-widget="w-cluster-scrolly"] .wc-rec__head {
+  margin: 0; padding: 2px var(--wc-recpad, 8px);
+  border-bottom: var(--stroke) solid var(--c4);
+  font: 700 var(--fs-caption)/16px var(--font-mono); letter-spacing: .06em; text-transform: uppercase;
+  white-space: nowrap; overflow: hidden;
+}
+/* rows sit 2px apart; a highlighted row's outline is drawn 1px inside its box, so it reaches exactly
+   to the next row and never covers that row's text */
+[data-widget="w-cluster-scrolly"] .wc-rec__rows { display: flex; flex-direction: column; gap: 2px; padding: 4px calc(var(--wc-recpad, 8px) - 2px); }
+[data-widget="w-cluster-scrolly"] .wc-rec__row {
+  display: grid; grid-template-columns: var(--wc-cols); column-gap: var(--wc-recgap, 12px); align-items: center;
+  padding: 0 2px; border-radius: var(--radius-1);
+  font: 400 var(--fs-caption)/17px var(--font-mono); white-space: nowrap;
+}
+[data-widget="w-cluster-scrolly"] .wc--narrow .wc-rec__row { line-height: 15px; }
+[data-widget="w-cluster-scrolly"] .wc--narrow .wc-rec__rows { padding-top: 2px; padding-bottom: 2px; }
+[data-widget="w-cluster-scrolly"] .wc--narrow .wc-rec__head { line-height: 15px; padding-top: 0; padding-bottom: 0; }
+[data-widget="w-cluster-scrolly"] .wc-rec__row.is-hl { outline-offset: -1px; }
+[data-widget="w-cluster-scrolly"] .wc-rec__name { font-weight: 700; overflow: hidden; }
+[data-widget="w-cluster-scrolly"] .wc-rec__want { color: var(--ink-2); }
+[data-widget="w-cluster-scrolly"] .wc-rec__marks { display: flex; align-items: center; gap: 4px; }
+[data-widget="w-cluster-scrolly"] .wc-rec__word { justify-self: end; font-weight: 700; overflow: hidden; }
+[data-widget="w-cluster-scrolly"] .wc-rec__sep { color: var(--ink-3); }
+/* one mark per Pod record: filled = the record says running; hollow dashed = recorded, not running;
+   "?" = on a node marked unknown. Glyphs, not text (10px squares). */
+[data-widget="w-cluster-scrolly"] .wc-mark { display: inline-block; flex: none; width: 10px; height: 10px; font-style: normal; }
+[data-widget="w-cluster-scrolly"] .wc-mark--run { background: var(--good); }
+[data-widget="w-cluster-scrolly"] .wc-mark--rec { border: var(--stroke) dashed var(--ink-3); }
+/* marked for deletion: still in the record, struck through, not counted */
+[data-widget="w-cluster-scrolly"] .wc-mark--del {
+  border: var(--stroke) solid var(--ink-3);
+  background: linear-gradient(to top right, transparent 42%, var(--ink-3) 42%, var(--ink-3) 58%, transparent 58%);
+}
+[data-widget="w-cluster-scrolly"] .wc-mark--unk { font: 700 var(--fs-caption)/10px var(--font-mono); text-align: center; color: var(--warn); }
+
+/* status and tone words: word + colour, never colour alone */
+[data-widget="w-cluster-scrolly"] .wc-tone--good { color: var(--good); }
+[data-widget="w-cluster-scrolly"] .wc-tone--bad { color: var(--bad); }
+[data-widget="w-cluster-scrolly"] .wc-tone--warn { color: var(--warn); }
+[data-widget="w-cluster-scrolly"] .wc-tone--mute { color: var(--ink-3); }
+
+/* ---- loops: actors (page .cp-loop) and the lens line ---- */
+[data-widget="w-cluster-scrolly"] .wc-loops { display: flex; flex-direction: column; gap: var(--sp-half); }
+[data-widget="w-cluster-scrolly"] .wc-loops__pills { display: flex; flex-wrap: wrap; gap: 6px; padding: 2px; }
+[data-widget="w-cluster-scrolly"] .wc-pill {
+  display: inline-flex; align-items: center; gap: var(--sp-half);
+  height: 22px; padding: 0 var(--wc-pillpad, 6px);
+  background: var(--c3-soft); border: var(--stroke) solid var(--c3); border-radius: var(--radius-3);
+  font: 700 var(--fs-caption)/1 var(--font-mono); letter-spacing: 0; white-space: nowrap; color: var(--ink);
+  opacity: .35;
+  transition: opacity var(--dur-2) var(--ease-out);
+}
+[data-widget="w-cluster-scrolly"] .wc-pill.is-on { opacity: 1; }
+[data-widget="w-cluster-scrolly"] .wc-pill__mark { font-weight: 700; }
+[data-widget="w-cluster-scrolly"] .wc--narrow .wc-pill { height: 18px; }
+[data-widget="w-cluster-scrolly"] .wc--narrow .wc-loops { gap: 2px; }
+[data-widget="w-cluster-scrolly"] .wc--narrow .wc-loops__pills { padding: 0 1px; }
+/* the lens block is padded inside its step-highlight outline, so the outline never sits on its text */
+[data-widget="w-cluster-scrolly"] .wc-lens { padding: 2px var(--sp-half); border-radius: var(--radius-1); }
+[data-widget="w-cluster-scrolly"] .wc--narrow .wc-lens { padding: 1px var(--sp-half); }
+[data-widget="w-cluster-scrolly"] .wc-lens.is-hl { outline-offset: 0; }
+[data-widget="w-cluster-scrolly"] .wc-lens__line {
+  margin: 0;
+  font: 400 var(--fs-caption)/17px var(--font-mono); color: var(--ink);
+}
+[data-widget="w-cluster-scrolly"] .wc--narrow .wc-lens__line { line-height: 15px; }
+[data-widget="w-cluster-scrolly"] .wc-lens__k { font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--ink-2); }
+
+/* ---- nodes: Ch 03's machine frame, NODE · NN, with the node agent and the record's view on the bar ---- */
+[data-widget="w-cluster-scrolly"] .wc__nodes { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: var(--wc-gapm, 8px); }
+[data-widget="w-cluster-scrolly"] .wc-n {
+  min-width: 0;
+  background: var(--surface);
+  border: var(--stroke) solid var(--ink); border-radius: var(--radius-1);
+}
+[data-widget="w-cluster-scrolly"] .wc-n__bar {
+  display: flex; flex-direction: column; align-items: flex-start; gap: 2px;
+  padding: 2px var(--wc-barpad, 4px) var(--sp-half);
+  border-bottom: var(--stroke) solid var(--ink);
+  font: 700 var(--fs-caption)/16px var(--font-mono); letter-spacing: .04em; text-transform: uppercase;
+  white-space: nowrap; overflow: hidden;
+}
+[data-widget="w-cluster-scrolly"] .wc--narrow .wc-n__bar { gap: 0; padding-top: 0; padding-bottom: 2px; line-height: 15px; }
+[data-widget="w-cluster-scrolly"] .wc--narrow .wc-pill--agent { height: 16px; }
+[data-widget="w-cluster-scrolly"] .wc-n__bar--row { flex-direction: row; align-items: center; justify-content: space-between; gap: 6px; padding-bottom: 2px; }
+[data-widget="w-cluster-scrolly"] .wc-n__id { display: block; color: var(--ink); font-variant-numeric: tabular-nums; }
+[data-widget="w-cluster-scrolly"] .wc-n__row { display: flex; align-items: center; gap: var(--sp-half); min-height: 18px; }
+[data-widget="w-cluster-scrolly"] .wc-n__st { font-weight: 700; letter-spacing: .04em; border-radius: var(--radius-1); }
+[data-widget="w-cluster-scrolly"] .wc-pill--agent {
+  height: 18px; padding: 0 var(--wc-barpad, 4px); gap: 2px;
+  text-transform: none; letter-spacing: 0;
+}
+[data-widget="w-cluster-scrolly"] .wc-n.is-down { border-style: dashed; border-color: var(--ink-3); }
+[data-widget="w-cluster-scrolly"] .wc-n.is-down .wc-n__bar { border-bottom-style: dashed; border-bottom-color: var(--ink-3); }
+[data-widget="w-cluster-scrolly"] .wc-n__body {
+  display: flex; flex-direction: column; gap: var(--wc-gapu, 4px);
+  padding: var(--wc-bodypad, 3px);
+}
+
+/* Pod = Ch 02's container chip inside an inset ink ring (page .cp-pod); height = size in room units */
+[data-widget="w-cluster-scrolly"] .wc-p {
+  flex: none; min-width: 0; padding: var(--wc-ringpad, 2px);
+  border: var(--stroke) solid var(--ink); border-radius: var(--radius-1);
+  background: var(--surface);
+}
+[data-widget="w-cluster-scrolly"] .wc-c {
+  display: flex; flex-direction: column; justify-content: flex-start;
+  height: 100%; min-width: 0; overflow: hidden;
+  padding: 1px var(--wc-chippad, 3px);
+  background: var(--c1-soft); border: var(--stroke) solid var(--c1); border-radius: 1px;
+  font: 700 var(--fs-caption)/16px var(--font-mono); letter-spacing: 0; color: var(--ink);
+}
+[data-widget="w-cluster-scrolly"] .wc--narrow .wc-c { line-height: 14px; letter-spacing: -0.02em; }
+/* small units: 1px Pod strokes, no ring inset (see geometry) */
+[data-widget="w-cluster-scrolly"] .wc--thin .wc-p,
+[data-widget="w-cluster-scrolly"] .wc--thin .wc-c { border-width: 1px; }
+[data-widget="w-cluster-scrolly"] .wc-c--tight { padding-top: 0; padding-bottom: 0; justify-content: center; }
+[data-widget="w-cluster-scrolly"] .wc-c--tight .wc-c__ln { line-height: 14px; }
+[data-widget="w-cluster-scrolly"] .wc-c__ln { display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+[data-widget="w-cluster-scrolly"] .wc-c__ln > .wc-lamp { vertical-align: 0; }
+/* NOT STARTED: the Pod exists only as a record, so dashed, no fill, no lamp */
+[data-widget="w-cluster-scrolly"] .wc-p--notstarted { border-style: dashed; border-color: var(--ink-3); background: transparent; }
+[data-widget="w-cluster-scrolly"] .wc-p--notstarted .wc-c { background: transparent; border-style: dashed; color: var(--ink-3); }
+/* LOST (on a dead machine) and STOPPED: dashed, no fill, so the Pod reads as gone */
+[data-widget="w-cluster-scrolly"] .wc-p--lost,
+[data-widget="w-cluster-scrolly"] .wc-p--stopped { border-style: dashed; border-color: var(--ink-3); background: transparent; }
+[data-widget="w-cluster-scrolly"] .wc-p--lost .wc-c,
+[data-widget="w-cluster-scrolly"] .wc-p--stopped .wc-c { background: transparent; border-style: dashed; border-color: var(--ink-3); color: var(--ink-3); }
+
+[data-widget="w-cluster-scrolly"] .wc-st { font-weight: 700; letter-spacing: 0; text-transform: uppercase; }
+[data-widget="w-cluster-scrolly"] .wc-st--running { color: var(--good); }
+[data-widget="w-cluster-scrolly"] .wc-st--starting,
+[data-widget="w-cluster-scrolly"] .wc-st--newaddr { color: var(--warn); }
+[data-widget="w-cluster-scrolly"] .wc-st--lost,
+[data-widget="w-cluster-scrolly"] .wc-st--crashed { color: var(--bad); }
+[data-widget="w-cluster-scrolly"] .wc-st--notstarted,
+[data-widget="w-cluster-scrolly"] .wc-st--stopped { color: var(--ink-3); }
+[data-widget="w-cluster-scrolly"] .wc-lamp {
+  display: inline-block; flex: none; width: var(--sp-1); height: var(--sp-1);
+  margin: 0 var(--sp-half) 0 0; background: currentColor;
+}
+
+/* unused room: c6 dashed, labelled N FREE */
+[data-widget="w-cluster-scrolly"] .wc-free,
+[data-widget="w-cluster-scrolly"] .wc-down {
+  flex: none; display: grid; place-items: center; min-width: 0; overflow: hidden;
+  border-radius: var(--radius-1);
+  font: 400 var(--fs-caption)/16px var(--font-mono); letter-spacing: .04em; text-transform: uppercase;
+  white-space: nowrap;
+}
+[data-widget="w-cluster-scrolly"] .wc-free { border: var(--stroke) dashed var(--c6); color: var(--ink-3); }
+/* a dead machine's body: reality, in words (what the record believes is on the bar) */
+[data-widget="w-cluster-scrolly"] .wc-down { font-weight: 700; color: var(--bad); }
+
+/* note lines: what customers experience, and the connection line */
+[data-widget="w-cluster-scrolly"] .wc__notes { display: flex; flex-direction: column; align-items: flex-start; gap: var(--sp-half); padding: 2px; }
+[data-widget="w-cluster-scrolly"] .wc--narrow .wc__notes { gap: 2px; padding: 0 2px; }
+/* notes sit 2px apart on a phone: a highlighted note's outline is drawn 1px inside its box */
+[data-widget="w-cluster-scrolly"] .wc--narrow .wc-note.is-hl { outline-offset: -1px; }
+[data-widget="w-cluster-scrolly"] .wc-note {
+  margin: 0; padding: 0 var(--sp-half);
+  background: var(--surface); border-radius: var(--radius-1);
+  font: 400 var(--fs-caption)/17px var(--font-mono); color: var(--ink);
+}
+[data-widget="w-cluster-scrolly"] .wc--narrow .wc-note { line-height: 15px; }
+[data-widget="w-cluster-scrolly"] .wc-note .wc-tone--good,
+[data-widget="w-cluster-scrolly"] .wc-note .wc-tone--bad,
+[data-widget="w-cluster-scrolly"] .wc-note .wc-tone--warn { font-weight: 700; }
+[data-widget="w-cluster-scrolly"] .wc-note__k { font-weight: 700; letter-spacing: .08em; text-transform: uppercase; }
+
+/* step highlight: what changed in this step gets a 3px ink outline, for this step only.
+   It eases in over dur-2 (≤ 300ms); the tokens make it instant under prefers-reduced-motion. */
+[data-widget="w-cluster-scrolly"] .is-hl {
+  outline: 3px solid transparent; outline-offset: 1px;
+  transition: outline-color var(--dur-2) var(--ease-out), opacity var(--dur-2) var(--ease-out);
+}
+[data-widget="w-cluster-scrolly"] .wc-p.is-hl,
+[data-widget="w-cluster-scrolly"] .wc-free.is-hl { outline-offset: 0; }
+[data-widget="w-cluster-scrolly"] .wc.is-lit .is-hl { outline-color: var(--ink); }
+
+/* step text: the clock kicker above a step ("~03:04:50") */
+[data-widget="w-cluster-scrolly"] .cs-step__text .wc-kicker {
+  margin: 0 0 var(--sp-1);
+  font: 700 var(--fs-caption)/var(--lh-caption) var(--font-mono); letter-spacing: .08em; text-transform: uppercase;
+  color: var(--ink-3); font-variant-numeric: tabular-nums;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-widget="w-cluster-scrolly"] .is-hl,
+  [data-widget="w-cluster-scrolly"] .wc-pill { transition: none; }
+}
+
+/* Measured fallback (plan size:, CURRICULUM §8 step 6): where the fitted canvas would still be taller
+   than 50vh (under 900px) or the viewport (above), the controller sets data-cs-fit="inline" on the
+   mount; the lane then works like the page's short-viewport rule: no sticky canvas, and each step
+   shows its own snapshot above its text. */
+[data-widget="w-cluster-scrolly"][data-cs-fit="inline"] .cs-lane__grid { grid-template-columns: minmax(0, 1fr); }
+[data-widget="w-cluster-scrolly"][data-cs-fit="inline"] .cs-canvas { display: none; }
+[data-widget="w-cluster-scrolly"][data-cs-fit="inline"] .cs-step { min-height: 0; }
+[data-widget="w-cluster-scrolly"][data-cs-fit="inline"] .cs-step__snap { display: block; margin-bottom: var(--sp-2); }
+
+/* Load-time reservation. The page reserves the canvas slot (min-height): min(360px, 50vh) under 600px,
+   min(480px, 50vh) at 600–899px, 540px from 900px. Where a lane draws taller than that, reserve it
+   here, before the script runs, so nothing below shifts when the drawing appears. Measured drawing
+   heights: lane A 363px and lane B 369px at 360px wide (B 398px at 390px), plus the slot's 16px padding
+   under 900px; lane B 553px at 1280px. Under 900px the drawing is fitted to 50vh (the slot adds its
+   padding); a page whose lanes can't fit falls back to inline snapshots. */
+[data-widget="w-cluster-scrolly"] .cs-lane[data-lane="A"] .cs-canvas { min-height: min(380px, calc(50vh + 16px)); }
+[data-widget="w-cluster-scrolly"] .cs-lane[data-lane="B"] .cs-canvas { min-height: min(414px, calc(50vh + 16px)); }
+@media (min-width: 600px) {
+  [data-widget="w-cluster-scrolly"] .cs-lane .cs-canvas { min-height: min(480px, calc(50vh + 16px)); }
+}
+@media (min-width: 900px) {
+  [data-widget="w-cluster-scrolly"] .cs-lane[data-lane="A"] .cs-canvas { min-height: 540px; }
+  [data-widget="w-cluster-scrolly"] .cs-lane[data-lane="B"] .cs-canvas { min-height: 556px; }
+}
+@media (max-height: 559px) {
+  [data-widget="w-cluster-scrolly"] .cs-lane .cs-canvas { min-height: 0; }
+}

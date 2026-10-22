@@ -1,0 +1,13 @@
+segments:
+  s-01   Year 3: the same 3 a.m.
+  s-02   Say what you want, not what to do
+  s-03   Pods: what Kubernetes counts
+  s-04   Moving day: what "apply" does
+  s-05   Saturday, 03:04, again
+  s-06   Replaced, not repaired
+  s-07   Who runs what
+  s-08   The conversation
+objectives: 4 · segments: 8 · reader's time: 20 min
+widgets: w-cluster-scrolly (high)
+checks: 9 · acceptance criteria: 17
+RESULT: PASS

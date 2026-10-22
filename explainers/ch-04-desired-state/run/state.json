@@ -1,0 +1,185 @@
+{
+  "version": 1,
+  "slug": "ch-04-desired-state",
+  "created": "2026-10-21T23:10:46-04:00",
+  "depth": "standard",
+  "minutes": 20,
+  "stage": "deliver",
+  "caps": {
+    "spawns": 25,
+    "agent_minutes": 120,
+    "loops": {
+      "research": 2,
+      "checkpoint": 4,
+      "gate": 6,
+      "review": 2
+    }
+  },
+  "seq": 8,
+  "dispatches": [
+    {
+      "nn": 1,
+      "role": "researcher",
+      "loop": "research",
+      "label": "standard-research",
+      "writes": [
+        "run/research"
+      ],
+      "exclude": [],
+      "opened": "2026-10-21T23:12:07-04:00",
+      "closed": "2026-10-21T23:20:30-04:00",
+      "status": "done_with_concerns",
+      "ns_ok": true,
+      "pivot": false,
+      "reason": null,
+      "changed": 9
+    },
+    {
+      "nn": 2,
+      "role": "instructional-designer",
+      "loop": "checkpoint",
+      "label": "plan-and-mockup",
+      "writes": [
+        "run/plan"
+      ],
+      "exclude": [],
+      "opened": "2026-10-21T23:20:33-04:00",
+      "closed": "2026-10-21T23:42:11-04:00",
+      "status": "done_with_concerns",
+      "ns_ok": true,
+      "pivot": false,
+      "reason": null,
+      "changed": 8
+    },
+    {
+      "nn": 3,
+      "role": "page-builder",
+      "loop": "gate:page",
+      "label": "page-build",
+      "writes": [
+        "site"
+      ],
+      "exclude": [
+        "site/widgets/*/*"
+      ],
+      "opened": "2026-10-22T08:04:27-04:00",
+      "closed": "2026-10-22T08:25:59-04:00",
+      "status": "done_with_concerns",
+      "ns_ok": true,
+      "pivot": false,
+      "reason": null,
+      "changed": 45
+    },
+    {
+      "nn": 4,
+      "role": "widget-builder",
+      "loop": "gate:w-cluster-scrolly",
+      "label": "cluster-scrolly",
+      "writes": [
+        "site/widgets/w-cluster-scrolly"
+      ],
+      "exclude": [],
+      "opened": "2026-10-22T08:26:04-04:00",
+      "closed": "2026-10-22T08:50:33-04:00",
+      "status": "done_with_concerns",
+      "ns_ok": true,
+      "pivot": false,
+      "reason": null,
+      "changed": 11
+    },
+    {
+      "nn": 5,
+      "role": "accuracy-reviewer",
+      "loop": "review:accuracy",
+      "label": "accuracy-r1",
+      "writes": [
+        "run/review/round-1"
+      ],
+      "exclude": [],
+      "opened": "2026-10-22T08:51:18-04:00",
+      "closed": "2026-10-22T08:58:22-04:00",
+      "status": "done_with_concerns",
+      "ns_ok": true,
+      "pivot": false,
+      "reason": null,
+      "changed": 135
+    },
+    {
+      "nn": 6,
+      "role": "pedagogy-ux-reviewer",
+      "loop": "review:pedagogy-ux",
+      "label": "pedagogy-ux-r1",
+      "writes": [
+        "run/review/round-1"
+      ],
+      "exclude": [],
+      "opened": "2026-10-22T08:51:18-04:00",
+      "closed": "2026-10-22T09:02:25-04:00",
+      "status": "done_with_concerns",
+      "ns_ok": true,
+      "pivot": false,
+      "reason": null,
+      "changed": 137
+    },
+    {
+      "nn": 7,
+      "role": "page-builder",
+      "loop": "gate:page",
+      "label": "r1-fixes-page",
+      "writes": [
+        "site"
+      ],
+      "exclude": [
+        "site/widgets/*/*"
+      ],
+      "opened": "2026-10-22T09:05:08-04:00",
+      "closed": "2026-10-22T11:54:52-04:00",
+      "status": "done",
+      "ns_ok": true,
+      "pivot": false,
+      "reason": null,
+      "changed": 36
+    },
+    {
+      "nn": 8,
+      "role": "widget-builder",
+      "loop": "gate:w-cluster-scrolly",
+      "label": "r1-fixes-widget",
+      "writes": [
+        "site/widgets/w-cluster-scrolly"
+      ],
+      "exclude": [],
+      "opened": "2026-10-22T09:05:08-04:00",
+      "closed": "2026-10-22T11:55:41-04:00",
+      "status": "done_with_concerns",
+      "ns_ok": true,
+      "pivot": false,
+      "reason": null,
+      "changed": 40
+    }
+  ],
+  "loops": {
+    "research": 1,
+    "checkpoint": 1,
+    "gate:page": 2,
+    "gate:w-cluster-scrolly": 2,
+    "review:accuracy": 1,
+    "review:pedagogy-ux": 1
+  },
+  "gate_history": {
+    "gate:page": [
+      [],
+      [],
+      [],
+      [],
+      [],
+      [],
+      []
+    ],
+    "gate:w-cluster-scrolly": [
+      [],
+      []
+    ]
+  },
+  "noprogress": {}
+}

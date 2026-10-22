@@ -1,0 +1,690 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Say what you want, not what to do: desired state and the reconcile loop</title>
+<meta name="description" content="Chapter 04. A year on, Fennel runs on managed Kubernetes. The same machine dies at 3 a.m., and this time nobody wakes up. How a written record of what Fennel wants, and many small loops that keep the cluster matching it, make that happen, and what those loops can’t do.">
+<link rel="stylesheet" href="assets/tokens.css">
+<link rel="stylesheet" href="assets/components.css">
+<link rel="stylesheet" href="assets/page.css">
+</head>
+<body class="d-body">
+
+<header class="cp-hero cp-blueprint">
+  <div class="cp-hero__inner">
+    <p class="cp-hero__kicker"><span class="cp-hero__idx">CHAPTER 04</span><span class="cp-label">Part II · Fennel, year 3</span></p>
+    <h1 class="cp-hero__title">Say what you want, not what to do: desired state and the reconcile loop</h1>
+    <p class="cp-hero__standfirst">A year on, Fennel runs on managed Kubernetes. When the same machine dies at 3 a.m., nobody has to wake up. This chapter explains how that works: Fennel writes down what it wants running, and many small loops keep the cluster matching that record. It also covers what those loops can’t do.</p>
+    <dl class="cp-meta">
+      <div><dt>Read</dt><dd>23 MIN</dd></div>
+      <div><dt>For</dt><dd>TECHNICAL MANAGERS</dd></div>
+      <div><dt>Chapter</dt><dd>04 / 15</dd></div>
+      <div><dt>Checks</dt><dd>09</dd></div>
+    </dl>
+  </div>
+</header>
+
+<div class="d-page">
+  <aside class="d-rail" data-toc data-minutes="23"></aside>
+  <main class="d-main" id="main">
+    <details class="d-toc-mobile" data-toc-mobile></details>
+
+    <!-- s-01 · Year 3: the same 3 a.m. · o-2 · claims c-21, c-22 · cast strip + D1 (CURRICULUM §2.11)
+         · k-01 retrieval (Ch 3's jobs) · Year 3 scene and Ari's line are Fennel fiction (d-04) · no
+         recovery time here (k-04 asks for it) -->
+    <section id="s-01" data-segment="s-01">
+      <h2 id="year-3"><span class="cp-sec">§ 01 </span>Year 3: the same 3 a.m.</h2>
+
+      <div class="cp-cast">
+        <p class="cp-label" id="cast-label">Cast</p>
+        <dl aria-labelledby="cast-label">
+        <dt>Sam</dt><dd>Founding engineer. On call for everything until this year.</dd>
+        <dt>Jordan</dt><dd>Co-founder, now managing the engineers: that’s you, in this story.</dd>
+        <dt>Ari</dt><dd>Platform lead, hired this year to move Fennel onto Kubernetes.</dd>
+        </dl>
+      </div>
+
+      <!-- D1 -->
+      <details class="d-more cp-more">
+        <summary>I didn’t read the last chapter. What happened?</summary>
+        <div class="cp-more__body">
+          <ul>
+            <li>In Chapter 1, Fennel ran on one server that Sam had built by hand. A full disk took the site down for two hours, and rebuilding the server from Sam’s notes failed.</li>
+            <li>In Chapter 2, Fennel started packing each piece of its software, with everything it needs to run, into an <em>image</em>. A running copy of an image is a <em>container</em>.</li>
+            <li>In Chapter 3, a year later, Fennel’s app was four services (<code>storefront</code>, <code>orders</code>, <code>payments</code> and <code>dispatch</code>) running as containers on four machines, with Sam’s spreadsheet saying what ran where. One Saturday at 03:04, machine 03 died with <code>orders</code> and a <code>dispatch</code> copy on it. Customers couldn’t order until Sam, woken by a page, started both on other machines and told <code>storefront</code> where <code>orders</code> had gone.</li>
+            <li>Software that does that kind of work all the time is an <em>orchestrator</em>. Kubernetes is one.</li>
+          </ul>
+        </div>
+      </details>
+
+      <div class="cp-check" role="group" aria-labelledby="k-01-q" data-check="k-01">
+        <div class="cp-check__head"><span class="cp-chip">RETRIEVE</span><span class="cp-label">Check 01 / 09</span></div>
+        <p class="cp-check__q" id="k-01-q">A year ago, at 03:04, machine 03 died with <code>orders</code> and a <code>dispatch</code> copy on it. Which jobs did Sam have to do before customers could order again?</p>
+        <ul class="cp-options">
+          <li><button type="button" class="cp-option" data-fb="Restarting is what Sam did at 02:51, when the crashed container’s machine was still running. At 03:04 the machine itself was gone, so its containers had to be started somewhere else, and storefront then had to be told where they were."><span class="cp-option__key">A</span><span>Restarting: start <code>orders</code> and <code>dispatch</code> again on machine 03, the way Sam restarted the crashed <code>dispatch</code> copy at 02:51.</span><span class="cp-option__tag"></span></button></li>
+          <li><button type="button" class="cp-option" data-ok data-fb="Right. Machine 03 was gone, so its containers had to be replaced on other machines. And storefront was still sending orders to machine 03, so it had to be reconnected. This chapter’s 03:04 needs the same two jobs."><span class="cp-option__key">B</span><span>Replacing, then connecting: start them on machines with room, then tell <code>storefront</code> where <code>orders</code> had gone.</span><span class="cp-option__tag"></span></button></li>
+          <li><button type="button" class="cp-option" data-fb="Nothing was wrong with storefront’s version. The jobs were starting the lost containers somewhere else, which is replacing, and telling storefront where they were, which is connecting."><span class="cp-option__key">C</span><span>Updating: release a new <code>storefront</code> that no longer depended on machine 03.</span><span class="cp-option__tag"></span></button></li>
+        </ul>
+        <div class="cp-feedback" role="status" hidden></div>
+      </div>
+
+      <p>It’s now Year 3, and Fennel runs on managed Kubernetes from its cloud provider. The provider runs Kubernetes’ own machinery, while Fennel’s services run on four machines, numbered 01 to 04 as before. Kubernetes calls each machine in a cluster a <dfn id="dfn-node">node</dfn>. Ari, the platform lead Fennel hired this year, led the move.</p>
+      <p>One Saturday at 03:04, machine 03 dies again. Kubernetes knows it as node 03 now, and just as a year ago, it was running <code>orders</code> and a <code>dispatch</code> copy. This time nobody’s phone rings. Sam sleeps through it and reads about it over breakfast.</p>
+      <p>On Monday, Jordan asks Ari how Kubernetes knew what to do.</p>
+      <blockquote class="cp-quote"><p>“Nobody told it what to do. We told it what we want.”</p><cite>Ari</cite></blockquote>
+      <p>The rest of this chapter explains what Ari means, and what that sentence doesn’t promise.</p>
+    </section>
+
+    <!-- s-02 · Say what you want, not what to do · o-1 · claims c-01, c-03, c-04 (D2), c-14, c-15 · f-01, k-02,
+         TERM 01, the delegated-owner analogy with its breaks line, D2, f-02 (kind: ReplicaSet, shortened;
+         Deployment named in the caption only) · k-02 comes before "imperative", "declarative", "desired state" -->
+    <section id="s-02" data-segment="s-02">
+      <h2 id="say-what-you-want"><span class="cp-sec">§ 02 </span>Say what you want, not what to do</h2>
+      <p>When a machine dies, there are two ways to write down how Fennel should recover. Fig. 01 compares both for the same incident. On the left is the step-by-step task list Sam worked through after machine 03 died last year. On the right is a goal that says how many copies of each service must keep running.</p>
+
+      <!-- f-01: static HTML. Left = instructions (dashed, unfilled, numbered: Ch 3's "commands typed"
+           grammar); right = a written intention (the record grammar, c4 on c4-soft). No arrows, no status. -->
+      <figure class="cp-fig d-wide" id="f-01" aria-labelledby="f-01-cap">
+        <div class="cp-fig__plate">
+          <div class="cp-fig__bar"><span class="cp-label">Fig. 01</span><span class="cp-label">A task list and a goal</span></div>
+          <div class="cp-blueprint docs">
+            <div class="docs__grid">
+              <div class="docs__doc">
+                <p class="docs__say">says what to do, step by step</p>
+                <div class="docs__task">
+                  <p class="docs__head">Sam’s task list · after 03:04, year 2</p>
+                  <ol>
+                    <li>Start <code>orders</code> on machine 04.</li>
+                    <li>Start the lost <code>dispatch</code> copy on machine 02.</li>
+                    <li>Change <code>storefront</code>’s settings: <code>orders</code> is on 04.</li>
+                  </ol>
+                </div>
+              </div>
+              <div class="docs__doc">
+                <p class="docs__say">says what should be running</p>
+                <div class="cp-rec docs__goal">
+                  <p class="docs__head">Fennel’s goal · written for the cluster</p>
+                  <dl>
+                    <dt>storefront</dt><dd>3 copies</dd>
+                    <dt>orders</dt><dd>1 copy</dd>
+                    <dt>payments</dt><dd>2 copies</dd>
+                    <dt>dispatch</dt><dd>3 copies</dd>
+                  </dl>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <figcaption id="f-01-cap"><span class="cp-label">Fig. 01</span><span>Two ways to plan the recovery from the same failure: a list of steps, and a goal.</span></figcaption>
+      </figure>
+
+      <div class="cp-check" role="group" aria-labelledby="k-02-q" data-check="k-02">
+        <div class="cp-check__head"><span class="cp-chip cp-chip--explain">COMPARE</span><span class="cp-label">Check 02 / 09</span></div>
+        <p class="cp-check__q" id="k-02-q">This time it’s node 04 that dies at 3 a.m., not node 03. Which of the two documents in Fig. 01 still says the right thing to do, unchanged?</p>
+        <ul class="cp-options">
+          <li><button type="button" class="cp-option" data-fb="Its first step starts orders on machine 04, which is the machine that just died. A task list only works for the situation its author had in mind."><span class="cp-option__key">A</span><span>Sam’s task list: it names exact machines and steps, so whoever follows it can’t get it wrong.</span><span class="cp-option__tag"></span></button></li>
+          <li><button type="button" class="cp-option" data-fb="The goal never mentioned machine 03, so it doesn’t need rewriting. With node 04 gone, payments has one copy running out of the two it wants, so the goal already makes clear what’s needed: one more payments copy, on any node with room."><span class="cp-option__key">B</span><span>Neither: each was written for the night machine 03 died, so both need rewriting first.</span><span class="cp-option__tag"></span></button></li>
+          <li><button type="button" class="cp-option" data-ok data-fb="Right. The goal doesn’t name any machines, so it still applies whichever one fails. With node 04 gone, one payments copy is still running. The goal asks for two, so one more copy needs to start on any node with room. Nobody has to rewrite anything."><span class="cp-option__key">C</span><span>Fennel’s goal: it lists only what should be running, not where, so nothing in it changes.</span><span class="cp-option__tag"></span></button></li>
+        </ul>
+        <div class="cp-feedback" role="status" hidden></div>
+      </div>
+
+      <p>Sam’s list spells out what to do, step by step, and engineers call that style <dfn id="dfn-imperative" aria-describedby="term-01">imperative</dfn>. Fennel’s goal describes what should be running and leaves the steps to the system, which makes it <dfn id="dfn-declarative" aria-describedby="term-01">declarative</dfn>. What a declarative goal describes is called the cluster’s <dfn id="dfn-desired-state" aria-describedby="term-01">desired state</dfn>.</p>
+      <div class="cp-term" id="term-01" role="note" aria-label="New term 1 of 4">
+        <p class="cp-term__kicker">New term · 01 / 04</p>
+        <p class="cp-term__term">desired state</p>
+        <p class="cp-term__def">A written description of what you want running, such as “<code>storefront</code>: 3 copies”. Kubernetes keeps working to make the cluster match it.</p>
+        <p class="cp-term__line">declarative: say what you want · imperative: say what to do</p>
+        <p class="cp-term__back">You met it in Fig. 01: Fennel’s goal.</p>
+      </div>
+
+      <p>The difference matters most on a night nobody planned for. A task list is only right for the failure its author imagined. A goal doesn’t mention machines, so it stays true whichever one fails. It still shows what’s missing, and whatever acts on the goal can work out the steps for itself.</p>
+
+      <div class="cp-aside">
+        <p><b>ANALOGY</b>You know this from managing people. Suppose you give a capable owner a goal, such as “every order out by 6 p.m.”, instead of a task list like “call the supplier, then rebook the van”. The owner keeps an eye on that one number, notices when it slips, and fixes it without being told how.</p>
+        <p class="cp-breaks"><b>WHERE THIS ANALOGY BREAKS</b>The owners inside Kubernetes have no judgement. They don’t ask why copies keep dying, and they don’t push back when a goal can’t be met: if there’s no room anywhere, a new copy simply waits. They never escalate, and they will restart a broken app forever. They also act only on the latest goal, ignoring any history of earlier instructions. In a person, all of that would be a problem. In software, it means you always know what it will do next, which is to close the gap between the goal and what’s running.</p>
+      </div>
+
+      <!-- D2 (c-04, x-03) -->
+      <details class="d-more cp-more">
+        <summary>What if the goal changes twice in quick succession?</summary>
+        <div class="cp-more__body"><p>Say someone changes <code>storefront</code>’s goal from 2 copies to 5 and then, a moment later, to 3. If the loop hasn’t looked in between, it never acts on 5 at all, because it compares the latest goal with what’s running and heads straight for 3. If it had already started heading for 5, it simply turns around. Either way it ends at 3, since there’s no queue of instructions to work through. Engineers call this behaviour “level-triggered”.</p></div>
+      </details>
+
+      <p>Fennel writes its goals in files called <dfn id="dfn-manifest">manifests</dfn>. Fig. 02 shows a shortened version of the manifest for <code>storefront</code>. Its line <code>replicas: 3</code> is the desired state: three copies. Teams usually keep manifests in version control, so that a change to a goal can be reviewed before it goes in, and leaves a history behind.</p>
+
+      <!-- f-02: static HTML. Code on the record ground (c4 on c4-soft: a written intention). Annotations
+           beside each line from 600px, under it below 600px; the one accent mark is replicas: 3. -->
+      <figure class="cp-fig" id="f-02" aria-labelledby="f-02-cap">
+        <div class="cp-fig__plate">
+          <div class="cp-fig__bar"><span class="cp-label">Fig. 02</span><span class="cp-label">A manifest · storefront</span></div>
+          <div class="cp-blueprint mf">
+            <div class="cp-rec mf__code">
+              <div class="mf__row"><code class="mf__line"><span class="mf__k">kind:</span> ReplicaSet</code><p class="mf__ann">the kind of record: a set of identical copies</p></div>
+              <div class="mf__row"><code class="mf__line"><span class="mf__k">metadata:</span></code></div>
+              <div class="mf__row"><code class="mf__line">  <span class="mf__k">name:</span> storefront</code></div>
+              <div class="mf__row"><code class="mf__line"><span class="mf__k">spec:</span></code></div>
+              <div class="mf__row mf__row--key"><code class="mf__line">  <span class="mf__k">replicas:</span> 3</code><p class="mf__ann mf__ann--key">the desired state: three copies</p></div>
+              <div class="mf__row"><code class="mf__line">  <span class="mf__k">template:</span></code><p class="mf__ann">what each copy is</p></div>
+              <div class="mf__row"><code class="mf__line"><span class="mf__c">    # … labels and other</span></code></div>
+              <div class="mf__row"><code class="mf__line"><span class="mf__c">    # details left out</span></code></div>
+              <div class="mf__row"><code class="mf__line">    <span class="mf__k">spec:</span></code></div>
+              <div class="mf__row"><code class="mf__line">      <span class="mf__k">containers:</span></code></div>
+              <div class="mf__row"><code class="mf__line">      - <span class="mf__k">name:</span> storefront</code></div>
+              <div class="mf__row"><code class="mf__line">        <span class="mf__k">image:</span> storefront:v38</code><p class="mf__ann">the image to run (Chapter 2)</p></div>
+            </div>
+          </div>
+        </div>
+        <figcaption id="f-02-cap"><span class="cp-label">Fig. 02</span><span>A manifest describes what should exist, without saying how to get there. This one is shortened, and real ones have a few more lines. Engineers usually write a Deployment, which wraps this and adds version updates; Chapter 6 shows how.</span></figcaption>
+      </figure>
+
+      <p>Chapter 3 ended on a question: what if the record were the thing the machines act on, instead of a note about them? With Kubernetes, that’s how it works. The cluster keeps its own record of what’s wanted and what’s running, and every part of Kubernetes works from that record.</p>
+    </section>
+
+    <!-- s-03 · Pods: what Kubernetes counts · o-3 · claims c-16, c-17 · f-03, TERM 02 · disposability waits for s-06 -->
+    <section id="s-03" data-segment="s-03">
+      <h2 id="pods"><span class="cp-sec">§ 03 </span>Pods: what Kubernetes counts</h2>
+      <p>There’s one more word to learn before Ari applies the <code>storefront</code> manifest. Kubernetes doesn’t count or place containers directly. Instead, it wraps each copy’s container in a <dfn id="dfn-pod" aria-describedby="term-02">Pod</dfn>, and Pods are what Kubernetes counts, places and replaces. Most Pods hold just one container, which is why people often use “Pod” and “container” interchangeably in conversation. Sometimes a small helper container runs alongside it in the same Pod.</p>
+
+      <!-- f-03: static HTML. Pod = the canvas's Pod grammar: Ch 2's container chips (c1) inside an inset ink ring; chip height by size; labels beside the ring. Node frames keep the bar-and-body look. -->
+      <figure class="cp-fig d-wide" id="f-03" aria-labelledby="f-03-cap">
+        <div class="cp-fig__plate">
+          <div class="cp-fig__bar"><span class="cp-label">Fig. 03</span><span class="cp-label">A Pod</span></div>
+          <div class="cp-blueprint pods">
+            <div class="pods__grid">
+              <div class="pods__item">
+                <div class="cp-pod"><span class="cp-ctr" data-size="2">storefront</span></div>
+                <div class="pods__labels">
+                  <p class="pods__kind"><span class="cp-label">Pod</span><span class="pods__addr">1 address</span></p>
+                  <p class="pods__say">one container: the usual case</p>
+                </div>
+              </div>
+              <div class="pods__item pods__item--minor">
+                <div class="cp-pod"><span class="cp-ctr" data-size="2">app</span><span class="cp-ctr" data-size="1">helper</span></div>
+                <div class="pods__labels">
+                  <p class="pods__kind"><span class="cp-label">Pod</span><span class="pods__addr">1 address, shared by both</span></p>
+                  <p class="pods__say">sometimes a small helper runs alongside</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <figcaption id="f-03-cap"><span class="cp-label">Fig. 03</span><span>Kubernetes counts, places and replaces Pods. The containers in one Pod always run together, on the same node, sharing one address.</span></figcaption>
+      </figure>
+
+      <div class="cp-term" id="term-02" role="note" aria-label="New term 2 of 4">
+        <p class="cp-term__kicker">New term · 02 / 04</p>
+        <p class="cp-term__term">Pod</p>
+        <p class="cp-term__def">A wrapper that Kubernetes puts around one container, or around a few that must run together. Kubernetes counts, places and replaces Pods rather than containers.</p>
+        <p class="cp-term__back">Chapter 2’s container, wrapped. The name comes from a pod of whales, or a pea pod.</p>
+      </div>
+    </section>
+
+    <!-- s-04 · Moving day: what "apply" does · o-1, o-2, o-4 · claims c-01, c-02, c-05, c-06, c-08, c-12, c-13,
+         c-21, c-25 · w-cluster-scrolly lane A (complexity high; built in widgets/w-cluster-scrolly/) · k-03 in
+         A1's step column gates A2–A5 · then the pattern named, TERM 03 (payoff, the chapter's only one), the
+         loop lens, and the helmsman aside -->
+    <section id="s-04" data-segment="s-04">
+      <h2 id="moving-day"><span class="cp-sec">§ 04 </span>Moving day: what “apply” does</h2>
+      <noscript><p class="cs-noscript">The drawings and step text in §04 and §05 need JavaScript. The rest of the page reads without it.</p></noscript>
+
+      <!--
+        ===== MOUNT CONTRACT · w-cluster-scrolly (page builder ↔ widget builder) =====
+        Adapted from Ch 3's w-fleet-scrolly contract (ch-03-orchestration/site/index.html). Changes from
+        Ch 3: the class prefix is .cs-* (was .fs-*); there are TWO mounts, one per section; and the
+        reserved canvas heights are new. Everything else is as Ch 3.
+
+        The page owns everything in this file, including the markup below and its layout CSS
+        (assets/page.css, ".cs-*"). The widget owns widgets/w-cluster-scrolly/ (data.js, index.js, index.css)
+        and renders only into the three kinds of slot named here. It never moves, adds or removes
+        page elements, and never touches the .cp-check cards or any <details> disclosure.
+
+        Mounts  TWO elements carry [data-widget="w-cluster-scrolly"] (class "d-wide cs"):
+                  [data-lanes="A"]  here in §04 (s-04)     lane A "Moving day", steps A1–A5
+                  [data-lanes="B"]  in §05 (s-05)          lane B "Saturday, 03:04", steps B1–B6
+                Didactician.widget('w-cluster-scrolly', init) hands init() only the FIRST mount (kit
+                widget.js uses querySelector). The controller must collect both lanes itself, e.g.
+                  document.querySelectorAll('[data-widget="w-cluster-scrolly"] .cs-lane')
+                and set el.__dInit = true on the second mount. Scope all widget CSS under
+                [data-widget="w-cluster-scrolly"] as usual: it then applies in both sections.
+                Lane B's first state continues from lane A's last (A5 = B1 before node 03 stops).
+                Note: verify.mjs --widget scopes its widget-phase checks to the first mount (lane A);
+                lane B is covered by the page-phase run.
+        Lanes   .cs-lane[data-lane="A" | "B"]            one per mount; aria-labelledby the section h2
+                  .cs-lane__grid                          page-owned layout grid (sticky rules in page.css)
+                    .cs-canvas[data-canvas]               SLOT 1. One per lane. Render the lane's drawing here with
+                                                          renderCluster(el, state, opts): the header bar
+                                                          ("W-01 · THE CLUSTER", lane name, lane B's clock kicker,
+                                                          "STEP n / N"), the record panel, loop pills and lens line,
+                                                          nodes with agent pills, CUSTOMERS / connection notes.
+                                                          Set role="img" and aria-label to the active step's
+                                                          ariaLabel from data.js on every change. Before any step
+                                                          is active, show the lane's first step.
+                    ol.cs-steps > li.cs-step[data-step="A1" … "A5" | "B1" … "B6"]
+                                                          Ids match data.js step keys. The page sets min-height
+                                                          (40vh), padding and the active border; the widget toggles:
+                                                            .is-active    the step whose top last crossed 55% of the
+                                                                          viewport (IntersectionObserver); scrolling
+                                                                          back re-activates earlier steps
+                                                            .is-locked    while a check in data-gate is uncommitted
+                                                            .is-unlocked  once, on unlock (page CSS fades content in)
+                      [data-step-snap]                    SLOT 2. renderCluster() of this step's state, shown by page
+                                                          CSS only on short viewports (max-height: 559px), where the
+                                                          lane canvas is hidden. Render it always; CSS decides.
+                      [data-step-text]                    SLOT 3. The step's text from data.js (any clock kicker such
+                                                          as "~03:04:50" included). Every reader-visible string of the
+                                                          canvas and the step text lives in data.js; the plan's
+                                                          ## Widgets shows: gives the draft wording for each step.
+                      p.cs-step__lock[data-step-lock]     page-owned line "Answer the question above to see what
+                                                          happens", shown by page CSS only while .is-locked.
+                      .cp-check                           page-owned (k-03 in A1, k-04 in B1); leave alone.
+        Gates   data-gate="k-03" on A2–A5; data-gate="k-04" on B2–B6 (space-separated check ids; the page's
+                attributes are authoritative). A step is locked until every listed check is committed. While
+                a step is locked it can't become active, and the canvas stays on the last unlocked step's
+                state. Gates never re-lock.
+                Unlock on   document 'didactician:check-commit'  (detail { id, option, correct }, dispatched by
+                assets/page.js on every commit, any option). At init, also treat any
+                .cp-check[data-committed] as committed.
+        Heights The page reserves the canvas slot (min-height): 540px from 900px wide; min(480px, 50vh) at
+                600–899px; min(360px, 50vh) under 600px. Under 900px keep the rendered canvas within 50vh
+                (the plan's target at 360px wide is ≤ 360px tall); above it, within the viewport.
+        Motion  State changes ≤ 300ms (dur-3 at most), instant under prefers-reduced-motion. No autoplay.
+        No JS   Slots stay empty, nothing is locked, and the <noscript> line above explains.
+      -->
+      <div data-widget="w-cluster-scrolly" data-lanes="A" class="d-wide cs">
+        <div class="cs-lane" data-lane="A" aria-labelledby="moving-day">
+          <div class="cs-lane__grid">
+            <div class="cs-canvas" data-canvas></div>
+            <ol class="cs-steps">
+              <li class="cs-step" data-step="A1">
+                <div class="cs-step__snap" data-step-snap></div>
+                <div class="cs-step__text" data-step-text></div>
+                <div class="cp-check" role="group" aria-labelledby="k-03-q" data-check="k-03">
+                  <div class="cp-check__head"><span class="cp-chip">PREDICT</span><span class="cp-label">Check 03 / 09</span></div>
+                  <p class="cp-check__q" id="k-03-q">Ari applies the <code>storefront</code> manifest, and the tool answers <code>created</code> in under a second. At that moment, what is new in the cluster?</p>
+                  <ul class="cp-options">
+                    <li><button type="button" class="cp-option" data-fb="That’s how a deploy script behaves: when it says done, the thing is running. Applying a manifest only writes the intention into the record. Other loops start the Pods, usually within seconds, so on a good day you can’t see the difference. The next steps show it."><span class="cp-option__key">A</span><span>Three <code>storefront</code> Pods, already running on nodes with room, since the tool said <code>created</code>.</span><span class="cp-option__tag"></span></button></li>
+                    <li><button type="button" class="cp-option" data-fb="There’s no queue and no release window. The intention is recorded straight away, and the loops that act on it run all the time, whether or not there’s a release."><span class="cp-option__key">B</span><span>A job that will start three <code>storefront</code> copies at the next release window.</span><span class="cp-option__tag"></span></button></li>
+                    <li><button type="button" class="cp-option" data-ok data-fb="Right. created means the intention has been recorded. Watch what happens to that line next."><span class="cp-option__key">C</span><span>Only a line in the cluster’s record saying three <code>storefront</code> copies are wanted.</span><span class="cp-option__tag"></span></button></li>
+                  </ul>
+                  <div class="cp-feedback" role="status" hidden></div>
+                </div>
+              </li>
+              <li class="cs-step" data-step="A2" data-gate="k-03">
+                <p class="cs-step__lock" data-step-lock>Answer the question above to see what happens</p>
+                <div class="cs-step__snap" data-step-snap></div>
+                <div class="cs-step__text" data-step-text></div>
+              </li>
+              <li class="cs-step" data-step="A3" data-gate="k-03">
+                <p class="cs-step__lock" data-step-lock>Answer the question above to see what happens</p>
+                <div class="cs-step__snap" data-step-snap></div>
+                <div class="cs-step__text" data-step-text></div>
+              </li>
+              <li class="cs-step" data-step="A4" data-gate="k-03">
+                <p class="cs-step__lock" data-step-lock>Answer the question above to see what happens</p>
+                <div class="cs-step__snap" data-step-snap></div>
+                <div class="cs-step__text" data-step-text></div>
+              </li>
+              <li class="cs-step" data-step="A5" data-gate="k-03">
+                <p class="cs-step__lock" data-step-lock>Answer the question above to see what happens</p>
+                <div class="cs-step__snap" data-step-snap></div>
+                <div class="cs-step__text" data-step-text></div>
+              </li>
+            </ol>
+          </div>
+        </div>
+      </div>
+
+      <p>Each loop on moving day followed the same pattern. It looked at the record and at the cluster, compared what’s wanted with what’s there, and acted to close any gap. Then it went back to looking. This pattern is called a <dfn id="dfn-reconcile-loop" aria-describedby="term-03">reconcile loop</dfn>. A <dfn id="dfn-controller" aria-describedby="term-03">controller</dfn> is a part of Kubernetes that runs one reconcile loop for one kind of thing; for example, the ReplicaSet loop is the controller for ReplicaSets. Engineers call one pass of the loop “reconciling”. The scheduler and the node agent work the same way, though engineers don’t usually call them controllers.</p>
+
+      <div class="cp-term cp-term--payoff cp-blueprint" id="term-03" role="note" aria-label="New term 3 of 4">
+        <p class="cp-term__kicker">New term · 03 / 04</p>
+        <p class="cp-term__term">reconcile loop <span class="cp-term__sep">·</span> controller</p>
+        <p class="cp-term__def">A loop that compares what the record says is wanted with what it observes, acts to close the gap, and then repeats, forever. A controller runs one such loop for one kind of thing.</p>
+        <p class="cp-term__jobs">the loop lens: which loop · watching what · doing what</p>
+        <p class="cp-term__back">You watched three of them on moving day.</p>
+      </div>
+
+      <p>You can describe each loop you watched by answering three questions: <strong>which loop, watching what, doing what?</strong> Together, these questions make up the <strong>loop lens</strong>, and you can ask them whenever Kubernetes does something. Each step of moving day answered them. At the fourth step, for example, the loop was the scheduler; it was watching for Pods with no node, and it wrote a node into each one. Because Kubernetes is built from many loops like these, the loop lens will help explain each new part of Kubernetes in the chapters ahead.</p>
+
+      <div class="cp-aside">
+        <p><b>ANALOGY</b>The name fits. Kubernetes is Greek for helmsman, or pilot. A helmsman doesn’t plan for every wave; they hold a heading and correct the wheel whenever the ship drifts off it. Engineers often shorten the name to K8s, which is a K, then the number of letters in between, then an s.</p>
+        <p class="cp-breaks"><b>WHERE THIS ANALOGY BREAKS</b>A ship has one helmsman, but a cluster has many loops, each holding its own small heading, and no captain gives them orders. A helmsman also reads the weather, whereas a loop only compares what’s wanted with what’s there.</p>
+      </div>
+    </section>
+
+    <!-- s-05 · Saturday, 03:04, again · o-2 · claims c-07, c-08, c-09, c-10, c-11, c-12, c-13, c-21 · lane B of
+         w-cluster-scrolly (second mount) · k-04 in B1's step column gates B2–B6 · Ch 1's question answered
+         (with default settings, roughly six or seven minutes; nobody) · D3, D4 · f-04 (CH04_LOOPS) · k-05 before
+         the "no single conductor" paragraphs · D5 · m-27 closer -->
+    <section id="s-05" data-segment="s-05">
+      <h2 id="saturday-0304"><span class="cp-sec">§ 05 </span>Saturday, 03:04, again</h2>
+
+      <!-- Second mount of w-cluster-scrolly: see the MOUNT CONTRACT comment in §04. -->
+      <div data-widget="w-cluster-scrolly" data-lanes="B" class="d-wide cs">
+        <div class="cs-lane" data-lane="B" aria-labelledby="saturday-0304">
+          <div class="cs-lane__grid">
+            <div class="cs-canvas" data-canvas></div>
+            <ol class="cs-steps">
+              <li class="cs-step" data-step="B1">
+                <div class="cs-step__snap" data-step-snap></div>
+                <div class="cs-step__text" data-step-text></div>
+                <div class="cp-check" role="group" aria-labelledby="k-04-q" data-check="k-04">
+                  <div class="cp-check__head"><span class="cp-chip">PREDICT</span><span class="cp-label">Check 04 / 09</span></div>
+                  <p class="cp-check__q" id="k-04-q">Node 03 has just stopped, and nobody will be woken. With Kubernetes’ default settings, how long until customers can place orders again?</p>
+                  <ul class="cp-options">
+                    <li><button type="button" class="cp-option" data-ok data-fb="Right. At first, Kubernetes can’t tell a dead machine from a network glitch, so by default it waits about 50 seconds before marking the node, then five more minutes before replacing its Pods. Scroll on to watch each step."><span class="cp-option__key">A</span><span>Several minutes: Kubernetes first waits to be sure node 03 isn’t coming back, then replaces its Pods.</span><span class="cp-option__tag"></span></button></li>
+                    <li><button type="button" class="cp-option" data-fb="Restarting a crashed container is that quick, but a whole node is different. By default, Kubernetes waits about six minutes before replacing its Pods, in case the node comes back. Scroll on to see why."><span class="cp-option__key">B</span><span>Under a minute: as soon as node 03 misses a check-in, its Pods start on other nodes.</span><span class="cp-option__tag"></span></button></li>
+                    <li><button type="button" class="cp-option" data-fb="Nobody needs to apply anything. The goal of one orders Pod is still in the record, and the loops compare it with what’s running all the time. Once the dead node’s Pods are marked for deletion, closing the gap is their job."><span class="cp-option__key">C</span><span>Not until someone applies <code>orders</code>’ manifest again: its count of one Pod was met when it was first applied.</span><span class="cp-option__tag"></span></button></li>
+                  </ul>
+                  <div class="cp-feedback" role="status" hidden></div>
+                </div>
+              </li>
+              <li class="cs-step" data-step="B2" data-gate="k-04">
+                <p class="cs-step__lock" data-step-lock>Answer the question above to see what happens</p>
+                <div class="cs-step__snap" data-step-snap></div>
+                <div class="cs-step__text" data-step-text></div>
+              </li>
+              <li class="cs-step" data-step="B3" data-gate="k-04">
+                <p class="cs-step__lock" data-step-lock>Answer the question above to see what happens</p>
+                <div class="cs-step__snap" data-step-snap></div>
+                <div class="cs-step__text" data-step-text></div>
+              </li>
+              <li class="cs-step" data-step="B4" data-gate="k-04">
+                <p class="cs-step__lock" data-step-lock>Answer the question above to see what happens</p>
+                <div class="cs-step__snap" data-step-snap></div>
+                <div class="cs-step__text" data-step-text></div>
+              </li>
+              <li class="cs-step" data-step="B5" data-gate="k-04">
+                <p class="cs-step__lock" data-step-lock>Answer the question above to see what happens</p>
+                <div class="cs-step__snap" data-step-snap></div>
+                <div class="cs-step__text" data-step-text></div>
+              </li>
+              <li class="cs-step" data-step="B6" data-gate="k-04">
+                <p class="cs-step__lock" data-step-lock>Answer the question above to see what happens</p>
+                <div class="cs-step__snap" data-step-snap></div>
+                <div class="cs-step__text" data-step-text></div>
+              </li>
+            </ol>
+          </div>
+        </div>
+      </div>
+
+      <p>Chapter 1 left Jordan with a question to ask about any machine Fennel depends on:</p>
+      <blockquote class="cp-quote"><p>“If this box vanished tonight, how long until we’re back, and who has to be awake?”</p><cite>Chapter 1</cite></blockquote>
+      <p>In Year 3, the answer is roughly six or seven minutes with default settings, sometimes less, and nobody has to be awake.</p>
+      <p>Those minutes still cost something. Fennel runs <code>orders</code> as a single copy, so it was down the whole time: when its one Pod stopped, there was no other copy to take orders while the loops replaced it. A service running as one copy is what Chapter 1 called a single point of failure. The loops restore what’s been declared, but they can’t prevent the gap while they do it. That makes this a question worth asking Ari: “Which of our services run as a single copy?”</p>
+
+      <!-- D3 (c-11 note, c-10) -->
+      <details class="d-more cp-more">
+        <summary>Can it be faster than six minutes?</summary>
+        <div class="cp-more__body"><p>It can be. In a cloud, Kubernetes asks the provider whether a silent machine still exists, and if the provider says it’s gone, its Pods are cleaned up without waiting the full five minutes. Engineers can also shorten or lengthen the five-minute wait for each app. The numbers in Fennel’s story are the defaults. In every case, the old Pod records stay around, marked for deletion, until Kubernetes knows the machine is gone, but the ReplicaSet loop stops counting them as soon as they’re marked. The wait exists because at first a network glitch looks the same as a dead machine, and replacing Pods too eagerly could leave two copies running where only one was wanted.</p></div>
+      </details>
+      <!-- D4 -->
+      <details class="d-more cp-more">
+        <summary>What about machine 03 itself?</summary>
+        <div class="cp-more__body"><p>Kubernetes replaced the Pods, but not the machine. Until a machine is added back, the cluster has three nodes and less spare room. That room is the subject of Chapter 5.</p></div>
+      </details>
+
+      <p>Fig. 04 looks at each loop you’ve watched through the loop lens, and shows which of Sam’s jobs it took over.</p>
+
+      <!-- f-04: the loop lens table. Rows are built by assets/page.js from CH04_LOOPS (later chapters copy the
+           array and add rows). Job names in Ch 3's words. No status colours. -->
+      <figure class="cp-fig d-wide" id="f-04" aria-labelledby="f-04-cap">
+        <div class="cp-fig__plate">
+          <div class="cp-fig__bar"><span class="cp-label">Fig. 04</span><span class="cp-label">Which loop, watching what, doing what</span></div>
+          <div class="cp-blueprint lens">
+            <table data-labels="Watching|Doing|Sam’s job">
+              <thead><tr><th scope="col">Loop</th><th scope="col">Watching</th><th scope="col">Doing</th><th scope="col">Sam’s job, now a loop’s</th></tr></thead>
+              <tbody data-loop-lens></tbody>
+              <tfoot><tr><td colspan="4">Updating and scaling are handled by loops too, in Chapters 6 and 8.</td></tr></tfoot>
+            </table>
+            <noscript><p class="cs-noscript">This table is drawn by JavaScript.</p></noscript>
+          </div>
+        </div>
+        <figcaption id="f-04-cap"><span class="cp-label">Fig. 04</span><span>Each of Sam’s 3 a.m. jobs now belongs to a loop, and each loop does only its own job.</span></figcaption>
+      </figure>
+
+      <div class="cp-check" role="group" aria-labelledby="k-05-q" data-check="k-05">
+        <div class="cp-check__head"><span class="cp-chip cp-chip--explain">EXPLAIN</span><span class="cp-label">Check 05 / 09</span></div>
+        <p class="cp-check__q" id="k-05-q">Jordan asks Ari: “When node 03 died, what worked out that <code>orders</code> should go to node 04?” Which answer is accurate?</p>
+        <ul class="cp-options">
+          <li><button type="button" class="cp-option" data-fb="No part made a plan. The node loop marked node 03 as unknown and, after a wait, marked its Pods for deletion. The ReplicaSet loop then saw a gap and wrote a new Pod record, and the scheduler saw a Pod with no node and picked one. Each loop did its own step and passed the work on through the record."><span class="cp-option__key">A</span><span>“The control plane did: it saw node 03 die, made a recovery plan, and told each node what to start.”</span><span class="cp-option__tag"></span></button></li>
+          <li><button type="button" class="cp-option" data-ok data-fb="Right. The scheduler didn’t plan a recovery, and it didn’t even need to know there had been a failure. It saw a Pod with no node, just as it did on moving day, and picked a node with room."><span class="cp-option__key">B</span><span>“The scheduler did: it saw a new <code>orders</code> Pod with no node, and picked a node with room for it.”</span><span class="cp-option__tag"></span></button></li>
+          <li><button type="button" class="cp-option" data-fb="Node agents only start Pods that have already been assigned to their node; they never take on work themselves. And nothing was taken over from node 03, as the next section explains."><span class="cp-option__key">C</span><span>“Node 04’s agent did: it noticed it had spare room and took over the <code>orders</code> Pod from node 03.”</span><span class="cp-option__tag"></span></button></li>
+        </ul>
+        <div class="cp-feedback" role="status" hidden></div>
+      </div>
+
+      <p>No part of Kubernetes made a plan for 03:04. The node loop didn’t know what a ReplicaSet was, the ReplicaSet loop didn’t know why its Pods had gone, and the scheduler didn’t know there had been a failure. Each one read the record, did its one job and wrote the result back, and the next loop picked up the work from there. That’s how the work gets split up without a single conductor.</p>
+      <p>Chapter 3 called Kubernetes an orchestrator because of the jobs it does, and that’s still true. Kubernetes’ own documentation, though, warns about what the word suggests. It describes orchestration as following a fixed script, “first do A, then B, then C”, and says that Kubernetes instead “comprises a set of independent, composable control processes”. It adds: “Centralized control is also not required.” So Chapter 3 used the word for what gets done, while the documentation is talking about how it gets done.</p>
+      <p>There’s a practical reason for building it this way. The same documentation prefers “simple controllers rather than one, monolithic set of control loops”, because controllers can fail. When the loops are separate, one of them can fail without stopping the rest.</p>
+
+      <!-- D5 (c-07 note) -->
+      <details class="d-more cp-more">
+        <summary>But engineers talk about “the controller manager”</summary>
+        <div class="cp-more__body"><p>They do. Kubernetes’ built-in controllers are shipped together as one program, which keeps them simple to run. Inside that program, each controller is still a separate loop watching its own kind of thing, much like separate teams sharing one office building. The scheduler and the node agents run as separate programs.</p></div>
+      </details>
+
+      <p>Nothing at 03:04 needed a release, or anyone applying anything, because the loops had been running all along.</p>
+    </section>
+
+    <!-- s-06 · Replaced, not repaired · o-3 · claims c-14, c-15, c-18, c-19, c-20 · k-06 (binary, m-06) opens the
+         section · Pod names are fiction (d-04) · twelve-factor disposability · self-healing (m-05) and what the
+         loops can't fix, each pointing to its chapter -->
+    <section id="s-06" data-segment="s-06">
+      <h2 id="replaced-not-repaired"><span class="cp-sec">§ 06 </span>Replaced, not repaired</h2>
+
+      <div class="cp-check" role="group" aria-labelledby="k-06-q" data-check="k-06">
+        <div class="cp-check__head"><span class="cp-chip">PREDICT</span><span class="cp-label">Check 06 / 09</span></div>
+        <p class="cp-check__q" id="k-06-q">Since 03:10, an <code>orders</code> Pod has been running on node 04. Is it the Pod that was on node 03?</p>
+        <ul class="cp-options">
+          <li><button type="button" class="cp-option" data-ok data-fb="Right. Kubernetes never moves a Pod; it replaces it with a new one wherever there’s room. That’s why Pods are called disposable, and why something has to tell storefront the new address."><span class="cp-option__key">A</span><span>No: it’s a new Pod from the same template, with a new name and address, and nothing from inside the old one.</span><span class="cp-option__tag"></span></button></li>
+          <li><button type="button" class="cp-option" data-fb="Pods can’t be moved like that. The old Pod was lost with node 03, so the ReplicaSet loop wrote a new one, which got a new name and a new address. That’s why storefront needed another loop to find it."><span class="cp-option__key">B</span><span>Yes: Kubernetes moved it to node 04, keeping its name and address, so nothing that calls it has to change.</span><span class="cp-option__tag"></span></button></li>
+        </ul>
+        <div class="cp-feedback" role="status" hidden></div>
+      </div>
+
+      <p>Ari’s dashboard shows the difference. On Friday it listed <code>orders-5c8x</code> on node 03, and since 03:10 it has listed <code>orders-q2rw</code> on node 04. Kubernetes never moves a Pod. It replaces it with a new one, made from the same template, which has a new name and a new address and keeps nothing from inside the old one.</p>
+      <p>This is why Kubernetes treats Pods as disposable. People rarely create Pods by hand; a controller makes them, and each one lasts until it finishes its work, is removed, or loses its node. The new address is also the reason <code>storefront</code> needed another loop, Chapter 7’s, to find the new <code>orders</code> Pod.</p>
+
+      <h3 id="what-disposable-asks">What “disposable” asks of the app</h3>
+      <p>Engineers will recognise this idea from the twelve-factor app, a widely used checklist for building software, which calls it “disposability”: an app’s processes “can be started or stopped at a moment’s notice”. For a service running on Kubernetes, that comes down to four things:</p>
+      <ul>
+        <li>Keep nothing important inside the Pod. Fennel’s orders live in its database, outside the app, as Chapter 2 explained; where that database should run is the subject of Chapter 10.</li>
+        <li>Cope with being stopped or replaced at any moment.</li>
+        <li>Start in seconds rather than minutes, because a slow start lengthens the gap every time a Pod is replaced.</li>
+        <li>Finish any work in progress when asked to stop. By default, Kubernetes gives a Pod 30 seconds to do that.</li>
+      </ul>
+      <p>Kubernetes can’t do these for you; they’re up to the app. They’re the questions to ask whenever one of your services moves onto the cluster.</p>
+
+      <h3 id="self-healing">Self-healing, honestly</h3>
+      <p>You’ll hear what happened at 03:04 called <dfn id="dfn-self-healing">self-healing</dfn>. After last year’s 3 a.m. pages, it’s tempting to hear that as “Kubernetes makes our app reliable”. What the loops actually do is restore the declared state: they restart containers that crash, and they replace the Pods of nodes that die. There are several things they can’t do:</p>
+      <ul>
+        <li><strong>Fix a bug.</strong> An app that crashes as it starts is restarted, crashes again, and is restarted again, forever. §08 shows an example.</li>
+        <li><strong>Find room that isn’t there.</strong> If no node has room for a new Pod, the Pod waits, unplaced, until room appears. Chapter 5 gives this state a name.</li>
+        <li><strong>Bring back what was inside a Pod.</strong> Anything written inside a Pod is lost with it; keeping data safe is the subject of Chapter 10.</li>
+        <li><strong>Keep a single copy up.</strong> As at 03:04, a service with only one copy is down while that copy is replaced.</li>
+      </ul>
+      <p>In other words, Kubernetes restores the number of copies that are running. Whether the app itself is healthy is still your engineers’ responsibility.</p>
+    </section>
+
+    <!-- s-07 · Who runs what · o-4 · claims c-05, c-21, c-22, c-23, c-24 · f-05 (HTML parts + arrow.js
+         connectors, each ending on the API server; none between loops: m-03) · TERM 04 · D6 (the only place
+         "etcd" appears), D7 · k-07 · no provider named, no price -->
+    <section id="s-07" data-segment="s-07">
+      <h2 id="who-runs-what"><span class="cp-sec">§ 07 </span>Who runs what</h2>
+      <p>You’ve now met every part of a cluster that a manager needs to know by name. Fig. 05 brings them together and shows who runs each part.</p>
+
+      <figure class="cp-fig d-wide" id="f-05" aria-labelledby="f-05-cap">
+        <div class="cp-fig__plate">
+          <div class="cp-fig__bar"><span class="cp-label">Fig. 05</span><span class="cp-label">Control plane and nodes</span></div>
+          <div class="cp-blueprint cl" data-cluster-sketch role="img" aria-label="The cluster in two bands. Top band, the control plane, run by your provider in every mode: the cluster’s record, with the API server in front of it, and three separate loops around it: the ReplicaSet loop and the node loop, which are controllers, and the scheduler. Each loop connects only to the API server, never to another loop. Bottom band, the nodes, yours in standard mode and the provider’s in fully managed modes: four nodes running Pods, each with a node agent that connects to the API server. Ari applies manifests through the API server too. Always yours: what goes into the record, your images and code, your data, who may change what, and watching alerts.">
+            <div class="cl__grid">
+              <div class="cl__ari" data-k="ari"><b>Ari</b>applies manifests</div>
+              <div class="cl__band cl__cp">
+                <p class="cl__bandlabel">Control plane · run by your provider, in every mode</p>
+                <div class="cl__cpgrid">
+                  <div class="cl__ctrl">
+                    <p class="cl__grouplabel">controllers</p>
+                    <span class="cp-loop" data-k="loop"><span class="cp-loop__mark">↻</span>ReplicaSet loop</span>
+                    <span class="cp-loop" data-k="loop"><span class="cp-loop__mark">↻</span>node loop</span>
+                  </div>
+                  <span class="cp-loop cl__sched" data-k="loop"><span class="cp-loop__mark">↻</span>scheduler</span>
+                  <div class="cp-rec cl__rec">
+                    <p class="cl__rechead">The cluster’s record</p>
+                    <p>what’s wanted</p>
+                    <p>what’s reported</p>
+                  </div>
+                  <div class="cl__api" data-k="api">API server</div>
+                </div>
+              </div>
+              <div class="cl__band cl__nodes">
+                <div class="cl__nodegrid">
+                  <div class="cl__node">
+                    <div class="cl__nodebar"><span class="cp-label">Node · 01</span><span class="cp-loop" data-k="agent"><span class="cp-loop__mark">↻</span>agent</span></div>
+                    <div class="cl__nodebody"><span class="cl__pod"></span><span class="cl__pod"></span><span class="cl__pod"></span><p class="cl__podlabel">Pods</p></div>
+                  </div>
+                  <div class="cl__node">
+                    <div class="cl__nodebar"><span class="cp-label">Node · 02</span><span class="cp-loop" data-k="agent"><span class="cp-loop__mark">↻</span>agent</span></div>
+                    <div class="cl__nodebody"><span class="cl__pod"></span><span class="cl__pod"></span><span class="cl__pod"></span></div>
+                  </div>
+                  <div class="cl__node">
+                    <div class="cl__nodebar"><span class="cp-label">Node · 03</span><span class="cp-loop" data-k="agent"><span class="cp-loop__mark">↻</span>agent</span></div>
+                    <div class="cl__nodebody"><span class="cl__pod"></span><span class="cl__pod"></span></div>
+                  </div>
+                  <div class="cl__node">
+                    <div class="cl__nodebar"><span class="cp-label">Node · 04</span><span class="cp-loop" data-k="agent"><span class="cp-loop__mark">↻</span>agent</span></div>
+                    <div class="cl__nodebody"><span class="cl__pod"></span><span class="cl__pod"></span></div>
+                  </div>
+                </div>
+                <p class="cl__bandlabel">Nodes · yours in standard mode; the provider’s in fully managed modes</p>
+              </div>
+              <div class="cl__yours">
+                <p class="cl__bandlabel">Always yours</p>
+                <ul>
+                  <li>what goes into the record</li>
+                  <li>your images and code</li>
+                  <li>your data</li>
+                  <li>who may change what</li>
+                  <li>watching alerts</li>
+                </ul>
+              </div>
+            </div>
+            <svg class="cl__wires" aria-hidden="true" focusable="false"></svg>
+          </div>
+        </div>
+        <figcaption id="f-05-cap"><span class="cp-label">Fig. 05</span><span>Every part talks only to the API server, and through it to the record. The provider runs everything in the top band, but what goes into the record is always yours.</span></figcaption>
+      </figure>
+
+      <p>You met the <dfn id="dfn-api-server">API server</dfn> on moving day as the front door to the record. Everything that reads or writes the record goes through it, whether that’s a person applying a manifest or one of the loops. The node agent on each node is what engineers call the kubelet; it starts whatever has been assigned to its node and reports back. Together, the API server, the record behind it, and the loops that work on that record, apart from the node agents, make up the <dfn id="dfn-control-plane" aria-describedby="term-04">control plane</dfn>.</p>
+
+      <div class="cp-term" id="term-04" role="note" aria-label="New term 4 of 4">
+        <p class="cp-term__kicker">New term · 04 / 04</p>
+        <p class="cp-term__term">control plane</p>
+        <p class="cp-term__def">The API server, the cluster’s record behind it, and the loops that work on it. On a managed service, your provider runs it.</p>
+        <p class="cp-term__back">You met each part in §04 and §05.</p>
+      </div>
+
+      <p>On a managed service, the provider runs the whole control plane in every mode, and carries out its upgrades to new Kubernetes versions. Deciding when to upgrade, and checking that Fennel’s apps still work on the new version, is still partly Fennel’s job; that work is the subject of Chapter 14.</p>
+      <p>Who looks after the nodes depends on the mode. In each big provider’s standard mode, the customer does, which at Fennel means Ari’s team. In the fully managed modes, the provider does. Either way, Fennel pays for the computing its Pods run on, which in most modes means paying for the machines themselves. Some things are always Fennel’s responsibility: what goes into the record, its images and code, its data, who may change what, and watching and responding to alerts.</p>
+      <p>Without a managed service, Fennel’s own team would also have to run the control plane, including keeping the record safe.</p>
+
+      <!-- D6 (c-05 note): the only mention of etcd -->
+      <details class="d-more cp-more">
+        <summary>What is the cluster’s record, exactly?</summary>
+        <div class="cp-more__body"><p>Engineers often call it etcd, after the software usually used to store it, although some providers store it differently. Only the API server reads and writes it directly; every loop goes through the API server.</p></div>
+      </details>
+      <!-- D7 (parking lot, principles.md) -->
+      <details class="d-more cp-more">
+        <summary>What if the control plane itself goes down?</summary>
+        <div class="cp-more__body"><p>Pods that are already running keep running, because each part carries on with what it was last told. But no Pod is replaced or placed until the control plane is back. What providers promise about this is covered in Chapter 14.</p></div>
+      </details>
+
+      <div class="cp-check" role="group" aria-labelledby="k-07-q" data-check="k-07">
+        <div class="cp-check__head"><span class="cp-chip cp-chip--apply">APPLY</span><span class="cp-label">Check 07 / 09</span></div>
+        <p class="cp-check__q" id="k-07-q">Fennel’s cluster runs on a managed service, in the provider’s standard mode. Which of these is still Fennel’s job?</p>
+        <ul class="cp-options">
+          <li><button type="button" class="cp-option" data-fb="That’s the control plane, which the provider runs in every mode."><span class="cp-option__key">A</span><span>Keeping the API server and the cluster’s record running, and replacing their machines when they fail.</span><span class="cp-option__tag"></span></button></li>
+          <li><button type="button" class="cp-option" data-fb="Those loops are part of the control plane too, so the provider runs them. They did Fennel’s 3 a.m. work, but Fennel doesn’t have to run them."><span class="cp-option__key">B</span><span>Running the scheduler and the loops that replace Pods when a node dies, since those did Fennel’s 3 a.m. work.</span><span class="cp-option__tag"></span></button></li>
+          <li><button type="button" class="cp-option" data-ok data-fb="Right. The provider runs the loops, but what they work towards is Fennel’s decision, and so is whether each app copes with being replaced. In standard mode, Ari’s team also looks after the nodes."><span class="cp-option__key">C</span><span>Deciding what goes in the record: how many copies of <code>orders</code> to run, and from which image.</span><span class="cp-option__tag"></span></button></li>
+        </ul>
+        <div class="cp-feedback" role="status" hidden></div>
+      </div>
+    </section>
+
+    <!-- s-08 · The conversation · o-2, o-3 · claim c-14 (x-05) · notifications is Fennel fiction (d-04) · k-08,
+         CrashLoopBackOff once, Ari's line, k-09 (think, then reveal; the curriculum's two questions) · recap ·
+         bridge to Ch 5 -->
+    <section id="s-08" data-segment="s-08">
+      <h2 id="the-conversation"><span class="cp-sec">§ 08 </span>The conversation</h2>
+      <p>Fennel’s newest service, <code>notifications</code>, sends customers texts and emails about their orders. If it runs late for a while, that’s annoying but not a disaster. On Wednesday, a setting it needs goes missing.</p>
+
+      <div class="cp-check" role="group" aria-labelledby="k-08-q" data-check="k-08">
+        <div class="cp-check__head"><span class="cp-chip">PREDICT</span><span class="cp-label">Check 08 / 09</span></div>
+        <p class="cp-check__q" id="k-08-q">Every time a <code>notifications</code> container starts, it crashes within seconds, because a setting it needs is missing. With default settings, what does Kubernetes do over the next hour?</p>
+        <ul class="cp-options">
+          <li><button type="button" class="cp-option" data-ok data-fb="Right. The node agent restarts it after about 10 seconds, then waits 20, then 40, and so on, up to 5 minutes between tries. That comes to roughly 15 restarts in the first hour and about 12 an hour after that, for as long as the setting is missing. The loop is working exactly as designed, and the app is still broken."><span class="cp-option__key">A</span><span>Restarts it in place again and again, waiting longer between tries, and never stops.</span><span class="cp-option__tag"></span></button></li>
+          <li><button type="button" class="cp-option" data-fb="There’s no point at which it gives up. The node agent keeps restarting it indefinitely, waiting longer each time, up to 5 minutes. Nobody is told unless your team has set up an alert."><span class="cp-option__key">B</span><span>Restarts it a few times, then stops and marks <code>notifications</code> as failed, so someone notices.</span><span class="cp-option__tag"></span></button></li>
+          <li><button type="button" class="cp-option" data-fb="A crashing container is restarted in place, in the same Pod on the same node. Pods are replaced when their node fails, not when their app crashes."><span class="cp-option__key">C</span><span>Replaces its Pod on a different node each time, in case the node is what’s broken.</span><span class="cp-option__tag"></span></button></li>
+        </ul>
+        <div class="cp-feedback" role="status" hidden></div>
+      </div>
+
+      <p>On engineers’ dashboards, this state shows up as <code>CrashLoopBackOff</code>. An example in the Kubernetes documentation shows a Pod in this state that has restarted 200 times over two days and nine hours.</p>
+
+      <div class="cp-check" role="group" aria-labelledby="k-09-q" data-check="k-09" data-reveal>
+        <div class="cp-check__head"><span class="cp-chip cp-chip--apply">APPLY</span><span class="cp-label">Check 09 / 09 · think, then reveal</span></div>
+        <p class="cp-check__q" id="k-09-q">Ari says: “<code>notifications</code> keeps crash-looping, but Kubernetes keeps restarting it.” What would you ask? Think of one or two questions, then show the answer.</p>
+        <button type="button" class="cp-reveal" aria-expanded="false" aria-controls="k-09-a">Show the answer</button>
+        <div class="cp-feedback" id="k-09-a" role="status" hidden>
+          <p><b>ANSWER</b>“So Kubernetes is doing its job. What’s wrong with the app? And is restarting hiding the problem from us?”</p>
+          <p>The loop checks one thing, whether the container is running, and acts on that. It can’t see the missing setting, so restarting is all it can do. Meanwhile, a service that restarts quietly can look “handled” on a dashboard while texts and emails stop going out. Chapter 12 comes back to how teams catch that.</p>
+          <p>If your question was “can Kubernetes fix it?”, that’s exactly the trap this chapter warns about: the loops restore the number of copies running, but they don’t repair the app.</p>
+        </div>
+      </div>
+
+      <div class="cp-recap">
+        <p class="cp-label">In short</p>
+        <ul>
+          <li>With Kubernetes, you write down what you want, the desired state, in manifests. Applying a manifest records that intention; it doesn’t run anything itself.</li>
+          <li>Many small loops each compare one part of the record with what they observe, and act to close any gap, over and over. None of them plans for the others; work passes between them through the record.</li>
+          <li>Kubernetes runs Pods, and Pods are disposable. When a node dies, its Pods are replaced by new ones within minutes with default settings, and nobody has to be awake. The app has to cope with that, and the loops can’t fix an app that is broken.</li>
+          <li>Your provider runs the control plane. What goes into the record, and whether your apps survive being replaced, stays your responsibility.</li>
+        </ul>
+        <p>From here on, whenever Kubernetes does something, the loop lens is the first question to ask: which loop, watching what, doing what? In the next chapter, Morgan, the co-founder who runs Fennel’s money, opens the first cloud bill since the move and finds it has gone up. That story starts with the loop that picked node 04 for <code>orders</code>.</p>
+      </div>
+    </section>
+
+    <footer class="cp-sources" data-toc-skip>
+      <p class="cp-label">Sources</p>
+      <ol>
+        <li>Kubernetes documentation, <a href="https://kubernetes.io/docs/concepts/overview/working-with-objects/">“Objects in Kubernetes”</a>: an object as a “record of intent”, desired state, and manifests.</li>
+        <li>Kubernetes project, <a href="https://github.com/kubernetes/community/blob/master/contributors/devel/sig-architecture/api-conventions.md">“API Conventions”</a>: a new goal is recorded at once and the system catches up over time; heading for the latest goal (2 → 5 → 3).</li>
+        <li>Kubernetes documentation, <a href="https://kubernetes.io/docs/concepts/overview/working-with-objects/object-management/">“Kubernetes Object Management”</a>: imperative commands and declarative configuration, kept in version control and reviewed.</li>
+        <li>Kubernetes documentation, <a href="https://kubernetes.io/docs/concepts/overview/">“Overview”</a>: “a set of independent, composable control processes”, “Centralized control is also not required”, and the name: helmsman or pilot, and K8s.</li>
+        <li>Kubernetes documentation, <a href="https://kubernetes.io/docs/concepts/architecture/controller/">“Controllers”</a>: control loops, many simple controllers rather than one, and controllers that work through the record.</li>
+        <li>Kubernetes documentation, <a href="https://kubernetes.io/docs/concepts/architecture/">“Cluster Architecture”</a>: the API server, the cluster’s store, the scheduler, the controllers, and the node agent.</li>
+        <li>Kubernetes documentation, <a href="https://kubernetes.io/docs/reference/node/node-status/">“Node Status”</a>: a silent node marked unknown after 50 seconds by default; and <a href="https://kubernetes.io/docs/concepts/architecture/nodes/">“Nodes”</a>: the five-minute wait by default, and the check with the cloud provider.</li>
+        <li>Kubernetes documentation, <a href="https://kubernetes.io/docs/concepts/workloads/controllers/replicaset/">“ReplicaSet”</a>: keeping a stated number of identical Pods, and replacing them after a node failure.</li>
+        <li>Kubernetes documentation, <a href="https://kubernetes.io/docs/concepts/workloads/pods/">“Pods”</a>: what a Pod is, one container per Pod as the common case, the name, and Pods as disposable.</li>
+        <li>Kubernetes documentation, <a href="https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle/">“Pod Lifecycle”</a>: Pods are replaced, never moved; the restart back-off (10 seconds doubling, up to 5 minutes) and its example of 200 restarts; Pods that wait to be placed; the 30-second stop by default.</li>
+        <li>The Twelve-Factor App, <a href="https://12factor.net/disposability">“IX. Disposability”</a>: processes that start fast, shut down cleanly and survive sudden death.</li>
+        <li>Google Cloud, <a href="https://cloud.google.com/kubernetes-engine/docs/concepts/cluster-architecture">“GKE cluster architecture”</a> and <a href="https://cloud.google.com/kubernetes-engine/docs/concepts/shared-responsibility">“Shared responsibility”</a>; AWS, <a href="https://docs.aws.amazon.com/eks/latest/userguide/what-is-eks.html">“What is Amazon EKS?”</a>; Microsoft, <a href="https://learn.microsoft.com/en-us/azure/aks/core-aks-concepts">“AKS core concepts”</a>: what a managed provider runs in each mode, and what stays the customer’s.</li>
+      </ol>
+      <p>Quotes from the Kubernetes documentation are by The Kubernetes Authors, under <a href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a>. Facts carried over from earlier chapters (an image is downloaded before its container can start; files written inside a container go with it; a moved container has a new address) are sourced in Chapters 2 and 3.</p>
+      <p>Fennel, its people, services, versions, machines, Pod names and incidents are fiction, made up to illustrate the mechanisms above. The clock times in §05 are arithmetic on Kubernetes’ default settings, not measurements.</p>
+    </footer>
+  </main>
+</div>
+
+<script src="assets/toc.js"></script>
+<script src="assets/arrow.js"></script>
+<script src="assets/page.js"></script>
+<script src="assets/widget.js"></script>
+<link rel="stylesheet" href="widgets/w-cluster-scrolly/index.css">
+<script src="widgets/w-cluster-scrolly/data.js"></script>
+<script src="widgets/w-cluster-scrolly/index.js"></script>
+</body>
+</html>

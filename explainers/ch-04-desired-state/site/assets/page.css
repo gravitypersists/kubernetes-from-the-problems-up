@@ -1,0 +1,649 @@
+/* Ch 04 page layer. Adapted from Ch 03's page.css (commit 5141855): base, hero, page column, prose,
+   asides, quotes, recap, sources, cast strip, disclosures (.cp-more), term cards (.cp-term and its
+   payoff variant), figure plates, status words, the machine / chip / cluster grammar and the check
+   card are the same treatments, so the chapters look and behave alike. Control Plane treatments
+   (design/control-plane/components/bundle.css) fitted to the didactician kit skeleton (components.css).
+   Every value is a token; no raw colours.
+   New in Ch 04: the written-intention / loop / Pod grammar (.cp-rec, .cp-loop, .cp-pod), f-01 to f-05,
+   the term card's mono line, and the §04/§05 scrollytelling scaffold (.cs-*, from Ch 03's .fs-*). */
+
+/* ---------- base ---------- */
+body.d-body { -webkit-font-smoothing: antialiased; }
+:where(body) :focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+
+.cp-label {
+  font: 700 var(--fs-caption)/var(--lh-caption) var(--font-mono);
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+}
+.cp-blueprint {
+  background-color: var(--surface);
+  background-image:
+    linear-gradient(var(--line) 1px, transparent 1px),
+    linear-gradient(90deg, var(--line) 1px, transparent 1px);
+  background-size: var(--sp-4) var(--sp-4);
+  background-position: -1px -1px;
+}
+
+/* ---------- hero ---------- */
+.cp-hero { padding: var(--sp-11) var(--sp-3) var(--sp-6); border-bottom: 3px solid var(--ink); }
+.cp-hero__inner { max-width: 960px; margin: 0 auto; }
+.cp-hero__kicker { display: flex; flex-wrap: wrap; gap: var(--sp-1) var(--sp-2); align-items: center; margin: 0 0 var(--sp-3); }
+.cp-hero__idx {
+  background: var(--accent); color: var(--accent-ink);
+  padding: 0 var(--sp-1); border-radius: var(--radius-1);
+  font: 700 var(--fs-caption)/var(--lh-caption) var(--font-mono); letter-spacing: .08em;
+}
+.cp-hero__title {
+  margin: 0 0 var(--sp-3); max-width: 18ch;
+  font: 800 var(--fs-h1)/var(--lh-h1) var(--font-sans);
+  font-stretch: 112%; letter-spacing: -0.02em; color: var(--ink); text-wrap: balance;
+}
+.cp-hero__standfirst { margin: 0 0 var(--sp-5); max-width: var(--measure); font: italic 400 22px/32px var(--font-serif); color: var(--ink-2); }
+.cp-meta { display: flex; flex-wrap: wrap; margin: 0; padding: 0; border-top: var(--stroke) solid var(--ink); }
+.cp-meta > div { display: flex; flex-direction: column; gap: 2px; padding: var(--sp-1) var(--sp-3) 0 0; margin-right: var(--sp-3); }
+.cp-meta dt { font: 400 var(--fs-caption)/var(--lh-caption) var(--font-mono); text-transform: uppercase; letter-spacing: .08em; color: var(--ink-3); }
+.cp-meta dd { margin: 0; font: 700 var(--fs-caption)/var(--lh-caption) var(--font-mono); color: var(--ink); font-variant-numeric: tabular-nums; }
+@media (max-width: 640px) {
+  .cp-hero { padding: var(--sp-8) var(--sp-2) var(--sp-5); }
+  .cp-hero__standfirst { font-size: 19px; line-height: 28px; }
+}
+
+/* ---------- page column ---------- */
+.d-page { padding-top: var(--sp-4); }
+.d-rail { padding-top: var(--sp-6); }
+/* Sections hold the prose measure (66ch in body type); wide blocks break out symmetrically,
+   bounded by the main column (container query units), so the left edge of all prose lines up. */
+.d-main { container-type: inline-size; }
+.d-main > * { margin-inline: auto; }
+.d-main section > .d-wide {
+  width: min(960px, 100cqw); max-width: none;
+  margin-left: calc((100% - min(960px, 100cqw)) / 2);
+}
+.d-main section > .cp-check {
+  width: min(720px, 100cqw); max-width: none;
+  margin-left: calc((100% - min(720px, 100cqw)) / 2);
+}
+
+/* ---------- prose ---------- */
+.d-main p { hanging-punctuation: first; }
+.d-main h2 {
+  margin: var(--sp-9) auto var(--sp-3);
+  padding-top: var(--sp-2);
+  border-top: var(--stroke) solid var(--ink);
+  font: 700 var(--fs-h2)/var(--lh-h2) var(--font-sans);
+  font-stretch: 106%; letter-spacing: -0.01em; text-wrap: balance;
+}
+.d-main section:first-of-type h2 { margin-top: var(--sp-4); }
+.cp-sec {
+  display: block; margin-bottom: var(--sp-1);
+  font: 700 var(--fs-caption)/var(--lh-caption) var(--font-mono);
+  letter-spacing: .08em; color: var(--accent);
+}
+.d-main a {
+  color: var(--accent);
+  text-decoration: underline; text-decoration-thickness: var(--stroke); text-underline-offset: 3px;
+  transition: color var(--dur-1) var(--ease-out);
+}
+.d-main a:hover { color: var(--ink); }
+.d-main dfn { font-style: normal; font-weight: 600; box-shadow: inset 0 -0.35em 0 var(--c1-soft); }
+.d-main ul { padding-left: var(--sp-3); }
+.d-main li { margin-bottom: var(--sp-1); }
+.cp-aside {
+  margin-top: var(--sp-4); margin-bottom: var(--sp-4);
+  padding: var(--sp-2) 0 var(--sp-2) var(--sp-3);
+  border-top: var(--stroke) solid var(--line); border-bottom: var(--stroke) solid var(--line);
+  font: var(--fs-small)/var(--lh-small) var(--font-sans); color: var(--ink-2);
+}
+.cp-aside p { margin: 0 0 var(--sp-1); }
+.cp-aside p:last-child { margin-bottom: 0; }
+.cp-aside b { font: 700 var(--fs-caption)/var(--lh-caption) var(--font-mono); letter-spacing: .08em; color: var(--ink); margin-right: var(--sp-1); }
+.cp-aside .cp-breaks b { color: var(--ink-3); }
+.cp-quote {
+  margin: var(--sp-3) 0;
+  padding: var(--sp-1) 0 var(--sp-1) var(--sp-3);
+  border-left: 3px solid var(--ink);
+  font: italic 400 22px/32px var(--font-serif); color: var(--ink);
+}
+.cp-quote p { margin: 0; }
+.cp-quote cite { display: block; margin-top: var(--sp-half); font: 400 var(--fs-caption)/var(--lh-caption) var(--font-mono); font-style: normal; letter-spacing: .08em; text-transform: uppercase; color: var(--ink-3); }
+.cp-recap { margin-top: var(--sp-6); padding-top: var(--sp-2); border-top: var(--stroke) solid var(--ink); }
+.cp-recap ul { margin: var(--sp-1) 0 var(--sp-3); padding-left: var(--sp-3); }
+.cp-recap li { margin-bottom: var(--sp-1); }
+.cp-sources { margin-top: var(--sp-9); padding-top: var(--sp-2); border-top: var(--stroke) solid var(--line); font: var(--fs-small)/var(--lh-small) var(--font-sans); color: var(--ink-2); }
+.cp-sources ol { margin: var(--sp-1) 0 var(--sp-2); padding-left: var(--sp-3); }
+.cp-sources li { margin-bottom: var(--sp-half); }
+.cp-sources p { margin: 0 0 var(--sp-1); }
+
+/* ---------- cast strip (course convention from Ch 03, CURRICULUM §2.11) ---------- */
+.cp-cast {
+  margin-top: 0; margin-bottom: var(--sp-2); padding: var(--sp-2) 0;
+  border-top: var(--stroke) solid var(--line); border-bottom: var(--stroke) solid var(--line);
+  font: var(--fs-small)/var(--lh-small) var(--font-sans); color: var(--ink-2);
+}
+.d-main .cp-cast > .cp-label { margin: 0 0 var(--sp-1); }
+.cp-cast dl { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: var(--sp-half) var(--sp-2); margin: 0; }
+.cp-cast dt { font: 700 var(--fs-caption)/var(--lh-small) var(--font-mono); letter-spacing: .08em; text-transform: uppercase; color: var(--ink); }
+.cp-cast dd { margin: 0; }
+
+/* ---------- disclosures: optional notes, collapsed by default (ink ▸ / ▾ markers, as Ch 02's "why" lists) ---------- */
+.d-more.cp-more { margin: var(--sp-2) auto var(--sp-3); padding-left: var(--sp-2); border-left: var(--stroke) solid var(--ink); }
+.cp-more > summary {
+  display: flex; align-items: center; min-height: var(--tap); cursor: pointer; list-style: none;
+  font: 600 var(--fs-small)/var(--lh-small) var(--font-sans); color: var(--ink);
+}
+.cp-more > summary::-webkit-details-marker { display: none; }
+.cp-more > summary::before { content: "▸"; flex: none; margin-right: var(--sp-1); font-family: var(--font-mono); color: var(--ink); }
+.cp-more[open] > summary::before { content: "▾"; }
+.cp-more__body { padding-bottom: var(--sp-1); font: var(--fs-small)/var(--lh-small) var(--font-serif); color: var(--ink-2); }
+.cp-more__body p, .cp-more__body ul { margin: 0 0 var(--sp-1); }
+.cp-more__body p:last-child, .cp-more__body ul:last-child { margin-bottom: 0; }
+.cp-more__body ul { padding-left: var(--sp-3); }
+.cp-more__body li { margin-bottom: var(--sp-half); }
+
+/* ---------- term cards (course convention from Ch 03, CURRICULUM §8 step 4; plan ## Figures) ----------
+   Outlined plate, no shadow (not interactive). One accent mark: the kicker. The payoff variant
+   (blueprint ground, larger term, job strip) appears at most once per chapter. Static: no animation. */
+.cp-term {
+  margin-top: var(--sp-6); margin-bottom: var(--sp-6);
+  padding: var(--sp-3);
+  background-color: var(--surface); border: var(--stroke) solid var(--ink); border-radius: var(--radius-1);
+}
+.cp-term > p { margin: 0; }
+.cp-term__kicker { font: 700 var(--fs-caption)/var(--lh-caption) var(--font-mono); letter-spacing: .08em; text-transform: uppercase; color: var(--accent); }
+.cp-term .cp-term__term {
+  margin: var(--sp-1) 0 var(--sp-2);
+  font: 800 32px/36px var(--font-sans); font-stretch: 112%; letter-spacing: -0.02em; color: var(--ink);
+  text-wrap: balance; overflow-wrap: anywhere;
+}
+.cp-term__sep { font-family: var(--font-mono); font-weight: 400; color: var(--ink-3); }
+.cp-term .cp-term__def { margin-bottom: var(--sp-2); font: 400 var(--fs-body)/var(--lh-body) var(--font-serif); color: var(--ink); }
+.cp-term__back { font: 400 var(--fs-caption)/var(--lh-caption) var(--font-mono); letter-spacing: .04em; color: var(--ink-3); }
+.cp-term--payoff { padding: var(--sp-4) var(--sp-3); }
+.cp-term--payoff .cp-term__term { font-size: 40px; line-height: 44px; }
+.cp-term__jobs {
+  padding-top: var(--sp-1); border-top: var(--stroke) solid var(--ink);
+  font: 700 var(--fs-caption)/var(--lh-caption) var(--font-mono); letter-spacing: .04em; color: var(--ink);
+}
+@media (max-width: 640px) {
+  .cp-term { padding: var(--sp-2); }
+  .cp-term .cp-term__term { font-size: 28px; line-height: 32px; }
+  .cp-term--payoff { padding: var(--sp-3) var(--sp-2); }
+  .cp-term--payoff .cp-term__term { font-size: 32px; line-height: 36px; }
+}
+
+/* ---------- figure plate ---------- */
+.cp-fig { margin: var(--sp-8) 0; }
+.cp-fig__plate { border: var(--stroke) solid var(--ink); border-radius: var(--radius-1); overflow: hidden; }
+.cp-fig__bar {
+  display: flex; justify-content: space-between; flex-wrap: wrap; gap: 0 var(--sp-2);
+  padding: var(--sp-1) var(--sp-2);
+  border-bottom: var(--stroke) solid var(--ink);
+  background: var(--surface);
+}
+.cp-fig__bar .cp-label:first-child { color: var(--ink); }
+.cp-fig svg { display: block; width: 100%; height: auto; }
+.cp-fig figcaption {
+  display: grid; grid-template-columns: auto 1fr; gap: var(--sp-2);
+  max-width: var(--measure); margin-top: var(--sp-1);
+  font: 400 var(--fs-caption)/var(--lh-caption) var(--font-sans); color: var(--ink-2);
+}
+.cp-fig figcaption .cp-label { color: var(--ink); }
+
+/* ---------- status words and lamps (word + colour, never colour alone) ---------- */
+.st { font: 700 var(--fs-caption)/var(--lh-caption) var(--font-mono); letter-spacing: .08em; text-transform: uppercase; white-space: nowrap; }
+.st--good { color: var(--good); }
+.st--bad { color: var(--bad); }
+.st--warn { color: var(--warn); }
+.lamp { display: inline-block; width: var(--sp-1); height: var(--sp-1); margin-right: var(--sp-half); vertical-align: 1px; }
+.st--good .lamp { background: var(--good); }
+.st--bad .lamp { background: var(--bad); }
+.st--warn .lamp { background: var(--warn); }
+
+/* ---------- course visual grammar: machine frame, rows, image and container chips ----------
+   Copied from Ch 02 (b661656). machine = outlined frame with a mono MACHINE · NAME bar; things on the
+   machine in c2; image chip = c1 stroke on c1-soft, no lamp; container chip = the same chip plus a
+   status. The §02 canvas (widgets/w-fleet-scrolly/) keeps its own scoped copy with chip sizes. */
+.cp-machine { min-width: 0; background: var(--surface); border: var(--stroke) solid var(--ink); border-radius: var(--radius-1); }
+.cp-machine__bar {
+  display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 0 var(--sp-1);
+  padding: var(--sp-half) var(--sp-1); border-bottom: var(--stroke) solid var(--ink);
+}
+.cp-machine__bar .cp-label { color: var(--ink); letter-spacing: .06em; }
+.cp-machine__bar .cp-label + .cp-label { color: var(--ink-3); }
+.cp-machine__body { display: grid; gap: var(--sp-1); padding: var(--sp-1); }
+.cp-chips { display: flex; flex-wrap: wrap; gap: var(--sp-half); align-items: flex-start; }
+.cp-img, .cp-ctr {
+  display: inline-flex; flex-wrap: wrap; align-items: baseline; gap: 0 var(--sp-1);
+  max-width: 100%; padding: 2px var(--sp-1); border-radius: var(--radius-1);
+  background: var(--c1-soft); border: var(--stroke) solid var(--c1);
+  font: 700 var(--fs-caption)/var(--lh-caption) var(--font-mono); color: var(--ink);
+  overflow-wrap: anywhere;
+}
+.cp-ann { display: block; margin-top: var(--sp-half); font: italic 400 var(--fs-caption)/var(--lh-caption) var(--font-sans); color: var(--ink-2); }
+.mrow {
+  display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 0 var(--sp-1);
+  padding: 2px var(--sp-1); border-radius: var(--radius-1);
+  font: 400 var(--fs-caption)/var(--lh-caption) var(--font-sans); color: var(--ink);
+}
+.mrow--c2 { background: var(--c2-soft); border: var(--stroke) solid var(--c2); }
+.cp-code, .mrow code { font: 700 var(--fs-caption)/var(--lh-caption) var(--font-mono); color: var(--ink); background: none; padding: 0; }
+
+/* cluster = a 3px ink frame around machine frames, with a mono CLUSTER bar (Ch 03 visual grammar) */
+.cp-cluster { min-width: 0; background: var(--surface); border: 3px solid var(--ink); border-radius: var(--radius-1); }
+.cp-cluster__bar { padding: var(--sp-half) var(--sp-1); border-bottom: var(--stroke) solid var(--ink); }
+.cp-cluster__bar .cp-label { color: var(--ink); }
+.cp-cluster__body { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--sp-1); padding: var(--sp-1); }
+
+/* arrows between frames: typographic glyphs (style guide: "→ for flow"), stacked ↓ on narrow plates */
+.flow__arrow {
+  display: flex; align-items: center; justify-content: center; gap: var(--sp-1);
+  min-height: var(--sp-5);
+  font: 700 var(--fs-caption)/var(--lh-caption) var(--font-mono); letter-spacing: .06em; color: var(--ink);
+}
+.flow__glyph { font: 700 var(--fs-h3)/1 var(--font-mono); }
+.flow__glyph .wide { display: none; }
+
+
+/* ---------- Ch 04 visual grammar, page level (plan ## Visual grammar) ----------
+   Three kinds of thing look different everywhere in the chapter:
+     a written intention = c4 stroke on c4-soft, mono rows (.cp-rec; f-01's goal, f-02's code ground, f-05's record)
+     an actor (a loop)    = c3 pill with a typographic ↻ (.cp-loop; f-04, f-05)
+     a running thing      = Ch 02's c1 chip; a Pod wraps it in an ink frame (.cp-pod, f-03) or ring (f-05)
+   Instructions written by a person (f-01's task list) are dashed, unfilled and numbered, Ch 03's
+   "commands typed" grammar. The §04/§05 canvas (widgets/w-cluster-scrolly/) keeps its own scoped copy. */
+.cp-rec {
+  min-width: 0;
+  background: var(--c4-soft); border: var(--stroke) solid var(--c4); border-radius: var(--radius-1);
+  color: var(--ink);
+}
+.cp-loop {
+  display: inline-flex; align-items: center; gap: var(--sp-half);
+  padding: 2px var(--sp-1); border-radius: var(--radius-3);
+  background: var(--c3-soft); border: var(--stroke) solid var(--c3);
+  font: 700 var(--fs-caption)/var(--lh-caption) var(--font-mono); color: var(--ink);
+  white-space: nowrap;
+}
+.cp-loop__mark { font-weight: 700; }
+.cp-loop--later { background: none; border-style: dashed; border-color: var(--ink-3); color: var(--ink-3); }
+
+/* ---------- f-01: Sam's task list and Fennel's goal ---------- */
+.docs { padding: var(--sp-3); }
+.docs__grid { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--sp-3); }
+@media (min-width: 600px) { .docs__grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+.cp-fig .docs__say { margin: 0 0 var(--sp-1); font: italic 400 var(--fs-caption)/var(--lh-caption) var(--font-sans); color: var(--ink-2); }
+.docs__doc { min-width: 0; }
+.cp-fig .docs__head {
+  margin: 0; padding: var(--sp-half) var(--sp-1);
+  font: 700 var(--fs-caption)/var(--lh-caption) var(--font-mono); letter-spacing: .06em; text-transform: uppercase; color: var(--ink);
+}
+/* the task list: instructions written by a person, so dashed and unfilled, with step numbers */
+.docs__task { border: var(--stroke) dashed var(--ink-3); border-radius: var(--radius-1); }
+.docs__task .docs__head { border-bottom: var(--stroke) dashed var(--ink-3); }
+.docs__task ol { margin: 0; padding: var(--sp-1) var(--sp-1) var(--sp-1) var(--sp-5); }
+.d-main .docs__task li { margin: 0 0 var(--sp-half); padding-left: var(--sp-half); font: 400 var(--fs-small)/var(--lh-small) var(--font-serif); color: var(--ink); }
+.docs__task li::marker { font: 700 var(--fs-caption)/1 var(--font-mono); color: var(--ink-3); }
+.docs__task code { font: 700 0.9em var(--font-mono); background: none; padding: 0; }
+/* the goal: a written intention, so the record grammar */
+.docs__goal .docs__head { border-bottom: var(--stroke) solid var(--c4); }
+.docs__goal dl { display: grid; grid-template-columns: max-content minmax(0, 1fr); gap: var(--sp-half) var(--sp-3); margin: 0; padding: var(--sp-1); }
+.docs__goal dt, .docs__goal dd { margin: 0; font: 700 var(--fs-caption)/var(--lh-small) var(--font-mono); color: var(--ink); }
+.docs__goal dd { font-weight: 400; }
+@media (max-width: 599px) { .docs { padding: var(--sp-2) var(--sp-1); } }
+
+/* ---------- f-02: the storefront manifest ----------
+   One row per line: the code line (record ground) and, beside it on wide plates, its annotation;
+   under 600px the annotation drops under its line, so the block never scrolls sideways. */
+.mf { padding: var(--sp-3); }
+.mf__code { padding: var(--sp-1) 0; }
+.mf__row { display: grid; grid-template-columns: minmax(0, 1fr); padding: 0 var(--sp-2); }
+.cp-fig .mf__line {
+  display: block; margin: 0; white-space: pre;
+  font: 400 var(--fs-caption)/var(--lh-small) var(--font-mono); color: var(--ink);
+  background: none; padding: 0;
+}
+.mf__line .mf__k { font-weight: 700; }
+.mf__line .mf__c { color: var(--ink-2); font-style: italic; }
+.cp-fig .mf__ann {
+  margin: 0 0 var(--sp-half); padding-left: var(--sp-2);
+  font: italic 400 var(--fs-caption)/var(--lh-caption) var(--font-sans); color: var(--ink-2);
+}
+.cp-fig .mf__ann::before { content: "↑ "; font-style: normal; font-family: var(--font-mono); color: var(--ink-3); }
+.cp-fig .mf__ann--key { font: 700 var(--fs-caption)/var(--lh-caption) var(--font-sans); font-style: normal; color: var(--accent); }
+.mf__row--key .mf__line { font-weight: 700; }
+@media (min-width: 600px) {
+  .mf__row { grid-template-columns: minmax(0, 30ch) minmax(0, 1fr); column-gap: var(--sp-2); align-items: baseline; }
+  .cp-fig .mf__ann { margin: 0; padding-left: 0; }
+  .cp-fig .mf__ann::before { content: "← "; }
+}
+@media (max-width: 599px) { .mf { padding: var(--sp-2) var(--sp-1); } .mf__row { padding: 0 var(--sp-1); } }
+
+/* ---------- f-03: a Pod, and a Pod with a helper ----------
+   Pod = the canvas's Pod grammar (widgets/w-cluster-scrolly .wc-p): Ch 02's container chips (c1 on
+   c1-soft) inside an inset ink ring, chip height by size (one unit = 24px). Labels sit beside the ring,
+   so a Pod never looks like a node's bar-and-body frame. The second Pod is drawn lighter: the uncommon case. */
+.pods { padding: var(--sp-3); }
+.pods__grid { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--sp-4); max-width: 720px; margin-inline: auto; }
+@media (min-width: 600px) { .pods__grid { grid-template-columns: repeat(2, minmax(0, 1fr)); align-items: start; } }
+.pods__item { display: grid; grid-template-columns: 136px minmax(0, 1fr); gap: var(--sp-2); align-items: start; }
+.cp-pod {
+  display: grid; gap: 2px; padding: 2px;
+  background: var(--surface); border: var(--stroke) solid var(--ink); border-radius: var(--radius-1);
+}
+.cp-pod .cp-ctr { display: flex; align-items: flex-start; width: 100%; height: 24px; border-radius: 1px; }
+.cp-pod .cp-ctr[data-size="2"] { height: 50px; }
+.pods__labels { display: grid; gap: var(--sp-half); padding-top: 2px; }
+.cp-fig .pods__kind { display: grid; margin: 0; }
+.pods__kind .cp-label { color: var(--ink); }
+.pods__addr { font: 700 var(--fs-caption)/var(--lh-caption) var(--font-mono); letter-spacing: .06em; text-transform: uppercase; color: var(--ink-2); }
+.pods__item--minor .cp-pod { border-color: var(--ink-3); }
+.pods__item--minor .pods__kind .cp-label, .pods__item--minor .pods__addr { color: var(--ink-3); }
+.cp-fig .pods__say { margin: 0; font: italic 400 var(--fs-caption)/var(--lh-caption) var(--font-sans); color: var(--ink-2); }
+.pods__item--minor .pods__say { color: var(--ink-3); }
+@media (max-width: 599px) { .pods { padding: var(--sp-2) var(--sp-1); } }
+
+/* ---------- f-04: the loop lens table (built from CH04_LOOPS in assets/page.js) ----------
+   A table on the blueprint plate; under 600px each row becomes a card (the loop as its header, then
+   three labelled lines). The Ch 07 row is dashed and muted: a loop met later. */
+.lens { padding: var(--sp-3); }
+.lens table { width: 100%; border-collapse: collapse; background: var(--surface); border: var(--stroke) solid var(--ink); }
+.lens th, .lens td { padding: var(--sp-1) var(--sp-2); text-align: left; vertical-align: top; border-bottom: var(--stroke) solid var(--line); }
+.lens thead th { font: 700 var(--fs-caption)/var(--lh-caption) var(--font-mono); letter-spacing: .08em; text-transform: uppercase; color: var(--ink-3); border-bottom: var(--stroke) solid var(--ink); }
+.lens tbody th { width: 1%; white-space: nowrap; font-weight: 400; }
+.lens td { font: 400 var(--fs-small)/var(--lh-small) var(--font-serif); color: var(--ink); }
+.lens td.lens__job { font-style: italic; }
+.lens__per { display: block; margin-top: var(--sp-half); font: 400 var(--fs-caption)/var(--lh-caption) var(--font-sans); color: var(--ink-2); white-space: normal; }
+.lens tr.is-later td, .lens tr.is-later .lens__per { color: var(--ink-3); }
+.lens tr.is-later th, .lens tr.is-later td { border-top: var(--stroke) dashed var(--ink-4); }
+.lens tfoot td { border-top: var(--stroke) solid var(--ink); border-bottom: 0; font: 400 var(--fs-caption)/var(--lh-caption) var(--font-sans); color: var(--ink-2); }
+.lens td[data-label]::before { display: none; }
+@media (max-width: 599px) {
+  /* phone: one card per loop. Header row = the loop pill (left) and Sam's job (right); then WATCHING and
+     DOING with their labels inline, so the five cards stay about 850px tall at 360. */
+  .lens { padding: var(--sp-2) var(--sp-1); }
+  .lens table, .lens tbody, .lens tfoot, .lens td { display: block; width: auto; }
+  .lens table { background: none; border: 0; }
+  .lens thead { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+  .lens tbody tr {
+    display: grid; grid-template-columns: max-content minmax(0, 1fr); grid-template-areas: "loop job" "w w" "d d";
+    margin-bottom: var(--sp-1); background: var(--surface); border: var(--stroke) solid var(--ink); border-radius: var(--radius-1);
+  }
+  .lens tbody tr.is-later { border-style: dashed; border-color: var(--ink-3); }
+  .lens tbody th { grid-area: loop; width: auto; white-space: normal; padding: var(--sp-half) var(--sp-1); border-bottom: var(--stroke) solid var(--line); }
+  .lens tbody td:nth-of-type(1) { grid-area: w; }
+  .lens tbody td:nth-of-type(2) { grid-area: d; }
+  .lens tbody td.lens__job { grid-area: job; padding: var(--sp-half) var(--sp-1); border-bottom: var(--stroke) solid var(--line); text-align: right; }
+  .lens tr.is-later th, .lens tr.is-later td { border-top: 0; }
+  .lens td { padding: var(--sp-half) var(--sp-1); border-bottom: 0; }
+  .lens tbody td:nth-of-type(2) { padding-bottom: var(--sp-1); }
+  .lens td[data-label]::before {
+    content: attr(data-label); display: inline; margin-right: var(--sp-1);
+    font: 700 var(--fs-caption)/var(--lh-caption) var(--font-mono); font-style: normal; letter-spacing: .08em; text-transform: uppercase; color: var(--ink-3);
+  }
+  .lens td.lens__job::before { display: block; margin-right: 0; white-space: nowrap; }
+  .lens tfoot tr { display: block; margin-top: var(--sp-2); }
+  .lens tfoot td { border-top: 0; padding: 0; }
+}
+
+/* ---------- f-05: the cluster, and who runs what ----------
+   HTML parts on a CSS grid (real 13px text at every width), with the two-headed connectors drawn by
+   assets/page.js into an overlay <svg> using the kit's arrow.js, from the parts' measured positions.
+   Every connector is vertical or horizontal and ends on the API server bar; none joins two loops.
+   ≥ 760px: bands left, Ari and ALWAYS YOURS in a right column. Narrower: stacked, with the loops in a
+   staircase (each connector runs down past the left edge of the pills below it) and Ari above the band. */
+.cl { position: relative; padding: var(--sp-3); container-type: inline-size; }
+.cl__wires { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; overflow: hidden; }
+.cl__grid { display: grid; grid-template-columns: minmax(0, 1fr); grid-template-areas: "ari" "cp" "nodes" "yours"; row-gap: var(--sp-4); }
+.cl__band { min-width: 0; background: var(--surface); border: var(--stroke) solid var(--ink); border-radius: var(--radius-1); }
+.cp-fig .cl__bandlabel {
+  margin: 0; padding: var(--sp-half) var(--sp-1);
+  font: 700 var(--fs-caption)/var(--lh-caption) var(--font-mono); letter-spacing: .06em; text-transform: uppercase; color: var(--ink);
+}
+.cl__cp { grid-area: cp; }
+.cl__cp .cl__bandlabel { border-bottom: var(--stroke) solid var(--ink); padding-right: var(--sp-4); }
+.cl__cpgrid {
+  display: grid; padding: var(--sp-2) calc(var(--sp-2) + var(--sp-half)) var(--sp-1) var(--sp-1);
+  grid-template-columns: max-content minmax(0, 1fr);
+  grid-template-areas: "ctrl ctrl" "sched rec" "api api";
+  column-gap: var(--sp-1);
+}
+.cl__ctrl {
+  grid-area: ctrl; align-self: start; justify-self: start;
+  display: grid; justify-items: start; gap: var(--sp-1);
+  padding: var(--sp-1); border: var(--stroke) dashed var(--ink-3); border-radius: var(--radius-1);
+}
+.cp-fig .cl__ctrl > .cl__grouplabel { margin: 0; font: 400 var(--fs-caption)/var(--lh-caption) var(--font-mono); color: var(--ink-3); }
+.cl__ctrl .cp-loop + .cp-loop { margin-left: var(--sp-2); }
+.cl__sched { grid-area: sched; align-self: start; justify-self: start; margin: var(--sp-2) 0 var(--sp-4) var(--sp-5); }
+.cl__rec { grid-area: rec; align-self: end; margin-top: var(--sp-1); border-bottom: 0; border-radius: var(--radius-1) var(--radius-1) 0 0; }
+.cp-fig .cl__rec p { margin: 0; padding: 0 var(--sp-1); font: 400 var(--fs-caption)/var(--lh-caption) var(--font-mono); color: var(--ink); }
+.cp-fig .cl__rec .cl__rechead { padding: var(--sp-half) var(--sp-1); margin-bottom: var(--sp-half); border-bottom: var(--stroke) solid var(--c4); font-weight: 700; letter-spacing: .06em; text-transform: uppercase; }
+.cp-fig .cl__rec p:last-child { padding-bottom: var(--sp-1); }
+.cl__api {
+  grid-area: api; margin-right: calc(-1 * (var(--sp-2) + var(--sp-half))); display: flex; align-items: center; justify-content: center; min-height: var(--sp-4);
+  background: var(--ink); color: var(--bg); border-radius: var(--radius-1);
+  font: 700 var(--fs-caption)/var(--lh-caption) var(--font-mono); letter-spacing: .1em; text-transform: uppercase;
+}
+.cl__ari {
+  grid-area: ari; justify-self: end; display: flex; align-items: center; min-height: var(--sp-4);
+  padding: 0 var(--sp-1); border: var(--stroke) solid var(--ink); border-radius: var(--radius-1); background: var(--surface);
+  font: 400 var(--fs-caption)/var(--lh-caption) var(--font-sans); color: var(--ink);
+}
+.cl__ari b { font: 700 var(--fs-caption)/var(--lh-caption) var(--font-mono); letter-spacing: .06em; text-transform: uppercase; margin-right: var(--sp-half); }
+.cl__nodes { grid-area: nodes; display: flex; flex-direction: column; }
+.cl__nodegrid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: var(--sp-half); padding: var(--sp-1) var(--sp-half); }
+.cl__nodes .cl__bandlabel { margin-top: auto; border-top: var(--stroke) solid var(--ink); }
+.cl__node { min-width: 0; border: var(--stroke) solid var(--ink); border-radius: var(--radius-1); background: var(--surface); }
+.cl__nodebar { display: grid; justify-items: center; gap: var(--sp-half); padding: var(--sp-half) 0; border-bottom: var(--stroke) solid var(--ink); }
+.cl__nodebar .cp-label { color: var(--ink); letter-spacing: .04em; text-align: center; }
+/* the agent pill sits first on the bar, so its connector crosses only the frame's top edge */
+.cl__nodebar .cp-loop { order: -1; padding: 0 2px; }
+.cl__nodebody { display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: var(--sp-half); min-height: var(--sp-5); padding: var(--sp-1) var(--sp-half); }
+/* a small Pod: the c1 chip inside an inset ink ring (the canvas's Pod grammar) */
+.cl__pod { width: 18px; height: 24px; background: var(--surface); border: var(--stroke) solid var(--ink); border-radius: var(--radius-1); padding: 2px; }
+.cl__pod::before { content: ""; display: block; width: 100%; height: 100%; background: var(--c1-soft); border: var(--stroke) solid var(--c1); border-radius: 1px; }
+.cp-fig .cl__podlabel { flex-basis: 100%; margin: 0; text-align: center; font: 400 var(--fs-caption)/var(--lh-caption) var(--font-mono); color: var(--ink-3); }
+.cl__yours { grid-area: yours; border: var(--stroke) solid var(--ink); border-radius: var(--radius-1); background: var(--surface); }
+.cl__yours .cl__bandlabel { border-bottom: var(--stroke) solid var(--ink); }
+.cl__yours ul { margin: 0; padding: var(--sp-1) var(--sp-1) var(--sp-1) var(--sp-3); font: 400 var(--fs-small)/var(--lh-small) var(--font-serif); color: var(--ink); }
+.d-main .cl__yours li { margin-bottom: var(--sp-half); }
+@media (max-width: 599px) {
+  .cl { padding: var(--sp-2) var(--sp-1); }
+  .cl__nodebar .cp-label { font-size: var(--fs-caption); }
+}
+@container (min-width: 760px) {
+  .cl__grid {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 200px);
+    grid-template-areas: "cp ari" "nodes yours";
+    column-gap: var(--sp-5); row-gap: var(--sp-5);
+  }
+  .cl__cpgrid {
+    grid-template-columns: max-content minmax(0, 1fr) max-content;
+    grid-template-areas: "ctrl rec sched" "api api api";
+    column-gap: var(--sp-3); padding: var(--sp-2) var(--sp-2) var(--sp-1);
+  }
+  .cl__api { margin-right: 0; }
+  .cl__ctrl { grid-auto-flow: column; grid-template-rows: auto auto; align-items: center; margin-bottom: var(--sp-5); }
+  .cl__ctrl > .cl__grouplabel { grid-column: 1 / span 2; }
+  .cl__ctrl .cp-loop + .cp-loop { margin-left: 0; }
+  .cl__sched { margin: var(--sp-5) 0 var(--sp-5); }
+  .cl__rec { justify-self: center; width: min(100%, 240px); }
+  /* Ari sits level with the API server bar: same height, bottom aligned with the band's padding */
+  .cl__ari { align-self: end; justify-self: start; margin-bottom: calc(var(--sp-1) + var(--stroke)); }
+  .cl__nodegrid { gap: var(--sp-2); padding: var(--sp-2); }
+  .cl__nodebody { justify-content: flex-start; padding: var(--sp-1); }
+  .cp-fig .cl__podlabel { flex-basis: auto; text-align: left; margin-left: var(--sp-half); }
+}
+
+/* ---------- term card additions (Ch 04) ---------- */
+.cp-term__jobs + .cp-term__back { margin-top: var(--sp-1); }
+.cp-term__line {
+  margin-bottom: var(--sp-2) !important;
+  font: 700 var(--fs-caption)/var(--lh-caption) var(--font-mono); letter-spacing: .04em; color: var(--ink-2);
+}
+
+/* ---------- §04 / §05 scrollytelling scaffold: w-cluster-scrolly (course convention, CURRICULUM §8 step 6) ----------
+   Adapted from Ch 03's .fs-* scaffold. The page owns this layout; the widget (widgets/w-cluster-scrolly/)
+   renders into the [data-canvas], [data-step-text] and [data-step-snap] slots and runs activation and
+   gates. Mount contract: see the comment above the first mount in index.html.
+   Reserved canvas heights (plan w-cluster-scrolly size:): 540px from 900px wide; min(480px, 50vh) at
+   600–899px; min(360px, 50vh) under 600px. */
+.cs { margin-top: var(--sp-5); margin-bottom: var(--sp-8); }
+.cs-lane__grid { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--sp-3); }
+/* under 900px: canvas sticky at the top (≤ 50vh), opaque, steps scroll beneath it */
+.cs-canvas {
+  position: sticky; top: 0; z-index: 2; align-self: start;
+  min-height: min(360px, 50vh); padding: var(--sp-1) 0;
+  background: var(--bg);
+}
+@media (min-width: 600px) { .cs-canvas { min-height: min(480px, 50vh); } }
+.cs-steps { position: relative; z-index: 1; display: grid; gap: var(--sp-3); margin: 0; padding: 0; list-style: none; }
+.d-main .cs-steps > li { margin: 0; }
+.cs-step {
+  position: relative; min-height: 40vh;
+  padding: var(--sp-3);
+  background: var(--surface); border: var(--stroke) solid var(--line); border-radius: var(--radius-1);
+  transition: border-color var(--dur-2) var(--ease-out);
+}
+.cs-step.is-active { border-color: var(--ink); }
+.cs-step__text { font: 400 var(--fs-body)/var(--lh-body) var(--font-serif); color: var(--ink); }
+.cs-step__text p { margin: 0 0 var(--sp-2); }
+.cs-step__text p:last-child { margin-bottom: 0; }
+.cs-step__snap { display: none; }
+.cs-step > .cp-more { margin: var(--sp-2) 0 0; }
+.cs-step > .cp-check { margin: var(--sp-3) 0 0; padding: var(--sp-3) var(--sp-2); }
+/* gated steps: the controller adds .is-locked until every check named in data-gate is committed */
+.cs-step__lock { display: none; }
+.cs-step.is-locked { border-style: dashed; border-color: var(--ink-4); }
+.cs-step.is-locked > :not(.cs-step__lock) { visibility: hidden; }
+.cs-step.is-locked > .cs-step__lock {
+  display: block; position: absolute; top: var(--sp-3); left: var(--sp-3); right: var(--sp-3); margin: 0;
+  font: 700 var(--fs-caption)/var(--lh-caption) var(--font-mono); letter-spacing: .08em; text-transform: uppercase; color: var(--ink-3);
+}
+.cs-step.is-unlocked > * { animation: cp-in var(--dur-2) var(--ease-out); }
+@media (max-width: 599px) {
+  .cs-step { padding: var(--sp-2); }
+  .cs-step.is-locked > .cs-step__lock { top: var(--sp-2); left: var(--sp-2); right: var(--sp-2); }
+  .cs-step > .cp-check { padding: var(--sp-2) var(--sp-1); }
+}
+/* ≥ 900px: canvas sticky on the left (about 55%), steps on the right (about 45%) */
+@media (min-width: 900px) {
+  .cs-lane__grid { grid-template-columns: minmax(0, 11fr) minmax(0, 9fr); column-gap: var(--sp-4); align-items: start; }
+  .cs-canvas { top: var(--sp-4); z-index: auto; min-height: 540px; padding: 0; background: none; }
+}
+/* short viewports (under 560px tall, e.g. a phone in landscape): no sticky canvas; each step shows its
+   own snapshot above its text, rendered by the widget into [data-step-snap] */
+@media (max-height: 559px) {
+  .cs-lane__grid { grid-template-columns: minmax(0, 1fr); }
+  .cs-canvas { display: none; }
+  .cs-step { min-height: 0; }
+  .cs-step__snap { display: block; margin-bottom: var(--sp-2); }
+}
+.cs-noscript { padding: var(--sp-2); border: var(--stroke) dashed var(--ink-4); font: var(--fs-small)/var(--lh-small) var(--font-sans); color: var(--ink-2); }
+
+/* ---------- comprehension checks (copied from Ch 03, itself from Ch 02) ---------- */
+.cp-check {
+  margin-top: var(--sp-6); margin-bottom: var(--sp-6);
+  background: var(--surface);
+  border: var(--stroke) solid var(--ink); border-radius: var(--radius-1);
+  box-shadow: var(--shadow-1);
+  padding: var(--sp-3);
+}
+@media (max-width: 599px) { .cp-check { padding: var(--sp-2); } }
+@media (min-width: 560px) { .cp-check { padding: var(--sp-4); } }
+.cp-check__head { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--sp-1) var(--sp-2); margin-bottom: var(--sp-2); }
+.cp-chip {
+  display: inline-block; padding: var(--sp-half) var(--sp-1);
+  background: var(--accent); color: var(--accent-ink); border-radius: var(--radius-1);
+  font: 700 var(--fs-caption)/var(--lh-caption) var(--font-mono); letter-spacing: .1em;
+}
+.cp-chip--explain { background: var(--ink); color: var(--bg); }
+.cp-chip--apply { background: var(--surface); color: var(--ink); box-shadow: inset 0 0 0 var(--stroke) var(--ink); }
+.cp-check__q { margin: 0 0 var(--sp-3) !important; font: 600 20px/28px var(--font-serif); color: var(--ink); }
+.cp-check__q code, .cp-option code { font: 700 0.9em var(--font-mono); background: var(--surface-2); padding: 0.1em 0.3em; border-radius: var(--radius-1); }
+.cp-chores { margin: 0 0 var(--sp-3); padding-left: var(--sp-4); font: 400 var(--fs-small)/var(--lh-small) var(--font-serif); color: var(--ink); }
+.d-main .cp-chores li { margin-bottom: var(--sp-half); padding-left: var(--sp-half); }
+.cp-chores li::marker { font: 700 var(--fs-caption)/1 var(--font-mono); color: var(--ink-3); }
+.cp-options { display: grid; gap: var(--sp-1); margin: 0; padding: 0; list-style: none; }
+.d-main .cp-options { padding: 0; }
+.d-main .cp-options li { margin: 0; }
+.cp-option {
+  display: grid; grid-template-columns: var(--sp-4) minmax(0, 1fr) auto; align-items: center; gap: var(--sp-2);
+  width: 100%; min-height: calc(var(--tap) + var(--sp-1));
+  padding: var(--sp-1) var(--sp-2);
+  background: var(--surface); color: var(--ink);
+  border: var(--stroke) solid var(--ink); border-radius: var(--radius-1);
+  font: 500 var(--fs-small)/var(--lh-small) var(--font-sans); text-align: left;
+  cursor: pointer;
+  transition: background var(--dur-1) var(--ease-out), transform var(--dur-1) var(--ease-out), box-shadow var(--dur-1) var(--ease-out);
+}
+@media (min-width: 560px) { .cp-option { font-size: 17px; line-height: 24px; } }
+@media (max-width: 599px) { .cp-option { gap: var(--sp-1); padding-inline: var(--sp-1); } }
+.cp-option__key {
+  display: grid; place-items: center; width: var(--sp-4); height: var(--sp-4);
+  border: var(--stroke) solid var(--ink); border-radius: var(--radius-1);
+  font: 700 var(--fs-caption)/1 var(--font-mono);
+}
+.cp-option__tag { font: 700 var(--fs-caption)/1 var(--font-mono); letter-spacing: .08em; }
+.cp-option:hover:not(:disabled) { background: var(--surface-2); transform: translate(-2px, -2px); box-shadow: 2px 2px 0 0 var(--ink); }
+.cp-option:active:not(:disabled) { transform: none; box-shadow: none; }
+.cp-option:disabled { cursor: default; color: var(--ink-3); border-color: var(--ink-4); }
+.cp-option:disabled .cp-option__key { border-color: var(--ink-4); }
+.cp-option.is-right { color: var(--ink); border: 3px solid var(--good); padding-inline: calc(var(--sp-2) - 1.5px); }
+.cp-option.is-right .cp-option__key { background: var(--good); border-color: var(--good); color: var(--surface); }
+.cp-option.is-right .cp-option__tag { color: var(--good); }
+.cp-option.is-wrong { color: var(--ink); border: 3px solid var(--bad); padding-inline: calc(var(--sp-2) - 1.5px); }
+.cp-option.is-wrong .cp-option__key { background: var(--bad); border-color: var(--bad); color: var(--surface); }
+.cp-option.is-wrong .cp-option__tag { color: var(--bad); }
+@media (max-width: 599px) { .cp-option.is-right, .cp-option.is-wrong { padding-inline: calc(var(--sp-1) - 1.5px); } }
+.cp-feedback {
+  margin-top: var(--sp-2); padding-top: var(--sp-2);
+  border-top: var(--stroke) dashed var(--ink-4);
+  font: var(--fs-small)/var(--lh-small) var(--font-serif); color: var(--ink-2);
+  animation: cp-in var(--dur-2) var(--ease-out);
+}
+.cp-feedback[hidden] { display: none; }
+.cp-feedback p { margin: 0 0 var(--sp-1); }
+.cp-feedback p:last-child { margin-bottom: 0; }
+.cp-feedback > p > b, .cp-why li > b { font: 700 var(--fs-caption)/var(--lh-caption) var(--font-mono); letter-spacing: .08em; margin-right: var(--sp-1); color: var(--ink); }
+.cp-feedback.is-right .cp-feedback__lead { color: var(--good); }
+.cp-feedback.is-wrong .cp-feedback__lead { color: var(--bad); }
+.cp-retry {
+  margin-left: var(--sp-1); min-height: var(--tap); padding: 0 var(--sp-1);
+  background: none; border: 0; color: var(--accent); cursor: pointer;
+  font: 700 var(--fs-caption)/1 var(--font-mono); letter-spacing: .08em; text-decoration: underline; text-underline-offset: 3px;
+}
+.cp-why { margin-top: var(--sp-2); }
+.cp-why summary {
+  display: flex; align-items: center; min-height: var(--tap); cursor: pointer;
+  font: 700 var(--fs-caption)/var(--lh-caption) var(--font-mono); letter-spacing: .08em; text-transform: uppercase; color: var(--ink);
+}
+.cp-why summary { list-style: none; }
+.cp-why summary::-webkit-details-marker { display: none; }
+.cp-why summary::before { content: "▸"; margin-right: var(--sp-1); color: var(--ink); }
+.cp-why[open] > summary::before { content: "▾"; }
+.cp-why ul { margin: 0; padding: 0; list-style: none; display: grid; gap: var(--sp-1); }
+.d-main .cp-why li { margin: 0; }
+/* think-then-reveal (k-05), as Ch 01 */
+.cp-reveal {
+  display: inline-flex; align-items: center; gap: var(--sp-1);
+  min-height: calc(var(--tap) + var(--sp-1)); padding: 0 var(--sp-3);
+  background: var(--surface); color: var(--ink);
+  border: var(--stroke) solid var(--ink); border-radius: var(--radius-1);
+  font: 700 var(--fs-caption)/1 var(--font-mono); letter-spacing: .08em; text-transform: uppercase;
+  cursor: pointer;
+  transition: background var(--dur-1) var(--ease-out), transform var(--dur-1) var(--ease-out), box-shadow var(--dur-1) var(--ease-out);
+}
+.cp-reveal:hover:not(:disabled) { background: var(--surface-2); transform: translate(-2px, -2px); box-shadow: 2px 2px 0 0 var(--ink); }
+.cp-reveal:disabled { cursor: default; color: var(--ink-3); border-color: var(--ink-4); }
+.cp-think { margin: 0 0 var(--sp-2) !important; font: italic var(--fs-small)/var(--lh-small) var(--font-serif); color: var(--ink-2); }
+.cp-answer { margin: var(--sp-1) 0; padding-left: var(--sp-3); }
+.d-main .cp-answer li { margin-bottom: var(--sp-half); }
+.cp-answer li > b:first-child { font: 700 15px/var(--lh-small) var(--font-mono); letter-spacing: 0; margin-right: 0; color: var(--ink); }
+.cp-feedback > .cp-more { margin: var(--sp-2) 0 0; }
+@keyframes cp-in { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: none; } }
+@media (prefers-reduced-motion: reduce) {
+  .cp-feedback, .cs-step.is-unlocked > * { animation: none; }
+  .cp-option, .cp-reveal, .cs-step { transition: none; }
+}

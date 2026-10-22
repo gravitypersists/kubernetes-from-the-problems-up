@@ -1,0 +1,20 @@
+{
+  "data_origins": [],
+  "widgets": {
+    "w-cluster-scrolly": {
+      "segment": "s-04, s-05",
+      "mount": "[data-widget=\"w-cluster-scrolly\"]",
+      "mounts": {
+        "A": "[data-widget=\"w-cluster-scrolly\"][data-lanes=\"A\"] (s-04, lane A 'Moving day', steps A1–A5, gated on k-03)",
+        "B": "[data-widget=\"w-cluster-scrolly\"][data-lanes=\"B\"] (s-05, lane B 'Saturday, 03:04', steps B1–B6, gated on k-04)"
+      },
+      "size": {
+        "desktop": "≥900px: .d-wide (≤960px); per lane a two-column grid: canvas slot ~55% wide, sticky at top var(--sp-4), 540px reserved; step cards ~45%, each ≥40vh",
+        "mobile": "<900px: one column; canvas slot sticky at top, opaque, ≤50vh (min(480px,50vh) at 600–899px, min(360px,50vh) under 600px; plan target ≤360px tall at 360px wide); steps scroll beneath. Height <560px: canvas hidden, per-step snapshot in [data-step-snap]"
+      },
+      "files": ["data.js", "index.js", "index.css"],
+      "cdn": [],
+      "data_origins": []
+    }
+  }
+}

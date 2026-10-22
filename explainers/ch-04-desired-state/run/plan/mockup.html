@@ -1,0 +1,665 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mockup: Say what you want, not what to do (Ch 4)</title>
+<!--
+  Checkpoint wireframe for Chapter 4. Low fidelity: grey boxes, real words.
+  Prose is draft wording; check prompts, options and answers are final.
+-->
+<style>
+  :root {
+    --bg: #fafaf9; --panel: #fff; --ink: #1c1917; --ink-2: #57534e; --ink-3: #a8a29e;
+    --line: #e7e5e4; --fill: #f5f5f4; --accent: #2563eb; --warn: #b45309; --ok: #15803d;
+    --rec: #a58300; --rec-soft: #f5eed6; --loop: #00876c; --loop-soft: #cfe8df; --pod: #c23a00; --pod-soft: #f6d9c9; --bad: #b0004c;
+    --s1: 8px; --s2: 16px; --s3: 24px; --s4: 32px; --s6: 48px;
+    --mono: ui-monospace, SFMono-Regular, Menlo, monospace;
+    --sans: system-ui, -apple-system, "Segoe UI", sans-serif;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg:#0c0a09; --panel:#1c1917; --ink:#fafaf9; --ink-2:#d6d3d1; --ink-3:#78716c;
+            --line:#292524; --fill:#292524; --accent:#60a5fa; --warn:#f59e0b; --ok:#4ade80;
+            --rec:#f5d04e; --rec-soft:#2c2614; --loop:#5fdcb0; --loop-soft:#11302a; --pod:#ff7a3d; --pod-soft:#3a2014; --bad:#ff6b98; }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--ink); font: 16px/1.5 var(--sans); }
+  .bar { position: sticky; top: 0; z-index: 3; display: flex; gap: var(--s2); align-items: center;
+         flex-wrap: wrap; padding: var(--s1) var(--s2); background: var(--panel); border-bottom: 1px solid var(--line);
+         font: 13px/1.4 var(--mono); }
+  .bar b { font-weight: 600; }
+  .bar .sp { flex: 1; }
+  .bar button { font: inherit; padding: 4px 8px; border: 1px solid var(--line); background: var(--fill);
+                color: var(--ink); border-radius: 4px; cursor: pointer; }
+  .bar button[aria-pressed="true"] { border-color: var(--accent); color: var(--accent); }
+  main { max-width: 1040px; margin: 0 auto; padding: var(--s4) var(--s2) var(--s6); }
+  body.mobile main { max-width: 360px; padding-left: 0; padding-right: 0; }
+  body.mobile .seg, body.mobile .lane, body.mobile .two { grid-template-columns: 1fr; }
+  h1 { font-size: 28px; line-height: 1.2; margin: 0 0 var(--s1); }
+  h2 { font: 600 13px/1.4 var(--mono); letter-spacing: .04em; text-transform: uppercase; color: var(--ink-2);
+       margin: var(--s6) 0 var(--s2); }
+  .meta { color: var(--ink-2); font-size: 14px; }
+  .panel { background: var(--panel); border: 1px solid var(--line); border-radius: 8px; padding: var(--s2); }
+  .seg { display: grid; grid-template-columns: minmax(0, 3fr) minmax(0, 2fr); gap: var(--s2);
+         margin-bottom: var(--s4); padding-bottom: var(--s3); border-bottom: 1px solid var(--line); }
+  .seg > header { grid-column: 1 / -1; display: flex; gap: var(--s1); align-items: baseline; flex-wrap: wrap; }
+  .seg > header .id { font: 12px var(--mono); color: var(--ink-3); }
+  .seg > header h3 { margin: 0; font-size: 18px; }
+  .wide { grid-column: 1 / -1; min-width: 0; }
+  .tag { font: 11px/1 var(--mono); padding: 3px 6px; border-radius: 3px; background: var(--fill); color: var(--ink-2); }
+  .intent { font-style: italic; color: var(--ink-2); margin: 0 0 var(--s1); }
+  .prose { color: var(--ink-2); font-size: 14px; }
+  .prose p { margin: 0 0 var(--s1); }
+  .prose ul, .prose ol { margin: 0 0 var(--s1); padding-left: 20px; }
+  .fig { min-height: 120px; border: 2px dashed var(--ink-3); border-radius: 8px; background: var(--fill);
+         padding: var(--s2); font-size: 14px; color: var(--ink-2); display: flex; flex-direction: column; gap: var(--s1); min-width: 0; }
+  .fig .kind { font: 600 11px var(--mono); letter-spacing: .04em; text-transform: uppercase; color: var(--ink); }
+  pre { margin: 0; font: 12px/1.45 var(--mono); color: var(--ink); overflow-x: auto; background: var(--panel);
+        border: 1px solid var(--line); border-radius: 4px; padding: var(--s1); }
+  pre.rec { background: var(--rec-soft); border-color: var(--rec); }
+  .check { border-left: 3px solid var(--accent); padding: var(--s1) var(--s2); background: var(--panel); margin-top: var(--s1); font-size: 14px; }
+  .check .kind { font: 600 11px var(--mono); text-transform: uppercase; color: var(--accent); }
+  .check ol { margin: var(--s1) 0; padding-left: 24px; list-style: upper-alpha; }
+  .check li { margin-bottom: 4px; }
+  .check .ans { font-weight: 600; }
+  .check .fb { color: var(--ink-2); font-size: 13px; }
+  .more { font-size: 13px; color: var(--ink-2); border-left: 2px dotted var(--ink-3); padding: 4px var(--s1); margin: 6px 0; }
+  .term { border: 1.5px solid var(--ink); padding: var(--s2); margin: var(--s1) 0; background: var(--panel); }
+  .term .k { font: 600 11px var(--mono); color: var(--accent); }
+  .term .t { font: 700 26px/1.1 var(--sans); letter-spacing: -.01em; margin: 4px 0; }
+  .term .d { font-size: 14px; }
+  .term .b { font: 12px var(--mono); color: var(--ink-3); margin-top: 4px; }
+  .term.pay { background-image: linear-gradient(var(--line) 1px, transparent 1px), linear-gradient(90deg, var(--line) 1px, transparent 1px); background-size: 32px 32px; }
+  .aside { border: 1px solid var(--ink-3); padding: var(--s1) var(--s2); font-size: 14px; color: var(--ink-2); margin: var(--s1) 0; }
+  .aside b { font: 600 11px var(--mono); color: var(--ink); display: block; }
+  .quote { border-left: 3px solid var(--ink); padding: 4px var(--s2); margin: var(--s1) 0; font-size: 15px; }
+  .quote cite { display: block; font: 12px var(--mono); color: var(--ink-3); font-style: normal; }
+  .lane { display: grid; grid-template-columns: minmax(0, 11fr) minmax(0, 9fr); gap: var(--s2); margin: var(--s2) 0; }
+  .lane .canvas { position: sticky; top: 56px; align-self: start; }
+  .lane .steps { display: flex; flex-direction: column; gap: var(--s2); }
+  .step { border: 1px solid var(--line); border-radius: 6px; padding: var(--s1) var(--s2); background: var(--panel); font-size: 14px; color: var(--ink-2); }
+  .step b.sid { font: 600 11px var(--mono); color: var(--ink); }
+  .step .clk { font: 600 11px var(--mono); color: var(--ink-3); margin-left: 6px; }
+  .step .lens { font: 12px var(--mono); color: var(--loop); margin: 4px 0; }
+  .step .cv { font: 12px var(--mono); color: var(--ink-3); margin-top: 4px; }
+  .step.locked { border-style: dashed; }
+  .two { display: grid; grid-template-columns: 1fr 1fr; gap: var(--s2); }
+  .key { font: 12px var(--mono); }
+  .key span { display: inline-block; padding: 1px 6px; margin: 2px 4px 2px 0; border-radius: 2px; }
+  .k-rec { border: 1.5px solid var(--rec); background: var(--rec-soft); }
+  .k-loop { border: 1.5px solid var(--loop); background: var(--loop-soft); border-radius: 999px !important; }
+  .k-pod { border: 1.5px solid var(--pod); background: var(--pod-soft); outline: 1px solid var(--ink); outline-offset: 2px; }
+  .k-ns { border: 1.5px dashed var(--pod); }
+  .k-task { border: 1.5px dashed var(--ink-3); }
+  table { width: 100%; border-collapse: collapse; font-size: 14px; }
+  th, td { text-align: left; padding: var(--s1); border-bottom: 1px solid var(--line); vertical-align: top; }
+  th { font: 600 12px var(--mono); color: var(--ink-2); }
+  .needs-user { color: var(--warn); font-weight: 600; }
+  .license { color: var(--ok); }
+  .warn { color: var(--warn); }
+  @media (max-width: 720px) { .seg, .lane, .two { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body>
+<div class="bar">
+  <b>MOCKUP · REV 0</b><span>Ch 4 · Say what you want, not what to do</span><span class="sp"></span>
+  <button type="button" id="vw-desk" aria-pressed="true">desktop</button>
+  <button type="button" id="vw-mob" aria-pressed="false">mobile 360</button>
+</div>
+<main>
+  <section id="overview">
+    <h1>Say what you want, not what to do: desired state and the reconcile loop</h1>
+    <p class="meta">For a somewhat technical manager (novice for infrastructure) · about 20 minutes (planned 20.25) · narrative article with two scrollytelling lanes over one drawing of the cluster, five figures, four term cards, nine checks · Chapter 4 of 15, opening Part II</p>
+    <div class="panel">
+      <p><b>Shape:</b> Fennel, Year 3, on managed Kubernetes. The core is two scrollytelling lanes on one cluster drawing. <b>Lane A, “Moving day”</b>: Ari writes down “3 copies of <code>storefront</code>” and applies it; the reader predicts what exists right after, then watches the record change first and three loops each do one small part. <b>Lane B, “Saturday, 03:04”</b>: Ch 3’s machine 03 dies again; the reader predicts how long until customers can order, then watches the same loops, plus one new one, close the gap on an honest clock, with nobody awake. Lane A pre-trains the loops on the calm case so lane B adds only one new loop and the clock. Around the lanes: goals vs. task lists and the manifest (o-1), Pods (just before lane A), disposable Pods and what loops can’t fix (o-3), who runs what on a managed service (o-4), and the conversation (a crash loop).</p>
+      <p><b>Why no hands-on widget:</b> a “kill a node” sandbox gives the same result every time, so tapping would be busywork. The two moments that teach (what exists after apply; how long and who’s awake) are committed predictions that unlock the steps answering them. Every interactive element is a check; the drawing has no controls.</p>
+      <p><b>Minutes:</b> §01 2.0 · §02 3.5 · §03 1.0 · §04 (lane A) 3.0 · §05 (lane B) 4.25 · §06 2.25 · §07 2.0 · §08 2.25 · <b>total ≈ 20.25</b>. Earlier chapters built 2–3 minutes over plan, so expect about 22–23; the cut order below recovers about 3. A 4a / 4b split is possible (seam after §05) but not recommended.</p>
+      <p><b>Key choices for you to check:</b></p>
+      <ul>
+        <li><b>The manifest shows <code>kind: ReplicaSet</code></b> (shortened), with a caption saying engineers usually write a Deployment, which wraps it (Chapter 6). It keeps the kind on the page matching the loop the reader watches.</li>
+        <li><b>Recovery time is honest:</b> with default settings, roughly six or seven minutes, never “instant”; <code>orders</code> is down for those minutes because it has one copy, and that becomes a manager’s question (“which of our services run as a single copy?”).</li>
+        <li><b>“Orchestrator” vs. the docs’ “not a mere orchestration system”</b> becomes the “no single conductor” reveal after lane B, paying off Ch 3’s conductor aside.</li>
+        <li><b>New story facts:</b> standard managed mode (provider runs the control plane, Ari’s team the nodes), moving day, the Year 3 03:04 timeline, Pod names, and <code>notifications</code> introduced for the conversation (R2).</li>
+        <li><b>Style rule applied:</b> Kubernetes kinds capitalised (Pod, ReplicaSet), per the Control Plane guide.</li>
+      </ul>
+      <p><b>Objectives:</b></p>
+      <ul>
+        <li><b>o-1</b> Explain declaring a desired state vs. issuing commands, with the goals-vs.-task-lists analogy and where it breaks; applying a manifest records an intention, it doesn’t run anything (m-04). <span class="meta">checks: k-02, k-03</span></li>
+        <li><b>o-2</b> Describe the reconcile loop (observe → compare → act, many independent controllers) and use the loop lens to predict what happens when a node dies, roughly how long it takes, and what the loop doesn’t fix (m-03, m-27, local-01). <span class="meta">checks: k-01, k-04, k-05, k-08</span></li>
+        <li><b>o-3</b> Explain what a Pod is, why Pods are disposable, what that asks of the app, and why endless restarts are the loop working, not a fix (m-05, m-06). <span class="meta">checks: k-06, k-08, k-09</span></li>
+        <li><b>o-4</b> Sketch the cluster (control plane with the API server and the record; nodes running Pods) and say what a managed provider runs and what stays the company’s. <span class="meta">checks: k-07, k-03</span></li>
+      </ul>
+      <p class="meta">check_plan: PASS, no warnings. All 25 claims used.</p>
+      <p class="key"><b>Visual grammar on the drawing</b> (things different in kind look different): <span class="k-rec">record row: written intention (c4, paper)</span><span class="k-loop">↻ loop: an actor (c3 pill)</span><span class="k-pod">Pod: running (c1 chip in a ring, lamp)</span><span class="k-ns">Pod: recorded, not started (dashed, no fill)</span><span class="k-task">task list: instructions (dashed, numbered)</span></p>
+    </div>
+  </section>
+
+  <section id="segments">
+    <h2>Segments</h2>
+    <p class="meta">Prose is draft wording: it shows what each segment says and in what order. The final prose is written for the reader at build time. Check prompts, options and answers are final.</p>
+
+    <!-- HERO -->
+    <article class="seg" id="hero">
+      <header><span class="id">hero</span><h3>Chapter 04 · Part II · Fennel, year 3</h3><span class="tag">hero</span></header>
+      <div class="wide prose">
+        <p><b>Title:</b> Say what you want, not what to do: desired state and the reconcile loop</p>
+        <p><b>Standfirst (draft):</b> A year on, Fennel runs on managed Kubernetes. The same machine dies at 3 a.m., and this time nobody wakes up. Here is how: a written record of what Fennel wants, and many small loops that keep the cluster matching it, plus what those loops can’t do.</p>
+        <p><b>Meta row:</b> READ 20 MIN · FOR TECHNICAL MANAGERS · CHAPTER 04 / 15 · CHECKS 09. ToC rail on desktop; collapsed “Contents” on mobile.</p>
+      </div>
+    </article>
+
+    <!-- s-01 -->
+    <article class="seg" id="s-01">
+      <header><span class="id">s-01 · § 01</span><h3>Year 3: the same 3 a.m.</h3><span class="tag">cast → retrieval → story</span><span class="tag">o-2</span><span class="tag">~2.0 min</span></header>
+      <div>
+        <p class="intent">Re-establish the cast, retrieve which jobs 03:04 needed, then show Year 3 from Jordan’s chair: the same failure, nobody woken, and “how?”.</p>
+        <div class="prose">
+          <p><b>Cast strip:</b> <b>Sam</b>, founding engineer; on call for everything until this year · <b>Jordan</b>, co-founder, now managing the engineers: that’s you, in this story · <b>Ari</b>, platform lead, hired this year to move Fennel onto Kubernetes.</p>
+          <p class="more">▸ <b>D1 · I didn’t read the last chapter. What happened?</b> (collapsed) Ch 1: one hand-built server; a full disk took the site down for two hours; rebuilding from Sam’s notes failed. Ch 2: each service is packed into an <i>image</i>; a running copy is a <i>container</i>. Ch 3: four services as containers on four machines, tracked in Sam’s spreadsheet. One Saturday at 03:04 machine 03 died with <code>orders</code> and a <code>dispatch</code> copy; customers couldn’t order until Sam, woken by a page, started them elsewhere and told <code>storefront</code> where <code>orders</code> had gone. Software that does such work all the time is an <i>orchestrator</i>; Kubernetes is one.</p>
+        </div>
+        <div class="check">
+          <div class="kind">RETRIEVE · Check 01 / 09 · k-01</div>
+          A year ago, at 03:04, machine 03 died with <code>orders</code> and a <code>dispatch</code> copy on it. Which jobs did Sam have to do before customers could order again?
+          <ol>
+            <li>Restarting: start <code>orders</code> and <code>dispatch</code> again on machine 03, the way Sam restarted the crashed <code>dispatch</code> copy at 02:51.</li>
+            <li class="ans">Replacing, then connecting: start them on machines with room, then tell <code>storefront</code> where <code>orders</code> had gone. ✓</li>
+            <li>Updating: release a new <code>storefront</code> that no longer depended on machine 03.</li>
+          </ol>
+          <p class="fb">A: “Restarting is what Sam did at 02:51: the same container, on the same machine, which was still running. At 03:04 the machine itself was gone…” B: “Right. Replacing, because machine 03 was gone, and connecting, because storefront still sent orders to machine 03. Those are the two jobs Kubernetes did at 03:04 this year.” C: “Nothing about storefront’s version was wrong…”</p>
+        </div>
+        <div class="prose" style="margin-top:8px">
+          <p>Year 3. Fennel now runs on managed Kubernetes from its cloud provider: the provider runs Kubernetes’ own machinery, and Fennel’s services run on four machines, numbered 01 to 04 as before. Kubernetes calls each machine in a cluster a <b>node</b> (dfn). Ari led the move.</p>
+          <p>One Saturday at 03:04, machine 03, node 03 now, dies again, with <code>orders</code> and a <code>dispatch</code> copy on it. Nobody’s phone rings. Sam sleeps through it and reads about it at breakfast.</p>
+          <p>On Monday, Jordan asks Ari how Kubernetes knew what to do.</p>
+        </div>
+        <div class="quote">“Nobody told it what to do. We told it what we want.”<cite>Ari</cite></div>
+        <div class="prose"><p>This chapter is what that sentence means, and what it doesn’t promise. (No recovery time is given here: k-04 asks for it.)</p></div>
+      </div>
+      <div class="fig">
+        <span class="kind">No figure</span>
+        Cast strip is a compact mono-labelled list (Ch 3’s <code>.cp-cast</code>). Ari’s line is a <code>.cp-quote</code>. At 360px the cast wraps and options are full width.
+      </div>
+    </article>
+
+    <!-- s-02 -->
+    <article class="seg" id="s-02">
+      <header><span class="id">s-02 · § 02</span><h3>Say what you want, not what to do</h3><span class="tag">contrasting cases → compare → name → analogy → manifest</span><span class="tag">o-1</span><span class="tag">~3.5 min</span></header>
+      <div>
+        <p class="intent">Contrast a task list with a written goal on Fennel’s 03:04, name desired state and declarative vs. imperative, give the management analogy with its breaks, and show the goal written as a manifest.</p>
+        <div class="prose"><p>Lead: two ways to write down what should happen at 03:04 (Fig. 01).</p></div>
+        <div class="check">
+          <div class="kind">COMPARE · Check 02 / 09 · k-02</div>
+          This time it’s node 04 that dies at 3 a.m., not node 03. Which of the two documents in Fig. 01 still says the right thing to do, unchanged?
+          <ol>
+            <li>Sam’s task list: it names exact machines and steps, so whoever follows it can’t get it wrong.</li>
+            <li>Neither: each was written for the night machine 03 died, so both need rewriting first.</li>
+            <li class="ans">Fennel’s goal: it names no machines, only what should be running, so it holds whichever machine dies. ✓</li>
+          </ol>
+          <p class="fb">A: “Its first step starts orders on machine 04, the machine that just died. A task list is right for the situation its author pictured, and only that one.” B: “The goal never mentioned machine 03. With node 04 gone, payments has 1 copy of the 2 wanted, so the goal already says what’s needed…” C: “Right. … the gap is one copy, wherever there’s room. Nobody has to rewrite anything.”</p>
+        </div>
+        <div class="prose" style="margin-top:8px">
+          <p>Sam’s list says what to do, step by step: <b>imperative</b>. Fennel’s goal says what should be running and leaves the steps to the system: <b>declarative</b>. What a declarative goal describes is the cluster’s <b>desired state</b>.</p>
+        </div>
+        <div class="term">
+          <div class="k">NEW TERM · 01 / 04</div>
+          <div class="t">desired state</div>
+          <div class="d">What you want running, written down: “storefront: 3 copies”. Kubernetes keeps working to make the cluster match it.</div>
+          <div class="b">declarative: say what you want · imperative: say what to do</div>
+          <div class="b">You met it in Fig. 01: Fennel’s goal.</div>
+        </div>
+        <div class="aside">
+          <b>ANALOGY</b>You know this from managing people. A task list (“call the supplier, then rebook the van”) works until reality differs from what you pictured. A goal (“every order out by 6 p.m.”) handed to a good owner keeps working: the owner watches one number, notices when it slips and fixes it, without being told how.
+          <b style="margin-top:6px">WHERE THIS ANALOGY BREAKS</b>Kubernetes’ owners have no judgement. They don’t ask why copies keep dying, don’t push back when a goal can’t be met (with no room anywhere, a new copy just waits), don’t escalate, and will restart a broken app forever. They act only on the latest goal, not on the history of instructions. In a person that would be a problem; in a machine it’s the point.
+        </div>
+        <p class="more">▸ <b>D2 · What if the goal changes twice in a minute?</b> (collapsed) From 2 copies to 5 and then to 3: Kubernetes heads straight for 3; there’s no queue of orders to fall behind on. Engineers call this “level-triggered”.</p>
+        <div class="prose">
+          <p>Fennel’s goal is written in files called <b>manifests</b> (dfn). Fig. 02 is storefront’s, shortened; <code>replicas: 3</code> <i>is</i> the desired state. Teams keep manifests in version control, so every change to the goal is reviewed before it goes in and leaves a history.</p>
+          <p>Chapter 3 ended on a question: what if the record were the thing the machines act on, instead of a note about them? With Kubernetes, it is. (What “apply” does is left for §04.)</p>
+        </div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:16px;min-width:0">
+        <div class="fig">
+          <span class="kind">FIG. 01 · Sam’s task list and Fennel’s goal · static figure</span>
+          <div class="two" style="gap:8px">
+            <pre style="border-style:dashed">SAM'S TASK LIST · AFTER 03:04, YEAR 2
+says what to do, step by step
+1  Start orders on machine 04.
+2  Start the lost dispatch copy
+   on machine 02.
+3  Change storefront's settings:
+   orders is on 04.
+4  Update the spreadsheet.</pre>
+            <pre class="rec">FENNEL'S GOAL · WRITTEN FOR THE CLUSTER
+says what should be running
+storefront   3 copies
+orders       1 copy
+payments     2 copies
+dispatch     3 copies</pre>
+          </div>
+          Left: dashed, unfilled, numbered (instructions). Right: the record style (c4 on c4-soft, paper). No arrows. Caption: “Fig. 01. The task list is right only for the night its author pictured. The goal names no machines, so it holds whichever one fails.” Under 600px: stacked, task list first.
+        </div>
+        <div class="fig">
+          <span class="kind">FIG. 02 · A manifest · storefront · static figure</span>
+          <pre class="rec">kind: ReplicaSet        ← the kind of record: a set
+                           of identical copies
+metadata:
+  name: storefront
+spec:
+  replicas: 3           ← THE DESIRED STATE:
+                           THREE COPIES  (accent)
+  template:             ← what each copy is
+    # … labels and other details left out
+    spec:
+      containers:
+      - name: storefront
+        image: storefront:v38   ← the image (Ch 2)</pre>
+          Annotations in the right margin on desktop, under each line on mobile (no horizontal scroll). Caption: “Fig. 02. A manifest is a written intention, not a list of steps. Shortened: real ones have a few more lines. Engineers usually write a Deployment, which wraps this and adds version updates; Chapter 6 shows how.”
+        </div>
+      </div>
+    </article>
+
+    <!-- s-03 -->
+    <article class="seg" id="s-03">
+      <header><span class="id">s-03 · § 03</span><h3>Pods: what Kubernetes counts</h3><span class="tag">name → small figure → term card</span><span class="tag">o-3</span><span class="tag">~1.0 min</span></header>
+      <div>
+        <p class="intent">Introduce the Pod as the unit Kubernetes counts, places and replaces, just before lane A needs it. (Disposability waits for §06.)</p>
+        <div class="prose">
+          <p>One more word before Ari applies the manifest. Kubernetes doesn’t count or place containers directly. It wraps each copy’s container in a <b>Pod</b>, and counts, places and replaces Pods. Most Pods hold one container, so people often say “Pod” and “container” for the same thing. Sometimes a small helper container rides along; the containers in a Pod always run together on one node and share one address.</p>
+        </div>
+        <div class="term">
+          <div class="k">NEW TERM · 02 / 04</div>
+          <div class="t">Pod</div>
+          <div class="d">The wrapper Kubernetes puts around one container, or a few that must run together. It counts, places and replaces Pods.</div>
+          <div class="b">Chapter 2’s container, wrapped. (As in a pod of whales: builder’s call.)</div>
+        </div>
+      </div>
+      <div class="fig">
+        <span class="kind">FIG. 03 · A Pod · static figure</span>
+        Two Pods side by side. Each Pod = an <b>ink outer frame</b> with a mono <code>POD</code> header, holding Ch 2’s container chips (c1 on c1-soft).
+        <ul>
+          <li><b>Left, full weight:</b> one chip <code>storefront</code>; label “one container: the usual case”; tag on the frame edge <code>1 ADDRESS</code>.</li>
+          <li><b>Right, smaller, ink-3 labels:</b> chips <code>app</code> (2 units) and <code>helper</code> (1 unit); label “sometimes a small helper rides along”; <code>1 ADDRESS</code> “shared by both”.</li>
+        </ul>
+        Caption: “Fig. 03. Kubernetes counts, places and replaces Pods. The containers in a Pod always run together, on one node, at one address.” Stacked under 600px.
+      </div>
+    </article>
+
+    <!-- s-04 -->
+    <article class="seg" id="s-04">
+      <header><span class="id">s-04 · § 04</span><h3>Moving day: what “apply” does</h3><span class="tag">predict (m-04) → scrolly lane A (B1) → payoff term → loop lens</span><span class="tag">o-1 o-2 o-4</span><span class="tag">~3.0 min</span></header>
+      <div class="wide">
+        <p class="intent">Show that applying a manifest writes an intention into the record, and that separate loops then each do one small part, reading and writing the record. Then name the pattern and introduce the loop lens.</p>
+        <div class="fig" style="margin-bottom:8px">
+          <span class="kind">WIDGET · w-cluster-scrolly · complexity high · lane A (5 steps), gated on k-03</span>
+          Copied and extended from Ch 3’s <code>w-fleet-scrolly</code> (same lane controller, sticky canvas, gates and mobile fallback; <code>renderFleet</code> → <code>renderCluster</code>). Desktop: canvas sticky on the left (~55%, about 540px tall), steps on the right. Under 900px: canvas sticky on top, steps beneath; where the canvas would exceed 50vh (or the screen is under 560px tall), each step shows its own inline snapshot. No controls on the canvas; checks sit in the step column.
+        </div>
+        <div class="lane">
+          <div class="canvas">
+            <div class="fig" style="min-height:0">
+              <span class="kind">Canvas wireframe (desktop) · state at A4</span>
+<pre>W-01 · THE CLUSTER · MOVING DAY                STEP 4 / 5
+┌ THE CLUSTER'S RECORD · API SERVER ───────────── (c4) ┐
+│ orders      WANT 1  ▪            1 RUNNING           │
+│ payments    WANT 2  ▪▪           2 RUNNING           │
+│ dispatch    WANT 3  ▪▪▪          3 RUNNING           │
+│ storefront  WANT 3  ▫▫▫          0 RUNNING   ← hl    │
+└──────────────────────────────────────────────────────┘
+ (↻ ReplicaSet loop)   [↻ scheduler]   ← active, 3px outline
+ WATCHING · Pods with no node
+ DOING    · writes a node into each: 01, 01, 02
+┌NODE · 01 (↻agent)┐┌NODE · 02 (↻agent)┐┌NODE · 03 (↻agent)┐┌NODE · 04 (↻agent)┐
+│┌╌╌╌╌╌╌╌╌┐ hl     ││┌╌╌╌╌╌╌╌╌┐ hl     ││╔══════════╗      ││ [payments]       │
+│╎store-  ╎NOT    ││╎store-  ╎NOT    ││║ orders   ║      ││                  │
+│╎front   ╎STARTED││╎front   ╎STARTED││║ RUNNING  ║      ││  5 FREE (c6 ┄)   │
+│└╌╌╌╌╌╌╌╌┘       ││└╌╌╌╌╌╌╌╌┘       ││╚══════════╝      ││                  │
+│┌╌╌╌╌╌╌╌╌┐       ││ [dispatch]       ││ [dispatch]       ││                  │
+│╎store-  ╎       ││ [dispatch]       ││  2 FREE          ││                  │
+│└╌╌╌╌╌╌╌╌┘       ││  2 FREE          ││                  ││                  │
+│ [payments] 1FREE│└──────────────────┘└──────────────────┘└──────────────────┘
+└─────────────────┘</pre>
+              <span class="meta">▪ filled = record says running · ▫ hollow dashed = recorded, not running · ╌ dashed chip = Pod assigned, not started · solid chip with lamp = running (inside the Pod ring). Inactive loops at 0.35 opacity. At 360px: record rows in a 2×2 grid, only the active loop pill + its lens line, unit 22px, target ≤ 360px tall.</span>
+            </div>
+          </div>
+          <div class="steps">
+            <div class="step"><b class="sid">A1</b><br>Moving day. <code>orders</code>, <code>payments</code> and <code>dispatch</code> already run on Fennel’s cluster; <code>storefront</code> is the last to move. Ari applies its manifest, Fig. 02, and the tool answers <code>created</code> in under a second.
+              <div class="cv">Canvas: four nodes with orders, payments ×2, dispatch ×3 running; record has three rows, no storefront row; loops inactive.</div>
+              <div class="check">
+                <div class="kind">PREDICT · Check 03 / 09 · k-03</div>
+                Ari applies the <code>storefront</code> manifest, and the tool answers <code>created</code> in under a second. At that moment, what is new in the cluster?
+                <ol>
+                  <li>Three <code>storefront</code> Pods, already running on nodes with room.</li>
+                  <li>A job that will start three <code>storefront</code> copies at the next release window.</li>
+                  <li class="ans">A line in the cluster’s record saying three <code>storefront</code> copies are wanted, and nothing else yet. ✓</li>
+                </ol>
+                <p class="fb">A (m-04): “That’s how a deploy script behaves… Applying a manifest only writes the intention into the record. Starting the Pods is other loops’ work, which usually begins within seconds, so on a good day you can’t see the difference.” B (m-27): “There’s no queue and no release window…” C: “Right. created means the intention is recorded. Watch what happens to that line next.”</p>
+              </div>
+            </div>
+            <div class="step locked"><b class="sid">A2</b> · locked until k-03<br>The manifest went to the cluster’s API server, its front door to the record. The API server checked it and wrote it down. That’s all <code>created</code> means: Fennel’s intention is recorded. Nothing new is running anywhere.
+              <div class="cv">Canvas: record gains “storefront WANT 3 · SHORT 3” (highlighted). Nodes unchanged.</div></div>
+            <div class="step locked"><b class="sid">A3</b><br>Within seconds the ReplicaSet loop notices the row: three wanted, none recorded. It writes three Pod records. It doesn’t pick nodes or start anything; that’s other loops’ work.
+              <div class="lens">↻ ReplicaSet loop · WATCHING storefront: 3 wanted, 0 Pods · DOING writes 3 new Pod records</div>
+              <div class="cv">Canvas: three hollow marks in the storefront row, “0 RUNNING”.</div></div>
+            <div class="step locked"><b class="sid">A4</b><br>The scheduler sees three Pods with no node and writes one into each record, choosing nodes with room. How it chooses is Chapter 5. It doesn’t start anything either.
+              <div class="lens">↻ scheduler · WATCHING Pods with no node · DOING writes a node into each: 01, 01, 02</div>
+              <div class="cv">Canvas: three dashed NOT STARTED storefront Pods on 01 (two) and 02 (one). (Shown in the wireframe.)</div></div>
+            <div class="step locked"><b class="sid">A5</b><br>On nodes 01 and 02, the node agent sees Pods assigned to its node, downloads the <code>storefront</code> image, starts the containers and reports back. Now the record matches. Nobody handed anybody a plan: each loop read the record and wrote to it. And they keep watching, release or not.
+              <div class="lens">↻ agents on 01, 02 · WATCHING Pods assigned to this node · DOING download the image, start, report back</div>
+              <div class="cv">Canvas: the three Pods RUNNING; row “▪▪▪ 3 RUNNING”. (= Ch 3’s Monday layout.)</div></div>
+          </div>
+        </div>
+        <div class="two">
+          <div>
+            <div class="prose"><p>Each of those loops did the same three things: looked at the record and the cluster, compared what’s wanted with what’s there, and acted to close the gap. Then it went back to looking. That’s a <b>reconcile loop</b>; a <b>controller</b> is a part of Kubernetes that runs one, for one kind of thing. (The scheduler and the node agent work the same way, though engineers don’t usually call them controllers.)</p></div>
+            <div class="term pay">
+              <div class="k">NEW TERM · 03 / 04 · payoff variant (blueprint ground)</div>
+              <div class="t">reconcile loop · controller</div>
+              <div class="d">A loop that compares what the record says is wanted with what it observes, acts to close the gap, and does it again, forever. A controller runs one, for one kind of thing.</div>
+              <div class="b" style="color:var(--ink)">which loop · watching what · doing what</div>
+              <div class="b">You met three on moving day.</div>
+            </div>
+          </div>
+          <div>
+            <div class="prose"><p><b>The loop lens.</b> From here on, whenever Kubernetes does something, ask three things: which loop, watching what, doing what? The lines on the drawing in §04 already used them. Every feature in later chapters is another loop.</p></div>
+            <div class="aside">
+              <b>ANALOGY</b>The name fits. Kubernetes is Greek for helmsman or pilot. A helmsman doesn’t plot every wave: they hold a heading and correct the wheel whenever the ship drifts. (Engineers write K8s: K, the eight letters in between, s.)
+              <b style="margin-top:6px">WHERE THIS ANALOGY BREAKS</b>A ship has one helmsman. A cluster has many loops, each holding its own small heading, and no captain giving them orders. And a helmsman reads the weather; a loop only compares two numbers.
+            </div>
+          </div>
+        </div>
+      </div>
+    </article>
+
+    <!-- s-05 -->
+    <article class="seg" id="s-05">
+      <header><span class="id">s-05 · § 05</span><h3>Saturday, 03:04, again</h3><span class="tag">predict (local-01, m-27) → scrolly lane B (B1) → payoff → lens table → explain (m-03)</span><span class="tag">o-2</span><span class="tag">~4.25 min</span></header>
+      <div class="wide">
+        <p class="intent">Replay Ch 3’s failure on Kubernetes: predict the recovery time, watch each loop take its step on an honest clock, see Ch 1’s question answered, see that orders was down while it was replaced, and confront the central-brain idea.</p>
+        <div class="lane">
+          <div class="canvas">
+            <div class="fig" style="min-height:0">
+              <span class="kind">Canvas wireframe (desktop) · state at B2</span>
+<pre>W-01 · THE CLUSTER · SATURDAY, 03:04   ~03:04:50   STEP 2 / 6
+┌ THE CLUSTER'S RECORD · API SERVER ───────────── (c4) ┐
+│ storefront  WANT 3  ▪▪▪          3 RUNNING           │
+│ orders      WANT 1  ?            (on node 03)  ← hl  │
+│ payments    WANT 2  ▪▪           2 RUNNING           │
+│ dispatch    WANT 3  ▪▪?          (1 on node 03) ← hl │
+└──────────────────────────────────────────────────────┘
+ (↻ ReplicaSet loop) (↻ scheduler) [↻ node loop NEW] ← active
+ WATCHING · every node's check-ins
+ DOING    · marks node 03 UNKNOWN
+┌NODE · 01┐┌NODE · 02┐┌┄NODE · 03 · UNKNOWN┄┐┌NODE · 04┐
+│ sf  sf  ││ sf      │┆ (orders)  LOST     ┆│ payments│
+│ payments││ dispatch│┆ (dispatch) LOST    ┆│ 5 FREE  │
+│ 1 FREE  ││ dispatch│┆   dashed ink-3     ┆│         │
+└─────────┘└─────────┘└┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┘└─────────┘
+CUSTOMERS · can't place orders  (bad)</pre>
+              <span class="meta">Reality (dashed DOWN frame, LOST Pods) and the record’s belief (UNKNOWN, “?” marks) are drawn separately: the record lags reality. Clock kicker on the canvas header and the step card.</span>
+            </div>
+          </div>
+          <div class="steps">
+            <div class="step"><b class="sid">B1</b><span class="clk">03:04</span><br>Machine 03, node 03 to Kubernetes, stops. The <code>orders</code> Pod and a <code>dispatch</code> Pod stop with it, and customers can’t place orders. The record still says all is well: nothing has told it otherwise.
+              <div class="cv">Canvas: node 03 DOWN (dashed), its Pods LOST; record unchanged (orders ▪ 1 RUNNING); CUSTOMERS “can’t place orders”; all loops inactive.</div>
+              <div class="check">
+                <div class="kind">PREDICT · Check 04 / 09 · k-04</div>
+                Node 03 has just stopped, and nobody will be woken. With Kubernetes’ default settings, how long until customers can place orders again?
+                <ol>
+                  <li class="ans">Several minutes: Kubernetes first waits to be sure node 03 isn’t coming back, then replaces its Pods. ✓</li>
+                  <li>Under a minute: as soon as node 03 misses a check-in, its Pods start on other nodes.</li>
+                  <li>Not until someone applies the manifest again: the count of <code>orders</code> Pods was met when Ari applied it.</li>
+                </ol>
+                <p class="fb">A: “Right. Kubernetes can’t tell a dead machine from a network glitch at first, so by default it waits about 50 seconds to mark the node, then five more minutes before replacing its Pods.” B (local-01): “Restarting a crashed container is that quick. A whole node is different: by default Kubernetes waits about six minutes…” C (m-27): “Nobody applies anything. The goal is still in the record, and the loops compare it with what’s there all the time…”</p>
+              </div>
+            </div>
+            <div class="step locked"><b class="sid">B2</b><span class="clk">~03:04:50</span> · locked until k-04<br>Each node’s agent checks in regularly. Node 03’s check-ins have stopped. After 50 seconds of silence, by default, the node loop marks node 03 as unknown. It doesn’t remove anything yet: a network glitch looks just like a dead machine, and the machine may come back.
+              <div class="lens">↻ node loop (new) · WATCHING every node’s check-ins · DOING marks node 03 UNKNOWN</div></div>
+            <div class="step locked"><b class="sid">B3</b><span class="clk">~03:09:50</span><br>By default the node loop waits five more minutes. Node 03 hasn’t come back, so its Pods are removed from the record. Now the record shows the gap that customers have felt since 03:04.
+              <div class="lens">↻ node loop · WATCHING node 03, unknown for 5 minutes · DOING removes its Pods from the record</div>
+              <div class="cv">Canvas: rows “orders WANT 1 · SHORT 1”, “dispatch WANT 3 ▪▪ SHORT 1”.</div></div>
+            <div class="step locked"><b class="sid">B4</b><span class="clk">SECONDS LATER</span><br>The ReplicaSet loop makes the same comparison as on moving day and finds two gaps. It writes two new Pod records. It doesn’t know, or need to know, why the old ones went.
+              <div class="lens">↻ ReplicaSet loop · WATCHING orders 1 wanted / 0; dispatch 3 / 2 · DOING writes 2 new Pod records</div></div>
+            <div class="step locked"><b class="sid">B5</b><br>The scheduler sees two Pods with no node. Node 04 is the only node with room for all of <code>orders</code>. It’s the choice Sam made by hand last year, made by a loop.
+              <div class="lens">↻ scheduler · WATCHING 2 Pods with no node · DOING orders → node 04; dispatch → node 02</div></div>
+            <div class="step locked"><b class="sid">B6</b><span class="clk">~03:10–03:11</span><br>Node 04 has never run <code>orders</code>, so its agent downloads the image first, then starts it. Customers can order again, roughly six or seven minutes after 03:04, with default settings. Nobody was woken. Another loop, Chapter 7’s, keeps <code>storefront</code> pointed at the new <code>orders</code> Pod, so connecting is done too.
+              <div class="lens">↻ agents on 04, 02 · WATCHING Pods assigned to this node · DOING download the image, start, report back</div>
+              <div class="cv">Canvas: both RUNNING; CUSTOMERS “can order” (good); note “storefront → orders: node 04 · kept current by another loop (Ch 7)”.</div></div>
+          </div>
+        </div>
+
+        <div class="two">
+          <div>
+            <div class="quote">“If this box vanished tonight, how long until we’re back, and who has to be awake?”<cite>Jordan’s question, Chapter 1</cite></div>
+            <div class="prose">
+              <p><b>Year 3’s answer:</b> with default settings, roughly six or seven minutes, sometimes less; and nobody.</p>
+              <p>But <code>orders</code> was down for those minutes, because it runs as a single copy: Chapter 1’s single point of failure. The loops restore what’s declared; they don’t prevent the gap. A question worth asking Ari: “Which of our services run as a single copy?”</p>
+            </div>
+            <p class="more">▸ <b>D3 · Can it be faster than six minutes?</b> It can be: in a cloud, Kubernetes asks the provider whether a silent machine still exists; if it’s gone, its Pods are cleaned up without the full wait. Engineers can also change the waits per service. The wait exists because a glitch looks like a dead machine, and replacing too eagerly would run two copies where one was wanted.</p>
+            <p class="more">▸ <b>D4 · What about machine 03 itself?</b> Kubernetes replaced the Pods, not the machine. Until a machine is added back, the cluster has three nodes and less spare room. Chapter 5 is about that room.</p>
+          </div>
+          <div class="fig">
+            <span class="kind">FIG. 04 · Which loop, watching what, doing what · static, data-driven table</span>
+            <table>
+              <thead><tr><th>LOOP</th><th>WATCHING</th><th>DOING</th><th>SAM’S JOB, NOW A LOOP’S</th></tr></thead>
+              <tbody>
+                <tr><td>↻ node loop</td><td>every node’s regular check-ins</td><td>marks a silent node unknown; after a wait, removes its Pods from the record</td><td><i>noticing a dead machine</i></td></tr>
+                <tr><td>↻ ReplicaSet loop</td><td>Pods wanted vs. Pods in the record</td><td>writes new Pod records, or removes extras</td><td><i>replacing</i></td></tr>
+                <tr><td>↻ scheduler</td><td>Pods with no node</td><td>picks a node with room (Chapter 5)</td><td><i>placing</i></td></tr>
+                <tr><td>↻ node agent, one per node</td><td>Pods assigned to its node</td><td>downloads the image, starts the containers, restarts any that crash, reports back</td><td><i>restarting</i></td></tr>
+                <tr style="color:var(--ink-3)"><td>↻ another loop (Ch 7)</td><td>where each service’s Pods run</td><td>keeps callers’ routes current</td><td><i>connecting</i></td></tr>
+              </tbody>
+            </table>
+            Footer: “Updating and scaling are loops too: Chapters 6 and 8.” Caption: “Fig. 04. Each of Sam’s 3 a.m. jobs is now a loop’s, and each loop does only its own.” Built from <code>CH04_LOOPS</code> so later chapters add rows. Stacked cards under 600px.
+          </div>
+        </div>
+
+        <div class="check">
+          <div class="kind">EXPLAIN · Check 05 / 09 · k-05</div>
+          Jordan asks Ari: “When node 03 died, what worked out that <code>orders</code> should go to node 04?” Which answer is accurate?
+          <ol>
+            <li>“The control plane did: it saw node 03 die, made a recovery plan, and told each node what to start.”</li>
+            <li class="ans">“The scheduler did. It only finds nodes for Pods that don’t have one; it saw a new <code>orders</code> Pod with no node and picked one with room.” ✓</li>
+            <li>“Node 04’s agent did: it noticed it had spare room and took over the <code>orders</code> Pod from node 03.”</li>
+          </ol>
+          <p class="fb">A (m-03): “No part made a plan. The node loop marked node 03 and removed its Pods; the ReplicaSet loop saw a gap…; the scheduler saw a Pod with no node… Each did its own step, passing work on through the record.” B: “Right. The scheduler didn’t plan a recovery or even need to know there had been a failure…” C: “Node agents start only Pods already assigned to their node; they don’t take work. And nothing was taken over from node 03; the next section says why.”</p>
+        </div>
+        <div class="prose" style="margin-top:8px">
+          <p><b>No single conductor.</b> No part of Kubernetes made a plan for 03:04. The node loop didn’t know what a ReplicaSet was; the ReplicaSet loop didn’t know why its Pods had gone; the scheduler didn’t know there had been a failure. Each read the record, did its one job and wrote the result back, and the next loop picked it up from there.</p>
+          <p>Chapter 3 called Kubernetes an orchestrator, for the jobs it does, and it is one. Kubernetes’ own documentation adds a warning about the word: it isn’t a conductor working through a score (“first do A, then B, then C”); it’s “a set of independent, composable control processes”. “Centralized control is also not required.” Simple loops rather than one big program also mean one can fail without stopping the rest.</p>
+          <p>None of this needed a release, or anyone applying anything: the loops were running all along.</p>
+        </div>
+        <p class="more">▸ <b>D5 · But engineers talk about “the controller manager”</b> (collapsed) They do: the built-in controllers ship as one program, to keep things simple to run. Inside it, each is still a separate loop watching its own kind of thing, like teams sharing an office building. The scheduler and node agents are separate programs again.</p>
+      </div>
+    </article>
+
+    <!-- s-06 -->
+    <article class="seg" id="s-06">
+      <header><span class="id">s-06 · § 06</span><h3>Replaced, not repaired</h3><span class="tag">predict (m-06) → requirements → misconception (m-05)</span><span class="tag">o-3</span><span class="tag">~2.25 min</span></header>
+      <div>
+        <p class="intent">A replacement is a new Pod; say what “disposable” asks of the app; list what the loops can’t fix.</p>
+        <div class="check">
+          <div class="kind">PREDICT · Check 06 / 09 · k-06</div>
+          Since 03:10, an <code>orders</code> Pod has been running on node 04. Is it the Pod that was on node 03?
+          <ol>
+            <li class="ans">No: it’s a new Pod made from the same template, with a new name and a new address. Anything kept inside the old one is gone. ✓</li>
+            <li>Yes: Kubernetes moved it to node 04, keeping its name and address, so nothing that calls it has to change.</li>
+          </ol>
+          <p class="fb">A: “Right. Kubernetes never moves a Pod. It replaces it with a new one, wherever there’s room…” B (m-06): “Virtual machines can be moved like that; Pods can’t. The old Pod went with node 03, and the ReplicaSet loop wrote a new one, which got a new name and a new address…”</p>
+        </div>
+        <div class="prose" style="margin-top:8px">
+          <p>Ari’s dashboard showed <code>orders-5c8x</code> on node 03 on Friday, and <code>orders-q2rw</code> on node 04 since 03:10. A Pod is never moved; it’s replaced by a new one with a new name, a new address, and nothing from inside the old one. That’s why Kubernetes treats Pods as disposable: people rarely create them by hand; a controller makes them, and each lasts until it’s finished, removed, or its node fails.</p>
+          <p><b>What “disposable” asks of the app</b> (the twelve-factor app’s checklist, which engineers will recognise):</p>
+          <ul>
+            <li>keep nothing important inside the Pod (Fennel’s orders live in its database, outside the app; where that database runs is Chapter 10);</li>
+            <li>survive being stopped or replaced at any moment;</li>
+            <li>start in seconds, not minutes: start time adds to every replacement’s gap;</li>
+            <li>finish in-flight work when asked to stop (Kubernetes gives a Pod 30 seconds by default).</li>
+          </ul>
+          <p>These are the app’s job, not Kubernetes’: the questions to ask when a service moves onto the cluster.</p>
+        </div>
+      </div>
+      <div>
+        <div class="prose">
+          <p><b>Self-healing, honestly.</b> Vendors call what you watched at 03:04 <b>self-healing</b> (dfn), and after last year’s 3 a.m. pages it’s easy to hear “Kubernetes makes our app reliable”. The loops restore the declared state: they restart crashed containers and replace Pods from dead nodes. What they can’t do:</p>
+          <ul>
+            <li><b>fix a bug:</b> an app that crashes on start is restarted, and crashes again, forever (§08);</li>
+            <li><b>find room that isn’t there:</b> with no node that has room, a new Pod waits, unplaced, until room appears (Chapter 5 names this);</li>
+            <li><b>bring back what was inside a Pod:</b> anything written there is gone with it (Chapter 10);</li>
+            <li>and from 03:04: a single copy is down while it’s replaced.</li>
+          </ul>
+          <p>Kubernetes heals the count. Whether the app is healthy is still your engineers’ work.</p>
+        </div>
+        <div class="fig" style="min-height:0"><span class="kind">No figure</span>Two short lists in prose. At 360px everything stacks.</div>
+      </div>
+    </article>
+
+    <!-- s-07 -->
+    <article class="seg" id="s-07">
+      <header><span class="id">s-07 · § 07</span><h3>Who runs what</h3><span class="tag">structure figure → term card → apply</span><span class="tag">o-4</span><span class="tag">~2.0 min</span></header>
+      <div>
+        <p class="intent">Assemble the parts already met into a sketch of the cluster, name the control plane, and say what a managed provider runs and what stays Fennel’s.</p>
+        <div class="prose">
+          <p>You’ve now met every part of a cluster a manager needs by name (Fig. 05).</p>
+          <p>The record and the loops that work on it, apart from the node agents, are the <b>control plane</b>. In front of the record sits the <b>API server</b> (dfn): everything that reads or writes the record goes through it, people applying manifests and every loop alike. Engineers call the node agent on each node the kubelet.</p>
+        </div>
+        <div class="term">
+          <div class="k">NEW TERM · 04 / 04</div>
+          <div class="t">control plane</div>
+          <div class="d">The cluster’s record and the loops that work on it, behind the API server. On a managed service, your provider runs it.</div>
+          <div class="b">You met each part in §04 and §05.</div>
+        </div>
+        <div class="prose">
+          <p>On a managed service the provider runs the whole control plane in every mode, and upgrades its Kubernetes version. Who looks after the nodes depends on the mode: in each big provider’s standard mode the customer does (at Fennel, Ari’s team); in fully managed modes the provider does. Either way Fennel pays for the machines its Pods run on, and always owns what goes into the record, its images and code, its data, who may change what, and watching and answering alerts. Without a managed service, Fennel’s team would run the control plane too, and keep the record safe.</p>
+        </div>
+        <p class="more">▸ <b>D6 · What is the cluster’s record, exactly?</b> Engineers often call it etcd, after the software usually used; some providers store it differently. Only the API server reads and writes it.</p>
+        <p class="more">▸ <b>D7 · What if the control plane itself goes down?</b> Running Pods keep running, but no Pod is replaced or placed until it’s back: each part keeps doing what it was last told. What providers promise about this is Chapter 14.</p>
+        <div class="check">
+          <div class="kind">APPLY · Check 07 / 09 · k-07</div>
+          Fennel’s cluster runs on a managed service, in the provider’s standard mode. Which of these is still Fennel’s job?
+          <ol>
+            <li>Keeping the API server and the cluster’s record running, and upgrading them to new Kubernetes versions.</li>
+            <li>Running the scheduler and the loops that replace Pods when a node dies.</li>
+            <li class="ans">Deciding what goes in the record, such as how many copies of <code>orders</code> to run, and making sure each service survives being replaced. ✓</li>
+          </ol>
+          <p class="fb">A: “That’s the control plane, which the provider runs in every mode, upgrades included.” B: “Those loops are part of the control plane too… They did Fennel’s 3 a.m. work, but Fennel doesn’t run them.” C: “Right. The provider runs the loops; what they work towards is Fennel’s to decide… In standard mode, Ari’s team also looks after the nodes.”</p>
+        </div>
+      </div>
+      <div class="fig">
+        <span class="kind">FIG. 05 · Control plane and nodes · static SVG (kit arrow.js)</span>
+<pre>┌ CONTROL PLANE · RUN BY YOUR PROVIDER, IN EVERY MODE ─────────┐
+│                                                               │
+│ ┄controllers┄┄┄┄┄┄┄┄┄┄┄┄┄┄┐                                   │
+│ ┆(↻ ReplicaSet loop)      ┆   ┌─API SERVER─┐                  │
+│ ┆(↻ node loop)       ⇄────┼──▶│ the        │◀──⇄ (↻ scheduler)│
+│ ┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┘   │ cluster's  │                  │
+│        Ari: applies manifests ⇄│ record (c4)│                  │
+│                               └─────▲──────┘                  │
+└─────────────────────────────────────┼─────────────────────────┘
+┌ NODES · YOURS IN STANDARD MODE; THE PROVIDER'S IN FULLY MANAGED┐
+│  ⇅ each agent ↔ API server                                    │
+│ [NODE 01 ↻agent][NODE 02 ↻agent][NODE 03 ↻agent][NODE 04 ↻agent]│
+│   Pods            Pods            Pods            Pods        │
+└───────────────────────────────────────────────────────────────┘
+ALWAYS YOURS: what goes into the record · your images and code ·
+your data · who may change what · watching alerts</pre>
+        Each loop has one two-headed connector to the API server bar; <b>no connector between loops</b> (m-03): the control plane is a record with separate loops around it, not one box above the machines. Caption: “Fig. 05. Every part talks only to the API server, and through it to the record. The provider runs everything in the top band; what goes into the record is always yours.” Under 600px: stacked (control plane, nodes 2×2, ALWAYS YOURS), connectors redrawn vertically, about 760px tall.
+      </div>
+    </article>
+
+    <!-- s-08 -->
+    <article class="seg" id="s-08">
+      <header><span class="id">s-08 · § 08</span><h3>The conversation</h3><span class="tag">predict (m-05) → think-then-reveal (apply) → recap → bridge</span><span class="tag">o-2 o-3</span><span class="tag">~2.25 min</span></header>
+      <div>
+        <p class="intent">Rehearse the discussion move on a crash loop, recap the model, and turn to Chapter 5.</p>
+        <div class="prose"><p>Fennel’s newest service, <code>notifications</code>, sends order texts and emails. On Wednesday a setting it needs goes missing, and every time its container starts, it crashes within seconds.</p></div>
+        <div class="check">
+          <div class="kind">PREDICT · Check 08 / 09 · k-08</div>
+          Every time a <code>notifications</code> container starts, it crashes within seconds, because a setting it needs is missing. With default settings, what does Kubernetes do over the next hour?
+          <ol>
+            <li class="ans">Restarts it in place again and again, waiting longer between tries, and never stops. ✓</li>
+            <li>Restarts it a few times, then stops and marks <code>notifications</code> as failed, so someone notices.</li>
+            <li>Replaces its Pod on a different node each time, in case the node is what’s broken.</li>
+          </ol>
+          <p class="fb">A: “Right. The node agent restarts it after about 10 seconds, then 20, 40 and so on, up to 5 minutes between tries: roughly 15 restarts in the first hour, then about 12 an hour… The loop is working exactly as designed; the app is still broken.” B (m-05): “There’s no give-up point… Nobody is told unless your team has set up an alert.” C (m-06): “A crashing container is restarted in place, in the same Pod on the same node…”</p>
+        </div>
+        <div class="prose" style="margin-top:8px"><p>Engineers’ dashboards show this as <code>CrashLoopBackOff</code>; the Kubernetes docs’ own example shows a Pod at 200 restarts over two days.</p></div>
+        <div class="quote">“notifications keeps crash-looping, but Kubernetes keeps restarting it.”<cite>Ari</cite></div>
+        <div class="check">
+          <div class="kind">APPLY · Check 09 / 09 · k-09 · think, then reveal</div>
+          Ari says: “notifications keeps crash-looping, but Kubernetes keeps restarting it.” What would you ask? Think of one or two questions, then show the answer.
+          <p class="ans" style="margin:6px 0">Model answer: “So Kubernetes is doing its job. What’s wrong with the app? And is restarting hiding the problem from us?”</p>
+          <p class="fb">Why: the loop compares one thing, a running container, and acts on it; it can’t see the missing setting, so restarting is all it can do. And a service that restarts quietly can look “handled” on a dashboard while texts and emails stop going out. Chapter 12 comes back to how teams catch that. Under it: “If your question was ‘can Kubernetes fix it?’, that’s the trap this chapter is about: the loops restore the count; they don’t repair the app.”</p>
+        </div>
+      </div>
+      <div>
+        <div class="fig" style="min-height:0">
+          <span class="kind">Recap · .cp-recap · “In short”</span>
+          <ul style="margin:0;padding-left:18px">
+            <li>With Kubernetes you write down what you want, the desired state, in manifests. Applying one records the intention; it doesn’t run anything.</li>
+            <li>Many small loops each compare one part of the record with what they observe, and act to close the gap, forever. No part plans for the others; work passes between them through the record.</li>
+            <li>Kubernetes runs Pods, and Pods are disposable: a dead node’s Pods are replaced by new ones, in minutes with default settings, with nobody awake. The app has to tolerate that, and the loops can’t fix a broken app.</li>
+            <li>Your provider runs the control plane. What goes into the record, and whether your app survives being replaced, stays yours.</li>
+          </ul>
+          <p style="margin:6px 0 0"><b>Bridge:</b> From here on, every chapter asks the same three things: which loop, watching what, doing what? Next: Morgan opens the first cloud bill since the move, and it’s gone up. The loop that picked node 04 for <code>orders</code> is where that story starts.</p>
+        </div>
+      </div>
+    </article>
+  </section>
+
+  <section id="cuts">
+    <h2>Cut list (researched, deliberately left out)</h2>
+    <table>
+      <thead><tr><th>What</th><th>Why it’s out</th><th>Cost to add back</th></tr></thead>
+      <tbody>
+        <tr><td>A hands-on “kill a node” widget</td><td>Same outcome every time: tapping is busywork. The two teaching moments are committed predictions (k-03, k-04) gating the lanes.</td><td>A widget on <code>renderCluster</code>, ~1 min; better in Ch 5 (sandbox)</td></tr>
+        <tr><td>A replicas control, 2 → 5 → 3 (level-based)</td><td>A new idea the model doesn’t need; kept as disclosure D2.</td><td>~0.5 min; Ch 6’s rollback is its natural home</td></tr>
+        <tr><td>Thermostat analogy (the docs’ own)</td><td>A third analogy; the delegated owner and the helmsman already carry it.</td><td>An aside, ~0.4 min; suggested for Ch 8</td></tr>
+        <tr><td>“Cybernetics” shares the Greek root</td><td>Unsourced.</td><td>One clause after sourcing</td></tr>
+        <tr><td>A Deployment snippet</td><td>An unexplained kind beside a differently named loop. Chosen: <code>kind: ReplicaSet</code>, shortened, Deployment named in the caption.</td><td>Swap one line + a sentence; Ch 6 does it properly</td></tr>
+        <tr><td>Scheduler’s factors; why node 01 got two storefront Pods; eviction, taints</td><td>Ch 5’s vocabulary and topic.</td><td>Ch 5</td></tr>
+        <tr><td>The node loop’s 5-second check; “older releases used 40 s”</td><td>A third number in lane B; unverified history.</td><td>A clause in B2</td></tr>
+        <tr><td>Probes; helper-container detail; crash back-off tuning</td><td>Ch 6, Ch 12/13.</td><td>Later chapters</td></tr>
+        <tr><td>Provider mode names (GKE Autopilot, EKS Auto Mode, AKS Automatic); pricing; node auto-repair</td><td>Curriculum keeps providers generic; pricing not researched; auto-repair unsourced.</td><td>A disclosure (~0.25 min) / Ch 14</td></tr>
+        <tr><td>etcd vs. Spanner; admission checks; GitOps; “control through choreography”</td><td>Out of scope (Ch 11, 13, 14) or redundant with the docs’ own words.</td><td>Later chapters</td></tr>
+      </tbody>
+    </table>
+    <p class="meta">All 25 claims are used. Of the examples, only x-01 (thermostat) is cut. Full table in cut-list.md.</p>
+
+    <h2>If it runs long (in the plan now; cut in this order)</h2>
+    <p class="meta">The prose is written at whatever length clarity needs. If the built page runs long, you pick cuts from here. Items 1–4 recover about 1.5 minutes; 1–8 about 3.</p>
+    <table>
+      <thead><tr><th>#</th><th>Cut</th><th>What the reader loses</th></tr></thead>
+      <tbody>
+        <tr><td>1</td><td>The helmsman aside (§04)</td><td>The name’s meaning, “K8s”, a second image of correction; TERM 03 keeps the idea (~0.3)</td></tr>
+        <tr><td>2</td><td>Fig. 03 (Pod figure) → TERM 02 alone</td><td>The drawn wrapper and helper; the card and canvas ring remain (~0.3)</td></tr>
+        <tr><td>3</td><td>k-02 → narrated</td><td>The committed comparison for o-1; k-03 still checks o-1 (~0.4)</td></tr>
+        <tr><td>4</td><td>Lane A step A5’s last sentences → into the TERM 03 paragraph</td><td>The “no plan, keeps watching” beat at the moment it happens (~0.25)</td></tr>
+        <tr><td>5</td><td>k-07 → one sentence</td><td>o-4’s committed check (k-03 remains for the record) (~0.5)</td></tr>
+        <tr><td>6</td><td>Fig. 05’s “fully managed” label → prose</td><td>Seeing who runs the nodes drawn (~0.25)</td></tr>
+        <tr><td>7</td><td>k-05 → prose question</td><td>The committed m-03 confrontation; Fig. 05 and the orchestrator paragraph keep the model (~0.5)</td></tr>
+        <tr><td>8</td><td>k-08 → folded into the scene</td><td>Predicting the crash loop; m-05 still confronted in §06 and k-09 (~0.5)</td></tr>
+      </tbody>
+    </table>
+    <p class="meta">Not cuttable without losing an objective, the core model, the payoff or an owned misconception: k-01, Fig. 01, TERM 01, the analogy and its breaks, Fig. 02, both lanes with k-03/k-04, TERM 03 and the lens, the Ch 1 payoff, Fig. 04, k-06 and the disposability list, the self-healing limits, Fig. 05 and TERM 04, k-09 and the recap. Past ~23 min after all cuts: split after §05 rather than compress.</p>
+  </section>
+
+  <section id="assets">
+    <h2>Third-party assets</h2>
+    <table>
+      <thead><tr><th>#</th><th>Asset</th><th>Used in</th><th>Licence</th><th>Clearance</th></tr></thead>
+      <tbody>
+        <tr><td>—</td><td>No third-party assets. Every figure and the scrolly canvas are drawn in HTML/CSS/SVG for this page; fonts come from the Control Plane style guide (Google Fonts, as in Ch 1–3). Short verbatim quotes from the Kubernetes documentation (CC BY 4.0) are attributed in the Sources footer.</td><td>—</td><td class="license">n/a</td><td>none needed</td></tr>
+      </tbody>
+    </table>
+    <p class="meta">No third-party assets.</p>
+  </section>
+</main>
+<script>
+  const d = document.getElementById('vw-desk'), m = document.getElementById('vw-mob');
+  function set(mobile) {
+    document.body.classList.toggle('mobile', mobile);
+    d.setAttribute('aria-pressed', String(!mobile)); m.setAttribute('aria-pressed', String(mobile));
+  }
+  d.onclick = () => set(false); m.onclick = () => set(true);
+</script>
+</body>
+</html>
