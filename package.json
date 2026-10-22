@@ -1,0 +1,12 @@
+{
+  "name": "k8s-course",
+  "private": true,
+  "description": "Kubernetes for technical managers: chapter explainers and the course site",
+  "type": "module",
+  "engines": { "node": ">=20" },
+  "scripts": {
+    "sync": "node tools/site/sync.mjs",
+    "build": "node tools/site/build.mjs",
+    "preview": "node tools/site/build.mjs --serve"
+  }
+}
