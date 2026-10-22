@@ -24,6 +24,7 @@ const course = loadCourse();
 const { config, parts, chapters, running, total, pad } = course;
 
 const esc = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+const LEGAL = `<p class="cn-legal">${esc(config.license.holder)} · <a href="${esc(config.license.href)}" rel="license">${esc(config.license.name)}</a></p>`;
 const statusWord = { running: 'Running', pending: 'Pending', creating: 'Creating' };
 
 // ---- Fig. 00: the course map ------------------------------------------------------------------
@@ -135,6 +136,7 @@ function nextPlate(ch) {
     <h2 class="cn-next__h" id="cn-next-h">${head}</h2>
     ${lead}
     ${courseMap({ id: 'cn-map-end', here: ch.n, base: '../' })}
+    ${LEGAL}
   </div>
 </section>`;
 }
@@ -218,7 +220,7 @@ ${masthead(null)}
   <p class="cn-home__lead">Each chapter starts from a problem Fennel runs into and ends with a conversation you could have with your engineers. Read them in order; Chapters 5, 6 and 7 can go in any order once you’ve read Chapter 4.</p>
   ${courseMap({ id: 'cn-map', base: '' })}
 </main>
-<footer class="cn-foot"><p>Fennel, its people and its incidents are fiction, made up to illustrate how the systems work. Each chapter lists its sources at the end.</p></footer>
+<footer class="cn-foot"><p>Fennel, its people and its incidents are fiction, made up to illustrate how the systems work. Each chapter lists its sources at the end.</p>${LEGAL}</footer>
 <script type="application/json" id="cn-data">${data.replace(/</g, '\\u003c')}</script>
 <script src="course/course.js" defer></script>
 </body>

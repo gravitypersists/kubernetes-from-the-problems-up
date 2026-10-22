@@ -3,5 +3,6 @@
   "subtitle": "Kubernetes from the problems up",
   "short": "Course home",
   "description": "A course for managers whose engineers want Kubernetes. Follow Fennel, a fictional grocery-delivery startup, from one hand-built server to a cluster, and learn to follow the reasoning, predict what the system does, and ask the questions that matter.",
+  "license": { "holder": "© 2026 Michael Silveira", "name": "CC BY-NC 4.0", "href": "https://creativecommons.org/licenses/by-nc/4.0/" },
   "status": {}
 }

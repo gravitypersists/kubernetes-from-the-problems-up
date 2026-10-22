@@ -167,6 +167,11 @@ a.cn-pod:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
 .cn-next__desc { font: var(--fs-small)/var(--lh-small) var(--font-body); color: var(--ink-2); }
 .cn-next__go { margin-top: var(--sp-1); font: 700 var(--fs-caption)/var(--lh-caption) var(--font-mono); letter-spacing: .08em; text-transform: uppercase; color: var(--accent); }
 
+.cn-legal { margin: var(--sp-5) 0 0; font: 400 var(--fs-caption)/var(--lh-caption) var(--font-sans); color: var(--ink-3); }
+.cn-legal a { color: var(--ink-2); text-underline-offset: 3px; }
+.cn-legal a:hover { color: var(--ink); }
+.cn-foot .cn-legal { margin-top: var(--sp-2); }
+
 /* ---- home ---------------------------------------------------------------------------------------- */
 .cn-hero { border-bottom: 3px solid var(--ink); overflow: hidden;
   background-color: var(--surface);
