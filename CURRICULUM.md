@@ -38,6 +38,7 @@ This is the course bible and chapter plan. Each chapter is built in its own dida
 9. **Confront misconceptions from the catalog (§6).** Each chapter owns the misconceptions assigned to it. State each one fairly, show a case where it predicts wrongly, then give the correct model.
 10. **Sizing.** There is no fixed time budget. Each chapter is sized in ideas, aiming for 3–5 objectives. Set `time_budget_minutes` at intake for each run, based on the chapter's objectives. If a chapter plans out too big, split it rather than compress it. Designers give an honest minutes table per part (including widget time) in the plan's `## Shape`, so overruns show at the checkpoint.
 11. **Friendly to readers who jump ahead.** From Ch 2 on, every chapter opens with a one-line cast strip of the characters it uses and a collapsed "I didn't read the last chapter. What happened?" disclosure, before the retrieval check. (User's Ch 2 review.)
+12. **Kubernetes kinds are capitalised as the API spells them**, from Ch 4 on: Pod, ReplicaSet, Deployment, Service, StatefulSet, and so on, as the style guide says. "node" stays lowercase, as in the Kubernetes docs' prose. (User decision in Ch 4's run, d-05.)
 
 ---
 
