@@ -1,4 +1,4 @@
-# Kubernetes for Technical Managers: Curriculum
+# Curriculum: “Desired state: Kubernetes from the problems up”
 
 This is the course bible and chapter plan. Each chapter is built in its own didactician run, and runs share no memory, so anything that has to stay consistent across chapters lives here. Every run's brief should point to this file and copy its chapter entry.
 
@@ -179,7 +179,7 @@ Each misconception is owned by one chapter, which confronts it. Later chapters m
 
 ## 7. Chapters
 
-Each entry is a draft brief. At intake, the didactician orchestrator should copy its fields into `brief.md`: `context: part of a course: "Kubernetes for Technical Managers"`, with prerequisites and out-of-scope taken from the entry, and `time_budget_minutes` set for that run.
+Each entry is a draft brief. At intake, the didactician orchestrator should copy its fields into `brief.md`: `context: part of a course: "Desired state: Kubernetes from the problems up"`, with prerequisites and out-of-scope taken from the entry, and `time_budget_minutes` set for that run.
 
 ---
 
@@ -488,7 +488,7 @@ _The central chapter of the course. Everything after it uses its model._
 1. Start a run: `/didactician` with a pointer to this file and the chapter number. Suggested output folder: `explainers/ch-NN-<slug>/`.
 2. At intake, the orchestrator fills `brief.md` from the chapter entry:
    - `audience` and `readiness` from §1 (readiness: novice for Kubernetes, intermediate for general software);
-   - `context: part of a course: "Kubernetes for Technical Managers"`;
+   - `context: part of a course: "Desired state: Kubernetes from the problems up"`;
    - `prerequisites` and `out_of_scope` from the entry, plus the term ledger (§5) for terms already introduced;
    - objectives from the draft objectives, refined at intake;
    - `research_depth` as suggested;

@@ -1,4 +1,4 @@
-# Kubernetes for Technical Managers
+# Desired state: Kubernetes from the problems up
 
 A course of explainer pages, one didactician run per chapter. `CURRICULUM.md` is the course bible; every run reads it (see its §8).
 

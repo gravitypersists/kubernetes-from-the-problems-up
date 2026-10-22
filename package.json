@@ -1,7 +1,7 @@
 {
   "name": "k8s-course",
   "private": true,
-  "description": "Kubernetes for technical managers: chapter explainers and the course site",
+  "description": "Desired state: Kubernetes from the problems up. Chapter explainers and the course site",
   "type": "module",
   "engines": { "node": ">=20" },
   "scripts": {

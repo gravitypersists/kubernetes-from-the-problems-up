@@ -187,7 +187,7 @@ function homePage() {
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>${esc(config.title)}</title>
+<title>${esc(config.title)}: ${esc(config.subtitle)}</title>
 <meta name="description" content="${esc(config.description)}">
 ${FAVICON}
 <link rel="stylesheet" href="pool/tokens.css">
@@ -200,7 +200,7 @@ ${masthead(null)}
   <div class="cn-hero__inner">
     <div class="cn-hero__words">
       <p class="cn-hero__kicker"><span class="cn-hero__idx">Course</span><span class="cn-label">${total} chapters · ${parts.length - 1} parts and a capstone</span></p>
-      <h1 class="cn-hero__title">${esc(config.title)}</h1>
+      <h1 class="cn-hero__title">${esc(config.title)}<span class="cn-hero__sub">${esc(config.subtitle)}</span></h1>
       <p class="cn-hero__standfirst">Your engineers want Kubernetes. This course follows Fennel, a made-up grocery-delivery startup, from one hand-built server to a cluster, so you can follow the reasoning, predict what the system will do, and ask the questions that matter.</p>
       <dl class="cn-meta">
         <div><dt>Chapters</dt><dd>${pad(total)}</dd></div>
