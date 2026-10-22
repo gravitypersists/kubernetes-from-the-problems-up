@@ -282,6 +282,12 @@ body.d-body { -webkit-font-smoothing: antialiased; }
 .dk__h2 { margin-top: var(--sp-2); }
 .dk__reg .cp-machine__body { justify-items: start; }
 .dk .cp-machine__body .dk__note { margin-top: 0; }
+/* commands Riley types: dashed and unfilled with a $ prompt, so they don't read as running things like the container chip */
+.dk__cmds { display: grid; gap: var(--sp-half); padding: var(--sp-half) var(--sp-1); border: var(--stroke) dashed var(--ink-3); border-radius: var(--radius-1); }
+.cp-fig .dk__cmds .cp-label { margin: 0; color: var(--ink-2); }
+.cp-fig .dk__cmd { margin: 0; font: 400 var(--fs-caption)/var(--lh-caption) var(--font-sans); color: var(--ink); }
+.dk__cmd::before { content: "$ "; font: 700 var(--fs-caption)/var(--lh-caption) var(--font-mono); color: var(--ink-3); }
+.dk__cmd code { font: 700 var(--fs-caption)/var(--lh-caption) var(--font-mono); color: var(--ink); background: none; padding: 0; }
 .dk__clu .cp-machine__bar { padding-inline: var(--sp-half); }
 .dk__clu .cp-machine__body { padding: var(--sp-half); }
 .cp-fig .dk__jobs {

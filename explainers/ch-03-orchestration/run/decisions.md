@@ -102,3 +102,10 @@ question: Apply post-ship curriculum updates (R4, R5) and commit Ch 3 with the t
 answer: "Apply and commit (Recommended)"
 decision: approved
 applies_to: other (CURRICULUM.md, git)
+
+### d-16 · 2026-10-21T23:30:00 · post-delivery
+question: Address the user's human review of the delivered chapter (run/review/human-review.md).
+answer: "Please address the changes - do so yourself, please. Keep it constrained."
+decision: approved
+applies_to: site (s-03, s-05, s-06, s-07, f-02)
+notes: Applied directly in the main session, no dispatch. s-03 idle-machines paragraph rewritten (opens on Morgan's question; same claims, 12–18% still hedged). s-05 "Morgan's question … at Google's scale" → "Just like Morgan at Fennel, Google cared about idle machines: …". s-06 meta opener replaced with the user's suggested framing, which also states the section's purpose (place Docker vs Kubernetes, m-02) without giving away k-08. f-02: docker build / docker run moved out of the process-row style into a dashed, unfilled "Commands Riley types" strip with $ prompts. NOTE aside after the push paragraph: real teams build and push images on a shared build server, not laptops. Gate round 10 PASS. Follow-up (review file re-saved with an expanded §06 note and a §07 note): s-06 prose now says a container is a general idea and Docker one brand of tools; OCI (2015, Docker donated its image format) sourced to opencontainers.org and added to Sources. s-07: Sam's quote kept; k-09 replaced with "If we'd been on Kubernetes last Saturday, what would have been different?" (A prevents failure, B m-27, C replacing + connecting = correct); the conversation question moved to prose with the Ch 14 pointer; new Part I → II transition paragraph (catching up → getting ahead). Gate round 11 PASS. No fresh accuracy or pedagogy-ux review.

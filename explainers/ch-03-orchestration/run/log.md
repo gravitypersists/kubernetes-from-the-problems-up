@@ -234,3 +234,23 @@ Ch 3 delivered: relabelled 17 min (d-14), 17 findings fixed, P-08 waived, P-13/P
 
 ### 2026-10-21T20:00:24-04:00 · orchestrator · stage
 Stage: deliver → **done**
+
+### 2026-10-21T22:54:49-04:00 · verify · gate
+Gate (page) round 10: **PASS**. Reading ~13.6 min (brief: ~17 min; reported, not gated); 277 KB, 16 requests.
+- [gate/page-round-10.json](gate/page-round-10.json)
+- [screenshots/page-round-10](screenshots/page-round-10)
+
+### 2026-10-21T22:55:15-04:00 · orchestrator · user_decision
+Human review applied (d-16): §03 idle-machines paragraph rewritten, §05 Morgan/Google line, §06 opener reframed, f-02 commands styled as commands, build-server note; gate round 10 PASS; no fresh review
+- [run/review/human-review.md](run/review/human-review.md)
+- [run/gate/page-round-10.json](run/gate/page-round-10.json)
+
+### 2026-10-21T23:02:00-04:00 · verify · gate
+Gate (page) round 11: **PASS**. Reading ~14.4 min (brief: ~17 min; reported, not gated); 396 KB, 16 requests.
+- [gate/page-round-11.json](gate/page-round-11.json)
+- [screenshots/page-round-11](screenshots/page-round-11)
+
+### 2026-10-21T23:02:08-04:00 · orchestrator · user_decision
+Human review follow-up (d-16): §06 container vs Docker + OCI 2015 (sourced), §07 new k-09 and Part I → II transition; gate round 11 PASS
+- [run/review/human-review.md](run/review/human-review.md)
+- [run/gate/page-round-11.json](run/gate/page-round-11.json)

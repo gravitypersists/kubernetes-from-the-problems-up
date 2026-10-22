@@ -321,7 +321,7 @@
         <figcaption id="f-01-cap"><span class="cp-label">Fig. 01</span><span>Each job Sam did by hand shows up on a manager’s desk.</span></figcaption>
       </figure>
 
-      <p>Start with Morgan’s idle machines. When people place containers by hand, they leave room free on each machine “to be safe” and keep spare machines, because moving things later is slow and risky. Some of that room is insurance: on Saturday night, the free room on machine 04 is where <code>orders</code> went. How much spare room is right is a question for Chapter 5. Machines doing far less than they could is an old problem, though. One industry estimate, for data centres where each app had a server to itself, put the average server at only 12 to 18% busy.</p>
+      <p>First, Morgan’s question: why do half of Fennel’s machines look mostly idle? When people place containers by hand, they play it safe. Moving a container later is slow and risky, so they leave free room on every machine and keep spare machines standing by. Some of that room is worth having: on Saturday night, the free room on machine 04 is where <code>orders</code> went. How much spare room is right is a question for Chapter 5. Still, idle machines are an old problem. One industry estimate, from data centres where each app had a server to itself, put the average server at only 12 to 18% busy.</p>
       <details class="d-more cp-more">
         <summary>Where does the 12–18% come from?</summary>
         <div class="cp-more__body"><p>It’s a 2014 estimate by the Natural Resources Defense Council (NRDC), quoted by the US Environmental Protection Agency’s <a href="https://www.energystar.gov/products/data_center_equipment/16-more-ways-cut-energy-waste-data-center/consolidate-lightly-utilized-servers">ENERGY STAR programme</a>. It describes US corporate data centres running one app per server. It isn’t a measurement of machines running containers, or of Fennel.</p></div>
@@ -397,7 +397,7 @@
         <p class="cp-term__jobs">placing · restarting · replacing · connecting · updating · scaling</p>
       </div>
 
-      <p>Kubernetes came out of Google. Google had run its own services in containers for years, on an internal system called Borg. It later built a second system, Omega, to try out new ideas, many of which went back into Borg. One reason Google built Borg was to let different kinds of work share the same machines, so that more of each machine gets used and costs come down. That’s Morgan’s question about idle machines, asked at Google’s scale.</p>
+      <p>Kubernetes came out of Google. Google had run its own services in containers for years, on an internal system called Borg. It later built a second system, Omega, to try out new ideas, many of which went back into Borg. Just like Morgan at Fennel, Google cared about idle machines: one reason it built Borg was to let different kinds of work share the same machines, so that more of each machine gets used and costs come down.</p>
       <p>You’ll hear that Kubernetes is Google’s Borg, released to the world. It isn’t. Kubernetes was Google’s third such system, built new with lessons from the first two, and open source from the start. Borg and Omega stayed inside Google.</p>
       <p>Google published Kubernetes as open source in 2014. In 2015, at version 1.0, Google announced it would give Kubernetes to a newly formed foundation, the Cloud Native Computing Foundation, which is part of the Linux Foundation, so no single company owns it. By 2024, tens of thousands of people from thousands of companies had contributed to it.</p>
       <details class="d-more cp-more">
@@ -412,7 +412,7 @@
          f-02 and the prose -->
     <section id="s-06" data-segment="s-06">
       <h2 id="where-docker-fits"><span class="cp-sec">§ 06 </span>Where Docker fits</h2>
-      <p>Last chapter said you’d hear the name Docker in conversations about containers, and that this chapter would place it. Commit to an answer before you read how.</p>
+      <p>You may already know the name Docker, and the last chapter on containers may have left you wondering how it fits in with Kubernetes. The two names come up together so often that they’re easy to mix up. So let’s introduce Docker properly, and see which job each one does.</p>
 
       <div class="cp-check" role="group" aria-labelledby="k-08-q" data-check="k-08">
         <div class="cp-check__head"><span class="cp-chip">PREDICT</span><span class="cp-label">Check 08 / 09</span></div>
@@ -439,8 +439,11 @@
               <div class="cp-machine dk__lap">
                 <div class="cp-machine__bar"><span class="cp-label">Machine · Riley’s laptop</span></div>
                 <div class="cp-machine__body">
-                  <div class="mrow mrow--c2"><span><code>docker build</code> → image <code>storefront:v13</code></span></div>
-                  <div class="mrow mrow--c2"><span><code>docker run</code> → a container, on this laptop</span></div>
+                  <div class="dk__cmds">
+                    <p class="cp-label">Commands Riley types</p>
+                    <p class="dk__cmd"><code>docker build</code> → makes the image <code>storefront:v13</code></p>
+                    <p class="dk__cmd"><code>docker run</code> → starts a container, on this laptop</p>
+                  </div>
                   <div class="cp-chips"><span class="cp-ctr">storefront:<wbr>v13 <span class="st st--good"><span class="lamp" aria-hidden="true"></span>RUNNING</span></span></div>
                 </div>
               </div>
@@ -485,8 +488,9 @@
         <figcaption id="f-02-cap"><span class="cp-label">Fig. 02</span><span>The image is the hand-off: the package Riley builds on one machine is the same package the cluster runs, whichever tool built it.</span></figcaption>
       </figure>
 
-      <p>“Docker” is a set of tools for building images and running containers. On Riley’s laptop, <code>docker build</code> makes the <code>storefront:v13</code> image, and <code>docker run</code> starts a container from that image, on that laptop. Docker’s tools act on the machine they’re run on.</p>
-      <p>Riley then pushes the image to the registry. From there, an orchestrator such as Kubernetes decides which machines in the cluster run copies of it, starts those copies, and keeps doing the six jobs for them. Images follow an open standard, so Kubernetes runs an image whichever tool built it. That’s why Docker and Kubernetes aren’t competitors in the usual sense: most teams use Docker’s tools to build images, and an orchestrator to run them across their machines.</p>
+      <p>A container is a general idea, not a product: the containers in Chapter 2 could have been built and run with any of several tools. “Docker” is the best-known set of those tools, from the company of the same name, and the one that made containers popular. On Riley’s laptop, <code>docker build</code> makes the <code>storefront:v13</code> image, and <code>docker run</code> starts a container from that image, on that laptop. Docker’s tools act on the machine they’re run on.</p>
+      <p>Riley then pushes the image to the registry. From there, an orchestrator such as Kubernetes decides which machines in the cluster run copies of it, starts those copies, and keeps doing the six jobs for them. In 2015, Docker and other container companies set up the <a href="https://opencontainers.org/about/overview/">Open Container Initiative</a>, and Docker gave it its image format. That format is now an open standard, so Kubernetes runs an image whichever tool built it. That’s why Docker and Kubernetes aren’t competitors in the usual sense: most teams use Docker’s tools to build images, and an orchestrator to run them across their machines.</p>
+      <div class="cp-aside"><b>NOTE</b>A laptop keeps the example simple. Real teams don’t ship images built on someone’s laptop: a shared build server builds and pushes them, so every image is made the same way from the team’s code.</div>
       <p>Kubernetes was even announced at Docker’s own conference, DockerCon, in 2014.</p>
       <details class="d-more cp-more">
         <summary>You may have read “Kubernetes drops Docker”</summary>
@@ -498,8 +502,8 @@
       </details>
     </section>
 
-    <!-- s-07 · The conversation · o-2, o-3 · claims c-09, c-11 · k-09 (B carries local-01 = m-25, dated 2016;
-         C skips the decision) · recap · bridge to Ch 4 -->
+    <!-- s-07 · The conversation · o-1, o-3 · k-09 (replay Saturday on Kubernetes; A: prevents failure, B: m-27,
+         C: replacing + connecting) · the conversation question (Ch 14) · Part I → II transition · recap · bridge to Ch 4 -->
     <section id="s-07" data-segment="s-07">
       <h2 id="the-conversation"><span class="cp-sec">§ 07 </span>The conversation</h2>
       <p>After another 3 a.m. page, Sam brings a proposal to the planning meeting.</p>
@@ -507,16 +511,17 @@
 
       <div class="cp-check" role="group" aria-labelledby="k-09-q" data-check="k-09">
         <div class="cp-check__head"><span class="cp-chip cp-chip--apply">APPLY</span><span class="cp-label">Check 09 / 09</span></div>
-        <p class="cp-check__q" id="k-09-q">What’s the most useful thing Jordan can ask?</p>
+        <p class="cp-check__q" id="k-09-q">Jordan asks Sam: “If we’d been on Kubernetes last Saturday, what would have been different?” Which answer holds up?</p>
         <ul class="cp-options">
-          <li><button type="button" class="cp-option" data-ok data-fb="Right. It ties the platform to pain you can name (3 a.m. replacing, idle machines, release days run from the chat) and asks whether fixing that is worth what the platform costs."><span class="cp-option__key">A</span><span>“Which of these jobs is hurting us most today, and is that worth the cost of the platform?”</span><span class="cp-option__tag"></span></button></li>
-          <li><button type="button" class="cp-option" data-fb="Kubernetes was Google’s third system, built new and open source; Google’s own services ran on Borg, at least as of 2016. And Fennel isn’t Google: what pays off at Google’s size may not at Fennel’s."><span class="cp-option__key">B</span><span>“Google built it and runs on it. Can we simply copy the way Google sets it up?”</span><span class="cp-option__tag"></span></button></li>
-          <li><button type="button" class="cp-option" data-fb="A fair planning question, but it skips the decision. Before ‘how long’, ask ‘what for’: which jobs hurt, and is fixing them worth the cost?"><span class="cp-option__key">C</span><span>“How long would the move take, and can we finish it before the holiday rush?”</span><span class="cp-option__tag"></span></button></li>
+          <li><button type="button" class="cp-option" data-fb="Kubernetes can’t stop a machine from failing. Machines still die; what changes is what happens next."><span class="cp-option__key">A</span><span>Machine 03 wouldn’t have died: Kubernetes spots failing machines early and keeps them healthy.</span><span class="cp-option__tag"></span></button></li>
+          <li><button type="button" class="cp-option" data-fb="That’s the deploy-script view from §04. An orchestrator works between releases too: at 03:04 it would have done the replacing and connecting itself."><span class="cp-option__key">B</span><span>Nothing: Kubernetes handles releases, and Saturday wasn’t a release.</span><span class="cp-option__tag"></span></button></li>
+          <li><button type="button" class="cp-option" data-ok data-fb="Right. The failure is the same; who does the work isn’t. Replacing and connecting, Sam’s 3 a.m. jobs, become the orchestrator’s. How it manages that is the next chapter."><span class="cp-option__key">C</span><span>Machine 03 still dies, but Kubernetes starts <code>orders</code> and <code>dispatch</code> on other machines and passes on their new addresses, without anyone being woken to do it.</span><span class="cp-option__tag"></span></button></li>
         </ul>
         <div class="cp-feedback" role="status" hidden></div>
       </div>
 
-      <p>Chapter 14 is where the cost side of that question gets answered.</p>
+      <p>Moving still costs something: the platform, and the time to learn and run it. So the question for Jordan to bring to the planning meeting is: “Which of these jobs is hurting us most today, and is that worth the cost of the platform?” Chapter 14 comes back to the cost side.</p>
+      <p>That’s the end of Part I. Since its first server, Fennel has been catching up: the disk filled, so Sam wrote a clean-up job; a release broke in production, so the team moved to containers; a machine died, so Sam moved containers by hand at 3 a.m. Each fix came after the pain. Part II is about getting ahead of it: telling Kubernetes what Fennel wants running, and letting it keep things that way.</p>
 
       <div class="cp-recap">
         <p class="cp-label">In short</p>
@@ -537,6 +542,7 @@
         <li>Kubernetes documentation, <a href="https://kubernetes.io/docs/concepts/overview/">“Overview”</a>: a cluster of machines, and fitting containers onto them by size.</li>
         <li>Kubernetes blog, <a href="https://kubernetes.io/blog/2024/06/06/10-years-of-kubernetes/">“10 Years of Kubernetes”</a> (2024): the 2014 release, the 2015 hand-over to the Cloud Native Computing Foundation, contributors, DockerCon 2014, and the 2022 change in how Kubernetes starts containers.</li>
         <li>Kubernetes blog, <a href="https://kubernetes.io/blog/2020/12/02/dont-panic-kubernetes-and-docker/">“Don’t Panic: Kubernetes and Docker”</a> (2020): Docker as a set of tools, and images that follow an open standard.</li>
+        <li>Open Container Initiative, <a href="https://opencontainers.org/about/overview/">“About the OCI”</a>: launched in 2015 by Docker, CoreOS and others; Docker donated its container format and runtime.</li>
         <li>ENERGY STAR, <a href="https://www.energystar.gov/products/data_center_equipment/16-more-ways-cut-energy-waste-data-center/consolidate-lightly-utilized-servers">“Consolidate lightly utilized servers”</a>, citing NRDC (2014): the 12–18% estimate.</li>
         <li>Google, <i>Site Reliability Engineering</i>, <a href="https://sre.google/sre-book/eliminating-toil/">“Eliminating Toil”</a>: toil, burnout, and the under-half goal.</li>
       </ol>
