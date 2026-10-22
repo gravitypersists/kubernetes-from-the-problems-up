@@ -1,0 +1,475 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mockup: Ch 3 orchestration</title>
+<!--
+  Checkpoint wireframe for Ch 3, "Many containers, many machines: the orchestration problem".
+  Low-fidelity: grey boxes, real words. Prose lines are draft wording; check prompts, options and
+  answers are final. Source of truth: run/plan/learning-plan.md.
+-->
+<style>
+  :root {
+    --bg: #fafaf9; --panel: #fff; --ink: #1c1917; --ink-2: #57534e; --ink-3: #a8a29e;
+    --line: #e7e5e4; --fill: #f5f5f4; --accent: #2563eb; --warn: #b45309; --ok: #15803d;
+    --s1: 8px; --s2: 16px; --s3: 24px; --s4: 32px; --s6: 48px;
+    --mono: ui-monospace, SFMono-Regular, Menlo, monospace;
+    --sans: system-ui, -apple-system, "Segoe UI", sans-serif;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg:#0c0a09; --panel:#1c1917; --ink:#fafaf9; --ink-2:#d6d3d1; --ink-3:#78716c;
+            --line:#292524; --fill:#292524; --accent:#60a5fa; --warn:#f59e0b; --ok:#4ade80; }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--ink); font: 16px/1.5 var(--sans); }
+  .bar { position: sticky; top: 0; z-index: 2; display: flex; gap: var(--s2); align-items: center;
+         flex-wrap: wrap; padding: var(--s1) var(--s2); background: var(--panel); border-bottom: 1px solid var(--line);
+         font: 13px/1.4 var(--mono); }
+  .bar b { font-weight: 600; }
+  .bar .sp { flex: 1; }
+  .bar button { font: inherit; padding: 4px 8px; border: 1px solid var(--line); background: var(--fill);
+                color: var(--ink); border-radius: 4px; cursor: pointer; }
+  .bar button[aria-pressed="true"] { border-color: var(--accent); color: var(--accent); }
+  main { max-width: 1040px; margin: 0 auto; padding: var(--s4) var(--s2) var(--s6); }
+  body.mobile main { max-width: 360px; padding-left: 0; padding-right: 0; }
+  body.mobile .seg { grid-template-columns: 1fr; }
+  h1 { font-size: 28px; line-height: 1.2; margin: 0 0 var(--s1); }
+  h2 { font: 600 13px/1.4 var(--mono); letter-spacing: .04em; text-transform: uppercase; color: var(--ink-2);
+       margin: var(--s6) 0 var(--s2); }
+  .meta { color: var(--ink-2); font-size: 14px; }
+  .panel { background: var(--panel); border: 1px solid var(--line); border-radius: 8px; padding: var(--s2); }
+  .seg { display: grid; grid-template-columns: minmax(0, 3fr) minmax(0, 2fr); gap: var(--s2);
+         margin-bottom: var(--s3); }
+  .seg header { grid-column: 1 / -1; display: flex; gap: var(--s1); align-items: baseline; flex-wrap: wrap; }
+  .seg header .id { font: 12px var(--mono); color: var(--ink-3); }
+  .seg header h3 { margin: 0; font-size: 18px; }
+  .tag { font: 11px/1 var(--mono); padding: 3px 6px; border-radius: 3px; background: var(--fill); color: var(--ink-2); }
+  .intent { font-style: italic; color: var(--ink-2); margin: 0 0 var(--s1); }
+  .prose { color: var(--ink-2); font-size: 14px; }
+  .prose p { margin: 0 0 var(--s1); }
+  .prose ul { margin: 0 0 var(--s1); padding-left: 20px; }
+  .fig { min-height: 160px; border: 2px dashed var(--ink-3); border-radius: 8px; background: var(--fill);
+         padding: var(--s2); font-size: 14px; color: var(--ink-2); display: flex; flex-direction: column; gap: var(--s1); min-width: 0; }
+  .fig .kind { font: 600 11px var(--mono); letter-spacing: .04em; text-transform: uppercase; color: var(--ink); }
+  .fig pre { margin: 0; font: 12px/1.45 var(--mono); color: var(--ink); overflow-x: auto; background: var(--panel);
+             border: 1px solid var(--line); border-radius: 4px; padding: var(--s1); }
+  .wide { grid-column: 1 / -1; }
+  .check { border-left: 3px solid var(--accent); padding: var(--s1) var(--s2); background: var(--panel); margin-top: var(--s1); font-size: 14px; }
+  .check .kind { font: 600 11px var(--mono); text-transform: uppercase; color: var(--accent); }
+  .check ol { margin: var(--s1) 0; padding-left: 24px; }
+  .check li { margin-bottom: 4px; }
+  .check .ans { font-weight: 600; }
+  .check .fb { color: var(--ink-2); }
+  table { width: 100%; border-collapse: collapse; font-size: 14px; }
+  th, td { text-align: left; padding: var(--s1); border-bottom: 1px solid var(--line); vertical-align: top; }
+  th { font: 600 12px var(--mono); color: var(--ink-2); }
+  .needs-user { color: var(--warn); font-weight: 600; }
+  .license { color: var(--ok); }
+  .warn { color: var(--warn); }
+  @media (max-width: 720px) { .seg { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body>
+<div class="bar">
+  <b>MOCKUP</b><span>Ch 3 · Many containers, many machines</span><span class="sp"></span>
+  <button type="button" id="vw-desk" aria-pressed="true">desktop</button>
+  <button type="button" id="vw-mob" aria-pressed="false">mobile 360</button>
+</div>
+<main>
+  <section id="overview">
+    <h1>Many containers, many machines: the orchestration problem</h1>
+    <p class="meta">For a somewhat technical manager (novice for infrastructure) · about 15 minutes of the reader's time (planned 14.75; expect ~16 built) · narrative article with one three-phase hands-on widget, two figures, six checks · Chapter 3 of 15</p>
+    <div class="panel">
+      <p><b>Shape:</b> The reader does Sam's job by hand first: place nine containers on four machines, survive a 3 a.m. failure, update a service without downtime. Then they list the jobs they did. Only then do the jobs get their costs (o-2), the software that does them gets a name (orchestrator, cluster), and Kubernetes appears, late and on purpose. Docker is placed last, against the layer the reader now has words for. Rejected: a free sandbox (the reader could skip the failure, and the debrief would have nothing to point at), scrollytelling (watching Sam instead of being Sam), and a fourth scaling phase (about 1 minute; Ch 8's ground).</p>
+      <p><b>Minutes:</b> s-01 2.0 · widget 4.75 (phase 1 1.25, phase 2 1.5, phase 3 1.0, debrief 1.0) · s-03 2.0 · s-04 2.0 · s-05 1.0 · s-06 1.75 · s-07 1.25 · <b>total ≈ 14.75</b>. The widget is the overrun risk; the cut order recovers about 1.5 min (items 1–4) or 2.5 (1–6).</p>
+      <p><b>Objectives:</b></p>
+      <ul>
+        <li><b>o-1</b> List the coordination jobs that appear once many containers run on many machines (placing, restarting, replacing, connecting, updating, scaling), having done several by hand. <span class="meta">checks: k-01, k-02</span></li>
+        <li><b>o-2</b> Explain how each job shows up as a business symptom (3 a.m. pages and burnout, idle spend, release days run from a group chat, a spreadsheet that drifts). <span class="meta">checks: k-03, k-06</span></li>
+        <li><b>o-3</b> Explain what an orchestrator is (does those jobs continuously, across a cluster), name Kubernetes as one and place it in history, and say how Docker relates to it (m-02). <span class="meta">checks: k-04, k-05, k-06</span></li>
+      </ul>
+      <p><b>Misconceptions:</b> m-02 (owned, s-06 + k-05); m-23 (retrieved, k-01); local-03 "an orchestrator is a fancier deploy script" (k-04); local-01 "Kubernetes is Borg open-sourced" (s-05, k-06 B). local-02 "enough free room in total means it fits" is designed out of the widget and recommended to Ch 5.</p>
+      <p><b>New terms, in order of arrival:</b> orchestration, orchestrator, cluster (s-04), Kubernetes (s-05). Jobs stay in plain words. No node, pod, scheduler, pending, rolling update, desired state, Service or replica anywhere.</p>
+      <p class="meta">check_plan: PASS, no warnings. Info: c-03 (fragmentation) unused, listed in the cut list.</p>
+    </div>
+  </section>
+
+  <section id="segments">
+    <h2>Segments</h2>
+    <p class="meta">Prose is draft wording: it shows what each segment says and in what order. The final prose is written for the reader at build time. Check prompts, options and answers are final.</p>
+
+    <article class="seg" id="hero">
+      <header>
+        <span class="id">hero</span><h3>Hero</h3><span class="tag">~0.25 min</span>
+      </header>
+      <div>
+        <div class="prose">
+          <p>Kicker: <code>CHAPTER 03 · Part I · Fennel, year 2</code>. Title as above. Meta row: 15 MIN READ.</p>
+          <p>Standfirst (draft): “A year on, Fennel’s app is four services on eight machines, and Sam is the one who keeps them running, often at 3 a.m. You’ll do Sam’s job by hand, list the jobs it’s made of, and then meet the software built to do them.” No “Kubernetes” here; the name arrives in §05.</p>
+          <p>ToC: rail on desktop, collapsed “Contents” on mobile (seven sections).</p>
+        </div>
+      </div>
+      <div class="fig"><span class="kind">no figure</span>Control Plane hero on blueprint ground, as Ch 1 and Ch 2.</div>
+    </article>
+
+    <article class="seg" id="s-01">
+      <header>
+        <span class="id">s-01 · § 01</span><h3>Year 2: eight machines and a spreadsheet</h3>
+        <span class="tag">retrieval → story</span><span class="tag">o-1 o-2</span><span class="tag">~1.75 min</span>
+      </header>
+      <div>
+        <p class="intent">Retrieve Ch 2’s open question (what happens when the machine dies), then set Year 2’s scene as a manager sees it, before any new idea.</p>
+        <div class="check">
+          <div class="kind">RETRIEVE · Check 01 / 06</div>
+          Last chapter ended on a question. A year later, Fennel runs its containers on eight machines. At 3 a.m. one of those machines dies for good. What happens to the containers that were running on it?
+          <ol type="A">
+            <li class="ans">They stop with the machine, and stay stopped until someone starts each one again on another machine. (key)</li>
+            <li>They start again on one of the other seven machines within seconds, since each can be re-created from its image. (m-23)</li>
+            <li>They carry on running, because each container is walled off from the machine underneath it.</li>
+          </ol>
+          <p class="fb">A: “Right. A container is a process on one machine, so it stops with that machine. Nothing in an image or a container notices, picks another machine and starts it there. Someone has to.” B: “Half right. Starting a container from its image is quick once the new machine has downloaded that image. But nothing in an image or a container notices the machine died, picks another one and starts them there. Someone has to.” C: “The walls are between containers, not between a container and its machine. When the machine goes, so does everything running on it.” All end: “At Fennel, that someone is Sam.”</p>
+        </div>
+        <div class="prose">
+          <p>“Year 2. Fennel’s one app is now four services: <code>storefront</code> (the site and app customers use), <code>orders</code>, <code>payments</code> and <code>dispatch</code> (which assigns drivers). Each runs as one or more copies, each copy a container, on about eight rented machines. Which container runs where lives in a spreadsheet Sam keeps.”</p>
+          <p>What Jordan sees, as events: Sam paged at 3 a.m. twice this month; release days start with Sam’s team-chat message, “Nobody deploy anything, I’m updating storefront”; the spreadsheet was wrong the last time it mattered; Morgan, reading the bill, asks why Fennel pays for eight machines when half look mostly idle.</p>
+          <p>Hand-off: “Morgan’s question is a fair one. Try it: here are Fennel’s containers and four machines.” No numbers for pages, hours or utilization.</p>
+        </div>
+      </div>
+      <div class="fig"><span class="kind">no figure</span>Text only. At 360px the options are full-width buttons.</div>
+    </article>
+
+    <article class="seg" id="s-02">
+      <header>
+        <span class="id">s-02 · § 02</span><h3>Run the machines yourself</h3>
+        <span class="tag">by hand, 3 phases + debrief</span><span class="tag">o-1</span><span class="tag">~4.75 min</span>
+      </header>
+      <div>
+        <p class="intent">The reader does Sam’s job by hand (placing, restarting, replacing, connecting, updating), feels where each one bites, then lists the jobs. The six jobs get their names only after the reader has done them.</p>
+        <div class="prose">
+          <p>Two lead-in sentences, then the widget. No prose after it: the debrief inside the widget ends the section.</p>
+          <p><b>Why these numbers:</b> 4 machines × 6 room units; 9 containers = 14 units, so about half the room is free (the idle picture). The sizes guarantee no phase can dead-end and no container ever “fits nowhere” (that puzzle is Ch 5’s). In phase 3 there is never room for all three new copies at once, which nudges “start new, then stop old” without the page teaching it.</p>
+          <p><b>Chosen by rule, so the story always works:</b> the 02:51 crash hits a dispatch copy on a machine that stays up; the 03:04 failure hits whichever machine the reader put <code>orders</code> on, so orders always goes DOWN.</p>
+        </div>
+        <div class="check">
+          <div class="kind">EXPLAIN · think, then reveal · Check 02 / 06 · inside the widget, debrief</div>
+          You just ran four of Fennel’s machines by hand. How many different kinds of job did you do, and what would you call each one? Settle on your list, then show it.
+          <p class="fb">Model answer (revealed in place, with the reader’s own evidence from the log; the numbers here are one example run): 1 <b>Placing</b>, “You placed 9 containers on 4 machines.” 2 <b>Restarting</b>, “You restarted dispatch on machine 02. The machine was fine, so it stayed put.” 3 <b>Replacing</b>, “Machine 03 died at 03:04; you started its 3 containers somewhere else.” 4 <b>Connecting</b>, “You passed on 15 new addresses.” 5 <b>Updating</b>, “You swapped storefront’s three copies to v13, and the site never went down.” 6 <b>Scaling</b>, “You didn’t do this one. storefront runs three copies because Friday’s dinner rush needs them. Adding copies when traffic climbs and removing them after, every week, is the sixth job.” Then: “The spreadsheet is 5 rows behind.” Then: “Real teams add more: noticing a container that’s running but stuck, handing each container its settings and passwords, watching all of it. Later chapters cover those.” Under the list: “If your list was shorter, the usual misses are restarting vs. replacing (one stays on its machine, one has to move) and connecting, which rode along with every move.”</p>
+        </div>
+      </div>
+      <div class="fig">
+        <span class="kind">WIDGET · w-fleet · W-01 Four machines, by hand · complexity high</span>
+        Reuses Ch 2’s container chip and machine frame (<code>.cp-ctr</code>, <code>.cp-machine</code>), adding chip <b>size</b>: chip height = size × 44px. Dashed “N FREE” region = free room and the tap target. One tap places the next container. Tap a placed chip for Move / Restart / Stop. Status is always word plus colour. “Start over” is always there.
+<pre>W-01 · FOUR MACHINES, BY HAND             [Start over]
+PHASE 1 / 3 · PLACE THEM
+Morgan's question: Fennel pays for eight machines,
+and half look mostly idle. Could four do the work?
+Put each container on a machine with room for it.
+
+NEXT · orders · needs 3 ■■■
+then: payments, dispatch, storefront … (5 more)
+
+MACHINE 01·UP  MACHINE 02·UP  MACHINE 03·UP  MACHINE 04·UP
+┌──────────┐  ┌──────────┐  ┌──────────┐  ┌──────────┐
+│storefront│  │storefront│  │┄┄┄┄┄┄┄┄┄┄│  │┄┄┄┄┄┄┄┄┄┄│
+│  v12     │  │  v12     │  │┄ 6 FREE ┄│  │┄ 6 FREE ┄│
+│ NEW ADDR │  │ NEW ADDR │  │┄┄┄┄┄┄┄┄┄┄│  │┄┄┄┄┄┄┄┄┄┄│
+│┄┄┄┄┄┄┄┄┄┄│  │┄┄┄┄┄┄┄┄┄┄│  │┄┄┄┄┄┄┄┄┄┄│  │┄┄┄┄┄┄┄┄┄┄│
+│┄ 4 FREE ┄│  │┄ 4 FREE ┄│  │┄┄┄┄┄┄┄┄┄┄│  │┄┄┄┄┄┄┄┄┄┄│
+└──────────┘  └──────────┘  └──────────┘  └──────────┘
+(after all 9 placed)   [Pass on the addresses (9)]
+→ all RUNNING · pills appear:
+  storefront 3·UP  orders 1·UP  payments 2·UP  dispatch 3·UP
+  SPREADSHEET · 9 rows to fill in   [Update the spreadsheet]
+"Nine containers on four machines, and about half
+ the room still free. Fennel pays for eight."
+                          [Next: Saturday, 02:51]
+
+PHASE 2 / 3 · SATURDAY, 02:51
+"Sam's phone buzzes: a dispatch copy on machine 02
+ has crashed. The machine itself is fine."
+  dispatch chip: CRASHED → tap → [Restart] → RUNNING
+"Restarted where it was. Back to sleep?" [Back to bed]
+03:04 · MACHINE 03 · DOWN  (dashed frame)
+  its chips: orders LOST · storefront LOST · payments LOST
+  orders 0·DOWN — "Customers can't place orders."
+NEXT · orders · needs 3   (fresh copies of the lost ones)
+  … reader re-places them → each NEW ADDR …
+"orders is running on machine 01, but storefront is
+ still sending orders to machine 03."
+                    [Pass on new addresses (3)]
+"Back up. Each container had to be pulled onto its
+ new machine if it wasn't there already, started,
+ and its new address passed on. The room you'd left
+ free is what made space for them."
+"The spreadsheet still says machine 03."
+                        [Next: Tuesday's release]
+
+PHASE 3 / 3 · TUESDAY'S RELEASE
+"storefront v13 is ready. Sam posts in the team chat:
+ 'Nobody deploy anything, I'm updating storefront.'
+ Replace all three v12 copies with v13, without the
+ site going down."
+NEXT · storefront v13 · needs 2   (×3; room for one
+ at a time)
+  tap a v12 chip → [Stop this copy]
+  storefront pill shows serving count, UP / DEGRADED / DOWN
+ if it hits 0: "The site went down: with no storefront
+  copy reachable, customers saw an error page."
+                        [Try the update again]
+ success: "Done: three copies on v13, and the site
+  never went down." (+ "At one point only 2 copies
+  were serving…" if so)   [Next: what did you just do?]
+
+DEBRIEF
+ Check 02 (think, then reveal) → [Show the list]
+ → six jobs with your own evidence, spreadsheet line,
+   "and more" line</pre>
+        <b>Desktop (≤ 960px):</b> left column about 280px (pills, NEXT, action bar, buttons, outcome); right, four machine columns of about 150px. Reserves 720px, the tallest state.
+        <b>Mobile 360:</b> one column; the four machines stay side by side (about 75px each), with the NEXT row directly above them, so the next container and every destination fit one screen (about 440px). <code>storefront</code> breaks as “store- / front” on its two-unit chip; size-1 chips show the label and status word only. Each state takes its own height (≈ 860–980px) and scrolls its header into view on change. Chips ≥ 44px; keyboard: free regions and chips are buttons, Escape cancels.
+        <b>Reuse:</b> config-driven (<code>data.js</code>), engine without DOM. Ch 4 auto mode (same 03:04 failure, the system re-places); Ch 5 sizes → requests, WAITING state; Ch 6 automated phase 3; Ch 7 the address bookkeeping; Ch 8 copies and machines over time. Nothing reader-visible added for reuse.
+      </div>
+    </article>
+
+    <article class="seg" id="s-03">
+      <header>
+        <span class="id">s-03 · § 03</span><h3>What the jobs cost</h3>
+        <span class="tag">table → explain → apply</span><span class="tag">o-2</span><span class="tag">~2 min</span>
+      </header>
+      <div>
+        <p class="intent">Tie each job to the symptom a manager sees, and show that the work grows with every service.</p>
+        <div class="prose">
+          <p>“Each job you did shows up somewhere Jordan can see it.” → Fig. 01.</p>
+          <ul>
+            <li><b>Idle machines, honestly:</b> by hand, people keep room free “to be safe” and keep spares, because moving things later is slow and risky, and some of that room is insurance (it saved you at 03:04). Industry estimates have long put a typical one-app-per-server machine at a small fraction of its capacity (a 2014 estimate: about 12–18%, US corporate data centres). No Fennel percentage. How much spare room is right: Ch 5.</li>
+            <li><b>Work that grows with the service:</b> Google’s site reliability engineers call manual, repetitive operations work <i>toil</i>. It grows in step with the service, too much of it burns people out, and they aim to keep it under half of each engineer’s time (Google’s practice, not an industry survey).</li>
+            <li><b>The spreadsheet:</b> Sam’s server notes from Ch 1 again. A hand-kept record of a system that moves every time something fails falls behind. Bridge question: “What if the record were the thing the machines act on, instead of a note about them? Hold that thought for the next chapter.”</li>
+          </ul>
+        </div>
+        <div class="check">
+          <div class="kind">APPLY · Check 03 / 06</div>
+          Next month Fennel adds a fifth service, catalog, with two copies. Nothing else changes, and Sam still does every job by hand. What happens to the work you just did?
+          <ol type="A">
+            <li>Only the release work grows: catalog adds updates to coordinate, but it’s placed once, and 3 a.m. replacing is per machine, not per service.</li>
+            <li class="ans">All of it grows: more containers to place and to restart or replace at 3 a.m., more addresses to pass on, more spreadsheet rows to keep right. (key)</li>
+            <li>Very little grows: catalog runs in containers, so its image carries all it needs, and the machines don’t care how many services there are. (tempting)</li>
+          </ol>
+          <p class="fb">A: “Placing isn’t once: every failure, move and update places things again. And a dead machine takes down every service on it, so more services means more to re-place each time.” B: “Right. Google’s site reliability engineers call this kind of work toil: manual, repetitive, and growing in step with the service. They aim to keep it under half of each engineer’s time, because too much of it burns people out. Each new service adds to Sam’s share.” C: “The image makes catalog easy to run on any machine. It doesn’t pick the machine, notice when that machine dies, or tell storefront where catalog went. Those are the jobs, and each new service adds to them.”</p>
+        </div>
+      </div>
+      <div class="fig">
+        <span class="kind">FIGURE · f-01 · The jobs, from the manager’s chair · static</span>
+        Two-column table in a figure plate. Job names exactly as in the debrief, in mono.
+<pre>JOB          WHAT A MANAGER SEES
+placing      machines kept half-empty "to be safe",
+             plus spares: idle spend
+restarting   someone must notice a crash and act,
+             at any hour: pages
+replacing    a dead machine takes its services down
+             until someone re-places them: 3 a.m.
+             pages, outages, on-call burnout
+connecting   "it's running but nothing can reach it";
+             a spreadsheet that falls behind
+updating     release days run by hand from the team
+             chat: slow, risky releases
+scaling      paying all week for Friday's peak, or
+             scrambling during it
+──────────────────────────────────────────────
+the spreadsheet: not a job of its own; the hand-kept
+record of all six, always a little behind (Ch 1)
+And more: a container that's running but stuck,
+settings and passwords, watching it all. Later chapters.</pre>
+        Caption: “Fig. 01. Each job you did by hand shows up on a manager’s desk, and each grows with every new service and machine.” At 360px: six stacked cards (about 640px).
+      </div>
+    </article>
+
+    <article class="seg" id="s-04">
+      <header>
+        <span class="id">s-04 · § 04</span><h3>Software that does the jobs</h3>
+        <span class="tag">name after meeting → analogy → apply</span><span class="tag">o-3</span><span class="tag">~2 min</span>
+      </header>
+      <div>
+        <p class="intent">Name what the reader now wants (software that does the six jobs, all the time, across machines treated as one pool) as orchestration, an orchestrator and a cluster. Defined by what it does, not how.</p>
+        <div class="prose">
+          <p>“What Sam needs isn’t a faster Sam. It’s software that does the six jobs.”</p>
+          <p>“Doing those jobs automatically, for as long as the containers run, is called <b>orchestration</b>. Software that does it is an <b>orchestrator</b>. It doesn’t just act at release time. At 3 a.m., when a machine dies, it does the job too, with nobody at a keyboard.”</p>
+          <p>“You give an orchestrator a group of machines and tell it how big each container is; it fits them on itself. That group, treated as one pool, is a <b>cluster</b>: the four machines you just ran by hand were one.” How it does all this is the next chapter (one sentence).</p>
+          <p><b>Aside · ANALOGY:</b> “Picture an operations manager for a chain of shops. They roster who works at which shop, cover for anyone who goes home sick, move a flooded shop’s staff to the others, keep head office told who is where, bring in a new procedure without closing a shop, and call in extra staff for the Saturday rush. An orchestrator is that job, done by software, around the clock, across a pool of machines.” <b>WHERE THIS ANALOGY BREAKS:</b> “A real manager uses judgement. They notice when something is off, and ask why the same person keeps going home sick. An orchestrator follows its rules, with no judgement: it will keep restarting an app that’s broken. And don’t picture one boss handing out every order. The next chapter shows how the work is really divided up.”</p>
+        </div>
+        <div class="check">
+          <div class="kind">APPLY · Check 04 / 06</div>
+          Riley says: “So an orchestrator is basically a smarter deploy script.” What does that picture leave out?
+          <ol type="A">
+            <li>That it builds the images too, so the deploy script and the image-building step can both be retired.</li>
+            <li>That it only watches: it pages Sam sooner when a machine dies, while the moving is still done by hand.</li>
+            <li class="ans">That it keeps working between releases: restarting, replacing and re-placing containers at 3 a.m., with nobody at a keyboard. (key; local-03 is the prompt)</li>
+          </ol>
+          <p class="fb">A: “An orchestrator runs images; it doesn’t build them. Building stays with your build tools; more on that in a moment.” B: “Watching is part of it, but it does the jobs too: it starts the replacements itself.” C: “Right. A deploy script runs when someone releases, then stops. The jobs that cost Sam sleep happen between releases. An orchestrator keeps doing them all the time. How it does that is the next chapter.”</p>
+        </div>
+      </div>
+      <div class="fig"><span class="kind">no figure</span>The cluster is pointed back to (the widget’s four machines) and drawn in f-02 in §06. The analogy is a <code>.cp-aside</code> with its breaks line inside.</div>
+    </article>
+
+    <article class="seg" id="s-05">
+      <header>
+        <span class="id">s-05 · § 05</span><h3>Its name is Kubernetes</h3>
+        <span class="tag">payoff → history</span><span class="tag">o-3</span><span class="tag">~1 min</span>
+      </header>
+      <div>
+        <p class="intent">Pay off the course’s promise: name Kubernetes after the reader has built its job list, and place it in history accurately.</p>
+        <div class="prose">
+          <p>“This is the name the course has been heading for. The orchestrator this course is about is <b>Kubernetes</b>. It does the six jobs you just did by hand, across a cluster, all the time.”</p>
+          <p>“Google ran its own services in containers for years, on internal systems called Borg and later Omega. It built Borg partly so different kinds of work could share machines, using more of each and cutting costs: Morgan’s question, at Google’s scale.”</p>
+          <p>“You’ll hear that Kubernetes is Google’s Borg, released to the world. Not quite: it was Google’s third such system, built new with lessons from the first two, and open source from the start. Google published it in 2014. At version 1.0, in 2015, it handed it to a new foundation, the Cloud Native Computing Foundation, part of the Linux Foundation, so no single company owns it. By 2024 it had tens of thousands of contributors from thousands of companies.”</p>
+          <p>“It isn’t the only orchestrator (Docker Swarm and Apache Mesos are others; Chapter 14 compares the options). How it does the jobs with nobody at a keyboard is the next chapter. First, the name you’ve heard alongside it.”</p>
+        </div>
+      </div>
+      <div class="fig"><span class="kind">no figure, no check</span>Low-interactivity facts. k-06 option B retrieves the Borg correction at the end.</div>
+    </article>
+
+    <article class="seg" id="s-06">
+      <header>
+        <span class="id">s-06 · § 06</span><h3>Where Docker fits</h3>
+        <span class="tag">predict → figure → explain</span><span class="tag">o-3 · m-02</span><span class="tag">~1.75 min</span>
+      </header>
+      <div>
+        <p class="intent">Deliver Ch 2’s promise. Confront m-02 (same thing, or rivals) by showing two layers that are usually used together.</p>
+        <div class="check">
+          <div class="kind">PREDICT · Check 05 / 06</div>
+          You’ll hear “Docker” and “Kubernetes” in the same breath. Before reading on: how do the two relate?
+          <ol type="A">
+            <li>The same thing under two names: Kubernetes is what Docker grew into once it could run containers on many machines. (m-02)</li>
+            <li class="ans">Different layers, used together: Docker builds images and runs containers on a machine; Kubernetes runs them across many. (key)</li>
+            <li>Rival products for the same job: a team runs its containers on one or the other, much like picking a cloud provider. (m-02)</li>
+          </ol>
+          <p class="fb">A: “They’re separate projects. Docker appeared in 2013 as a tool for building and running containers. Kubernetes came from Google in 2014, to keep containers running across many machines.” B: “Right. Docker works where last chapter lived: build the image, run a container on a machine. Kubernetes works a layer up, keeping many containers running across many machines. Teams usually use both.” C: “Not in the usual sense: most teams use both, Docker to build and Kubernetes to run across machines. The one real rivalry was at the many-machines layer, where Docker’s own orchestrator, Swarm, competed with Kubernetes.”</p>
+        </div>
+        <div class="prose">
+          <p>After the reveal, Fig. 02, then:</p>
+          <ul>
+            <li>“Docker” isn’t one thing but a set of tools: <code>docker build</code> makes the <code>storefront:v13</code> image; <code>docker run</code> starts a container from it on one machine. Ch 2’s world.</li>
+            <li>The image goes to the registry; an orchestrator such as Kubernetes decides which of the cluster’s machines run copies, and keeps them running. Images follow an open standard, so Kubernetes runs them whichever tool built them. Most teams use both.</li>
+            <li>Kubernetes was announced in 2014 at DockerCon, Docker’s own conference. Not rivals in the usual sense; the one overlap is Docker Swarm, which did compete at the many-machines layer.</li>
+            <li>One sentence: since 2022 Kubernetes no longer uses Docker’s own engine inside the cluster, hence “Kubernetes drops Docker” headlines, but Docker-built images run exactly as before.</li>
+          </ul>
+        </div>
+      </div>
+      <div class="fig">
+        <span class="kind">FIGURE · f-02 · Two layers · static, after k-05</span>
+        Ch 2’s Fig. 01 flow, extended to the right. Built in HTML/CSS from Ch 2’s renderers.
+<pre>ONE MACHINE · DOCKER          MANY MACHINES · AN ORCHESTRATOR,
+"builds the image,            E.G. KUBERNETES
+ runs a container"            "keeps containers running
+                               across the cluster"
+┌ MACHINE · RILEY'S LAPTOP ┐        ┌ CLUSTER ─────────────────┐
+│ docker build → image     │ push   │ ┌01┐ ┌02┐ ┌03┐ ┌04┐      │
+│   storefront:v13         │──→ ┌REGISTRY┐ ─pull→ │sf│ │sf│ │or│ │sf│ │
+│ docker run → 1 container │    │sf:v13  │   │pa│ │di│ │di│ │pa│ │
+│ [storefront:v13 RUNNING] │    └────────┘   └──┘ └──┘ └──┘ └──┘ │
+└──────────────────────────┘ "the image: an │ placing · restarting ·   │
+                              open standard"│ replacing · connecting · │
+                                            │ updating · scaling — all │
+                                            │ the time                 │
+                                            └──────────────────────────┘</pre>
+        The job strip is words, not a box above the machines (no “one brain”). Caption: “Fig. 02. Docker works on one machine: build the image, run a container. An orchestrator such as Kubernetes works one layer up, keeping containers running across a cluster. The image passes between them, so teams usually use both.” At 360px it stacks: laptop → push ↓ → registry → pull ↓ → cluster (2×2) → job strip (about 760px).
+      </div>
+    </article>
+
+    <article class="seg" id="s-07">
+      <header>
+        <span class="id">s-07 · § 07</span><h3>The conversation</h3>
+        <span class="tag">apply → recap → bridge</span><span class="tag">o-2 o-3</span><span class="tag">~1.25 min</span>
+      </header>
+      <div>
+        <p class="intent">Rehearse the discussion move: answer “We should move to Kubernetes” with the question that ties the platform to the jobs that hurt.</p>
+        <div class="check">
+          <div class="kind">APPLY · Check 06 / 06</div>
+          At the planning meeting, after another 3 a.m. page, Sam says: “We should move to Kubernetes.” What’s the most useful thing Jordan can ask?
+          <ol type="A">
+            <li class="ans">“Which of these jobs is hurting us most today, and is that worth the cost of the platform?” (key)</li>
+            <li>“Google built it and runs on it. Can we simply copy the way Google sets it up?” (local-01)</li>
+            <li>“How long would the move take, and can we finish it before the holiday rush?” (skips the decision)</li>
+          </ol>
+          <p class="fb">A: “Right. It ties the platform to pain you can name (3 a.m. replacing, idle machines, release days run from the chat) and asks whether fixing that is worth what the platform costs.” B: “Kubernetes was Google’s third system, built new and open source, not the one Google ran its own services on (as of 2016, that was still Borg). And Fennel isn’t Google: what pays off at Google’s size may not at Fennel’s.” C: “A fair planning question, but it skips the decision. Before ‘how long’, ask ‘what for’: which jobs hurt, and is fixing them worth the cost?”</p>
+        </div>
+        <div class="prose">
+          <p>“Chapter 14 is where the cost side of that question gets answered.”</p>
+          <p><b>In short</b> (recap box, three lines):</p>
+          <ul>
+            <li>Once many containers run on many machines, someone has to place them, restart and replace them, connect them, update them and scale them. By hand, that someone is Sam, at 3 a.m.</li>
+            <li>Each job lands on a manager’s desk: pages and burnout, idle machines, release days run from the team chat, and a spreadsheet that’s always behind.</li>
+            <li>An orchestrator does those jobs all the time, across machines treated as one pool, a cluster. Kubernetes is one, built from Google’s experience and now a community project. Docker builds and runs the containers it keeps going.</li>
+          </ul>
+          <p>Bridge: “Next: Fennel moves to Kubernetes, the same machine dies at 3 a.m., and nobody wakes up. The next chapter is how.”</p>
+          <p>Footer: sources list; “Fennel, its people, services, versions and incidents are fiction.”</p>
+        </div>
+      </div>
+      <div class="fig"><span class="kind">no figure</span>Check, recap box (<code>.cp-recap</code>), closing line, sources footer.</div>
+    </article>
+  </section>
+
+  <section id="cuts">
+    <h2>Cut list (researched, deliberately left out)</h2>
+    <table>
+      <thead><tr><th>What</th><th>Why it's out</th><th>Cost to add back</th></tr></thead>
+      <tbody>
+        <tr><td>Fragmentation: “fits nowhere though there’s room in total” (c-03, x-01, local-02)</td><td>Turns the 3 a.m. phase into a packing puzzle when the reader should be noticing jobs. It only appears for some layouts, and Ch 5 owns it. The widget’s sizes rule it out. c-03 is the only unused claim.</td><td>Re-size the widget, add a WAITING state and a predict check: about 1 min. Recommended for Ch 5.</td></tr>
+        <tr><td>A scaling phase (the Friday rush)</td><td>About 1 min, and a time axis Ch 8 owns. Named in the debrief instead.</td><td>A fourth phase, data only: about 1 min.</td></tr>
+        <tr><td>About a dozen containers → nine</td><td>Four machines side by side at 360px, with honest sizes, and every phase guaranteed to finish.</td><td>Data only, but it breaks the guarantees.</td></tr>
+        <tr><td>A recovery clock in phase 2</td><td>No sourced recovery or page figures; invented minutes would read as claims.</td><td>Only with a sourced figure.</td></tr>
+        <tr><td>Editable spreadsheet panel</td><td>Typing friction and width at 360px. Reduced to a rows-out-of-date count plus an optional button.</td><td>About 0.5 min; mobile risk.</td></tr>
+        <tr><td>Per-service chip colours</td><td>Ch 2 draws all containers in c1. Labels and sizes suffice.</td><td>CSS only.</td></tr>
+        <tr><td>Where orders’ data lives when its machine dies</td><td>Ch 2 put data outside the container; state is Ch 10.</td><td>One sentence; not recommended.</td></tr>
+        <tr><td>Rule: spread a service’s copies across machines</td><td>A second rule while placing. It still shows emergently.</td><td>About 0.5 min. Ch 5.</td></tr>
+        <tr><td>Second analogy: ports and shipping lines (extends Ch 2’s)</td><td>One analogy is enough; f-02 shows the layers.</td><td>An aside: about 0.4 min.</td></tr>
+        <tr><td>Docker, Inc.; Docker Desktop’s bundled Kubernetes</td><td>Unsourced; adds a third meaning of “Docker”.</td><td>One clause after sourcing.</td></tr>
+        <tr><td>“K8s”, and “Kubernetes = helmsman”</td><td>Unsourced here. Worth sourcing for chat-reading managers.</td><td>One sentence; suggested for Ch 4.</td></tr>
+        <tr><td>Kubernetes timeline figure</td><td>Prose carries it; Borg’s dates aren’t in the facts.</td><td>Small figure: about 0.3 min.</td></tr>
+        <tr><td>Exact contributor figure (88,000 / 8,000+)</td><td>Dates fast; hedged instead.</td><td>One clause.</td></tr>
+        <tr><td>Nomad, AWS ECS; “not a PaaS”; release cadence</td><td>Unsourced, or Ch 14’s scope.</td><td>Ch 14.</td></tr>
+        <tr><td>Health checks, settings and secrets, monitoring</td><td>Ch 6/12, Ch 9, Ch 12. An “and more” line only.</td><td>Later chapters.</td></tr>
+        <tr><td>Choreography vs. central orchestration; per-container ports</td><td>Ch 4 (m-03) and Ch 7 background.</td><td>Ch 4, Ch 7.</td></tr>
+        <tr><td>“30% of servers comatose”; toil 33% / 80%; DORA</td><td>Unverified, redundant, or not fetched.</td><td>After verification / Ch 6.</td></tr>
+        <tr><td>Follow-up think-then-reveal after k-06</td><td>Ch 14 answers the cost side.</td><td>About 0.75 min.</td></tr>
+      </tbody>
+    </table>
+
+    <h2>If it runs long (in the plan now; cut in this order)</h2>
+    <p class="meta">The prose is written at whatever length clarity needs. If the built page runs long, you pick cuts from here. Items 1–4 recover about 1.5 min; items 1–6 about 2.5 min.</p>
+    <table>
+      <thead><tr><th>#</th><th>Cut</th><th>What the reader loses</th></tr></thead>
+      <tbody>
+        <tr><td>1</td><td>The 2022 runtime sentence in s-06 (c-12)</td><td>Why “Kubernetes drops Docker” headlines happened. ~0.2 min</td></tr>
+        <tr><td>2</td><td>Phase 1 pre-places 4 containers (orders, both payments); the reader places 5</td><td>Some of the felt tedium of placing; the job is still done by hand. ~0.4 min</td></tr>
+        <tr><td>3</td><td>k-04 → one sentence in s-04</td><td>The commitment on local-03 (the definition still says it). ~0.5 min</td></tr>
+        <tr><td>4</td><td>f-02 → prose only</td><td>The picture of the two layers; k-05 and the prose keep m-02. ~0.4 min</td></tr>
+        <tr><td>5</td><td>The utilization sentence in s-03 (c-04)</td><td>The industry anchor for idle spend; the honest “padding plus insurance” stays. ~0.25 min</td></tr>
+        <tr><td>6</td><td>k-03 → think-then-reveal</td><td>The commitment against “containers solved it”. ~0.25 min</td></tr>
+        <tr><td>7</td><td>Phase 3 updates two copies (storefront becomes 2 copies)</td><td>Some repetition, and the nudge toward start-then-stop weakens. ~0.25 min</td></tr>
+        <tr><td>8</td><td>Analogy A1 (s-04)</td><td>The chapter’s only management analogy (§2.1). Cut last. ~0.4 min</td></tr>
+      </tbody>
+    </table>
+    <p class="meta">Never cut: k-01, w-fleet phases 1–3 and the debrief, f-01, s-05’s naming, k-05 and the Docker placement, k-06 and the recap. If the build runs over about 17.5 min even after these, split rather than compress: move §06 (Docker) to the start of Ch 4.</p>
+  </section>
+
+  <section id="assets">
+    <h2>Third-party assets</h2>
+    <table>
+      <thead><tr><th>#</th><th>Asset</th><th>Used in</th><th>Licence</th><th>Clearance</th></tr></thead>
+      <tbody>
+        <tr><td>—</td><td>No third-party assets. Every figure and the widget are drawn in HTML/CSS/SVG from the Control Plane tokens; Ch 2’s chip and machine styles are this course’s own code.</td><td>—</td><td class="license">n/a</td><td>nothing to clear</td></tr>
+      </tbody>
+    </table>
+    <p class="meta">No third-party assets.</p>
+  </section>
+</main>
+<script>
+  const d = document.getElementById('vw-desk'), m = document.getElementById('vw-mob');
+  function set(mobile) {
+    document.body.classList.toggle('mobile', mobile);
+    d.setAttribute('aria-pressed', String(!mobile)); m.setAttribute('aria-pressed', String(mobile));
+  }
+  d.onclick = () => set(false); m.onclick = () => set(true);
+</script>
+</body>
+</html>

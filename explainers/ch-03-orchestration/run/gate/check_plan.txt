@@ -1,0 +1,13 @@
+segments:
+  s-01   Year 2: eight machines and a spreadsheet
+  s-02   One week of Sam's job
+  s-03   What the jobs cost
+  s-04   Software that does the jobs
+  s-05   Its name is Kubernetes
+  s-06   Where Docker fits
+  s-07   The conversation
+objectives: 3 · segments: 7 · reader's time: 15 min
+widgets: w-fleet-scrolly (high)
+checks: 9 · acceptance criteria: 18
+info  claims not used by any segment: c-03 (should appear in cut-list.md)
+RESULT: PASS

@@ -37,6 +37,7 @@ This is the course bible and chapter plan. Each chapter is built in its own dida
 8. **Every chapter opens with retrieval.** One or two quick questions on earlier chapters, preferably ones that need the loop lens. Later chapters mix in items from several earlier chapters. Ch 1 has no retrieval opener; a pre-question may take its place.
 9. **Confront misconceptions from the catalog (§6).** Each chapter owns the misconceptions assigned to it. State each one fairly, show a case where it predicts wrongly, then give the correct model.
 10. **Sizing.** There is no fixed time budget. Each chapter is sized in ideas, aiming for 3–5 objectives. Set `time_budget_minutes` at intake for each run, based on the chapter's objectives. If a chapter plans out too big, split it rather than compress it. Designers give an honest minutes table per part (including widget time) in the plan's `## Shape`, so overruns show at the checkpoint.
+11. **Friendly to readers who jump ahead.** From Ch 3 on (Ch 2 is being brought in line), every chapter opens with a one-line cast strip of the characters it uses and a collapsed "I didn't read the last chapter. What happened?" disclosure, before the retrieval check. (User's Ch 2 review.)
 
 ---
 
@@ -55,6 +56,7 @@ Every chapter takes place at a point on Fennel's timeline. Later chapters can re
 
 - **Ch 1, the Friday disk outage (Year 0):** the dinner rush fills the disk with logs; it hits 100% at 18:12 and orders fail; Sam is at dinner across town; orders go through again at 20:10. Afterwards Sam sets up, by hand, a nightly 23:00 job that deletes old logs. Sam's server notes were written at setup and last edited 14 months before the outage. Things added by hand and never written down: the photo-resizing tool (May, when product photos launched), the email provider's key (August, when order emails launched), and a web-server setting from a holiday sale that nobody, Sam included, can explain. Rebuilding from the notes produces a server where photo upload and confirmation email fail and the log clean-up is silently missing.
 - **Ch 2, "works on my machine" (Year 1):** production runs on one rented machine, plus a staging machine. The photo-resizing tool is 6.2 in production and 7.0 on Riley's laptop; Riley's change works on the laptop and fails in production ("can't reproduce"). Sam's first image is `fennel-app:v42` (with 6.2), so the failure shows on the laptop before release; Riley's `v43` (with 7.0) passes on both. One Saturday night Riley hand-fixes photo uploads inside a running production container; Tuesday's release replaces the container and the fix vanishes.
+- **Ch 3, many containers, many machines (Year 2):** four services (`storefront`, `orders`, `payments`, `dispatch`) on about eight rented machines, with "what runs where" in Sam's spreadsheet. Copies and sizes in room units (machines hold 6): storefront 3 × 2, orders 1 × 3, payments 2 × 1, dispatch 3 × 1. Morgan asks: "We pay for eight machines and half look mostly idle. Could four do it?" On Monday Sam moves everything onto machines 01–04 (01: storefront ×2 + payments; 02: storefront + dispatch ×2; 03: orders + dispatch; 04: payments); the other four sit empty as spares Fennel still pays for ("the spare room is for when something breaks"). Saturday: a dispatch copy crashes at 02:51 and Sam restarts it in place; at 03:04 machine 03 dies, and orders is down until Sam starts `orders` on 04 (the only running machine with room), the lost dispatch copy on 02, and passes on the new addresses; the spreadsheet still says machine 03. Tuesday: with Sam's team-chat message "Nobody deploy anything, I'm updating storefront", storefront goes v12 → v13 in three rounds of start-one, stop-one, using the spare room (first on 04, then twice on 01). Ch 4's "same 3 a.m. failure" should reuse machine 03 at 03:04.
 
 ### Timeline
 
@@ -122,7 +124,7 @@ A term is introduced in the listed chapter and may be used freely afterward. A c
 | server / machine, process, deploy, dependency, "snowflake" server, (configuration) drift, runbook, single point of failure | 1 | Machine = outlined frame with a mono `MACHINE · NAME` bar; the code row in `c1`; other contents as `c2` rows grouped RUNTIME / LIBRARIES & TOOLS / CONFIG / DISK & DATA; clutter and unknowns in `c6` dashed; status as word + colour (PRESENT, MISSING, UNKNOWN, PASS, FAIL, IDENTICAL). Two machines compared row by row (`w-rebuild` stage 4; content in `site/widgets/w-rebuild/data.js`). Incident timeline as a data-driven list with a status band (f-01, `CH01_OUTAGE_TIMELINE` in `assets/page.js`). |                                           |
 | virtual machine (VM), briefly                                                                                          | 1       |                                           |
 | container, image, registry, immutability, (operating system) kernel, briefly | 2 | Extends Ch 1. Image = frame in `c1` stroke on `c1-soft` with a mono `IMAGE · fennel-app:v42` header holding its rows; compact form a chip with no lamp. Container = the same chip plus a square lamp and RUNNING, inside a machine frame (Ch 1's process row, packaged). Registry = frame with a `REGISTRY` bar holding a vertical stack of image chips, older versions at reduced opacity. Kernel = full-width `c2` band `OS KERNEL`, `SHARED BY ALL` under containers; per-VM "whole OS + kernel" inside each `VM` frame. Comparison markers SAME (`good`), DIFFERENT (`warn`), IDENTICAL; mono uppercase band labels spanning both machine columns (INSTALLED BY HAND…, IN THE IMAGE…, NOT IN THE IMAGE). Reusable chips `.cp-machine` / `.cp-img` / `.cp-ctr` in Ch 2's `assets/page.css`; f-01 drawn from `CH02_REGISTRY` / `CH02_MACHINES` in `assets/page.js`. |
-| orchestration, orchestrator, Kubernetes (by name), cluster                                                             | 3       |                                           |
+| orchestration, orchestrator, Kubernetes (by name), cluster                                                             | 3       | Extends Ch 2. Container chip height = size in room units (40px per unit on desktop, 28px under 600px; all chips `c1`, told apart by label). Machine body fixed at capacity, unused room one dashed `c6` region `N FREE`. DOWN machine = dashed `ink-3` frame, bar `DOWN` in `bad`, chips kept at reduced opacity marked LOST. Container status words RUNNING (`good`), CRASHED, LOST (`bad`), NEW ADDR (`warn`: running, callers not told), STOPPED (removed next step); where a word doesn't fit, RUNNING is left unmarked (never a lamp alone). Service pills `orders 1 · UP` with UP / DEGRADED / DOWN; a pill can be held as "?" until a check is committed. Connection note line (`storefront → orders: machine 04`) and stale-record note (`SPREADSHEET · …`). Step highlight = 3px ink outline for one step. `CLUSTER` frame = 3px `ink` stroke around machine frames (f-02, static page CSS, not the renderer). Term card `.cp-term`, payoff variant on blueprint ground. Scrollytelling lanes per §8 step 6. Renderer `renderFleet` and complete per-step snapshots in Ch 3's `site/widgets/w-fleet-scrolly/` (`data.js` documents the format) for later chapters to copy. |
 | node, pod, desired state, declarative vs. imperative, reconcile loop / controller, control plane, API server, manifest | 4       |                                           |
 | replica set (lightly), self-healing                                                                                    | 4       |                                           |
 | scheduler, requests, limits, bin packing, node pool, pending, eviction, OOM-killed                                     | 5       |                                           |
@@ -168,6 +170,9 @@ Each misconception is owned by one chapter, which confronts it. Later chapters m
 | m-22 | "With VMs we can recreate the server any time." A snapshot copies the snowflake, cruft and all; it doesn't explain it | 1     |
 | m-23 | "Once everything is containerized, a machine failure is no longer a problem." Containers run on one machine; when it dies, so do they, until something re-creates them elsewhere (Ch 3–4). Container-level precursor of m-05 | 2     |
 | m-24 | "If an image passed in staging, it will behave identically in production." The image is identical; settings, secrets, outside services and processor type can still differ. Ch 9 revisits it | 2 (Ch 9 revisits) |
+| m-25 | "Kubernetes is Google's Borg, open-sourced (and what Google runs on), so it's right for us." It is Google's third system, built new and open source from the start; the "good enough for Google" leap is Ch 14's question | 3 (Ch 14 revisits) |
+| m-26 | "If our machines have enough free room in total, a new or moved container will fit somewhere." Free room split across machines can't hold one large container. Ch 3 designs it out on purpose | 5 |
+| m-27 | "An orchestrator is a fancier deploy script: it puts containers on machines when we release." It keeps working between releases. Ch 3 confronts the what; Ch 4 explains the how (rhymes with m-04) | 3 (Ch 4 revisits) |
 
 ---
 
@@ -219,18 +224,18 @@ Each entry is a draft brief. At intake, the didactician orchestrator should copy
 
 - **Fennel moment:** Year 2. Fennel has split into `storefront`, `orders`, `payments` and `dispatch`, running across about 8 machines. A spreadsheet says what runs where. Sam gets paged at 3 a.m. when a machine dies and moves containers by hand. Morgan notices half the machines are mostly idle.
 - **What the manager sees:** on-call burnout; idle spend; deploys coordinated in a group chat; a spreadsheet as the source of truth.
-- **Pain in the page (key widget):** the reader places a dozen containers of different sizes onto 4 machines by hand. Then a machine fails and they re-place its containers. Then a new version has to roll out without downtime. Afterwards they list the jobs they just did: placement, restarting, replacing, connecting, updating, scaling.
+- **Pain in the page (scrollytelling, user decision in Ch 3's run, d-03/d-07):** three scrollytelling lanes over four machines and nine containers of different sizes: Monday's placing, Saturday's 02:51 crash and 03:04 machine failure, Tuesday's update without downtime. The reader makes Sam's three key decisions as committed checks (where `orders` goes now; whether customers can order once it's running again; start-new-first or stop-first), then sorts Sam's chores into the jobs: placement, restarting, replacing, connecting, updating, scaling. (Originally a hands-on placement widget; replaced because tapping was busywork and stepped states added load.)
 - **Ideas:** the work that remains once you have containers is coordination at scale; an _orchestrator_ automates that list of jobs; Kubernetes is named here as one orchestrator, briefly placed in history (it came out of Google's experience with its internal Borg system and is now a community project).
 - **Draft objectives:**
-  - o-1 List the coordination jobs that appear once many containers run on many machines.
+  - o-1 List the coordination jobs that appear once many containers run on many machines, having made the key decisions themselves.
   - o-2 Explain how each job shows up as a business symptom (pages, idle cost, risky deploys).
   - o-3 Explain what an orchestrator is, and why Kubernetes is one. Not the same as Docker.
-- **Misconceptions:** m-02.
+- **Misconceptions:** m-02, m-25, m-27.
 - **Prerequisites:** Ch 1–2.
 - **Out of scope:** how Kubernetes works (Ch 4); alternatives compared in depth (Ch 14).
 - **Retrieval from:** Ch 2 (what containers don't solve). Suggested opener: Ch 2's "the machine running the containers dies at 3 a.m.; what happens?" (m-23).
 - **Docker:** Ch 2 says once "you'll hear the name Docker; the next chapter places it", so this chapter must place Docker alongside m-02.
-- **Widget reuse:** the placement widget should reuse Ch 2's f-01 container chip and machine frame, adding chip size, rather than adapt `w-rebuild` or `w-samecode`.
+- **Visual reuse:** the lanes reuse Ch 2's f-01 container chip and machine frame, adding chip height for size, drawn by a reusable `renderFleet` renderer from complete per-step snapshots (in Ch 3's `site/widgets/w-fleet-scrolly/`).
 - **The conversation:** "We should move to Kubernetes." The question to ask: "Which of these jobs is hurting us most today, and is that worth the cost of the platform?" (Ch 14 gives the full answer.)
 - **Research depth:** light.
 
@@ -256,6 +261,7 @@ _The central chapter of the course. Everything after it uses its model._
 - **Misconceptions:** m-03, m-04, m-05, m-06.
 - **Prerequisites:** Ch 1–3.
 - **Out of scope:** scheduling details (Ch 5); Deployments and rollouts (Ch 6); networking (Ch 7); etcd beyond "the cluster's record."
+- **Picked up from Ch 3:** (a) reuse Ch 3's Monday layout and 03:04 failure of machine 03 as a lane (or a small widget on Ch 3's `renderFleet`) in which the system does what Sam did by hand, after a predict ("machine 03 dies; what happens now?"); (b) suggested retrieval: "which jobs did Sam do at 3:04?" (replacing, connecting); (c) Ch 3's conductor aside promises this chapter shows how the work is split with no single conductor (m-03), and Ch 3 leaves the question "what if the record were the thing the machines act on?", which desired state answers; (d) "K8s" and "Kubernetes means helmsman" are unsourced so far; source them here if wanted. Revisit m-27 (an orchestrator is not a deploy script) through the loops.
 - **Retrieval from:** Ch 3 (the jobs list; which job this solves). Call back Ch 1's question, "If this box vanished tonight, how long until we're back, and who has to be awake?" The answer here, "minutes, and nobody", is the payoff.
 - **The conversation:** "The app keeps crash-looping, but Kubernetes keeps restarting it." The questions to ask: "So Kubernetes is doing its job. What's wrong with the app? And is restarting hiding the problem from us?"
 - **Research depth:** light.
@@ -272,10 +278,11 @@ _The central chapter of the course. Everything after it uses its model._
   - o-1 Explain how requests determine placement, and therefore how many machines you pay for.
   - o-2 Predict the effect of over- and under-requesting resources on cost and reliability.
   - o-3 Interpret "pending" and "OOM-killed" as symptoms and know which questions they raise.
-- **Misconceptions:** m-07, m-08.
+- **Misconceptions:** m-07, m-08, m-26.
 - **Prerequisites:** Ch 4.
 - **Out of scope:** autoscaling (Ch 8); scheduling constraints like affinity and taints, beyond one sentence that they exist.
 - **Retrieval from:** Ch 4 (the loop model), Ch 3 (idle machines).
+- **Picked up from Ch 3:** m-26 with Ch 3's research example x-01 (100 GB free in 10 GB pieces can't take a 20 GB job). This chapter's topic is genuinely system dynamics, so a hands-on sandbox (B2) may earn its place here: build it on Ch 3's `renderFleet` with a WAITING state. Ch 3 promises this chapter counts memory and processor separately, and says "some idle room is insurance; how much is Chapter 5's question": pick up headroom explicitly. Spreading a service's copies across machines is the "one sentence that affinity exists".
 - **The conversation:** "We need to bump memory limits on `orders`." The questions to ask: "Is that a leak or real growth? What does it do to our node count?"
 - **Research depth:** light.
 
@@ -294,6 +301,7 @@ _The central chapter of the course. Everything after it uses its model._
 - **Prerequisites:** Ch 4.
 - **Out of scope:** canary/blue-green in depth (name them); CI/CD tooling; database migrations (Ch 10 touches state).
 - **Retrieval from:** Ch 4 (declare vs. command), Ch 2 (immutable images).
+- **Picked up from Ch 3:** Ch 3's lane C is the by-hand rolling update (start one, add its address, stop one; it needs one copy's worth of spare room). Retrieve it ("in Ch 3, Sam did this by hand") and consider reusing its lane controller and snapshots for this chapter's step-locked rollout. Ch 3 names "noticing a container that's running but stuck" only as a later job; probes deliver it.
 - **Picked up from Ch 2 (cut there for time):** tags vs. digests: a version label like `latest` can be moved to a newer image; only a digest pins one exact image. And old images can be deleted from a registry, so rolling back assumes someone kept them. Both answer "which exact image is in production, and can we go back to it?"
 - **The conversation:** "The rollout passed health checks, so it wasn't the deploy." The question to ask: "What do our health checks actually test? Would they catch wrong behavior, or only crashes?"
 - **Research depth:** light.
@@ -313,7 +321,7 @@ _The central chapter of the course. Everything after it uses its model._
 - **Misconceptions:** m-10.
 - **Prerequisites:** Ch 4. Ch 6 (readiness) helps but isn't required.
 - **Out of scope:** network plugins, IP addressing, TLS details, service mesh internals.
-- **Retrieval from:** Ch 4 (pods are disposable), Ch 6 (readiness).
+- **Retrieval from:** Ch 4 (pods are disposable), Ch 6 (readiness). Ch 3's k-03 ("`orders` is running again; can customers order?", no: storefront still points at the dead machine) is this chapter's hand-written-address pain, already felt once; retrieve it.
 - **The conversation:** "We want a separate load balancer for every service." The question to ask: "What does each one cost? Could one ingress/gateway route to all of them?"
 - **Research depth:** light.
 
@@ -331,7 +339,7 @@ _The central chapter of the course. Everything after it uses its model._
 - **Misconceptions:** m-11.
 - **Prerequisites:** Ch 4, Ch 5.
 - **Out of scope:** vertical autoscaling and event-driven scaling (name them); metrics pipelines.
-- **Retrieval from:** Ch 5 (requests drive node count), Ch 4.
+- **Retrieval from:** Ch 5 (requests drive node count), Ch 4. Ch 3 names scaling but doesn't show it: its chore "kept three storefront copies running all week, because Friday's dinner rush needs three" is this chapter's over-provisioning. This chapter needs a time axis, so probably its own widget, drawing machines with Ch 3's `renderFleet`.
 - **The conversation:** "We'll turn on autoscaling, so we're ready for the holidays." The questions to ask: "How fast do we scale compared with how fast traffic rises? What's the bottleneck after the app: the database, the payment provider?"
 - **Research depth:** light.
 
@@ -353,7 +361,7 @@ _The central chapter of the course. Everything after it uses its model._
 - **Misconceptions:** m-12.
 - **Prerequisites:** Ch 2, Ch 4, Ch 6.
 - **Out of scope:** cryptography; specific secret-manager products.
-- **Retrieval from:** Ch 2 (immutable images), Ch 6 (rollouts). Ch 2 already said settings are handed to a container at start, so one image serves staging and production; point back to it. Revisit m-24.
+- **Retrieval from:** Ch 2 (immutable images), Ch 6 (rollouts). Ch 2 already said settings are handed to a container at start, so one image serves staging and production; point back to it. Revisit m-24. Ch 3 names "handing each container its settings and passwords" only as a later job.
 - **The conversation:** "Credentials are in Kubernetes Secrets, so we're fine for the audit." The questions to ask: "Are they encrypted at rest? Who has read access? Should they live in our cloud's secret manager?"
 - **Research depth:** standard (security defaults vary by provider and version).
 
@@ -408,7 +416,7 @@ _The central chapter of the course. Everything after it uses its model._
 - **Misconceptions:** m-15.
 - **Prerequisites:** Ch 4–8.
 - **Out of scope:** specific observability products; tracing beyond a mention.
-- **Retrieval from:** Ch 4 (crash loops), Ch 6 (probes), Ch 8 (scaling lag).
+- **Retrieval from:** Ch 4 (crash loops), Ch 6 (probes), Ch 8 (scaling lag). Ch 3 names "noticing a container that's running but stuck" and "watching it all" only as later jobs, and its k-03 is an early case of "running is not the same as working" (m-15).
 - **The conversation:** "Root cause: pod restarted, now resolved." The questions to ask: "Why did it restart? How many times before this? Would we have noticed without the customer report?"
 - **Research depth:** light.
 
@@ -450,10 +458,10 @@ _The central chapter of the course. Everything after it uses its model._
   - o-2 Explain why upgrades are ongoing work and how teams plan for them.
   - o-3 Explain the role of a platform team and why most developers shouldn't need deep Kubernetes knowledge.
   - o-4 Argue, for a given company situation, whether Kubernetes is worth it.
-- **Misconceptions:** m-17, m-18, m-08 (revisited).
+- **Misconceptions:** m-17, m-18, m-08 (revisited), m-25 (revisited: "good enough for Google").
 - **Prerequisites:** Ch 1–13.
 - **Out of scope:** vendor-by-vendor comparisons; pricing specifics.
-- **Retrieval from:** Ch 3 (the jobs list), Ch 5 (cost), Ch 13 (ownership cost).
+- **Retrieval from:** Ch 3 (the jobs list), Ch 5 (cost), Ch 13 (ownership cost). From Ch 3: its jobs-to-symptoms figure and its closing question ("Which of these jobs is hurting us most today, and is that worth the cost of the platform?"); m-25; other orchestrators named there only briefly (Docker Swarm, Mesos; Nomad and AWS ECS still unsourced); "Kubernetes doesn't build your application and isn't an all-inclusive PaaS".
 - **The conversation:** "We need two more platform engineers." The questions to ask: "What are they going to automate or own? What's the cost of not doing it: upgrade lag, incidents, developer time?"
 - **Research depth:** standard (recent facts: release cadence, support windows, provider responsibilities).
 
@@ -490,9 +498,16 @@ _The central chapter of the course. Everything after it uses its model._
    - copy `design/control-plane/control-plane.css` to `site/assets/tokens.css` in place of the kit's default tokens; don't invent tokens or hard-code colours;
    - follow `design/control-plane/README.md` (voice, colour rules, type, space, figure and widget conventions) and the token usage notes in `tokens.json`;
    - use the treatments in `design/control-plane/components/` (hero, prose, figure plate, slider widget, check) as the reference for those elements, copying from `components/bundle.css`.
+   - **Term cards (course convention, Ch 3 run d-08):** each chapter's few critical terms get the `.cp-term` card (specified in Ch 3's plan, `## Figures`), not just a `<dfn>`, so terms look alike across chapters. At most one payoff variant (blueprint ground) per chapter.
      The reviewer checks the page against the style guide as part of the UX review.
 5. **Widget height rule (course-wide, user decision in Ch 2's run, d-08).** On screens 600px and wider, a multi-state widget reserves the height of its tallest state, so moving between states never moves the page. Below 600px it does not: each state takes its own height, and on a state change the widget scrolls the new state's header to the top of the viewport. Plans still estimate phone heights honestly. Ch 1's `w-rebuild` predates this rule and still reserves its tallest state on phones; bring it in line in a later pass.
-6. After each chapter ships:
+6. **Scrollytelling for processes (course convention, Ch 3 run d-08).** Show a process over time as scrollytelling lanes, not as a stepped widget or carousel (user's Ch 2 review). Full spec in Ch 3's plan (`w-fleet-scrolly`).
+   - One lane per stage, three to six steps. Desktop: canvas sticky on the left, steps on the right. Under 900px: canvas sticky at the top (≤ 50vh), steps beneath. Under 560px tall: inline snapshots per step.
+   - Each step's canvas state is a complete snapshot, so scrolling back restores it.
+   - Checks sit in the step column, and the step after a check is gated until the reader commits.
+   - Transitions ≤ 300ms, instant under reduced motion, no autoplay.
+   - Any placement or drag interaction a chapter does build must also work by tap and by keyboard.
+7. After each chapter ships:
    - fill in the **Visuals** column of the term ledger;
    - note any change to Fennel's story (new events, numbers, names) in §3;
    - move anything the chapter cut that a later chapter should pick up into that chapter's entry.

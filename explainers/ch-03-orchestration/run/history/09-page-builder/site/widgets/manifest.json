@@ -1,0 +1,16 @@
+{
+  "data_origins": [],
+  "widgets": {
+    "w-fleet-scrolly": {
+      "segment": "s-02",
+      "mount": "[data-widget=\"w-fleet-scrolly\"]",
+      "size": {
+        "desktop": "≥900px: .d-wide (≤960px); three lanes, each a two-column grid: canvas slot ~55% wide, sticky at top var(--sp-4), 420px reserved; step cards ~45%, each ≥40vh",
+        "mobile": "<900px: one column; canvas slot sticky at top, opaque, ≤50vh (min(420px,50vh) at 600–899px, min(316px,50vh) under 600px); steps scroll beneath. Height <560px: canvas hidden, per-step snapshot in [data-step-snap]"
+      },
+      "files": ["data.js", "index.js", "index.css"],
+      "cdn": [],
+      "data_origins": []
+    }
+  }
+}

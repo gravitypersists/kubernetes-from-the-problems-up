@@ -1,0 +1,555 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Many containers, many machines: the orchestration problem</title>
+<meta name="description" content="Chapter 03. A year on, Fennel runs four services in containers across about eight machines, and Sam keeps a spreadsheet of what runs where. One week of Sam’s job shows the work that containers leave over, what it costs a manager, and the name for the software that does it.">
+<link rel="stylesheet" href="assets/tokens.css">
+<link rel="stylesheet" href="assets/components.css">
+<link rel="stylesheet" href="assets/page.css">
+</head>
+<body class="d-body">
+
+<header class="cp-hero cp-blueprint">
+  <div class="cp-hero__inner">
+    <p class="cp-hero__kicker"><span class="cp-hero__idx">CHAPTER 03</span><span class="cp-label">Part I · Fennel, year 2</span></p>
+    <h1 class="cp-hero__title">Many containers, many machines: the orchestration problem</h1>
+    <p class="cp-hero__standfirst">A year on, Fennel runs four services in containers across about eight machines, and Sam keeps a spreadsheet of what runs where. One week of Sam’s job shows the work that containers leave over, what that work costs a manager, and the name for software that does it instead.</p>
+    <dl class="cp-meta">
+      <div><dt>Read</dt><dd>15 MIN</dd></div>
+      <div><dt>For</dt><dd>TECHNICAL MANAGERS</dd></div>
+      <div><dt>Chapter</dt><dd>03 / 15</dd></div>
+      <div><dt>Checks</dt><dd>09</dd></div>
+    </dl>
+  </div>
+</header>
+
+<div class="d-page">
+  <aside class="d-rail" data-toc data-minutes="15"></aside>
+  <main class="d-main" id="main">
+    <details class="d-toc-mobile" data-toc-mobile></details>
+
+    <!-- s-01 · Year 2: eight machines and a spreadsheet · o-1, o-2 · cast strip + D1 (R15 jump-ahead
+         convention) · k-01 retrieval (m-23) · Ch 2 claims 05, 07, 11 by reference · scene is Fennel fiction (d-04) -->
+    <section id="s-01" data-segment="s-01">
+      <h2 id="year-2"><span class="cp-sec">§ 01 </span>Year 2: eight machines and a spreadsheet</h2>
+
+      <div class="cp-cast">
+        <p class="cp-label" id="cast-label">Cast</p>
+        <dl aria-labelledby="cast-label">
+        <dt>Sam</dt><dd>Founding engineer. Built Fennel’s first server and is on call for everything.</dd>
+        <dt>Jordan</dt><dd>Co-founder, now managing the engineers: that’s you, in this story.</dd>
+        <dt>Morgan</dt><dd>Co-founder. Runs the money.</dd>
+        <dt>Riley</dt><dd>Engineer since Year 1.</dd>
+        </dl>
+      </div>
+
+      <details class="d-more cp-more">
+        <summary>I didn’t read the last chapter. What happened?</summary>
+        <div class="cp-more__body">
+          <ul>
+            <li>In Chapter 1, Fennel ran on one server that Sam had built by hand. When its disk filled up during a Friday dinner rush, the site was down for two hours. Rebuilding the server from Sam’s notes then failed, because things had been added to it by hand and never written down.</li>
+            <li>In Chapter 2, Fennel started packing each piece of its software, with everything it needs to run, into an <em>image</em>.</li>
+            <li>A running copy of an image is a <em>container</em>. Many containers can share one machine.</li>
+            <li>When a machine dies, the containers on it stop, and they stay stopped until someone starts them on another machine.</li>
+          </ul>
+        </div>
+      </details>
+
+      <div class="cp-check" role="group" aria-labelledby="k-01-q" data-check="k-01" data-after="At Fennel, that someone is Sam.">
+        <div class="cp-check__head"><span class="cp-chip">RETRIEVE</span><span class="cp-label">Check 01 / 09</span></div>
+        <p class="cp-check__q" id="k-01-q">Last chapter ended on a question. A year later, Fennel runs its containers on eight machines. At 3 a.m. one of those machines dies for good. What happens to the containers that were running on it?</p>
+        <ul class="cp-options">
+          <li><button type="button" class="cp-option" data-ok data-fb="Right. A container runs on one machine, so it stops with that machine. Nothing in an image or a container notices, picks another machine and starts it there. Someone has to."><span class="cp-option__key">A</span><span>They stop with the machine, and stay stopped until someone starts each one again on another machine.</span><span class="cp-option__tag"></span></button></li>
+          <li><button type="button" class="cp-option" data-fb="Half right. Starting a container from its image is quick once the new machine has downloaded that image. But nothing in an image or a container notices the machine died, picks another one and starts them there. Someone has to."><span class="cp-option__key">B</span><span>They start again on one of the other seven machines within seconds, since each can be re-created from its image.</span><span class="cp-option__tag"></span></button></li>
+          <li><button type="button" class="cp-option" data-fb="The walls are between containers, not between a container and its machine. When the machine goes, so does everything running on it."><span class="cp-option__key">C</span><span>They carry on running, because each container is walled off from the machine underneath it.</span><span class="cp-option__tag"></span></button></li>
+        </ul>
+        <div class="cp-feedback" role="status" hidden></div>
+      </div>
+
+      <p>It’s Year 2. Fennel’s app used to be one piece of software. It’s now four <em>services</em>, separate parts that each do one job: <code>storefront</code> (the site and app customers use), <code>orders</code>, <code>payments</code> and <code>dispatch</code> (which assigns drivers). Each service runs as one or more copies, and each copy is a container started from that service’s image. Together they run on about eight rented machines. Sam keeps a spreadsheet that says which container runs on which machine.</p>
+      <p>Jordan doesn’t see containers or machines. Jordan sees four things:</p>
+      <ul>
+        <li>Sam has been woken by a page at 3 a.m. more than once this month.</li>
+        <li>Release days start with a message from Sam in the team chat: “Nobody deploy anything, I’m updating storefront.”</li>
+        <li>The last time anyone needed the spreadsheet in a hurry, it was wrong.</li>
+        <li>Morgan, reading the bill, asks why Fennel pays for eight machines when half of them look mostly idle.</li>
+      </ul>
+      <p>Here is one week of Sam’s job, step by step.</p>
+    </section>
+
+    <!-- s-02 · One week of Sam's job · o-1 · claims c-01, c-02, c-08, c-06 (Ch 2 claims 05, 07 by reference)
+         · w-fleet-scrolly (complexity high; built in widgets/w-fleet-scrolly/) · checks k-02, k-03, k-04 sit in
+         the step column at their gates; k-05 (think, then reveal) and D4 follow lane C -->
+    <section id="s-02" data-segment="s-02">
+      <h2 id="one-week"><span class="cp-sec">§ 02 </span>One week of Sam’s job</h2>
+      <noscript><p class="fs-noscript">The drawings and step text in this section need JavaScript. The rest of the page reads without it.</p></noscript>
+
+      <!--
+        ===== MOUNT CONTRACT · w-fleet-scrolly (page builder ↔ widget builder) =====
+        The page owns everything in this file, including the markup below and its layout CSS
+        (assets/page.css, ".fs-*"). The widget owns widgets/w-fleet-scrolly/ (data.js, index.js, index.css)
+        and renders only into the three kinds of slot named here. It never moves, adds or removes
+        page elements, and never touches the .cp-check cards or the <details> disclosures.
+
+        Mount   [data-widget="w-fleet-scrolly"]  (class "d-wide fs"). Init with Didactician.widget('w-fleet-scrolly', …).
+        Lanes   .fs-lane[data-lane="A" | "B" | "C"]           (A Monday, B Saturday night, C Tuesday)
+                  h3.fs-lane__title                            page-owned heading; don't change it
+                  .fs-lane__grid                               page-owned layout grid (sticky rules in page.css)
+                    .fs-canvas[data-canvas]                    SLOT 1. One per lane. Render the lane's drawing here with
+                                                               renderFleet(el, state): the header bar
+                                                               ("W-01 · ONE WEEK, BY HAND", lane name, "STEP n / N"),
+                                                               machines, pills, connection line, spreadsheet note.
+                                                               Set role="img" and aria-label to the active step's
+                                                               ariaLabel from data.js on every change. Before any step
+                                                               is active, show the lane's first step.
+                    ol.fs-steps > li.fs-step[data-step="A1" … "C4"]
+                                                               Ids match data.js step keys. The page sets min-height
+                                                               (40vh), padding and the active border; the widget toggles:
+                                                                 .is-active    the step whose top last crossed 55% of the
+                                                                               viewport (IntersectionObserver); scrolling
+                                                                               back re-activates earlier steps
+                                                                 .is-locked    while a check in data-gate is uncommitted
+                                                                 .is-unlocked  once, on unlock (page CSS fades content in)
+                      [data-step-snap]                         SLOT 2. renderFleet() of this step's state, shown by page CSS
+                                                               only on short viewports (max-height: 559px), where the lane
+                                                               canvas is hidden. Render it always; CSS decides visibility.
+                      [data-step-text]                         SLOT 3. The step's text from data.js (any step kicker such as
+                                                               "02:51" included). Every reader-visible string of the
+                                                               canvas and the step text lives in data.js.
+                      p.fs-step__lock[data-step-lock]          page-owned line "Answer the question above to see what
+                                                               happens", shown by page CSS only while .is-locked.
+                      .cp-check / details.cp-more              page-owned; leave alone.
+        Gates   data-gate="k-02 k-03" on a step: space-separated check ids. The step is locked until every
+                listed check is committed. The gated steps are B4 (k-02), B5 (k-03) and C2 (k-04); the steps
+                after them in the same lane carry the same ids so the outcome isn't readable early
+                (B5, B6 wait on k-02 and k-03; C3, C4 wait on k-04). While a step is locked, it can't
+                become active, and the canvas stays on the last unlocked step's state. Gates never re-lock.
+                Unlock on   document 'didactician:check-commit'  (detail { id, option, correct }, dispatched by
+                assets/page.js on every commit, any option). At init, also treat any
+                .cp-check[data-committed] as committed.
+        Heights The page reserves the canvas slot: 420px from 900px wide (and min(420px, 50vh) at 600–899),
+                min(316px, 50vh) under 600px. Keep the rendered canvas within that under 900px (≤ 50vh).
+        Motion  State changes ≤ 300ms (the step highlight), instant under prefers-reduced-motion. No autoplay.
+        No JS   Slots stay empty, nothing is locked, and the <noscript> line above explains.
+      -->
+      <div data-widget="w-fleet-scrolly" class="d-wide fs">
+
+        <div class="fs-lane" data-lane="A">
+          <h3 class="fs-lane__title" id="lane-monday">Monday: could four do it?</h3>
+          <div class="fs-lane__grid">
+            <div class="fs-canvas" data-canvas></div>
+            <ol class="fs-steps">
+              <li class="fs-step" data-step="A1">
+                <div class="fs-step__snap" data-step-snap></div>
+                <div class="fs-step__text" data-step-text></div>
+                <details class="d-more cp-more">
+                  <summary>What’s a unit of room?</summary>
+                  <div class="cp-more__body"><p>Real machines run out of memory and of processor time separately. The drawing in this section folds the two into one number to keep it simple. Chapter 5 counts them properly.</p></div>
+                </details>
+              </li>
+              <li class="fs-step" data-step="A2">
+                <div class="fs-step__snap" data-step-snap></div>
+                <div class="fs-step__text" data-step-text></div>
+              </li>
+              <li class="fs-step" data-step="A3">
+                <div class="fs-step__snap" data-step-snap></div>
+                <div class="fs-step__text" data-step-text></div>
+              </li>
+            </ol>
+          </div>
+        </div>
+
+        <div class="fs-lane" data-lane="B">
+          <h3 class="fs-lane__title" id="lane-saturday">Saturday night</h3>
+          <div class="fs-lane__grid">
+            <div class="fs-canvas" data-canvas></div>
+            <ol class="fs-steps">
+              <li class="fs-step" data-step="B1">
+                <div class="fs-step__snap" data-step-snap></div>
+                <div class="fs-step__text" data-step-text></div>
+              </li>
+              <li class="fs-step" data-step="B2">
+                <div class="fs-step__snap" data-step-snap></div>
+                <div class="fs-step__text" data-step-text></div>
+              </li>
+              <li class="fs-step" data-step="B3">
+                <div class="fs-step__snap" data-step-snap></div>
+                <div class="fs-step__text" data-step-text></div>
+                <div class="cp-check" role="group" aria-labelledby="k-02-q" data-check="k-02">
+                  <div class="cp-check__head"><span class="cp-chip cp-chip--apply">APPLY</span><span class="cp-label">Check 02 / 09</span></div>
+                  <p class="cp-check__q" id="k-02-q">Machine 03 is gone, and <code>orders</code> needs 3 units of room. Where would you put it now?</p>
+                  <ul class="cp-options">
+                    <li><button type="button" class="cp-option" data-fb="Machine 01 has 1 unit free, and orders needs 3, all on one machine. It can’t be split across machines."><span class="cp-option__key">A</span><span>Machine 01 · 1 unit free</span><span class="cp-option__tag"></span></button></li>
+                    <li><button type="button" class="cp-option" data-fb="Machine 02 has 2 units free, one short. A container has to fit whole on one machine."><span class="cp-option__key">B</span><span>Machine 02 · 2 units free</span><span class="cp-option__tag"></span></button></li>
+                    <li><button type="button" class="cp-option" data-ok data-fb="Right. Machine 04 is the only one with room for all of orders. That’s the spare room Sam kept ‘for when something breaks’."><span class="cp-option__key">C</span><span>Machine 04 · 5 units free</span><span class="cp-option__tag"></span></button></li>
+                  </ul>
+                  <div class="cp-feedback" role="status" hidden></div>
+                </div>
+              </li>
+              <li class="fs-step" data-step="B4" data-gate="k-02">
+                <p class="fs-step__lock" data-step-lock>Answer the question above to see what happens</p>
+                <div class="fs-step__snap" data-step-snap></div>
+                <div class="fs-step__text" data-step-text></div>
+                <details class="d-more cp-more">
+                  <summary>What about the orders customers had already placed?</summary>
+                  <div class="cp-more__body"><p>Chapter 2 showed that the data a container writes, such as orders, is kept outside the container. Where Fennel keeps that data, and how it’s protected when a machine dies, is Chapter 10.</p></div>
+                </details>
+                <div class="cp-check" role="group" aria-labelledby="k-03-q" data-check="k-03">
+                  <div class="cp-check__head"><span class="cp-chip">PREDICT</span><span class="cp-label">Check 03 / 09</span></div>
+                  <p class="cp-check__q" id="k-03-q"><code>orders</code> is running again, on machine 04. Can customers place orders now?</p>
+                  <ul class="cp-options">
+                    <li><button type="button" class="cp-option" data-fb="It’s running, but storefront can’t find it. On Monday, Sam wrote ‘machine 03’ into storefront’s settings, and nothing has changed them since. A container that moves is at a new address, and everything that calls it has to be told."><span class="cp-option__key">A</span><span>Yes: orders is running again, so checkout works as it did before 03:04.</span><span class="cp-option__tag"></span></button></li>
+                    <li><button type="button" class="cp-option" data-ok data-fb="Right. On Monday, Sam wrote ‘machine 03’ into storefront’s settings. Until someone passes on the new address, checkout keeps failing, with orders running the whole time."><span class="cp-option__key">B</span><span>Not yet: storefront still sends orders to machine 03, where nothing is running.</span><span class="cp-option__tag"></span></button></li>
+                  </ul>
+                  <div class="cp-feedback" role="status" hidden></div>
+                </div>
+              </li>
+              <li class="fs-step" data-step="B5" data-gate="k-02 k-03">
+                <p class="fs-step__lock" data-step-lock>Answer the question above to see what happens</p>
+                <div class="fs-step__snap" data-step-snap></div>
+                <div class="fs-step__text" data-step-text></div>
+              </li>
+              <li class="fs-step" data-step="B6" data-gate="k-02 k-03">
+                <p class="fs-step__lock" data-step-lock>Answer the question above to see what happens</p>
+                <div class="fs-step__snap" data-step-snap></div>
+                <div class="fs-step__text" data-step-text></div>
+              </li>
+            </ol>
+          </div>
+        </div>
+
+        <div class="fs-lane" data-lane="C">
+          <h3 class="fs-lane__title" id="lane-tuesday">Tuesday’s release</h3>
+          <div class="fs-lane__grid">
+            <div class="fs-canvas" data-canvas></div>
+            <ol class="fs-steps">
+              <li class="fs-step" data-step="C1">
+                <div class="fs-step__snap" data-step-snap></div>
+                <div class="fs-step__text" data-step-text></div>
+                <div class="cp-check" role="group" aria-labelledby="k-04-q" data-check="k-04">
+                  <div class="cp-check__head"><span class="cp-chip">PREDICT</span><span class="cp-label">Check 04 / 09</span></div>
+                  <p class="cp-check__q" id="k-04-q">There’s room for only one extra storefront copy. Which order of steps keeps the site up while all three copies become v13?</p>
+                  <ul class="cp-options">
+                    <li><button type="button" class="cp-option" data-fb="For a while nothing is serving customers: the old copies are gone and the new ones aren’t started or reachable yet. The site doesn’t load."><span class="cp-option__key">A</span><span>Stop the three v12 copies, then start three v13 copies and add their addresses to the list.</span><span class="cp-option__tag"></span></button></li>
+                    <li><button type="button" class="cp-option" data-ok data-fb="Right. Three copies serve customers the whole time. It takes longer, and it needs that one copy’s worth of spare room."><span class="cp-option__key">B</span><span>Start one v13 copy and add its address, then stop one v12 copy; repeat three times.</span><span class="cp-option__tag"></span></button></li>
+                  </ul>
+                  <div class="cp-feedback" role="status" hidden></div>
+                </div>
+              </li>
+              <li class="fs-step" data-step="C2" data-gate="k-04">
+                <p class="fs-step__lock" data-step-lock>Answer the question above to see what happens</p>
+                <div class="fs-step__snap" data-step-snap></div>
+                <div class="fs-step__text" data-step-text></div>
+              </li>
+              <li class="fs-step" data-step="C3" data-gate="k-04">
+                <p class="fs-step__lock" data-step-lock>Answer the question above to see what happens</p>
+                <div class="fs-step__snap" data-step-snap></div>
+                <div class="fs-step__text" data-step-text></div>
+              </li>
+              <li class="fs-step" data-step="C4" data-gate="k-04">
+                <p class="fs-step__lock" data-step-lock>Answer the question above to see what happens</p>
+                <div class="fs-step__snap" data-step-snap></div>
+                <div class="fs-step__text" data-step-text></div>
+              </li>
+            </ol>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="cp-check" role="group" aria-labelledby="k-05-q" data-check="k-05" data-reveal>
+        <div class="cp-check__head"><span class="cp-chip cp-chip--explain">EXPLAIN</span><span class="cp-label">Check 05 / 09 · think, then reveal</span></div>
+        <p class="cp-check__q" id="k-05-q">Here’s everything Sam did between Monday and Tuesday. How many different kinds of job are in this list, and what would you call each one? Settle on your answer, then show it.</p>
+        <ol class="cp-chores">
+          <li>Found a machine with room for each of nine containers.</li>
+          <li>Wrote each one’s machine into the spreadsheet and into the settings of the services that call it.</li>
+          <li>Restarted the crashed dispatch copy where it was.</li>
+          <li>Started orders and dispatch on other machines after machine 03 died.</li>
+          <li>Passed orders’ new address to storefront.</li>
+          <li>Swapped storefront’s three copies to v13, one at a time.</li>
+          <li>Kept three storefront copies running all week, because Friday’s dinner rush needs three.</li>
+        </ol>
+        <button type="button" class="cp-reveal" aria-expanded="false" aria-controls="k-05-a">Show the answer</button>
+        <div class="cp-feedback" id="k-05-a" role="status" hidden>
+          <p><b>ANSWER</b>Six kinds of job:</p>
+          <ul class="cp-answer">
+            <li><b>placing</b> (1, and part of 4): finding a machine with room for each container.</li>
+            <li><b>restarting</b> (3): starting a crashed container again where it was.</li>
+            <li><b>replacing</b> (4): starting a dead machine’s containers on other machines.</li>
+            <li><b>connecting</b> (2, 5): telling everything that calls a container where it is.</li>
+            <li><b>updating</b> (6): swapping in a new version without downtime.</li>
+            <li><b>scaling</b> (7): matching the number of copies to demand. Sam doesn’t, so Fennel pays all week for Friday’s three. Doing it by hand would mean adding copies every Friday and removing them afterwards.</li>
+          </ul>
+          <p>The spreadsheet isn’t a job of its own. It’s the record of all six, and right now it still says orders is on machine 03.</p>
+          <p>If your list was shorter, the usual misses are restarting vs. replacing (one stays on its machine, one has to move) and connecting, which came along with every move.</p>
+          <details class="d-more cp-more">
+            <summary>Is that every job?</summary>
+            <div class="cp-more__body"><p>Real teams add more: noticing a container that’s running but stuck, handing each container its settings and passwords, and watching all of it. Chapters 6, 9 and 12 cover those.</p></div>
+          </details>
+        </div>
+      </div>
+    </section>
+
+    <!-- s-03 · What the jobs cost · o-2 · claims c-02, c-04 (medium, hedged; D5), c-06; Ch 1 claim 06 by reference
+         · f-01 · k-06 -->
+    <section id="s-03" data-segment="s-03">
+      <h2 id="what-the-jobs-cost"><span class="cp-sec">§ 03 </span>What the jobs cost</h2>
+      <p>Each of the six jobs in Sam’s week shows up somewhere Jordan can see it.</p>
+
+      <figure class="cp-fig d-wide" id="f-01" aria-labelledby="f-01-cap">
+        <div class="cp-fig__plate">
+          <div class="cp-fig__bar"><span class="cp-label">Fig. 01</span><span class="cp-label">The jobs, from the manager’s chair</span></div>
+          <div class="cp-blueprint jobs">
+            <table>
+              <thead><tr><th scope="col">Job</th><th scope="col">What a manager sees</th></tr></thead>
+              <tbody>
+                <tr><th scope="row">placing</th><td>Machines kept half-empty “to be safe”, plus spare machines, because moving things later by hand is slow and risky: <b>idle spend</b>.</td></tr>
+                <tr><th scope="row">restarting</th><td>Someone has to notice a crash and act, at any hour: <b>pages</b>.</td></tr>
+                <tr><th scope="row">replacing</th><td>A dead machine takes its containers down with it until someone starts them elsewhere: <b>3 a.m. pages, outages, on-call burnout</b>.</td></tr>
+                <tr><th scope="row">connecting</th><td><b>“It’s running, but nothing can reach it”</b> after a move, until someone tells its callers where it went; and a spreadsheet that falls behind.</td></tr>
+                <tr><th scope="row">updating</th><td>Release days run by hand from the team chat (“Nobody deploy anything”): <b>slow, risky releases</b>.</td></tr>
+                <tr><th scope="row">scaling</th><td><b>Paying all week for Friday’s peak</b>, or scrambling during it.</td></tr>
+              </tbody>
+              <tfoot>
+                <tr><td colspan="2"><b>The spreadsheet</b>Not a job of its own: the hand-kept record of all six, always a little behind, like Sam’s server notes in Chapter 1.</td></tr>
+              </tfoot>
+            </table>
+          </div>
+        </div>
+        <figcaption id="f-01-cap"><span class="cp-label">Fig. 01</span><span>Each job Sam did by hand shows up on a manager’s desk, and each grows with every new service and machine.</span></figcaption>
+      </figure>
+
+      <p>Start with Morgan’s idle machines. When people place containers by hand, they leave room free on each machine “to be safe” and keep spare machines, because moving things later is slow and risky. Some of that room is insurance: on Saturday night, the free room on machine 04 is where <code>orders</code> went. How much spare room is right is a question for Chapter 5. Machines doing far less than they could is an old problem, though. One industry estimate, for data centres where each app had a server to itself, put the average server at only 12 to 18% busy.</p>
+      <details class="d-more cp-more">
+        <summary>Where does the 12–18% come from?</summary>
+        <div class="cp-more__body"><p>It’s a 2014 estimate by the Natural Resources Defense Council (NRDC), quoted by the US Environmental Protection Agency’s <a href="https://www.energystar.gov/products/data_center_equipment/16-more-ways-cut-energy-waste-data-center/consolidate-lightly-utilized-servers">ENERGY STAR programme</a>. It describes US corporate data centres running one app per server. It isn’t a measurement of machines running containers, or of Fennel.</p></div>
+      </details>
+      <p>Then there are the people doing the work. Google’s site reliability engineers have a name for manual, repetitive operations work that could be automated: <a href="https://sre.google/sre-book/eliminating-toil/"><em>toil</em></a>. In their experience, toil grows in step with the service it supports, and too much of it burns people out, so they aim to keep it under half of each engineer’s time. Almost everything Sam did between Monday and Tuesday was toil.</p>
+      <p>And then there’s the spreadsheet. It’s Sam’s server notes from Chapter 1 again: a record kept by hand, of a system that changes every time something fails. A record like that falls behind, and on Saturday night this one did. It still says <code>orders</code> is on machine 03.</p>
+      <p>What if the record were the thing the machines act on, instead of a note about them? Hold that thought for the next chapter.</p>
+
+      <div class="cp-check" role="group" aria-labelledby="k-06-q" data-check="k-06">
+        <div class="cp-check__head"><span class="cp-chip cp-chip--apply">APPLY</span><span class="cp-label">Check 06 / 09</span></div>
+        <p class="cp-check__q" id="k-06-q">Next month Fennel adds a fifth service, catalog, with two copies. Nothing else changes, and Sam still does every job by hand. What happens to the work in Sam’s week?</p>
+        <ul class="cp-options">
+          <li><button type="button" class="cp-option" data-fb="Placing isn’t once: every failure, move and update places things again. And a dead machine takes down every service on it, so more services means more to re-place each time."><span class="cp-option__key">A</span><span>Only the release work grows: catalog adds updates to coordinate, but it’s placed once, and 3 a.m. replacing is per machine, not per service.</span><span class="cp-option__tag"></span></button></li>
+          <li><button type="button" class="cp-option" data-ok data-fb="Right. Google’s site reliability engineers call this kind of work toil: manual, repetitive, and growing in step with the service. They aim to keep it under half of each engineer’s time, because too much of it burns people out. Each new service adds to Sam’s share."><span class="cp-option__key">B</span><span>All of it grows: more containers to place and to restart or replace at 3 a.m., more addresses to pass on, more spreadsheet rows to keep right.</span><span class="cp-option__tag"></span></button></li>
+          <li><button type="button" class="cp-option" data-fb="The image makes catalog easy to run on any machine. It doesn’t pick the machine, notice when that machine dies, or tell storefront where catalog went. Those are the jobs, and each new service adds to them."><span class="cp-option__key">C</span><span>Very little grows: catalog runs in containers, so its image carries all it needs, and the machines don’t care how many services there are.</span><span class="cp-option__tag"></span></button></li>
+        </ul>
+        <div class="cp-feedback" role="status" hidden></div>
+      </div>
+    </section>
+
+    <!-- s-04 · Software that does the jobs · o-3 · claims c-07, c-01, c-08 · TERM 01, TERM 02 (.cp-term, R14)
+         · analogy A2 (conductor; m-03 guard in its breaks line) · k-07 (local-03 = m-27) -->
+    <section id="s-04" data-segment="s-04">
+      <h2 id="software-that-does-the-jobs"><span class="cp-sec">§ 04 </span>Software that does the jobs</h2>
+      <p>What would help Sam isn’t a faster Sam. It’s software that does the six jobs in Fig. 01 itself.</p>
+      <p>Doing those jobs automatically, for as long as the containers run, is called <dfn id="dfn-orchestration" aria-describedby="term-01">orchestration</dfn>, and software that does it is an <dfn id="dfn-orchestrator" aria-describedby="term-01">orchestrator</dfn>. An orchestrator doesn’t only act when someone releases a new version. At 3 a.m., when a machine dies, it starts the lost containers on other machines and passes on their new addresses, with nobody woken up to do it.</p>
+
+      <div class="cp-term" id="term-01" role="note" aria-label="New term 1 of 3">
+        <p class="cp-term__kicker">New term · 01 / 03</p>
+        <p class="cp-term__term">orchestration <span class="cp-term__sep">·</span> orchestrator</p>
+        <p class="cp-term__def">Doing the six jobs automatically, all the time, for as long as the containers run; and the software that does it.</p>
+        <p class="cp-term__back">You met it in §02: Sam’s week.</p>
+      </div>
+
+      <p>You give an orchestrator a group of machines, physical or virtual, and tell it how big each container is. It fits the containers onto the machines itself. That group of machines, treated as one pool of room, is a <dfn id="dfn-cluster" aria-describedby="term-02">cluster</dfn>. Sam’s four machines in §02 would make a small one.</p>
+
+      <div class="cp-term" id="term-02" role="note" aria-label="New term 2 of 3">
+        <p class="cp-term__kicker">New term · 02 / 03</p>
+        <p class="cp-term__term">cluster</p>
+        <p class="cp-term__def">A group of machines an orchestrator treats as one pool of room for containers.</p>
+        <p class="cp-term__back">You met it in §02: the four machines.</p>
+      </div>
+
+      <p>Both definitions say what an orchestrator does, not how it does it. How it manages all this with nobody at a keyboard is the next chapter’s subject.</p>
+
+      <div class="cp-aside">
+        <p><b>ANALOGY</b>The word comes from music. A conductor keeps dozens of players starting, stopping and changing together, so the orchestra sounds like one instrument.</p>
+        <p class="cp-breaks"><b>WHERE THIS ANALOGY BREAKS</b>A conductor is one person giving every cue from the front, and every player still uses their own judgement. An orchestrator doesn’t work from one place giving every cue; how its work is split up is the next chapter. And no part of it uses judgement: it follows rules, so it will keep restarting an app that is broken.</p>
+      </div>
+
+      <div class="cp-check" role="group" aria-labelledby="k-07-q" data-check="k-07">
+        <div class="cp-check__head"><span class="cp-chip cp-chip--apply">APPLY</span><span class="cp-label">Check 07 / 09</span></div>
+        <p class="cp-check__q" id="k-07-q">Riley says: “So an orchestrator is basically a smarter deploy script.” What does that leave out?</p>
+        <ul class="cp-options">
+          <li><button type="button" class="cp-option" data-fb="An orchestrator runs images; it doesn’t build them. Building stays with your build tools; §06 shows which."><span class="cp-option__key">A</span><span>That it builds the images too, so the deploy script and the image-building step can both be retired.</span><span class="cp-option__tag"></span></button></li>
+          <li><button type="button" class="cp-option" data-fb="Watching is part of it, but it does the jobs too: it starts the replacements and passes on the addresses itself."><span class="cp-option__key">B</span><span>That it only watches: it pages Sam sooner when a machine dies, while the moving is still done by hand.</span><span class="cp-option__tag"></span></button></li>
+          <li><button type="button" class="cp-option" data-ok data-fb="Right. A deploy script runs when someone releases, then stops. Most of Sam’s Saturday happened between releases. An orchestrator keeps doing the jobs all the time. How it does that is the next chapter."><span class="cp-option__key">C</span><span>That it keeps working between releases: restarting, replacing and reconnecting containers at 3 a.m., with nobody at a keyboard.</span><span class="cp-option__tag"></span></button></li>
+        </ul>
+        <div class="cp-feedback" role="status" hidden></div>
+      </div>
+    </section>
+
+    <!-- s-05 · Its name is Kubernetes · o-3 · claims c-09, c-10, c-05 (paraphrased), c-07 · TERM 03 payoff card
+         (the chapter's only blueprint-ground term card) · local-01 (= m-25) corrected · D6 · no check -->
+    <section id="s-05" data-segment="s-05">
+      <h2 id="kubernetes"><span class="cp-sec">§ 05 </span>Its name is Kubernetes</h2>
+      <p>The orchestrator this course is about is <dfn id="dfn-kubernetes" aria-describedby="term-03">Kubernetes</dfn>. It’s the name the course has been heading for since Chapter 1.</p>
+
+      <div class="cp-term cp-term--payoff cp-blueprint" id="term-03" role="note" aria-label="New term 3 of 3">
+        <p class="cp-term__kicker">New term · 03 / 03</p>
+        <p class="cp-term__term">Kubernetes</p>
+        <p class="cp-term__def">An orchestrator: software that does the six jobs across a cluster, all the time.</p>
+        <p class="cp-term__jobs">placing · restarting · replacing · connecting · updating · scaling</p>
+      </div>
+
+      <p>Kubernetes came out of Google. For years, Google had run its own services in containers, on internal systems it built itself: first one called Borg, and later one called Omega. One reason Google built Borg was to let different kinds of work share the same machines, so that more of each machine gets used and costs come down. That’s Morgan’s question about idle machines, asked at Google’s scale.</p>
+      <p>You’ll hear that Kubernetes is Google’s Borg, released to the world. It isn’t. Kubernetes was Google’s third such system, built new with lessons from the first two, and open source from the start. Borg and Omega stayed inside Google.</p>
+      <p>Google published Kubernetes as open source in 2014. In 2015, at version 1.0, Google handed it to a newly formed foundation, the Cloud Native Computing Foundation, which is part of the Linux Foundation, so no single company owns it. By 2024, tens of thousands of people from thousands of companies had contributed to it.</p>
+      <details class="d-more cp-more">
+        <summary>Does Google run on Kubernetes?</summary>
+        <div class="cp-more__body"><p>Google’s own services ran on Borg, at least as of 2016, when the designers of Borg and Kubernetes described both in a paper. Kubernetes was built for developers outside Google, including the customers of Google’s cloud business.</p></div>
+      </details>
+      <p>Kubernetes isn’t the only orchestrator. Docker Swarm and Apache Mesos are two others, and Chapter 14 compares the options.</p>
+      <p>How Kubernetes does the six jobs with nobody at a keyboard is the next chapter. First, a name you’ll hear alongside it.</p>
+    </section>
+
+    <!-- s-06 · Where Docker fits · o-3 · claims c-11, c-12 (D7 only), c-10, c-07 (D8) · m-02 owned · k-08 before
+         f-02 and the prose -->
+    <section id="s-06" data-segment="s-06">
+      <h2 id="where-docker-fits"><span class="cp-sec">§ 06 </span>Where Docker fits</h2>
+      <p>Last chapter said you’d hear the name Docker in conversations about containers, and that this chapter would place it. Commit to an answer before you read how.</p>
+
+      <div class="cp-check" role="group" aria-labelledby="k-08-q" data-check="k-08">
+        <div class="cp-check__head"><span class="cp-chip">PREDICT</span><span class="cp-label">Check 08 / 09</span></div>
+        <p class="cp-check__q" id="k-08-q">You’ll hear “Docker” and “Kubernetes” in the same breath. Before reading on: how do the two relate?</p>
+        <ul class="cp-options">
+          <li><button type="button" class="cp-option" data-fb="They’re separate projects. Docker appeared in 2013 as a set of tools for building and running containers. Kubernetes came from Google in 2014, to keep containers running across many machines."><span class="cp-option__key">A</span><span>The same thing under two names: Kubernetes is what Docker grew into once it could run containers on many machines.</span><span class="cp-option__tag"></span></button></li>
+          <li><button type="button" class="cp-option" data-ok data-fb="Right. Docker’s tools work on the machine you use them on: build the image, start a container there. Kubernetes decides which of many machines run each container, and keeps them running. Teams usually use both."><span class="cp-option__key">B</span><span>Different jobs, usually used together: Docker’s tools build images and start containers on one machine; Kubernetes runs them across many machines.</span><span class="cp-option__tag"></span></button></li>
+          <li><button type="button" class="cp-option" data-fb="Most teams use both: Docker’s tools to build images, Kubernetes to run them across their machines. Docker did make its own orchestrator, Swarm, and that is where the two competed."><span class="cp-option__key">C</span><span>Rival products for the same job: a team runs its containers on one or the other, much like picking a cloud provider.</span><span class="cp-option__tag"></span></button></li>
+        </ul>
+        <div class="cp-feedback" role="status" hidden></div>
+      </div>
+
+      <!-- f-02: static HTML with the page-level machine / chip / cluster classes (assets/page.css); it doesn't
+           depend on the §02 widget. Cluster layout: storefront ×3, orders ×1, payments ×2, dispatch ×3 (Fennel's copies). -->
+      <figure class="cp-fig d-wide" id="f-02" aria-labelledby="f-02-cap">
+        <div class="cp-fig__plate">
+          <div class="cp-fig__bar"><span class="cp-label">Fig. 02</span><span class="cp-label">One machine, then the cluster</span></div>
+          <div class="cp-blueprint dk">
+            <div class="dk__grid">
+              <div class="dk__h1">
+                <p class="dk__head">Docker: on one machine</p>
+                <p class="dk__note">builds the image; starts containers on the machine it’s run on</p>
+              </div>
+              <div class="cp-machine dk__lap">
+                <div class="cp-machine__bar"><span class="cp-label">Machine · Riley’s laptop</span></div>
+                <div class="cp-machine__body">
+                  <div class="mrow mrow--c2"><span><code>docker build</code> → image <code>storefront:v13</code></span></div>
+                  <div class="mrow mrow--c2"><span><code>docker run</code> → a container, on this laptop</span></div>
+                  <div class="cp-chips"><span class="cp-ctr">storefront:<wbr>v13 <span class="st st--good"><span class="lamp" aria-hidden="true"></span>RUNNING</span></span></div>
+                </div>
+              </div>
+              <div class="flow__arrow dk__push"><span>push</span><span class="flow__glyph" aria-hidden="true"><span class="wide">→</span><span class="narrow">↓</span></span></div>
+              <div class="cp-machine dk__reg">
+                <div class="cp-machine__bar"><span class="cp-label">Registry</span></div>
+                <div class="cp-machine__body">
+                  <span class="cp-img">storefront:<wbr>v13</span>
+                  <p class="dk__note">an open standard: any orchestrator can run it</p>
+                </div>
+              </div>
+              <div class="flow__arrow dk__pull"><span>pull</span><span class="flow__glyph" aria-hidden="true"><span class="wide">→</span><span class="narrow">↓</span></span></div>
+              <div class="dk__h2">
+                <p class="dk__head">An orchestrator (e.g. Kubernetes): across the cluster</p>
+                <p class="dk__note">decides which machines run each container, and keeps them running</p>
+              </div>
+              <div class="cp-cluster dk__clu">
+                <div class="cp-cluster__bar"><span class="cp-label">Cluster</span></div>
+                <div class="cp-cluster__body">
+                  <div class="cp-machine">
+                    <div class="cp-machine__bar"><span class="cp-label">Machine · 01</span></div>
+                    <div class="cp-machine__body cp-chips"><span class="cp-ctr">storefront:<wbr>v13</span><span class="cp-ctr">payments</span></div>
+                  </div>
+                  <div class="cp-machine">
+                    <div class="cp-machine__bar"><span class="cp-label">Machine · 02</span></div>
+                    <div class="cp-machine__body cp-chips"><span class="cp-ctr">storefront:<wbr>v13</span><span class="cp-ctr">dispatch</span></div>
+                  </div>
+                  <div class="cp-machine">
+                    <div class="cp-machine__bar"><span class="cp-label">Machine · 03</span></div>
+                    <div class="cp-machine__body cp-chips"><span class="cp-ctr">orders</span><span class="cp-ctr">dispatch</span></div>
+                  </div>
+                  <div class="cp-machine">
+                    <div class="cp-machine__bar"><span class="cp-label">Machine · 04</span></div>
+                    <div class="cp-machine__body cp-chips"><span class="cp-ctr">storefront:<wbr>v13</span><span class="cp-ctr">payments</span><span class="cp-ctr">dispatch</span></div>
+                  </div>
+                </div>
+              </div>
+              <p class="dk__jobs">placing · restarting · replacing · connecting · updating · scaling<span class="dk__always">all the time</span></p>
+            </div>
+          </div>
+        </div>
+        <figcaption id="f-02-cap"><span class="cp-label">Fig. 02</span><span>Docker’s tools build the image and run containers on the machine they’re used on. An orchestrator such as Kubernetes takes that image from the registry and decides which machines in the cluster run it, then keeps those containers running.</span></figcaption>
+      </figure>
+
+      <p>“Docker” is a set of tools for building images and running containers. On Riley’s laptop, <code>docker build</code> makes the <code>storefront:v13</code> image, and <code>docker run</code> starts a container from that image, on that laptop. Docker’s tools act on the machine they’re run on.</p>
+      <p>Riley then pushes the image to the registry. From there, an orchestrator such as Kubernetes decides which machines in the cluster run copies of it, starts those copies, and keeps doing the six jobs for them. Images follow an open standard, so Kubernetes runs an image whichever tool built it. That’s why Docker and Kubernetes aren’t competitors in the usual sense: most teams use Docker’s tools to build images, and an orchestrator to run them across their machines.</p>
+      <p>Kubernetes was even announced at Docker’s own conference, DockerCon, in 2014.</p>
+      <details class="d-more cp-more">
+        <summary>You may have read “Kubernetes drops Docker”</summary>
+        <div class="cp-more__body"><p>Since 2022, Kubernetes no longer uses Docker’s own software to start containers on its machines; it uses other software that does the same job. Images built with Docker run exactly as before.</p></div>
+      </details>
+      <details class="d-more cp-more">
+        <summary>Didn’t Docker make an orchestrator too?</summary>
+        <div class="cp-more__body"><p>Yes: Docker Swarm, which did compete with Kubernetes at the orchestrator’s job. That’s the one place the two were rivals.</p></div>
+      </details>
+    </section>
+
+    <!-- s-07 · The conversation · o-2, o-3 · claims c-09, c-11 · k-09 (B carries local-01 = m-25, dated 2016;
+         C skips the decision) · recap · bridge to Ch 4 -->
+    <section id="s-07" data-segment="s-07">
+      <h2 id="the-conversation"><span class="cp-sec">§ 07 </span>The conversation</h2>
+      <p>After another 3 a.m. page, Sam brings a proposal to the planning meeting.</p>
+      <blockquote class="cp-quote"><p>“We should move to Kubernetes.”</p><cite>Sam</cite></blockquote>
+
+      <div class="cp-check" role="group" aria-labelledby="k-09-q" data-check="k-09">
+        <div class="cp-check__head"><span class="cp-chip cp-chip--apply">APPLY</span><span class="cp-label">Check 09 / 09</span></div>
+        <p class="cp-check__q" id="k-09-q">At the planning meeting, after another 3 a.m. page, Sam says: “We should move to Kubernetes.” What’s the most useful thing Jordan can ask?</p>
+        <ul class="cp-options">
+          <li><button type="button" class="cp-option" data-ok data-fb="Right. It ties the platform to pain you can name (3 a.m. replacing, idle machines, release days run from the chat) and asks whether fixing that is worth what the platform costs."><span class="cp-option__key">A</span><span>“Which of these jobs is hurting us most today, and is that worth the cost of the platform?”</span><span class="cp-option__tag"></span></button></li>
+          <li><button type="button" class="cp-option" data-fb="Kubernetes was Google’s third system, built new and open source; Google’s own services ran on Borg, at least as of 2016. And Fennel isn’t Google: what pays off at Google’s size may not at Fennel’s."><span class="cp-option__key">B</span><span>“Google built it and runs on it. Can we simply copy the way Google sets it up?”</span><span class="cp-option__tag"></span></button></li>
+          <li><button type="button" class="cp-option" data-fb="A fair planning question, but it skips the decision. Before ‘how long’, ask ‘what for’: which jobs hurt, and is fixing them worth the cost?"><span class="cp-option__key">C</span><span>“How long would the move take, and can we finish it before the holiday rush?”</span><span class="cp-option__tag"></span></button></li>
+        </ul>
+        <div class="cp-feedback" role="status" hidden></div>
+      </div>
+
+      <p>Chapter 14 is where the cost side of that question gets answered.</p>
+
+      <div class="cp-recap">
+        <p class="cp-label">In short</p>
+        <ul>
+          <li>Once many containers run on many machines, someone has to place them, restart and replace them, connect them, update them and scale them. By hand, that someone is Sam, at 3 a.m.</li>
+          <li>Each job lands on a manager’s desk: pages and burnout, idle machines, release days run from the team chat, and a spreadsheet that’s always behind.</li>
+          <li>An orchestrator does those jobs all the time, across a cluster of machines. Kubernetes is one, built from Google’s experience and now held by a foundation rather than one company. Docker’s tools build the images it runs.</li>
+        </ul>
+        <p>Next: Fennel moves to Kubernetes, the same machine dies at 3 a.m., and nobody wakes up. The next chapter is how.</p>
+      </div>
+    </section>
+
+    <footer class="cp-sources" data-toc-skip>
+      <p class="cp-label">Sources</p>
+      <ol>
+        <li>Red Hat, <a href="https://www.redhat.com/en/topics/containers/what-is-container-orchestration">“What is container orchestration?”</a>: the jobs an orchestrator does, the definition of orchestration, and other orchestrators.</li>
+        <li>Brendan Burns, Brian Grant, David Oppenheimer, Eric Brewer and John Wilkes, <a href="https://static.googleusercontent.com/media/research.google.com/en//pubs/archive/44843.pdf">“Borg, Omega, and Kubernetes”</a>, ACM Queue, 2016: Kubernetes as Google’s third container system, why Borg shared machines, and why a container that moves has to be found again.</li>
+        <li>Kubernetes documentation, <a href="https://kubernetes.io/docs/concepts/overview/">“Overview”</a>: a cluster of machines, and fitting containers onto them by size.</li>
+        <li>Kubernetes blog, <a href="https://kubernetes.io/blog/2024/06/06/10-years-of-kubernetes/">“10 Years of Kubernetes”</a> (2024): the 2014 release, the 2015 hand-over to the Cloud Native Computing Foundation, contributors, DockerCon 2014, and the 2022 change in how Kubernetes starts containers.</li>
+        <li>Kubernetes blog, <a href="https://kubernetes.io/blog/2020/12/02/dont-panic-kubernetes-and-docker/">“Don’t Panic: Kubernetes and Docker”</a> (2020): Docker as a set of tools, and images that follow an open standard.</li>
+        <li>ENERGY STAR, <a href="https://www.energystar.gov/products/data_center_equipment/16-more-ways-cut-energy-waste-data-center/consolidate-lightly-utilized-servers">“Consolidate lightly utilized servers”</a>, citing NRDC (2014): the 12–18% estimate.</li>
+        <li>Google, <i>Site Reliability Engineering</i>, <a href="https://sre.google/sre-book/eliminating-toil/">“Eliminating Toil”</a>: toil, burnout, and the under-half goal.</li>
+      </ol>
+      <p>Fennel, its people, services, versions, machines and incidents are fiction, made up to illustrate the mechanisms above.</p>
+    </footer>
+  </main>
+</div>
+
+<script src="assets/toc.js"></script>
+<script src="assets/page.js"></script>
+<script src="assets/widget.js"></script>
+<link rel="stylesheet" href="widgets/w-fleet-scrolly/index.css">
+<script src="widgets/w-fleet-scrolly/data.js"></script>
+<script src="widgets/w-fleet-scrolly/index.js"></script>
+</body>
+</html>

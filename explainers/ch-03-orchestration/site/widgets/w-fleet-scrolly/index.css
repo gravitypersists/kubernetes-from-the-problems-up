@@ -1,0 +1,191 @@
+/* w-fleet-scrolly · scoped styles for the §02 lane drawing (renderFleet) and the step kicker.
+   The page owns the scrolly layout (.fs-* in assets/page.css); this file styles only what the widget
+   renders into [data-canvas], [data-step-snap] and [data-step-text]. Every value is a token.
+   Grammar (plan ## Visual grammar): figure plate with a mono header bar on blueprint ground; machine =
+   outlined frame with a mono MACHINE / NAME bar (Ch 02's .cp-machine); container = Ch 02's .cp-ctr chip
+   (c1 stroke on c1-soft, mono label, status word), height = size; unused room = c6 dashed "N FREE";
+   DOWN machine = dashed ink-3 frame, LOST chips dashed; status always word + colour. No shadow: the
+   drawing isn't interactive. */
+
+[data-widget="w-fleet-scrolly"] .wf {
+  position: relative;
+  background: var(--surface);
+  border: var(--stroke) solid var(--ink);
+  border-radius: var(--radius-1);
+  color: var(--ink);
+  font: 700 var(--fs-caption)/16px var(--font-mono);
+}
+
+/* header bar: W-01 · ONE WEEK, BY HAND · LANE … STEP n / N */
+[data-widget="w-fleet-scrolly"] .wf__bar {
+  display: flex; align-items: center; justify-content: space-between; gap: var(--sp-1);
+  min-height: 28px; padding: var(--sp-half) var(--sp-1);
+  border-bottom: var(--stroke) solid var(--ink);
+  font: 700 var(--fs-caption)/var(--lh-caption) var(--font-mono);
+  letter-spacing: .08em; text-transform: uppercase; white-space: nowrap;
+}
+[data-widget="w-fleet-scrolly"] .wf__title { min-width: 0; overflow: hidden; text-overflow: ellipsis; color: var(--ink); }
+[data-widget="w-fleet-scrolly"] .wf__step { flex: none; color: var(--ink-3); font-variant-numeric: tabular-nums; }
+
+/* blueprint ground (the style guide's .cp-blueprint, scoped) */
+[data-widget="w-fleet-scrolly"] .wf__ground {
+  display: flex; flex-direction: column; gap: var(--wf-row, 8px);
+  padding: var(--wf-pad, 12px);
+  background-color: var(--surface);
+  background-image:
+    linear-gradient(var(--line) 1px, transparent 1px),
+    linear-gradient(90deg, var(--line) 1px, transparent 1px);
+  background-size: var(--sp-4) var(--sp-4);
+  background-position: -1px -1px;
+}
+[data-widget="w-fleet-scrolly"] .wf__ground > * { margin: 0; }
+
+/* "what if" banner (lane C, step C2) */
+[data-widget="w-fleet-scrolly"] .wf__banner { display: flex; align-items: flex-start; }
+[data-widget="w-fleet-scrolly"] .wf__banner-t {
+  padding: 2px var(--sp-1);
+  background: var(--surface); border: var(--stroke) dashed var(--ink); border-radius: var(--radius-1);
+  font: 700 var(--fs-caption)/var(--lh-caption) var(--font-mono); letter-spacing: .08em; text-transform: uppercase;
+}
+
+/* machines: four frames side by side at every width */
+[data-widget="w-fleet-scrolly"] .wf__machines {
+  display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: var(--wf-gapm, 8px);
+}
+[data-widget="w-fleet-scrolly"] .wf-m {
+  min-width: 0;
+  background: var(--surface);
+  border: var(--stroke) solid var(--ink); border-radius: var(--radius-1);
+}
+[data-widget="w-fleet-scrolly"] .wf-m__bar {
+  padding: 2px var(--sp-half);
+  border-bottom: var(--stroke) solid var(--ink);
+  font: 700 var(--fs-caption)/16px var(--font-mono); letter-spacing: .04em; text-transform: uppercase;
+  white-space: nowrap; overflow: hidden;
+}
+[data-widget="w-fleet-scrolly"] .wf-m__k { display: block; color: var(--ink-3); }
+[data-widget="w-fleet-scrolly"] .wf-m__id { display: block; color: var(--ink); font-variant-numeric: tabular-nums; }
+[data-widget="w-fleet-scrolly"] .wf-m__id b { font-weight: 700; letter-spacing: 0; }
+[data-widget="w-fleet-scrolly"] .wf-m.is-down { border-style: dashed; border-color: var(--ink-3); }
+[data-widget="w-fleet-scrolly"] .wf-m.is-down .wf-m__bar { border-bottom-style: dashed; border-bottom-color: var(--ink-3); }
+[data-widget="w-fleet-scrolly"] .wf-m__body {
+  display: flex; flex-direction: column; gap: var(--wf-gapu, 4px);
+  padding: var(--wf-bodypad, 4px);
+}
+
+/* container chip (Ch 02 .cp-ctr), height = size in room units */
+[data-widget="w-fleet-scrolly"] .wf-c {
+  flex: none; display: flex; flex-direction: column; justify-content: flex-start;
+  min-width: 0; overflow: hidden;
+  padding: 1px var(--wf-chippad, 4px);
+  background: var(--c1-soft); border: var(--stroke) solid var(--c1); border-radius: var(--radius-1);
+  font: 700 var(--fs-caption)/16px var(--font-mono); letter-spacing: 0; color: var(--ink);
+}
+[data-widget="w-fleet-scrolly"] .wf--narrow .wf-c { line-height: 14px; }
+[data-widget="w-fleet-scrolly"] .wf--narrow .wf-m__bar { padding-top: 1px; padding-bottom: 1px; line-height: 14px; }
+[data-widget="w-fleet-scrolly"] .wf--narrow .wf__bar { min-height: 24px; padding-top: 2px; padding-bottom: 2px; }
+[data-widget="w-fleet-scrolly"] .wf--narrow .wf-pill { height: 22px; }
+[data-widget="w-fleet-scrolly"] .wf-c--tight { padding-top: 0; padding-bottom: 0; justify-content: center; }
+[data-widget="w-fleet-scrolly"] .wf-c--tight .wf-c__ln { line-height: 14px; }
+[data-widget="w-fleet-scrolly"] .wf-c__ln { display: flex; align-items: center; white-space: nowrap; }
+/* LOST (on a DOWN machine) and STOPPED: dashed, no fill, so the chip reads as gone */
+[data-widget="w-fleet-scrolly"] .wf-c--lost { background: transparent; border-style: dashed; color: var(--ink-3); }
+[data-widget="w-fleet-scrolly"] .wf-c--stopped { background: transparent; border-style: dashed; border-color: var(--c6); color: var(--ink-3); }
+
+/* status words: word + colour, never colour alone */
+[data-widget="w-fleet-scrolly"] .wf-st { font-weight: 700; letter-spacing: 0; text-transform: uppercase; }
+[data-widget="w-fleet-scrolly"] .wf-st--running { color: var(--good); }
+[data-widget="w-fleet-scrolly"] .wf-st--crashed,
+[data-widget="w-fleet-scrolly"] .wf-st--lost,
+[data-widget="w-fleet-scrolly"] .wf-st--bad { color: var(--bad); }
+[data-widget="w-fleet-scrolly"] .wf-st--newaddr { color: var(--warn); }
+[data-widget="w-fleet-scrolly"] .wf-st--stopped { color: var(--ink-3); }
+[data-widget="w-fleet-scrolly"] .wf-lamp {
+  display: inline-block; flex: none; width: var(--sp-1); height: var(--sp-1);
+  margin: 0 var(--sp-half) 0 0; background: currentColor;
+}
+[data-widget="w-fleet-scrolly"] .wf-c__ln > .wf-lamp:last-child:not(:first-child) { margin: 0 0 0 var(--sp-half); }
+[data-widget="w-fleet-scrolly"] .wf-st--stopped .wf-lamp { background: transparent; box-shadow: inset 0 0 0 var(--stroke) currentColor; }
+
+/* unused room: c6 dashed, labelled N FREE */
+[data-widget="w-fleet-scrolly"] .wf-free {
+  flex: none; display: grid; place-items: center; min-width: 0; overflow: hidden;
+  border: var(--stroke) dashed var(--c6); border-radius: var(--radius-1);
+  font: 400 var(--fs-caption)/16px var(--font-mono); letter-spacing: .04em; text-transform: uppercase;
+  color: var(--ink-3); white-space: nowrap;
+}
+
+/* service pills: one per service, computed from the snapshot */
+[data-widget="w-fleet-scrolly"] .wf__pills { display: flex; flex-direction: column; gap: var(--sp-half); }
+[data-widget="w-fleet-scrolly"] .wf__pills.is-empty { visibility: hidden; }
+[data-widget="w-fleet-scrolly"] .wf__pillrow { display: flex; flex-wrap: nowrap; gap: 6px; }
+[data-widget="w-fleet-scrolly"] .wf-pill {
+  display: inline-flex; align-items: center; gap: var(--sp-half);
+  height: 24px; padding: 0 var(--sp-1);
+  background: var(--surface); border: var(--stroke) solid var(--ink); border-radius: var(--radius-3);
+  font: 700 var(--fs-caption)/1 var(--font-mono); letter-spacing: 0; white-space: nowrap; color: var(--ink);
+}
+[data-widget="w-fleet-scrolly"] .wf-pill__n { font-variant-numeric: tabular-nums; }
+[data-widget="w-fleet-scrolly"] .wf-pill__sep { color: var(--ink-3); }
+[data-widget="w-fleet-scrolly"] .wf-pill--up .wf-pill__st { color: var(--good); }
+[data-widget="w-fleet-scrolly"] .wf-pill--degraded .wf-pill__st { color: var(--warn); }
+[data-widget="w-fleet-scrolly"] .wf-pill--down .wf-pill__st { color: var(--bad); }
+[data-widget="w-fleet-scrolly"] .wf-pill--held { border-style: dashed; }
+[data-widget="w-fleet-scrolly"] .wf-pill--held .wf-pill__st { color: var(--ink-3); }
+
+/* note lines: storefront's setting for orders, and the spreadsheet */
+/* notes sit var(--sp-1) in from the plate's edge and var(--sp-1) apart, so their 3px highlight
+   outlines (offset 1px) never touch the plate border or each other */
+[data-widget="w-fleet-scrolly"] .wf__notes { display: flex; flex-direction: column; gap: var(--sp-1); padding: var(--sp-half) 0 0 var(--sp-half); }
+[data-widget="w-fleet-scrolly"] .wf--narrow .wf__notes { padding: var(--sp-half); }
+[data-widget="w-fleet-scrolly"] .wf__noteslot { display: flex; align-items: flex-start; }
+[data-widget="w-fleet-scrolly"] .wf-note {
+  margin: 0; padding: 0 var(--sp-half);
+  background: var(--surface);
+  font: 400 var(--fs-caption)/18px var(--font-mono); color: var(--ink);
+}
+[data-widget="w-fleet-scrolly"] .wf-note--warn { color: var(--warn); font-weight: 700; }
+[data-widget="w-fleet-scrolly"] .wf-note--mute { color: var(--ink-3); }
+[data-widget="w-fleet-scrolly"] .wf-note__k { font-weight: 700; letter-spacing: .08em; text-transform: uppercase; }
+
+/* step highlight: what changed in this step gets a 3px ink outline, for this step only.
+   It eases in over dur-2 (≤ 300ms); the tokens make it instant under prefers-reduced-motion. */
+[data-widget="w-fleet-scrolly"] .is-hl {
+  outline: 3px solid transparent; outline-offset: 1px;
+  transition: outline-color var(--dur-2) var(--ease-out);
+}
+[data-widget="w-fleet-scrolly"] .wf-c.is-hl,
+[data-widget="w-fleet-scrolly"] .wf-free.is-hl { outline-offset: 0; }
+[data-widget="w-fleet-scrolly"] .wf.is-lit .is-hl { outline-color: var(--ink); }
+
+/* step text: the time kicker above a step ("02:51") */
+[data-widget="w-fleet-scrolly"] .fs-step__text .wf-kicker {
+  margin: 0 0 var(--sp-1);
+  font: 700 var(--fs-caption)/var(--lh-caption) var(--font-mono); letter-spacing: .08em; color: var(--ink-3);
+  font-variant-numeric: tabular-nums;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-widget="w-fleet-scrolly"] .is-hl { transition: none; }
+}
+
+/* Load-time reservation: the page reserves 420px (≥ 600px wide) or min(316px, 50vh) for every canvas
+   slot; lanes B and C draw taller (note rows, banner row), so reserve each lane's measured height here,
+   before the script runs, and nothing below shifts when the drawing appears. Under 900px the drawing
+   is fitted to 50vh, so the cap stays. Every state of a lane has the same height (CURRICULUM §8.5). */
+[data-widget="w-fleet-scrolly"] .fs-lane[data-lane="A"] .fs-canvas { min-height: min(324px, 50vh); }
+[data-widget="w-fleet-scrolly"] .fs-lane[data-lane="B"] .fs-canvas { min-height: min(380px, 50vh); }
+[data-widget="w-fleet-scrolly"] .fs-lane[data-lane="C"] .fs-canvas { min-height: min(352px, 50vh); }
+@media (min-width: 600px) {
+  [data-widget="w-fleet-scrolly"] .fs-lane[data-lane="A"] .fs-canvas { min-height: min(420px, 50vh); }
+  [data-widget="w-fleet-scrolly"] .fs-lane[data-lane="B"] .fs-canvas { min-height: min(468px, 50vh); }
+  [data-widget="w-fleet-scrolly"] .fs-lane[data-lane="C"] .fs-canvas { min-height: min(444px, 50vh); }
+}
+@media (min-width: 900px) {
+  [data-widget="w-fleet-scrolly"] .fs-lane[data-lane="A"] .fs-canvas { min-height: 424px; }
+  [data-widget="w-fleet-scrolly"] .fs-lane[data-lane="B"] .fs-canvas { min-height: 480px; }
+  [data-widget="w-fleet-scrolly"] .fs-lane[data-lane="C"] .fs-canvas { min-height: 456px; }
+}
+@media (max-height: 559px) {
+  [data-widget="w-fleet-scrolly"] .fs-lane .fs-canvas { min-height: 0; }
+}

@@ -1,0 +1,226 @@
+{
+  "version": 1,
+  "slug": "ch-03-orchestration",
+  "created": "2026-10-21T16:22:07-04:00",
+  "depth": "light",
+  "minutes": 15,
+  "stage": "done",
+  "caps": {
+    "spawns": 18,
+    "agent_minutes": 109,
+    "loops": {
+      "research": 2,
+      "checkpoint": 4,
+      "gate": 6,
+      "review": 2
+    }
+  },
+  "seq": 10,
+  "dispatches": [
+    {
+      "nn": 1,
+      "role": "researcher",
+      "loop": "research",
+      "label": "light-research",
+      "writes": [
+        "run/research"
+      ],
+      "exclude": [],
+      "opened": "2026-10-21T16:23:10-04:00",
+      "closed": "2026-10-21T16:30:35-04:00",
+      "status": "done_with_concerns",
+      "ns_ok": true,
+      "pivot": false,
+      "reason": null,
+      "changed": 9
+    },
+    {
+      "nn": 2,
+      "role": "instructional-designer",
+      "loop": "checkpoint",
+      "label": "plan-and-mockup",
+      "writes": [
+        "run/plan"
+      ],
+      "exclude": [],
+      "opened": "2026-10-21T16:30:38-04:00",
+      "closed": "2026-10-21T16:54:01-04:00",
+      "status": "done_with_concerns",
+      "ns_ok": true,
+      "pivot": false,
+      "reason": null,
+      "changed": 8
+    },
+    {
+      "nn": 3,
+      "role": "instructional-designer",
+      "loop": "checkpoint",
+      "label": "revise-scrolly",
+      "writes": [
+        "run/plan"
+      ],
+      "exclude": [],
+      "opened": "2026-10-21T17:39:24-04:00",
+      "closed": "2026-10-21T17:51:57-04:00",
+      "status": "done_with_concerns",
+      "ns_ok": true,
+      "pivot": false,
+      "reason": null,
+      "changed": 8
+    },
+    {
+      "nn": 4,
+      "role": "page-builder",
+      "loop": "gate:page",
+      "label": "page-build",
+      "writes": [
+        "site"
+      ],
+      "exclude": [
+        "site/widgets/*/*"
+      ],
+      "opened": "2026-10-21T17:57:50-04:00",
+      "closed": "2026-10-21T18:14:26-04:00",
+      "status": "done_with_concerns",
+      "ns_ok": true,
+      "pivot": false,
+      "reason": null,
+      "changed": 26
+    },
+    {
+      "nn": 5,
+      "role": "widget-builder",
+      "loop": "gate:w-fleet-scrolly",
+      "label": "fleet-scrolly",
+      "writes": [
+        "site/widgets/w-fleet-scrolly"
+      ],
+      "exclude": [],
+      "opened": "2026-10-21T18:14:37-04:00",
+      "closed": "2026-10-21T18:38:46-04:00",
+      "status": "done_with_concerns",
+      "ns_ok": true,
+      "pivot": false,
+      "reason": null,
+      "changed": 22
+    },
+    {
+      "nn": 6,
+      "role": "pedagogy-ux-reviewer",
+      "loop": "review:pedagogy-ux",
+      "label": "merged-r1",
+      "writes": [
+        "run/review/round-1"
+      ],
+      "exclude": [],
+      "opened": "2026-10-21T18:48:19-04:00",
+      "closed": "2026-10-21T18:59:13-04:00",
+      "status": "done_with_concerns",
+      "ns_ok": true,
+      "pivot": false,
+      "reason": null,
+      "changed": 228
+    },
+    {
+      "nn": 7,
+      "role": "page-builder",
+      "loop": "gate:page",
+      "label": "r1-fixes-page",
+      "writes": [
+        "site"
+      ],
+      "exclude": [
+        "site/widgets/*/*"
+      ],
+      "opened": "2026-10-21T19:49:59-04:00",
+      "closed": "2026-10-21T19:52:04-04:00",
+      "status": "done",
+      "ns_ok": true,
+      "pivot": false,
+      "reason": null,
+      "changed": 13
+    },
+    {
+      "nn": 8,
+      "role": "widget-builder",
+      "loop": "gate:w-fleet-scrolly",
+      "label": "r1-fixes-widget",
+      "writes": [
+        "site/widgets/w-fleet-scrolly"
+      ],
+      "exclude": [],
+      "opened": "2026-10-21T19:49:59-04:00",
+      "closed": "2026-10-21T19:54:49-04:00",
+      "status": "done_with_concerns",
+      "ns_ok": true,
+      "pivot": false,
+      "reason": null,
+      "changed": 18
+    },
+    {
+      "nn": 9,
+      "role": "page-builder",
+      "loop": "gate:page",
+      "label": "k02-qualifier",
+      "writes": [
+        "site"
+      ],
+      "exclude": [
+        "site/widgets/*/*"
+      ],
+      "opened": "2026-10-21T19:55:33-04:00",
+      "closed": "2026-10-21T19:56:37-04:00",
+      "status": "done",
+      "ns_ok": true,
+      "pivot": false,
+      "reason": null,
+      "changed": 9
+    },
+    {
+      "nn": 10,
+      "role": "page-builder",
+      "loop": "gate:page",
+      "label": "relabel-17",
+      "writes": [
+        "site"
+      ],
+      "exclude": [
+        "site/widgets/*/*"
+      ],
+      "opened": "2026-10-21T19:59:05-04:00",
+      "closed": "2026-10-21T19:59:58-04:00",
+      "status": "done",
+      "ns_ok": true,
+      "pivot": false,
+      "reason": null,
+      "changed": 9
+    }
+  ],
+  "loops": {
+    "research": 1,
+    "checkpoint": 2,
+    "gate:page": 4,
+    "gate:w-fleet-scrolly": 2,
+    "review:pedagogy-ux": 1
+  },
+  "gate_history": {
+    "gate:page": [
+      [],
+      [],
+      [],
+      [],
+      [],
+      [],
+      [],
+      [],
+      []
+    ],
+    "gate:w-fleet-scrolly": [
+      [],
+      [],
+      [],
+      []
+    ]
+  },
+  "noprogress": {}
+}
