@@ -17,7 +17,7 @@
     <h1 class="cp-hero__title">“Works on my machine”: containers</h1>
     <p class="cp-hero__standfirst">A year on, Fennel has six engineers and a new kind of bug: it happens in production and nowhere else. How packing the app with everything it needs makes that bug show up on a laptop instead, and what it still doesn’t fix.</p>
     <dl class="cp-meta">
-      <div><dt>Read</dt><dd>16 MIN</dd></div>
+      <div><dt>Read</dt><dd>18 MIN</dd></div>
       <div><dt>For</dt><dd>TECHNICAL MANAGERS</dd></div>
       <div><dt>Chapter</dt><dd>02 / 15</dd></div>
       <div><dt>Widgets</dt><dd>01</dd></div>
@@ -27,13 +27,35 @@
 </header>
 
 <div class="d-page">
-  <aside class="d-rail" data-toc data-minutes="16"></aside>
+  <aside class="d-rail" data-toc data-minutes="18"></aside>
   <main class="d-main" id="main">
     <details class="d-toc-mobile" data-toc-mobile></details>
 
-    <!-- s-01 · A year later · o-1 · claims c-03 (Ch 1 claims 01, 06 by reference) · k-01 retrieval -->
+    <!-- s-01 · A year later · o-1 · claims c-03 (Ch 1 claims 01, 06 by reference) · cast strip + jump-ahead
+         disclosure (CURRICULUM §2.11; user's human review) · k-01 retrieval -->
     <section id="s-01" data-segment="s-01">
       <h2 id="a-year-later"><span class="cp-sec">§ 01</span>A year later</h2>
+
+      <div class="cp-cast">
+        <p class="cp-label" id="cast-label">Cast</p>
+        <dl aria-labelledby="cast-label">
+        <dt>Sam</dt><dd>Founding engineer. Built Fennel’s first server by hand and still looks after production.</dd>
+        <dt>Jordan</dt><dd>Co-founder, now managing Fennel’s engineers: that’s you, in this story.</dd>
+        <dt>Riley</dt><dd>Engineer. Joined Fennel last month.</dd>
+        </dl>
+      </div>
+
+      <details class="d-more cp-more">
+        <summary>I didn’t read the last chapter. What happened?</summary>
+        <div class="cp-more__body">
+          <ul>
+            <li>Fennel is a grocery-delivery startup. In Chapter 1, its app ran on one server that Sam had set up by hand.</li>
+            <li>One Friday the server’s disk filled up during the dinner rush, and the site was down for two hours.</li>
+            <li>Rebuilding the server from Sam’s notes, with exactly the same code, gave a machine where some features failed. Over the months, things had been installed on the server by hand and never written down. A server whose real setup exists only on the machine itself is called a <em>snowflake</em> server.</li>
+            <li>Machines set up by hand also <em>drift</em>: each one quietly becomes a little different from the others. The check below asks about one of the features that failed.</li>
+          </ul>
+        </div>
+      </details>
 
       <div class="cp-check" role="group" aria-labelledby="k-01-q" data-check="k-01" data-after="A year on, that kind of gap isn’t on one server. It’s on every laptop.">
         <div class="cp-check__head"><span class="cp-chip">RETRIEVE</span><span class="cp-label">Check 01 / 07</span></div>
@@ -57,36 +79,196 @@
       <p>Nobody is being careless. This is last chapter’s drift, now on every machine Fennel has. Each laptop, the staging machine and production was set up by hand, and each has quietly become a little different from the others. When the software installed on two machines differs, small incompatibilities appear, and code that passed its tests on one machine can fail on the other. Here’s what one of those bugs looks like up close.</p>
     </section>
 
-    <!-- s-02 · Same code, two machines · o-1 · claims c-01, c-02, c-03, c-04 · widget w-samecode (complexity high; built in widgets/w-samecode/) · checks k-02, k-03 live inside it -->
+    <!-- s-02 · Same code, two machines · o-1 · claims c-01, c-03, c-04 · w-samecode-scrolly (two scrollytelling
+         lanes, CURRICULUM §8 step 6; replaces the w-samecode carousel after the user's human review) · checks k-02
+         (lane A) and k-03 (lane B) sit in the step column at their gates -->
     <section id="s-02" data-segment="s-02">
       <h2 id="same-code-two-machines"><span class="cp-sec">§ 02</span>Same code, two machines</h2>
-      <p>Below are Riley’s laptop and Fennel’s production machine, side by side, row by row. Predict what happens at each step before you see it; the whole thing takes about three minutes.</p>
-      <div data-widget="w-samecode" class="d-wide" aria-label="Interactive: the same code on two machines, first installed by hand, then from one image"></div>
-    </section>
+      <p>Here is one of those bugs, step by step, on Riley’s laptop and Fennel’s production machine. Scroll through it. Two questions along the way unlock what happens next.</p>
+      <noscript><p class="fs-noscript">The drawings and step text in this section need JavaScript. The rest of the page reads without it.</p></noscript>
 
-    <!-- s-03 · What goes in the image, and what doesn't · o-1, o-2 · claims c-01, c-02, c-04, c-06 · m-19 revisited (new trap: "the image is the whole app") · analogy A1 -->
-    <section id="s-03" data-segment="s-03">
-      <h2 id="what-goes-in-the-image"><span class="cp-sec">§ 03</span>What goes in the image, and what doesn’t</h2>
-      <p>The sealed package you just used has a name. An <dfn>image</dfn> is the app’s code packed together with what it needs to run: the language runtime, the libraries, tools like the photo resizer, and the files the app starts with. Those are the rows inside the IN THE IMAGE band. They’re built into the image once, and everyone who runs that image gets exactly those versions. That’s why, in the second state, the photo tool row read 6.2 on Riley’s laptop too: the app used the tool inside the image, not the 7.0 Riley had installed.</p>
-      <p>That also answers Riley’s first week. Instead of following a wiki page to install a runtime, libraries and tools one at a time, a new engineer downloads the image and runs it, and starts with the same versions everyone else has.</p>
-      <p>Two things stay out of the image on purpose, and you saw both in the NOT IN THE IMAGE band. Settings that differ from place to place, like the database address and its password, are handed to the app when it starts, which is why one image can run in both staging and production. The data the app writes, like orders, is kept outside as well, so replacing the app doesn’t wipe it out. In the last chapter you found that the code isn’t the whole app. The image isn’t the whole app either: it’s the code plus what it needs to run, without the settings and data that make each place different.</p>
-      <p>Once an image is built, it can’t be changed; engineers say images are <em>immutable</em>. To change anything inside one, such as the photo tool, you build a new image with a new version label. That’s what Riley did with v43, and v42 stayed exactly as it was. This is why an image can’t drift the way Sam’s server did. Sam’s server drifted because people changed it by hand, one sensible fix at a time. Nobody can change a built image by hand, so the image that passed the tests is exactly the image that ships.</p>
-      <p>One caution: the version label is a name attached to the image, and someone can move that name to a different image. Teams that need certainty use labels they never reuse, or the image’s unique fingerprint, which engineers call a digest.</p>
-      <div class="cp-aside">
-        <p><b>ANALOGY</b>Many companies don’t hand a new hire a setup checklist. IT gives them a laptop copied from one master setup, so everyone starts the same.</p>
-        <p class="cp-breaks"><b>WHERE THIS ANALOGY BREAKS</b>An IT laptop starts drifting on day one, as people install things on it. An image can’t be changed at all: every time it runs, it starts from the same contents, and any change means a new image. And IT’s master copy includes the core of the operating system. An image leaves that out, which matters later in this chapter.</p>
+      <!--
+        ===== MOUNT CONTRACT · w-samecode-scrolly (page ↔ widget) =====
+        Same contract as Ch 03's w-fleet-scrolly. The page owns this markup and its layout CSS (assets/page.css,
+        ".fs-*"). The widget owns widgets/w-samecode-scrolly/ and renders only into:
+          .fs-canvas[data-canvas]     one per lane: renderPair() of the active step's snapshot, role="img" + aria-label
+          [data-step-snap]            each step's snapshot, shown by page CSS only on short viewports (max-height: 559px)
+          [data-step-text]            the step's text from data.js
+        Steps: li.fs-step[data-step] ids match data.js; the widget toggles .is-active / .is-locked / .is-unlocked.
+        Gates: data-gate="k-02" etc. A gated step stays locked until 'didactician:check-commit' (assets/page.js)
+        fires for every listed check; gates never re-lock.
+      -->
+      <div data-widget="w-samecode-scrolly" class="d-wide fs">
+
+        <div class="fs-lane" data-lane="A">
+          <h3 class="fs-lane__title" id="lane-by-hand">Installed by hand</h3>
+          <div class="fs-lane__grid">
+            <div class="fs-canvas" data-canvas></div>
+            <ol class="fs-steps">
+              <li class="fs-step" data-step="A1">
+                <div class="fs-step__snap" data-step-snap></div>
+                <div class="fs-step__text" data-step-text></div>
+              </li>
+              <li class="fs-step" data-step="A2">
+                <div class="fs-step__snap" data-step-snap></div>
+                <div class="fs-step__text" data-step-text></div>
+              </li>
+              <li class="fs-step" data-step="A3">
+                <div class="fs-step__snap" data-step-snap></div>
+                <div class="fs-step__text" data-step-text></div>
+                <div class="cp-check" role="group" aria-labelledby="k-02-q" data-check="k-02">
+                  <div class="cp-check__head"><span class="cp-chip">PREDICT</span><span class="cp-label">Check 02 / 07</span></div>
+                  <p class="cp-check__q" id="k-02-q">Riley’s change passes every test on the laptop, and the code is the same on both machines. What happens when the change ships to production?</p>
+                  <ul class="cp-options">
+                    <li><button type="button" class="cp-option" data-ok data-fb="Right. Riley’s code asks ImageResizer for an option only 7.0 has. Production has 6.2, so uploads fail there and only there. On the laptop it works every time: a “can’t reproduce” bug."><span class="cp-option__key">A</span><span>Photo upload fails in production, while on Riley’s laptop it keeps working, so nobody can reproduce it.</span><span class="cp-option__tag"></span></button></li>
+                    <li><button type="button" class="cp-option" data-fb="That’s “the code is the app” again. The tests ran on Riley’s laptop, with ImageResizer 7.0. Production has 6.2, which doesn’t have the option Riley’s code uses."><span class="cp-option__key">B</span><span>Photo upload works in production too: the code is the same, and it passed every test on the laptop.</span><span class="cp-option__tag"></span></button></li>
+                    <li><button type="button" class="cp-option" data-fb="Nothing checks the tools when new code is copied over. The release installs and runs. It fails later, the first time a customer uploads a photo."><span class="cp-option__key">C</span><span>The release refuses to install on production at all, because the two machines’ tools don’t match.</span><span class="cp-option__tag"></span></button></li>
+                  </ul>
+                  <div class="cp-feedback" role="status" hidden></div>
+                </div>
+              </li>
+              <li class="fs-step" data-step="A4" data-gate="k-02">
+                <p class="fs-step__lock" data-step-lock>Answer the question above to see what happens</p>
+                <div class="fs-step__snap" data-step-snap></div>
+                <div class="fs-step__text" data-step-text></div>
+              </li>
+            </ol>
+          </div>
+        </div>
+
+        <div class="fs-lane" data-lane="B">
+          <h3 class="fs-lane__title" id="lane-image">Packed in an image</h3>
+          <div class="fs-lane__grid">
+            <div class="fs-canvas" data-canvas></div>
+            <ol class="fs-steps">
+              <li class="fs-step" data-step="B1">
+                <div class="fs-step__snap" data-step-snap></div>
+                <div class="fs-step__text" data-step-text></div>
+              </li>
+              <li class="fs-step" data-step="B2">
+                <div class="fs-step__snap" data-step-snap></div>
+                <div class="fs-step__text" data-step-text></div>
+                <div class="cp-check" role="group" aria-labelledby="k-03-q" data-check="k-03">
+                  <div class="cp-check__head"><span class="cp-chip">PREDICT</span><span class="cp-label">Check 03 / 07</span></div>
+                  <p class="cp-check__q" id="k-03-q">Riley’s laptop now runs the app from <code>fennel-app:v42</code>. Will the tests that passed on Riley’s laptop before still pass?</p>
+                  <ul class="cp-options">
+                    <li><button type="button" class="cp-option" data-fb="They passed before because the laptop had ImageResizer 7.0, installed by hand. Now the app uses what’s in the image: 6.2, exactly as production does. So the tests fail, on the laptop, before anything is released. That’s the failure you want."><span class="cp-option__key">A</span><span>The tests will continue passing.</span><span class="cp-option__tag"></span></button></li>
+                    <li><button type="button" class="cp-option" data-ok data-fb="Right. Inside the image, the laptop has ImageResizer 6.2, just like production, and Riley’s change needs 7.0. The tests fail on Riley’s laptop, before the change goes anywhere near customers."><span class="cp-option__key">B</span><span>The tests will now fail.</span><span class="cp-option__tag"></span></button></li>
+                  </ul>
+                  <div class="cp-feedback" role="status" hidden></div>
+                </div>
+              </li>
+              <li class="fs-step" data-step="B3" data-gate="k-03">
+                <p class="fs-step__lock" data-step-lock>Answer the question above to see what happens</p>
+                <div class="fs-step__snap" data-step-snap></div>
+                <div class="fs-step__text" data-step-text></div>
+              </li>
+              <li class="fs-step" data-step="B4" data-gate="k-03">
+                <p class="fs-step__lock" data-step-lock>Answer the question above to see what happens</p>
+                <div class="fs-step__snap" data-step-snap></div>
+                <div class="fs-step__text" data-step-text></div>
+              </li>
+            </ol>
+          </div>
+        </div>
+
       </div>
     </section>
 
-    <!-- s-04 · Build once, run many · o-2 · claims c-05, c-06, c-07, c-02, c-03, c-09 · f-01 · analogy A2 (plants m-24) · k-04 -->
+    <!-- s-03 · What goes in the image, and what doesn't · o-1, o-2 · claims c-01, c-02, c-04, c-06 · m-19 revisited
+         (new trap: "the image is the whole app") · TERM 01–03 (.cp-term, CURRICULUM §8 step 4) · f-01 · rewritten
+         after the user's human review: no re-telling of §02, the analogy aside removed, the tag caveat in a disclosure -->
+    <section id="s-03" data-segment="s-03">
+      <h2 id="what-goes-in-the-image"><span class="cp-sec">§ 03</span>What goes in the image, and what doesn’t</h2>
+
+      <div class="cp-term" id="term-01" role="note" aria-label="New term 1 of 4">
+        <p class="cp-term__kicker">New term · 01 / 04</p>
+        <p class="cp-term__term">image</p>
+        <p class="cp-term__def">The app’s code packed together with everything it needs to run: the language runtime, the libraries, tools like ImageResizer, and the files the app starts with. Everyone who runs the same image gets exactly the same versions.</p>
+        <p class="cp-term__back">You met it in §02: fennel-app:v42.</p>
+      </div>
+
+      <p>That also answers Riley’s first week. Instead of following a wiki page to install Python, the libraries and the tools one at a time, a new engineer downloads the image and runs it, and starts with exactly what everyone else has.</p>
+
+      <div class="cp-term" id="term-02" role="note" aria-label="New term 2 of 4">
+        <p class="cp-term__kicker">New term · 02 / 04</p>
+        <p class="cp-term__term">immutable</p>
+        <p class="cp-term__def">Can’t be changed once it’s built. To change anything inside an image, even one tool, you build a new image with a new version name.</p>
+        <p class="cp-term__back">You saw it in §02: Riley built v43, and v42 stayed as it was.</p>
+      </div>
+
+      <p>This is why an image can’t drift the way Sam’s server did. The server drifted because people changed it by hand, one sensible fix at a time. Nobody can change a built image by hand, so the image that passed the tests is exactly the image that ships.</p>
+
+      <details class="d-more cp-more">
+        <summary>Can a version name ever point to a different image?</summary>
+        <div class="cp-more__body">
+          <p>Yes, so engineers are careful with them. A version name like v42 is called a <em>tag</em>, and a tag is only a name pointing at an image. Someone can move it to point at a newer image; neither image changes, but “v42” now means something else.</p>
+          <p>Teams that need certainty never reuse a tag, or they refer to the image by its <em>digest</em>, a fingerprint calculated from the image’s contents, which can’t be moved.</p>
+        </div>
+      </details>
+
+      <p>Two things stay out of the image on purpose. Settings that differ from place to place, like the database address and its password, are handed to the app when it starts. That’s why one image can run in staging and in production. And the data the app writes, like orders, is kept outside the app, in Fennel’s database, so replacing the app doesn’t wipe it out.</p>
+
+      <!-- f-01: static; .inout in assets/page.css. Same rows and image frame as §02's drawing. -->
+      <figure class="cp-fig d-wide" id="f-01" aria-labelledby="f-01-cap">
+        <div class="cp-fig__plate">
+          <div class="cp-fig__bar"><span class="cp-label">Fig. 01</span><span class="cp-label">One image, two places</span></div>
+          <div class="cp-blueprint inout">
+            <div class="inout__grid">
+              <p class="inout__col"><span class="cp-label">Machine</span><b>Staging</b></p>
+              <p class="inout__col"><span class="cp-label">Machine</span><b>Production</b></p>
+
+              <p class="inout__band"><b>In the image</b><span>built once, the same in both places</span></p>
+              <div class="inout__img">
+                <p class="inout__imghead"><span class="cp-label">Image</span> fennel-app:v43</p>
+                <span class="mrow mrow--c1">code: main</span>
+                <span class="mrow mrow--c2">Python 3.12</span>
+                <span class="mrow mrow--c2">12 libraries</span>
+                <span class="mrow mrow--c2">ImageResizer 7.0</span>
+              </div>
+              <div class="inout__img">
+                <p class="inout__imghead"><span class="cp-label">Image</span> fennel-app:v43</p>
+                <span class="mrow mrow--c1">code: main</span>
+                <span class="mrow mrow--c2">Python 3.12</span>
+                <span class="mrow mrow--c2">12 libraries</span>
+                <span class="mrow mrow--c2">ImageResizer 7.0</span>
+              </div>
+
+              <p class="inout__band"><b>Handed in at start</b><span>different in each place</span></p>
+              <span class="mrow mrow--c2">settings: staging</span>
+              <span class="mrow mrow--c2">settings: production</span>
+
+              <p class="inout__band"><b>Kept outside the app</b><span>outlives any copy of it</span></p>
+              <span class="mrow inout__data">data: test orders</span>
+              <span class="mrow inout__data">data: real orders</span>
+            </div>
+          </div>
+        </div>
+        <figcaption id="f-01-cap"><span class="cp-label">Fig. 01</span><span>The image is identical in staging and production. Each place hands the app its own settings when it starts, and keeps its own data outside the app.</span></figcaption>
+      </figure>
+
+      <p>In the last chapter you found that the code isn’t the whole app. The image isn’t the whole app either: it’s the code plus what it needs to run, without the settings and data that make each place different. Keeping the data out has a name of its own.</p>
+
+      <div class="cp-term" id="term-03" role="note" aria-label="New term 3 of 4">
+        <p class="cp-term__kicker">New term · 03 / 04</p>
+        <p class="cp-term__term">stateless</p>
+        <p class="cp-term__def">Said of an app that keeps nothing it needs inside itself: its data lives outside it, and its settings are handed in at start. You can stop it and start a fresh copy from the image at any time, and nothing is lost.</p>
+        <p class="cp-term__back">Fennel’s app is built this way. Apps that can’t be, like the database itself, are Chapter 10.</p>
+      </div>
+
+      <p>The two words work as a pair. The image is immutable, so every fresh copy starts out exactly the same. The app is stateless, so throwing a copy away costs nothing. The next section shows what those running copies are.</p>
+    </section>
+
+    <!-- s-04 · Build once, run many · o-2 · claims c-05, c-06, c-07, c-02, c-03, c-09 · f-02 · TERM 04 · analogy A2 (plants m-24)
+         · k-04 + disclosure (storage outside the container, named in Ch 10; user's human review) -->
     <section id="s-04" data-segment="s-04">
       <h2 id="build-once-run-many"><span class="cp-sec">§ 04</span>Build once, run many: images and containers</h2>
       <p>An image is a package. It does nothing until a machine runs it. Here is how one image gets from Riley’s laptop to every machine that needs it.</p>
 
-      <!-- f-01: registry chips and machine frames rendered by assets/page.js from CH02_REGISTRY / CH02_MACHINES (reusable) -->
-      <figure class="cp-fig d-wide" id="f-01" aria-labelledby="f-01-cap">
+      <!-- f-02: registry chips and machine frames rendered by assets/page.js from CH02_REGISTRY / CH02_MACHINES (reusable) -->
+      <figure class="cp-fig d-wide" id="f-02" aria-labelledby="f-02-cap">
         <div class="cp-fig__plate">
-          <div class="cp-fig__bar"><span class="cp-label">Fig. 01</span><span class="cp-label">One image, many containers</span></div>
+          <div class="cp-fig__bar"><span class="cp-label">Fig. 02</span><span class="cp-label">One image, many containers</span></div>
           <div class="cp-blueprint flow">
             <div class="flow__grid">
               <div class="cp-machine">
@@ -106,12 +288,21 @@
             </div>
           </div>
         </div>
-        <figcaption id="f-01-cap"><span class="cp-label">Fig. 01</span><span>Build the image once and keep it in the registry. Every machine runs containers from that same package, and one image can run as several containers.</span></figcaption>
+        <figcaption id="f-02-cap"><span class="cp-label">Fig. 02</span><span>Build the image once and keep it in the registry. Every machine runs containers from that same package, and one image can run as several containers.</span></figcaption>
       </figure>
 
       <p>Riley builds fennel-app:v43 once and uploads it to a <dfn>registry</dfn>, a shared store of images that Fennel’s machines can reach. Engineers call that upload a push. The laptop, the staging machine and production then each download, or pull, the same image from it.</p>
-      <p>Running an image gives you a <dfn>container</dfn>: the app running as a process, walled off by the operating system so that it has its own files, which come from the image, and its own view of what’s running. Last chapter called a running app a process. A container is that process, packaged and walled off. One image can run as several containers, on one machine or on many; in Fig. 01, production runs two.</p>
-      <p>A running container can write files, and someone can even change things inside it by hand. But containers don’t last. Every release replaces the running containers with new ones, started from the new image, and when a container is replaced, the changes made inside it go with it. Each new container starts fresh, with exactly what the image holds.</p>
+      <p>Running an image starts a container. Last chapter called a running app a process; in practice an app is usually one main process, sometimes with a few helper processes it starts itself. A container is that group of processes, started from an image and isolated from the rest of the machine by the machine’s operating system. The processes inside see the files that came from the image, not the machine’s own, and they see each other but none of the machine’s other programs.</p>
+
+      <div class="cp-term" id="term-04" role="note" aria-label="New term 4 of 4">
+        <p class="cp-term__kicker">New term · 04 / 04</p>
+        <p class="cp-term__term">container</p>
+        <p class="cp-term__def">One or more processes of an app, started from an image and walled off from the rest of the machine.</p>
+        <p class="cp-term__back">Chapter 1’s process, packaged and walled off.</p>
+      </div>
+
+      <p>One image can run as several containers, on one machine or on many; in Fig. 02, production runs two.</p>
+      <p>A running container can write files, and someone can even change things inside it by hand. But containers don’t last. Every release replaces the running containers with new ones, started from the new image, and when a container is replaced, the changes made inside it go with it. Each new container starts fresh, with exactly what the image holds. Because Fennel’s app is stateless, that costs nothing: its orders were never inside the container.</p>
       <div class="cp-aside">
         <p><b>ANALOGY</b>The usual comparison is to shipping containers. Before them, cargo was loaded piece by piece, and differently at every port. After them, any ship, crane or truck could move the same sealed box without caring what was inside. Engineers call the software version of that promise “build once, run anywhere.”</p>
         <p class="cp-breaks"><b>WHERE THIS ANALOGY BREAKS</b>A shipping container doesn’t care which ship carries it. A software container does: it needs a machine with the right kind of processor, and its settings are handed in when it arrives. Outside services, like the database, may differ too. “Run anywhere” means the inside is the same everywhere, not everything around it.</p>
@@ -128,9 +319,17 @@
         </ul>
         <div class="cp-feedback" role="status" hidden></div>
       </div>
+
+      <details class="d-more cp-more">
+        <summary>A note on where Riley made the fix</summary>
+        <div class="cp-more__body">
+          <p>A container can also be given storage that lives outside it, so that files written there outlive the container. Chapter 10 names it and shows what it’s for: data, like orders. Riley made the fix inside the container itself, not in storage like that, so it went with the container.</p>
+          <p>Even if Riley could have kept it, a fix to the app belongs in a new image, where everyone can see it and every new container gets it. A fix kept anywhere else is drift again.</p>
+        </div>
+      </details>
     </section>
 
-    <!-- s-05 · Not a small VM · o-3 · claims c-10, c-11 (hedged), c-12 · m-01 owned · k-05 before the kernel gloss and f-02 · analogy A3 -->
+    <!-- s-05 · Not a small VM · o-3 · claims c-10, c-11 (hedged), c-12 · m-01 owned · k-05 before the kernel gloss and f-03 · analogy A3 -->
     <section id="s-05" data-segment="s-05">
       <h2 id="not-a-small-vm"><span class="cp-sec">§ 05</span>Not a small VM</h2>
       <p>Sam has a one-line summary of all this, and it’s one you’ll hear often: “a container is basically a small VM.” Last chapter’s virtual machine was a whole computer made in software, with its own operating system. Before reading on, decide whether that’s what a container is.</p>
@@ -140,17 +339,17 @@
         <p class="cp-check__q" id="k-05-q">Sam says a container is basically a small VM. Before you read on, which of these is closest to what a container actually is?</p>
         <ul class="cp-options">
           <li><button type="button" class="cp-option" data-fb="That’s the common picture, and it’s why containers get drawn like little VMs. But a container doesn’t boot an operating system of its own; it runs on the machine’s operating system core. That’s exactly why it’s small and quick to start."><span class="cp-option__key">A</span><span>A small virtual machine: it boots its own trimmed-down operating system, just a lighter one.</span><span class="cp-option__tag"></span></button></li>
-          <li><button type="button" class="cp-option" data-fb="That’s closer to last chapter’s VM snapshot, clutter and all. An image holds only the app and what it needs, and a container is that image running as a process."><span class="cp-option__key">B</span><span>A compressed copy of a whole machine: it unpacks on any machine into an exact clone of the original.</span><span class="cp-option__tag"></span></button></li>
-          <li><button type="button" class="cp-option" data-ok data-fb="Right. A container is a process, like any running app, with walls around it: its own files from the image, its own view of what’s running. Underneath, it shares the machine’s operating system core with every other container there."><span class="cp-option__key">C</span><span>An ordinary program, fenced off from its neighbours: it runs on the machine’s own operating system.</span><span class="cp-option__tag"></span></button></li>
+          <li><button type="button" class="cp-option" data-fb="That’s closer to last chapter’s VM snapshot, clutter and all. An image holds only the app and what it needs, and a container is that image running as one or more processes."><span class="cp-option__key">B</span><span>A compressed copy of a whole machine: it unpacks on any machine into an exact clone of the original.</span><span class="cp-option__tag"></span></button></li>
+          <li><button type="button" class="cp-option" data-ok data-fb="Right. A container is an app’s processes, like any running app, with walls around them: they see the image’s files and each other, not the rest of the machine. Underneath, they share the machine’s operating system core with every other container there."><span class="cp-option__key">C</span><span>An ordinary program, fenced off from its neighbours: it runs on the machine’s own operating system.</span><span class="cp-option__tag"></span></button></li>
         </ul>
         <div class="cp-feedback" role="status" hidden></div>
       </div>
 
       <p>The core of the operating system has a name, the <dfn>kernel</dfn>: the part that runs the hardware and every process on it. Here is the same machine running three apps two ways.</p>
 
-      <figure class="cp-fig d-wide" id="f-02" aria-labelledby="f-02-cap">
+      <figure class="cp-fig d-wide" id="f-03" aria-labelledby="f-03-cap">
         <div class="cp-fig__plate">
-          <div class="cp-fig__bar"><span class="cp-label">Fig. 02</span><span class="cp-label">One machine, two ways</span></div>
+          <div class="cp-fig__bar"><span class="cp-label">Fig. 03</span><span class="cp-label">One machine, two ways</span></div>
           <div class="cp-blueprint ways">
             <div class="ways__grid">
               <div class="ways__panel">
@@ -187,16 +386,16 @@
             </div>
           </div>
         </div>
-        <figcaption id="f-02-cap"><span class="cp-label">Fig. 02</span><span>Each VM carries a whole operating system. Containers share the machine’s one kernel, so each is smaller and quicker to start, and the walls between them are thinner. Sizes and times are typical, not guarantees.</span></figcaption>
+        <figcaption id="f-03-cap"><span class="cp-label">Fig. 03</span><span>Each VM carries a whole operating system. Containers share the machine’s one kernel, so each is smaller and quicker to start, and the walls between them are thinner. Sizes and times are typical, not guarantees.</span></figcaption>
       </figure>
 
-      <p>That one difference explains the rest. A VM has to carry a whole operating system and boot it, the way a computer starts up. A container skips both: starting one just starts a process on a kernel that’s already running. An image often does include an operating system’s basic files and tools (engineers will say an image is “based on Debian”, for example), but never its kernel, and nothing boots. So a container is <a href="https://cloud.google.com/discover/containers-vs-vms">typically</a> tens to hundreds of megabytes and starts in seconds, while a VM is typically gigabytes and takes tens of seconds to minutes to boot. Those are rough orders of magnitude, not measurements; the real numbers depend on the app and the setup.</p>
+      <p>Leaving out the kernel is what makes a container small and quick to start. A VM has to carry a whole operating system and boot it, the way a computer starts up. A container skips both: starting one just starts a process on a kernel that’s already running. An image often does include an operating system’s basic files and tools (engineers will say an image is “based on Debian”, for example), but never its kernel, and nothing boots. So a container is <a href="https://cloud.google.com/discover/containers-vs-vms">typically</a> tens to hundreds of megabytes and starts in seconds, while a VM is typically gigabytes and takes tens of seconds to minutes to boot. Those are rough orders of magnitude, not measurements; the real numbers depend on the app and the setup.</p>
       <p>Without a whole operating system and kernel for every app, the same machine has room for many more apps. How many more depends on the apps themselves.</p>
-      <p>The price is a thinner wall. Every container on a machine shares one kernel, so a flaw in that kernel is shared by all of them, while each VM has its own. That’s why cloud providers that run many different customers’ containers on the same machines put each customer’s containers inside a <a href="https://www.usenix.org/conference/nsdi20/presentation/agache">lightweight VM of its own</a>; AWS does this for some of its services. Containers are still walled off from each other, though. The wall is thinner than a VM’s, not missing, and for a company running only its own code, that trade-off is usually fine.</p>
-      <p>Nor is it one or the other. In the cloud, the machine running your containers is usually a VM itself. Containers and VMs are layers, not rivals.</p>
+      <p>The price is a thinner wall. Every container on a machine shares one kernel, so a flaw in that kernel is shared by all of them, while each VM has its own kernel. That’s why cloud providers that run many different customers’ containers on the same machines put each customer’s containers inside a <a href="https://www.usenix.org/conference/nsdi20/presentation/agache">lightweight VM of its own</a>; AWS does this for some of its services. Containers are still walled off from each other, though. The wall between containers isn’t missing, it’s just thinner. For a company running only its own code, that trade-off is usually fine.</p>
+      <p>You also don’t have to choose one or the other. When Fennel rents a machine from a cloud provider, that machine is usually a VM, and Fennel’s containers run inside it. In the cloud, you usually get both: containers, running inside a VM.</p>
       <div class="cp-aside">
         <p><b>ANALOGY</b>A VM is a house: its own foundation, plumbing and wiring. A container is an apartment: its own locked door, sharing the building’s foundation and plumbing. Apartments are cheaper and pack more people into the same land, and a burst main pipe reaches every flat.</p>
-        <p class="cp-breaks"><b>WHERE THIS ANALOGY BREAKS</b>In the cloud, containers usually run inside a VM, which would mean apartments built inside a house; the picture can’t show that. And it says nothing about how fast a container starts.</p>
+        <p class="cp-breaks"><b>WHERE THIS ANALOGY BREAKS</b>The analogy makes house and apartment a choice, but in the cloud you usually get both: Fennel’s containers run inside a VM, like apartments carved out of one house. And buildings don’t start up, so it can’t show the other difference: a container starts in seconds because, unlike a VM, it has no operating system to boot.</p>
       </div>
     </section>
 
@@ -269,8 +468,8 @@
 <script src="assets/replay.js"></script>
 <script src="assets/page.js"></script>
 <script src="assets/widget.js"></script>
-<link rel="stylesheet" href="widgets/w-samecode/index.css">
-<script src="widgets/w-samecode/data.js"></script>
-<script src="widgets/w-samecode/index.js"></script>
+<link rel="stylesheet" href="widgets/w-samecode-scrolly/index.css">
+<script src="widgets/w-samecode-scrolly/data.js"></script>
+<script src="widgets/w-samecode-scrolly/index.js"></script>
 </body>
 </html>

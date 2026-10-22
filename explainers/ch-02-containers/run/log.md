@@ -246,3 +246,19 @@ Ch 2 delivered: ~16 min, 0 open findings after P-02 fixed via course phone-heigh
 
 ### 2026-10-21T13:59:29-04:00 · orchestrator · stage
 Stage: deliver → **done**
+
+### 2026-10-21T21:44:54-04:00 · verify · gate
+Gate (page) round 8: **PASS**. Reading ~14.4 min (brief: ~16 min; reported, not gated); 254 KB, 17 requests.
+- [gate/page-round-8.json](gate/page-round-8.json)
+- [screenshots/page-round-8](screenshots/page-round-8)
+
+### 2026-10-21T21:47:52-04:00 · verify · gate
+Gate (page) round 9: **PASS**. Reading ~14.2 min (brief: ~16 min; reported, not gated); 275 KB, 17 requests.
+- [gate/page-round-9.json](gate/page-round-9.json)
+- [screenshots/page-round-9](screenshots/page-round-9)
+
+### 2026-10-21T22:41:17-04:00 · orchestrator · user_decision
+Human review applied (d-11): §02 now scrollytelling (w-samecode-scrolly), §03 rewritten with term cards, §01 cast + jump-ahead, §04/§05 wording; gate round 9 PASS; relabelled 18 min; no fresh review
+- [run/review/human-review.md](run/review/human-review.md)
+- [run/gate/page-round-9.json](run/gate/page-round-9.json)
+- **decision:** d-11

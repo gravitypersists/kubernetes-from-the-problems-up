@@ -10,7 +10,7 @@
     return e;
   }
 
-  /* ---------- f-01 · One image, many containers ----------
+  /* ---------- f-02 · One image, many containers (f-01 until the human-review revision) ----------
      Reusable data structure (plan f-01 reuse note): Ch 3's placement widget can copy the arrays,
      the two renderers below and the .cp-machine / .cp-ctr / .cp-img CSS in page.css, then add a
      chip size. Fields: registry chips { image, current, label? }; machines { name, containers:
@@ -89,7 +89,19 @@
 
   /* ---------- comprehension checks: commit, then reveal; feedback explains every option ----------
      Same behaviour as Ch 01. Addition: data-after on the card adds one closing line to every
-     outcome (k-01's "A year on…" line), shown once, not repeated in the disclosure. */
+     outcome (k-01's "A year on…" line), shown once, not repeated in the disclosure.
+     As Ch 03: every commit dispatches a bubbling CustomEvent from the card,
+       'didactician:check-commit'  detail { id: 'k-02', option: 'A', correct: true }
+     and stamps the card with data-committed="<option key>" (kept after TRY AGAIN). The §02 scrolly
+     controller (widgets/w-samecode-scrolly/) listens for it to unlock gated steps. */
+  function commit(card, option, correct) {
+    card.setAttribute('data-committed', option);
+    card.dispatchEvent(new CustomEvent('didactician:check-commit', {
+      bubbles: true,
+      detail: { id: card.getAttribute('data-check'), option: option, correct: correct }
+    }));
+  }
+
   function setupChoice(card) {
     var opts = Array.prototype.slice.call(card.querySelectorAll('.cp-option'));
     var fb = card.querySelector('.cp-feedback');
@@ -145,6 +157,7 @@
         fb.appendChild(det);
         fb.hidden = false;
         fb.focus({ preventScroll: true });
+        commit(card, keyOf(btn), ok);
       });
     });
   }

@@ -29,7 +29,7 @@ readiness_notes: novice for infrastructure, intermediate for general software. F
 
 ## Scope
 
-time_budget_minutes: 16  <!-- was 14; relabelled by user at d-09 (no cuts) -->
+time_budget_minutes: 18  <!-- was 14; 16 at d-09 (no cuts); 18 after the human-review revision (d-11), gate text-only ~14.2 min -->
 context: part of a course: "Kubernetes for Technical Managers" (chapter 2 of 15; Part I "Before Kubernetes")
 prerequisites: Ch 1 ("One app, one server"): server / machine, process, deploy, dependency, snowflake server, drift, runbook, single point of failure, virtual machine.
 out_of_scope: Dockerfile syntax; container internals (namespaces/cgroups) beyond a single sentence; orchestration, and Kubernetes by name (Ch 3; Chapters 1–2 contain no Kubernetes); course-wide exclusions (kubectl, YAML writing, installing clusters, certification material, deep networking/security internals). Terms this chapter may introduce: container, image, registry, immutability. Later ledger terms (orchestration, orchestrator, Kubernetes, cluster, node, pod, …) may not be used except as "we'll name this later". Config/secrets practice belongs to Ch 9; data/state to Ch 10.

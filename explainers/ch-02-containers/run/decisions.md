@@ -67,3 +67,10 @@ question: Apply post-ship curriculum updates (R4, R5) and commit Ch 2?
 answer: "Apply and commit (Recommended)"
 decision: approved
 applies_to: other (CURRICULUM.md, git)
+
+### d-11 · 2026-10-21T18:00:00 · post-delivery
+question: Address the user's human review of the delivered chapter (run/review/human-review.md).
+answer: "please address those issues and make the requested changes"
+decision: approved
+applies_to: site (s-01, s-02, s-03, s-04, s-05), CURRICULUM.md
+notes: Applied directly in the main session, not through a new dispatch (run caps nearly spent: 12/18 dispatches, 270/310 agent-min). s-01 cast strip + jump-ahead disclosure; s-02 w-samecode carousel replaced by w-samecode-scrolly (two lanes, k-02/k-03 as gated page checks; k-03 now two options, verbatim from the review); s-03 rewritten with term cards (image, immutable, stateless) and new f-01 (in / handed in / kept outside), tag caveat moved to a disclosure, A1 analogy aside deleted; s-04 container defined as the app's processes + term card, k-04 disclosure on storage outside the container (named in Ch 10); s-05 wording fixes. Figures renumbered (registry f-02, VM vs containers f-03). Relabelled 18 min. Gate round 9 PASS. No fresh accuracy or pedagogy-ux review was run.

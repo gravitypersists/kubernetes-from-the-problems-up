@@ -5,22 +5,18 @@
     "https://fonts.gstatic.com"
   ],
   "widgets": {
-    "w-samecode": {
+    "w-samecode-scrolly": {
       "segment": "s-02",
-      "mount": "[data-widget=\"w-samecode\"]",
+      "mount": "[data-widget=\"w-samecode-scrolly\"]",
       "complexity": "high",
       "size": {
-        "desktop": "≤960×1000 (.d-wide; constant height, 1001px at 1280 and 1045px at 768; min-height 1000px reserved at ≥900px and 1040px at 600–899px in assets/page.css while the mount is empty; two columns: row table ~58%, check panel ~42%; state lead across the top)",
-        "mobile": "100% wide under 600px; each state takes its own height (course rule, CURRICULUM.md §8 step 5; d-08). First state 1240px at 360 before an answer; min-height 1200px reserved while the mount is empty. Single column: bar, state header, lead, row table, result row, check panel."
+        "desktop": "≥900px: .d-wide (≤960px); two lanes, each a two-column grid: canvas slot ~55% wide, sticky at top var(--sp-4), 420px reserved; step cards ~45%, each ≥40vh",
+        "mobile": "<900px: one column; canvas slot sticky at top, opaque, ≤50vh (min(420px,50vh) at 600–899px, min(316px,50vh) under 600px); steps scroll beneath. Height <560px: canvas hidden, per-step snapshot in [data-step-snap]"
       },
-      "files": [
-        "data.js",
-        "index.js",
-        "index.css"
-      ],
+      "files": ["data.js", "index.js", "index.css"],
       "cdn": [],
       "data_origins": [],
-      "notes": "index.html loads widgets/w-samecode/index.css, data.js, then index.js after assets/widget.js. Adapted from Ch 1's w-rebuild stage 4 (copy, never edit Ch 1). Checks k-02 and k-03 live inside the widget (Check 02 / 07, Check 03 / 07); their text is final in run/plan/learning-plan.md and must be used verbatim. The widget may reuse the page's check classes in assets/page.css (.cp-check, .cp-option, .cp-feedback, .cp-why, .cp-retry) and status classes (.st, .st--good/--bad/--warn, .lamp), as w-rebuild did. Reuse candidates: Ch 15, possibly Ch 9."
+      "notes": "Replaces the w-samecode carousel after the user's human review (run/review/human-review.md). Scrollytelling per CURRICULUM §8 step 6; lane controller copied from Ch 03's w-fleet-scrolly. Checks k-02 (lane A, step A3) and k-03 (lane B, step B2) are page-owned cards in the step column; steps A4, B3 and B4 are gated on them via data-gate."
     }
   }
 }

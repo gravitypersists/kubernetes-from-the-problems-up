@@ -108,6 +108,63 @@ body.d-body { -webkit-font-smoothing: antialiased; }
 .cp-sources li { margin-bottom: var(--sp-half); }
 .cp-sources p { margin: 0 0 var(--sp-1); }
 
+/* ---------- cast strip (copied from Ch 03; course convention, CURRICULUM §2.11) ---------- */
+.cp-cast {
+  margin-top: 0; margin-bottom: var(--sp-2); padding: var(--sp-2) 0;
+  border-top: var(--stroke) solid var(--line); border-bottom: var(--stroke) solid var(--line);
+  font: var(--fs-small)/var(--lh-small) var(--font-sans); color: var(--ink-2);
+}
+.d-main .cp-cast > .cp-label { margin: 0 0 var(--sp-1); }
+.cp-cast dl { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: var(--sp-half) var(--sp-2); margin: 0; }
+.cp-cast dt { font: 700 var(--fs-caption)/var(--lh-small) var(--font-mono); letter-spacing: .08em; text-transform: uppercase; color: var(--ink); }
+.cp-cast dd { margin: 0; }
+
+/* ---------- disclosures: optional notes, collapsed by default (ink ▸ / ▾ markers, as Ch 02's "why" lists) ---------- */
+.d-more.cp-more { margin: var(--sp-2) auto var(--sp-3); padding-left: var(--sp-2); border-left: var(--stroke) solid var(--ink); }
+.cp-more > summary {
+  display: flex; align-items: center; min-height: var(--tap); cursor: pointer; list-style: none;
+  font: 600 var(--fs-small)/var(--lh-small) var(--font-sans); color: var(--ink);
+}
+.cp-more > summary::-webkit-details-marker { display: none; }
+.cp-more > summary::before { content: "▸"; flex: none; margin-right: var(--sp-1); font-family: var(--font-mono); color: var(--ink); }
+.cp-more[open] > summary::before { content: "▾"; }
+.cp-more__body { padding-bottom: var(--sp-1); font: var(--fs-small)/var(--lh-small) var(--font-serif); color: var(--ink-2); }
+.cp-more__body p, .cp-more__body ul { margin: 0 0 var(--sp-1); }
+.cp-more__body p:last-child, .cp-more__body ul:last-child { margin-bottom: 0; }
+.cp-more__body ul { padding-left: var(--sp-3); }
+.cp-more__body li { margin-bottom: var(--sp-half); }
+
+/* ---------- term cards (copied from Ch 03; course convention, CURRICULUM §8 step 4; Ch 03 plan ## Figures) ----------
+   Outlined plate, no shadow (not interactive). One accent mark: the kicker. The payoff variant
+   (blueprint ground, larger term, job strip) appears at most once per chapter. Static: no animation. */
+.cp-term {
+  margin-top: var(--sp-6); margin-bottom: var(--sp-6);
+  padding: var(--sp-3);
+  background-color: var(--surface); border: var(--stroke) solid var(--ink); border-radius: var(--radius-1);
+}
+.cp-term > p { margin: 0; }
+.cp-term__kicker { font: 700 var(--fs-caption)/var(--lh-caption) var(--font-mono); letter-spacing: .08em; text-transform: uppercase; color: var(--accent); }
+.cp-term .cp-term__term {
+  margin: var(--sp-1) 0 var(--sp-2);
+  font: 800 32px/36px var(--font-sans); font-stretch: 112%; letter-spacing: -0.02em; color: var(--ink);
+  text-wrap: balance; overflow-wrap: anywhere;
+}
+.cp-term__sep { font-family: var(--font-mono); font-weight: 400; color: var(--ink-3); }
+.cp-term .cp-term__def { margin-bottom: var(--sp-2); font: 400 var(--fs-body)/var(--lh-body) var(--font-serif); color: var(--ink); }
+.cp-term__back { font: 400 var(--fs-caption)/var(--lh-caption) var(--font-mono); letter-spacing: .04em; color: var(--ink-3); }
+.cp-term--payoff { padding: var(--sp-4) var(--sp-3); }
+.cp-term--payoff .cp-term__term { font-size: 40px; line-height: 44px; }
+.cp-term__jobs {
+  padding-top: var(--sp-1); border-top: var(--stroke) solid var(--ink);
+  font: 700 var(--fs-caption)/var(--lh-caption) var(--font-mono); letter-spacing: .04em; color: var(--ink);
+}
+@media (max-width: 640px) {
+  .cp-term { padding: var(--sp-2); }
+  .cp-term .cp-term__term { font-size: 28px; line-height: 32px; }
+  .cp-term--payoff { padding: var(--sp-3) var(--sp-2); }
+  .cp-term--payoff .cp-term__term { font-size: 32px; line-height: 36px; }
+}
+
 /* ---------- figure plate ---------- */
 .cp-fig { margin: var(--sp-8) 0; }
 .cp-fig__plate { border: var(--stroke) solid var(--ink); border-radius: var(--radius-1); overflow: hidden; }
@@ -169,7 +226,35 @@ body.d-body { -webkit-font-smoothing: antialiased; }
 .mrow__tag { font: italic 400 var(--fs-caption)/var(--lh-caption) var(--font-sans); color: var(--ink-2); }
 .cp-code { font: 400 var(--fs-caption)/var(--lh-caption) var(--font-mono); color: var(--ink); }
 
-/* ---------- f-01: one image, many containers ----------
+/* ---------- f-01: one image, two places (in the image / handed in at start / kept outside) ----------
+   Two columns at every width; mono band labels span both. Same grammar as §02's drawing: image frame
+   in c1 on c1-soft with a mono header, code row c1, other rows c2; data outside the app dashed. */
+.inout { padding: var(--sp-3) var(--sp-2); }
+@media (max-width: 599px) { .inout { padding: var(--sp-2) var(--sp-1); } }
+.inout__grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--sp-1) var(--sp-2); max-width: 640px; margin-inline: auto; }
+@media (max-width: 599px) { .inout__grid { column-gap: var(--sp-1); } }
+.cp-fig .inout__col { margin: 0; padding-bottom: var(--sp-half); border-bottom: var(--stroke) solid var(--ink); }
+.inout__col .cp-label { display: block; }
+.inout__col b { display: block; font: 700 var(--fs-caption)/var(--lh-caption) var(--font-mono); letter-spacing: .06em; text-transform: uppercase; color: var(--ink); }
+.cp-fig .inout__band {
+  grid-column: 1 / -1; display: flex; flex-wrap: wrap; align-items: baseline; gap: 0 var(--sp-1);
+  margin: var(--sp-2) 0 0;
+  font: italic 400 var(--fs-caption)/var(--lh-caption) var(--font-sans); color: var(--ink-2);
+}
+.inout__band b { font: 700 var(--fs-caption)/var(--lh-caption) var(--font-mono); font-style: normal; letter-spacing: .08em; text-transform: uppercase; color: var(--ink); }
+.inout__img {
+  display: grid; gap: var(--sp-half); padding: var(--sp-half);
+  background: var(--c1-soft); border: var(--stroke) solid var(--c1); border-radius: var(--radius-1);
+}
+.cp-fig .inout__imghead {
+  margin: 0; padding: 0 var(--sp-half) var(--sp-half); border-bottom: var(--stroke) solid var(--c1);
+  font: 700 var(--fs-caption)/var(--lh-caption) var(--font-mono); color: var(--ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.inout__imghead .cp-label { display: block; }
+.inout .mrow { font-family: var(--font-mono); overflow-wrap: anywhere; }
+.inout__data { background: var(--surface); border: var(--stroke) dashed var(--ink-3); }
+
+/* ---------- f-02: one image, many containers ----------
    Stacked (build → push ↓ → registry → pull ↓ → machines) unless the plate is ≥ 880px wide. */
 .flow { padding: var(--sp-3) var(--sp-2); container-type: inline-size; }
 .flow__grid { display: grid; gap: var(--sp-1); max-width: 560px; margin-inline: auto; }
@@ -199,7 +284,7 @@ body.d-body { -webkit-font-smoothing: antialiased; }
   .flow__row > .flow__arrow { display: flex; }
 }
 
-/* ---------- f-02: one machine, two ways ---------- */
+/* ---------- f-03: one machine, two ways ---------- */
 .ways { padding: var(--sp-3) var(--sp-2); container-type: inline-size; }
 @media (max-width: 599px) { .ways, .flow { padding: var(--sp-2) var(--sp-1); } }
 .ways__grid { display: grid; gap: var(--sp-4); max-width: 460px; margin-inline: auto; }
@@ -240,14 +325,65 @@ body.d-body { -webkit-font-smoothing: antialiased; }
 .ways__band--plain { background: var(--surface); }
 .cp-fig .ways__label { margin: 0; font: italic 400 var(--fs-caption)/var(--lh-caption) var(--font-sans); color: var(--ink-2); }
 
-/* ---------- widget mount (w-samecode is built separately in widgets/w-samecode/) ----------
-   Reserved only until the widget mounts (:empty), at or just below the widget's final heights:
-   constant 1001px at 1280 and 1045px at 768; under 600px each state takes its own height (course rule,
-   CURRICULUM.md §8 step 5; d-08), and the first state is 1240px at 360 before an answer. */
-[data-widget="w-samecode"] { margin-top: var(--sp-6); margin-bottom: var(--sp-8); }
-[data-widget="w-samecode"]:empty { min-height: 1000px; }
-@media (max-width: 899px) { [data-widget="w-samecode"]:empty { min-height: 1040px; } }
-@media (max-width: 599px) { [data-widget="w-samecode"]:empty { min-height: 1200px; } }
+/* ---------- §02 scrollytelling scaffold (copied from Ch 03): w-samecode-scrolly (course convention, CURRICULUM §8 step 6) ----------
+   The page owns this layout; the widget (widgets/w-samecode-scrolly/) renders into the [data-canvas],
+   [data-step-text] and [data-step-snap] slots and runs activation and gates. Mount contract: see the
+   comment above the mount in index.html.
+   Reserved heights (as Ch 03): canvas about 420px from 600px up, min(316px, 50vh) under 600px. */
+.fs { margin-top: var(--sp-6); margin-bottom: var(--sp-8); }
+.fs-lane + .fs-lane { margin-top: var(--sp-10); }
+.d-main .fs-lane__title { margin: 0 0 var(--sp-3); }
+.fs-lane__grid { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--sp-3); }
+/* under 900px: canvas sticky at the top (≤ 50vh), opaque, steps scroll beneath it */
+.fs-canvas {
+  position: sticky; top: 0; z-index: 2; align-self: start;
+  min-height: min(316px, 50vh); padding: var(--sp-1) 0;
+  background: var(--bg);
+}
+@media (min-width: 600px) { .fs-canvas { min-height: min(420px, 50vh); } }
+.fs-steps { position: relative; z-index: 1; display: grid; gap: var(--sp-3); margin: 0; padding: 0; list-style: none; }
+.d-main .fs-steps > li { margin: 0; }
+.fs-step {
+  position: relative; min-height: 40vh;
+  padding: var(--sp-3);
+  background: var(--surface); border: var(--stroke) solid var(--line); border-radius: var(--radius-1);
+  transition: border-color var(--dur-2) var(--ease-out);
+}
+.fs-step.is-active { border-color: var(--ink); }
+.fs-step__text { font: 400 var(--fs-body)/var(--lh-body) var(--font-serif); color: var(--ink); }
+.fs-step__text p { margin: 0 0 var(--sp-2); }
+.fs-step__text p:last-child { margin-bottom: 0; }
+.fs-step__snap { display: none; }
+.fs-step > .cp-more { margin: var(--sp-2) 0 0; }
+.fs-step > .cp-check { margin: var(--sp-3) 0 0; padding: var(--sp-3) var(--sp-2); }
+/* gated steps: the controller adds .is-locked until the check named in data-gate is committed */
+.fs-step__lock { display: none; }
+.fs-step.is-locked { border-style: dashed; border-color: var(--ink-4); }
+.fs-step.is-locked > :not(.fs-step__lock) { visibility: hidden; }
+.fs-step.is-locked > .fs-step__lock {
+  display: block; position: absolute; top: var(--sp-3); left: var(--sp-3); right: var(--sp-3); margin: 0;
+  font: 700 var(--fs-caption)/var(--lh-caption) var(--font-mono); letter-spacing: .08em; text-transform: uppercase; color: var(--ink-3);
+}
+.fs-step.is-unlocked > * { animation: cp-in var(--dur-2) var(--ease-out); }
+@media (max-width: 599px) {
+  .fs-step { padding: var(--sp-2); }
+  .fs-step.is-locked > .fs-step__lock { top: var(--sp-2); left: var(--sp-2); right: var(--sp-2); }
+  .fs-step > .cp-check { padding: var(--sp-2) var(--sp-1); }
+}
+/* ≥ 900px: canvas sticky on the left (about 55%), steps on the right (about 45%) */
+@media (min-width: 900px) {
+  .fs-lane__grid { grid-template-columns: minmax(0, 11fr) minmax(0, 9fr); column-gap: var(--sp-4); align-items: start; }
+  .fs-canvas { top: var(--sp-4); z-index: auto; min-height: 420px; padding: 0; background: none; }
+}
+/* short viewports (under 560px tall, e.g. a phone in landscape): no sticky canvas; each step shows its
+   own snapshot above its text, rendered by the widget into [data-step-snap] */
+@media (max-height: 559px) {
+  .fs-lane__grid { grid-template-columns: minmax(0, 1fr); }
+  .fs-canvas { display: none; }
+  .fs-step { min-height: 0; }
+  .fs-step__snap { display: block; margin-bottom: var(--sp-2); }
+}
+.fs-noscript { padding: var(--sp-2); border: var(--stroke) dashed var(--ink-4); font: var(--fs-small)/var(--lh-small) var(--font-sans); color: var(--ink-2); }
 
 /* ---------- comprehension checks ---------- */
 .cp-check {
