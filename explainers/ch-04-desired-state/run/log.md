@@ -198,3 +198,43 @@ Gate (page) round 7: **PASS**. Reading ~19.2 min (brief: ~23 min; reported, not 
 ### 2026-10-22T12:34:34-04:00 · orchestrator · revision
 Readability pass per human review 01 (d-11): 70 edits to index.html (prose, captions, check feedback, recap), 11 to lane step text; keys, facts, hedges unchanged. Gate round 7 PASS; text-only ~19.2 min.
 - [run/review/human-review-01.md](run/review/human-review-01.md)
+
+### 2026-10-22T19:50:19-04:00 · orchestrator · user-decision
+Human review 02 as input (d-12); loop lens reworded to wants / sees / does (d-13)
+- [run/review/human-review-02.md](run/review/human-review-02.md)
+
+### 2026-10-22T19:51:52-04:00 · verify · gate
+Gate (page) round 8: **PASS**. Reading ~20.7 min (brief: ~23 min; reported, not gated); 318 KB, 17 requests.
+- [gate/page-round-8.json](gate/page-round-8.json)
+- [screenshots/page-round-8](screenshots/page-round-8)
+
+### 2026-10-22T19:52:32-04:00 · orchestrator · revision
+Human review 02 applied as input (d-12, d-13): §04 opens with moving day, the record, the API server and the loops already running; 'the tool' → Kubernetes; reconcile loop named as a general pattern with controllers as implementations; loop lens → which loop · wants · sees · does (TERM 03, lens paragraph, f-04 gains a Wants column, canvas SEES/DOES, recap); B2 grounds node agents' reports; §07 API server no longer 'front door'. Gate round 8 PASS; text-only ~20.7 min.
+- [run/review/human-review-02.md](run/review/human-review-02.md)
+- [run/gate/page-round-8.json](run/gate/page-round-8.json)
+
+### 2026-10-22T20:51:59-04:00 · orchestrator · revision
+Moving day follows the default scheduler (d-14, from Ch 5 d-04): storefront on 01, 04, 02; at 03:04 orders → 04 (one of two nodes with room), dispatch → 01
+- [run/decisions.md](run/decisions.md)
+
+### 2026-10-22T20:52:32-04:00 · verify · gate
+Gate (page) round 9: **PASS**. Reading ~20.7 min (brief: ~23 min; reported, not gated); 325 KB, 17 requests.
+- [gate/page-round-9.json](gate/page-round-9.json)
+- [screenshots/page-round-9](screenshots/page-round-9)
+
+### 2026-10-22T21:22:00-04:00 · verify · gate
+Gate (page) round 10: **PASS**. Reading ~20.7 min (brief: ~23 min; reported, not gated); 255 KB, 20 requests.
+- [gate/page-round-10.json](gate/page-round-10.json)
+- [screenshots/page-round-10](screenshots/page-round-10)
+
+### 2026-10-23T03:19:07-04:00 · verify · gate
+Gate (page) round 11: **PASS**. Reading ~20.7 min (brief: ~23 min; reported, not gated); 244 KB, 20 requests.
+- [gate/page-round-11.json](gate/page-round-11.json)
+- [screenshots/page-round-11](screenshots/page-round-11)
+
+### 2026-10-23T07:36:54-04:00 · orchestrator · delivered
+Ch 4 closed: human reviews 01–02 and d-14 applied, gate round 11 PASS (~20.7 min); CURRICULUM R1–R13 applied (story facts §3, Visuals column, m-28, picked-up notes in Ch 5–14, loop lens §2.3, kinds principle 12), renderer location updated to explainers/_pool/cluster/ (Ch 5 d-06)
+- [site/index.html](site/index.html)
+
+### 2026-10-23T07:36:54-04:00 · orchestrator · stage
+Stage: deliver → **done**

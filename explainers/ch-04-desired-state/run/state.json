@@ -4,7 +4,7 @@
   "created": "2026-10-21T23:10:46-04:00",
   "depth": "standard",
   "minutes": 20,
-  "stage": "deliver",
+  "stage": "done",
   "caps": {
     "spawns": 25,
     "agent_minutes": 120,
@@ -168,6 +168,10 @@
   },
   "gate_history": {
     "gate:page": [
+      [],
+      [],
+      [],
+      [],
       [],
       [],
       [],

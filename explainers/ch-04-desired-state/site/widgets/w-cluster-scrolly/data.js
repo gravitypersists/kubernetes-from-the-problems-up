@@ -4,70 +4,14 @@
    sizes, nodes, Pod names, times and the moving-day story are fiction (d-04); the waits in lane B are
    Kubernetes' documented defaults (facts c-10, c-11; x-04), so every timing says "by default".
 
-   ---- Snapshot format (copy this for later chapters) -------------------------------------------------
-   Each step's `state` is a COMPLETE snapshot, not a diff, so any step can be drawn on its own and
-   scrolling back restores it exactly. renderCluster(el, state, opts) in index.js draws one snapshot.
-
-     nodes       { '01': ['pa1', 'sf1:notstarted'], … }  every node and the Pods placed on it, top to
-                 bottom. An entry is 'id' (status running) or 'id:status', status one of
-                   running     solid chip with a lamp, RUNNING (good)
-                   notstarted  assigned to this node, not running yet: dashed, no fill, no lamp,
-                               NOT STARTED (ink-3). It exists only as a record.
-                   starting    the node agent is downloading the image and starting it: STARTING (warn)
-                   lost        on a node that is physically DOWN (reality, not yet in the record): LOST
-                   crashed     CRASHED (bad)
-                   newaddr | stopped   Ch 03's statuses, still drawn, unused here
-                 Nodes are drawn in key order, one column each, so a later chapter may add or remove
-                 keys between steps (Ch 08 adds nodes). Every node has CAPACITY units of room; a Pod
-                 takes its service's `size`; unused room is drawn as "N FREE".
-     down        ['03']            nodes that are physically dead: dashed frame, "DOWN" in the body,
-                                   their Pods drawn LOST. This is reality; the record may not know yet.
-     nodeStatus  { '03': 'unknown' }  what the record says about a node: 'unknown' prints UNKNOWN (warn)
-                                   on the node bar, and that node's Pod marks in the record read "?".
-     record      { rows: ['orders', …], want: { orders: 1, … }, pods: { orders: ['or1'], … } }
-                 The cluster's record: one row per service in `rows` order, WANT n, then one mark per
-                 Pod record in `pods`, then one struck-through mark per record in the optional
-                 `deleting: { dispatch: ['di3'] }` (marked for deletion; engineers see Terminating).
-                 Marks and row words are COMPUTED, never written here:
-                   mark  filled (good)   the Pod is in `nodes`, running or lost, on a node not marked
-                                         unknown (the record believes what the agent last reported,
-                                         even if the machine has since died)
-                         hollow dashed   the Pod is notstarted/starting/crashed, or not on any node yet
-                         ? (warn)        the Pod is on a node marked unknown
-                         struck through  a Pod record in `deleting`: marked for deletion, still in the
-                                         record, no longer counted
-                   word  SHORT n (warn)  fewer Pod records than WANT
-                         n RUNNING       otherwise, n = filled marks (good when n ≥ WANT), plus
-                                         "· n UNKNOWN" (warn) when any mark is "?". Where the full word
-                                         doesn't fit (narrow canvas) only the most urgent part shows.
-     loops       { shown: ['rs', 'sched'], active: ['sched'], agents: ['01'], lens: { watching, doing } }
-                 shown   loop pills drawn on the canvas (LOOPS below), inactive ones at 0.35 opacity
-                 active  the acting loop(s), at full ink
-                 agents  nodes whose agent is acting: its "↻ agent" pill on the node bar lights up, and an
-                         "↻ agents · 01, 02" pill (or "↻ agents", where the row is full) joins the
-                         loop row so the lens line has its actor
-                 lens    the acting loop's lens line, WATCHING · … / DOING · … (omit when none acts)
-                 On a wide canvas every shown pill is drawn (the row wraps if it must); on a narrow
-                 one only the acting pill (all shown pills, dimmed, when none acts).
-     notes       [{ id, label?, text, sub?, tone? }]  lines under the nodes: the CUSTOMERS line, the
-                 connection line. tone 'good' | 'bad' | 'warn' | 'mute' colours `text`; `sub` is an
-                 ink-3 tail ("kept current by …"), dropped on a narrow canvas (the step text says it).
-     clock       'string'          the clock kicker on the canvas header ('~03:04:50'); omit for none
-     banner      'text'            optional "what if" line above the record (Ch 03's)
-   Later-chapter fields (designed in the plan; none is used or drawn in Ch 04 unless marked):
-     restarts    { podId: n }      DRAWN: "↻ n" on the Pod's chip where it fits (Ch 12, crash loops)
-     PODS[id].version              DRAWN: printed after the label where it fits (Ch 06, versions)
-     status 'waiting', row word 'WAITING · NO ROOM'   NOT DRAWN yet (Ch 05: a Pod no node has room for)
-     several rows per service (old and new ReplicaSet under a Deployment row)   NOT DRAWN yet (Ch 06)
-     a note listing a service's current Pod addresses   use `notes` (Ch 07)
+   The snapshot format, the step fields and the highlight keys are the pool's: see
+   explainers/_pool/README.md, "Cluster drawing" (pool/cluster/cluster.js draws one snapshot) and
+   "Cluster lanes" (pool/cluster/lanes.js). Each step's `state` is a COMPLETE snapshot, not a diff, so
+   any step can be drawn on its own and scrolling back restores it exactly. This chapter uses room units
+   (CAPACITY 6, no UNIT) and none of the optional Ch 05 fields.
 
    A Pod id names one Pod (one running copy of a service, in its wrapper): see PODS. A replacement is a
-   new Pod with a new id and a new name (or1 → or2: orders-5c8x → orders-q2rw); Pods never move.
-   Step fields: id, kicker? (a time, shown above the step text), text [paragraphs; `code` in
-   backticks], ariaLabel (the canvas state in words), gate? (check ids; the page's data-gate attributes
-   are authoritative), highlight [what changed in this step: 'p:<pod>', 'n:<node>' (the whole node),
-   'status:<node>' (its UNKNOWN word), 'free:<node>', 'row:<service>', 'loop:<id>', 'agent:<node>',
-   'note:<id>', 'lens', 'banner']. */
+   new Pod with a new id and a new name (or1 → or2: orders-5c8x → orders-q2rw); Pods never move. */
 (function () {
   'use strict';
 
@@ -126,7 +70,7 @@
     loopMark: '↻',
     agent: 'agent',
     agents: 'agents',
-    lens: { watching: 'Watching', doing: 'Doing' },
+    lens: { watching: 'Sees', doing: 'Does' },
     lanes: { A: 'Moving day', B: 'Saturday, 03:04' }
   };
 
@@ -136,8 +80,9 @@
   var CUSTOMERS_DOWN = { id: 'customers', label: 'Customers', text: 'can’t place orders', tone: 'bad' };
   var CUSTOMERS_UP = { id: 'customers', label: 'Customers', text: 'can order', tone: 'good' };
 
-  /* end of moving day = Ch 03's Monday layout (the storefront Pods were added below what was there) */
-  var A5_NODES = { '01': ['pa1', 'sf1', 'sf2'], '02': ['di1', 'di2', 'sf3'], '03': ['or1', 'di3'], '04': ['pa2'] };
+  /* end of moving day: the scheduler's default layout (emptiest node first, copies spread: Ch 05 facts
+     c-06, c-07), one storefront Pod each on 01, 04 and 02 (Ch 05 run d-04; was Ch 03's Monday layout) */
+  var A5_NODES = { '01': ['pa1', 'sf1'], '02': ['di1', 'di2', 'sf3'], '03': ['or1', 'di3'], '04': ['pa2', 'sf2'] };
   /* after ~03:09:50: node 03's Pods are marked for deletion; the records linger, uncounted */
   var DELETING = { orders: ['or1'], dispatch: ['di3'] };
   var A5_PODS = { orders: ['or1'], payments: ['pa1', 'pa2'], dispatch: ['di1', 'di2', 'di3'], storefront: ['sf1', 'sf2', 'sf3'] };
@@ -156,7 +101,8 @@
             notes: []
           },
           text: [
-            'It’s moving day. Kubernetes keeps one record of what Fennel wants and what’s running, drawn at the top. `orders`, `payments` and `dispatch` are already in that record and already running on Fennel’s cluster, and `storefront` is the last service to move. Ari applies its manifest, the one in Fig. 02, and the tool answers `created` in under a second.'
+            'The record is drawn at the top. It wants one `orders` Pod, two `payments` Pods and three `dispatch` Pods, and that’s exactly what runs on the nodes below it, so the loops keep comparing and find no gap to close.',
+            'Then Ari applies the `storefront` manifest from Fig. 02, and Kubernetes answers `created` in under a second.'
           ],
           ariaLabel: 'The cluster’s record lists three services: orders, 1 Pod wanted and 1 running; payments, 2 wanted and 2 running; dispatch, 3 wanted and 3 running. It has no storefront line. Node 01 runs a payments Pod; node 02, two dispatch Pods; node 03, the orders Pod and a dispatch Pod; node 04, a payments Pod. No loop is acting.',
           highlight: []
@@ -172,7 +118,7 @@
             notes: []
           },
           text: [
-            'The manifest went to the cluster’s API server, the front door to the record, which checked it and wrote it down. That’s all `created` means: Fennel’s intention has been recorded, but nothing new is running anywhere yet.'
+            'Ari’s command sent the manifest to the API server, which checked it and added a new line to the record: `storefront`, three Pods wanted. That’s all `created` means. Fennel’s intention has been recorded, but nothing new is running anywhere yet.'
           ],
           ariaLabel: 'A new line in the cluster’s record: storefront, 3 Pods wanted, short 3, with no Pod records yet. The nodes are unchanged: no storefront Pod exists anywhere. No loop is acting yet.',
           highlight: ['row:storefront']
@@ -184,7 +130,7 @@
             nodes: { '01': ['pa1'], '02': ['di1', 'di2'], '03': ['or1', 'di3'], '04': ['pa2'] },
             down: [], nodeStatus: {},
             record: { rows: ROWS, want: WANT, pods: A5_PODS },
-            loops: { shown: ['rs', 'sched'], active: ['rs'], agents: [], lens: { watching: 'storefront: wants 3, has 0', doing: 'writes 3 new Pod records' } },
+            loops: { shown: ['rs', 'sched'], active: ['rs'], agents: [], lens: { watching: 'storefront: 0 of 3 Pods', doing: 'writes 3 new Pod records' } },
             notes: []
           },
           text: [
@@ -197,7 +143,7 @@
           id: 'A4',
           gate: ['k-03'],
           state: {
-            nodes: { '01': ['pa1', 'sf1:notstarted', 'sf2:notstarted'], '02': ['di1', 'di2', 'sf3:notstarted'], '03': ['or1', 'di3'], '04': ['pa2'] },
+            nodes: { '01': ['pa1', 'sf1:notstarted'], '02': ['di1', 'di2', 'sf3:notstarted'], '03': ['or1', 'di3'], '04': ['pa2', 'sf2:notstarted'] },
             down: [], nodeStatus: {},
             record: { rows: ROWS, want: WANT, pods: A5_PODS },
             loops: { shown: ['rs', 'sched'], active: ['sched'], agents: [], lens: { watching: 'Pods with no node', doing: 'writes a node into each record' } },
@@ -206,7 +152,7 @@
           text: [
             'Next, the scheduler sees three Pods with no node and writes a node with room into each Pod’s record; how it chooses is the subject of Chapter 5. The scheduler doesn’t start anything either, so for now each `storefront` Pod exists only as a record.'
           ],
-          ariaLabel: 'The scheduler is acting. Watching for Pods with no node, it writes a node into each: 01, 01 and 02. Two storefront Pods now sit on node 01 and one on node 02, not started: they exist only as records. The record still shows 0 storefront Pods running.',
+          ariaLabel: 'The scheduler is acting. Watching for Pods with no node, it writes a node into each: 01, 04 and 02. One storefront Pod now sits on each of nodes 01, 04 and 02, not started: they exist only as records. The record still shows 0 storefront Pods running.',
           highlight: ['loop:sched', 'lens', 'p:sf1', 'p:sf2', 'p:sf3']
         },
         {
@@ -216,15 +162,15 @@
             nodes: A5_NODES,
             down: [], nodeStatus: {},
             record: { rows: ROWS, want: WANT, pods: A5_PODS },
-            loops: { shown: ['rs', 'sched'], active: [], agents: ['01', '02'], lens: { watching: 'each node’s assigned Pods', doing: 'downloads the image, starts it' } },
+            loops: { shown: ['rs', 'sched'], active: [], agents: ['01', '02', '04'], lens: { watching: 'assigned Pods not running', doing: 'downloads the image, starts it' } },
             notes: []
           },
           text: [
-            'On nodes 01 and 02, each node’s agent sees the Pods assigned to its node. It downloads the `storefront` image, starts the containers and reports back, and now the record matches what’s running.',
+            'On nodes 01, 02 and 04, each node’s agent sees the Pods assigned to its node. It downloads the `storefront` image, starts the containers and reports back, and now the record matches what’s running.',
             'No part handed another a plan; each loop simply read the record and wrote to it. And the loops keep watching, whether or not there’s a release.'
           ],
-          ariaLabel: 'The node agents on nodes 01 and 02 are acting. Each watching the Pods assigned to its own node, they download the storefront image, start the containers and report back. All three storefront Pods are running, and the record reads storefront, 3 wanted, 3 running; every line matches what runs. Node 01: a payments Pod and two storefront Pods, 1 unit free. Node 02: two dispatch Pods and a storefront Pod, 2 free. Node 03: orders and a dispatch Pod, 2 free. Node 04: a payments Pod, 5 free.',
-          highlight: ['agent:01', 'agent:02', 'lens', 'p:sf1', 'p:sf2', 'p:sf3', 'row:storefront']
+          ariaLabel: 'The node agents on nodes 01, 02 and 04 are acting. Each watching the Pods assigned to its own node, they download the storefront image, start the containers and report back. All three storefront Pods are running, and the record reads storefront, 3 wanted, 3 running; every line matches what runs. Node 01: a payments Pod and a storefront Pod, 3 units free. Node 02: two dispatch Pods and a storefront Pod, 2 free. Node 03: orders and a dispatch Pod, 2 free. Node 04: a payments Pod and a storefront Pod, 3 free.',
+          highlight: ['agent:01', 'agent:02', 'agent:04', 'lens', 'p:sf1', 'p:sf2', 'p:sf3', 'row:storefront']
         }
       ]
     },
@@ -236,7 +182,7 @@
           id: 'B1',
           kicker: '03:04',
           state: {
-            nodes: { '01': ['pa1', 'sf1', 'sf2'], '02': ['di1', 'di2', 'sf3'], '03': ['or1:lost', 'di3:lost'], '04': ['pa2'] },
+            nodes: { '01': ['pa1', 'sf1'], '02': ['di1', 'di2', 'sf3'], '03': ['or1:lost', 'di3:lost'], '04': ['pa2', 'sf2'] },
             down: ['03'], nodeStatus: {},
             record: { rows: ROWS, want: WANT, pods: A5_PODS },
             loops: { shown: ['rs', 'sched'], active: [], agents: [] },
@@ -254,15 +200,15 @@
           kicker: '~03:04:50',
           gate: ['k-04'],
           state: {
-            nodes: { '01': ['pa1', 'sf1', 'sf2'], '02': ['di1', 'di2', 'sf3'], '03': ['or1:lost', 'di3:lost'], '04': ['pa2'] },
+            nodes: { '01': ['pa1', 'sf1'], '02': ['di1', 'di2', 'sf3'], '03': ['or1:lost', 'di3:lost'], '04': ['pa2', 'sf2'] },
             down: ['03'], nodeStatus: { '03': 'unknown' },
             record: { rows: ROWS, want: WANT, pods: A5_PODS },
-            loops: { shown: ['rs', 'sched', 'node'], active: ['node'], agents: [], lens: { watching: 'every node’s check-ins', doing: 'marks node 03 UNKNOWN' } },
+            loops: { shown: ['rs', 'sched', 'node'], active: ['node'], agents: [], lens: { watching: 'node 03: no report for 50 s', doing: 'marks node 03 UNKNOWN' } },
             notes: [CUSTOMERS_DOWN],
             clock: '~03:04:50'
           },
           text: [
-            'Each node’s agent checks in regularly, and node 03’s check-ins have stopped. By default, after 50 seconds of silence the node loop marks node 03 as unknown.',
+            'Every node’s agent reports to the API server regularly, which is how the record knows each node is alive. Node 03’s reports have stopped. By default, after 50 seconds of silence, the node loop marks node 03 as unknown.',
             'It doesn’t touch node 03’s Pods yet, because a network glitch looks just like a dead machine, and the machine may come back.'
           ],
           ariaLabel: 'About 03:04:50. The node loop is acting. Watching every node’s check-ins, it marks node 03 unknown. In the record, the orders Pod and one dispatch Pod, both on node 03, now read unknown. Customers still can’t place orders.',
@@ -273,7 +219,7 @@
           kicker: '~03:09:50',
           gate: ['k-04'],
           state: {
-            nodes: { '01': ['pa1', 'sf1', 'sf2'], '02': ['di1', 'di2', 'sf3'], '03': ['or1:lost', 'di3:lost'], '04': ['pa2'] },
+            nodes: { '01': ['pa1', 'sf1'], '02': ['di1', 'di2', 'sf3'], '03': ['or1:lost', 'di3:lost'], '04': ['pa2', 'sf2'] },
             down: ['03'], nodeStatus: { '03': 'unknown' },
             record: { rows: ROWS, want: WANT, pods: { orders: [], payments: ['pa1', 'pa2'], dispatch: ['di1', 'di2'], storefront: ['sf1', 'sf2', 'sf3'] }, deleting: DELETING },
             loops: { shown: ['rs', 'sched', 'node'], active: ['node'], agents: [], lens: { watching: 'node 03: 5 minutes unknown', doing: 'marks its Pods for deletion' } },
@@ -292,10 +238,10 @@
           kicker: 'Seconds later',
           gate: ['k-04'],
           state: {
-            nodes: { '01': ['pa1', 'sf1', 'sf2'], '02': ['di1', 'di2', 'sf3'], '03': ['or1:lost', 'di3:lost'], '04': ['pa2'] },
+            nodes: { '01': ['pa1', 'sf1'], '02': ['di1', 'di2', 'sf3'], '03': ['or1:lost', 'di3:lost'], '04': ['pa2', 'sf2'] },
             down: ['03'], nodeStatus: { '03': 'unknown' },
             record: { rows: ROWS, want: WANT, pods: { orders: ['or2'], payments: ['pa1', 'pa2'], dispatch: ['di1', 'di2', 'di4'], storefront: ['sf1', 'sf2', 'sf3'] }, deleting: DELETING },
-            loops: { shown: ['rs', 'sched', 'node'], active: ['rs'], agents: [], lens: { watching: 'Pods wanted vs. recorded', doing: 'writes 2 new Pod records' } },
+            loops: { shown: ['rs', 'sched', 'node'], active: ['rs'], agents: [], lens: { watching: 'orders, dispatch: 1 short each', doing: 'writes 2 new Pod records' } },
             notes: [CUSTOMERS_DOWN],
             clock: 'Seconds later'
           },
@@ -309,28 +255,28 @@
           id: 'B5',
           gate: ['k-04'],
           state: {
-            nodes: { '01': ['pa1', 'sf1', 'sf2'], '02': ['di1', 'di2', 'sf3', 'di4:notstarted'], '03': ['or1:lost', 'di3:lost'], '04': ['pa2', 'or2:notstarted'] },
+            nodes: { '01': ['pa1', 'sf1', 'di4:notstarted'], '02': ['di1', 'di2', 'sf3'], '03': ['or1:lost', 'di3:lost'], '04': ['pa2', 'sf2', 'or2:notstarted'] },
             down: ['03'], nodeStatus: { '03': 'unknown' },
             record: { rows: ROWS, want: WANT, pods: { orders: ['or2'], payments: ['pa1', 'pa2'], dispatch: ['di1', 'di2', 'di4'], storefront: ['sf1', 'sf2', 'sf3'] }, deleting: DELETING },
-            loops: { shown: ['rs', 'sched', 'node'], active: ['sched'], agents: [], lens: { watching: '2 Pods with no node', doing: 'orders → 04, dispatch → 02' } },
+            loops: { shown: ['rs', 'sched', 'node'], active: ['sched'], agents: [], lens: { watching: '2 Pods with no node', doing: 'orders → 04, dispatch → 01' } },
             notes: [CUSTOMERS_DOWN],
             clock: 'Seconds later'
           },
           text: [
-            'The scheduler sees two Pods with no node. Node 04 is the only node with enough room for `orders`, so that’s where it goes. Sam made the same choice by hand a year ago; this time a loop made it.'
+            'The scheduler sees two Pods with no node. Nodes 01 and 04 both have enough room for `orders`, and the scheduler picks node 04; the new `dispatch` Pod goes to node 01. A year ago Sam put `orders` on machine 04 by hand; this time a loop made the choice.'
           ],
-          ariaLabel: 'The scheduler is acting. Watching 2 Pods with no node, it writes node 04 into the new orders Pod, the only node with room for it, and node 02 into the new dispatch Pod. Both Pods sit on their nodes, not started. Node 04 now has 2 units free and node 02 has 1. Customers still can’t place orders.',
-          highlight: ['loop:sched', 'lens', 'p:or2', 'p:di4', 'free:04', 'free:02']
+          ariaLabel: 'The scheduler is acting. Watching 2 Pods with no node, it writes node 04 into the new orders Pod, one of two nodes with room for it, and node 01 into the new dispatch Pod. Both Pods sit on their nodes, not started. Node 04 now has no room free and node 01 has 2 units. Customers still can’t place orders.',
+          highlight: ['loop:sched', 'lens', 'p:or2', 'p:di4', 'free:04', 'free:01']
         },
         {
           id: 'B6',
           kicker: '~03:10–03:11',
           gate: ['k-04'],
           state: {
-            nodes: { '01': ['pa1', 'sf1', 'sf2'], '02': ['di1', 'di2', 'sf3', 'di4'], '03': ['or1:lost', 'di3:lost'], '04': ['pa2', 'or2'] },
+            nodes: { '01': ['pa1', 'sf1', 'di4'], '02': ['di1', 'di2', 'sf3'], '03': ['or1:lost', 'di3:lost'], '04': ['pa2', 'sf2', 'or2'] },
             down: ['03'], nodeStatus: { '03': 'unknown' },
             record: { rows: ROWS, want: WANT, pods: { orders: ['or2'], payments: ['pa1', 'pa2'], dispatch: ['di1', 'di2', 'di4'], storefront: ['sf1', 'sf2', 'sf3'] }, deleting: DELETING },
-            loops: { shown: ['rs', 'sched', 'node'], active: [], agents: ['04', '02'], lens: { watching: 'each node’s assigned Pods', doing: 'gets the image, starts it' } },
+            loops: { shown: ['rs', 'sched', 'node'], active: [], agents: ['04', '01'], lens: { watching: 'assigned Pods not running', doing: 'gets the image, starts it' } },
             notes: [CUSTOMERS_UP, { id: 'link', text: 'storefront → orders: node 04', sub: 'kept current by another loop (Ch 7)' }],
             clock: '~03:10–03:11'
           },
@@ -338,8 +284,8 @@
             'If node 04 doesn’t already have the `orders` image, its agent downloads it first, then starts the container. With default settings, customers can order again roughly six or seven minutes after 03:04, and nobody was woken.',
             'Another loop, which Chapter 7 covers, keeps `storefront` pointed at the new `orders` Pod, so the connecting job is done too.'
           ],
-          ariaLabel: 'About 03:10 to 03:11. The node agents on nodes 04 and 02 are acting: node 04’s agent downloads the orders image if it doesn’t have it, and both start their new Pods. The record reads orders, 1 running, and dispatch, 3 running. Customers can order again. storefront sends orders to node 04, kept current by another loop, covered in Chapter 7.',
-          highlight: ['agent:04', 'agent:02', 'lens', 'p:or2', 'p:di4', 'row:orders', 'row:dispatch', 'note:customers', 'note:link']
+          ariaLabel: 'About 03:10 to 03:11. The node agents on nodes 04 and 01 are acting: node 04’s agent downloads the orders image if it doesn’t have it, and both start their new Pods. The record reads orders, 1 running, and dispatch, 3 running. Customers can order again. storefront sends orders to node 04, kept current by another loop, covered in Chapter 7.',
+          highlight: ['agent:04', 'agent:01', 'lens', 'p:or2', 'p:di4', 'row:orders', 'row:dispatch', 'note:customers', 'note:link']
         }
       ]
     }

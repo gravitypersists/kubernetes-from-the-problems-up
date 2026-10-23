@@ -113,23 +113,26 @@
    Ch 7 the connecting loop filled in, Ch 8 the two autoscalers, …). Row fields:
      loop      the loop's name, as the lanes name it
      per       optional: a short qualifier under the name ("one per node")
-     watching  what it compares, in the record or the cluster
-     doing     what it does when the two differ
+     wants     what it works towards (the loop lens: which loop · wants · sees · does, d-13)
+     sees      what it observes, in the record or the cluster
+     does      what it does about a gap between the two
      job       the job of Sam's (Ch 03's words) that it took over
      chapter   optional: the chapter that covers this loop; a row with it is drawn dashed (met later) */
 var CH04_LOOPS = [
-  { loop: 'node loop', watching: 'every node’s regular check-ins',
-    doing: 'marks a silent node unknown; after a wait, marks its Pods for deletion',
+  { loop: 'node loop', wants: 'every node reporting in', sees: 'each node’s latest report',
+    does: 'marks a silent node unknown; after a wait, marks its Pods for deletion',
     job: 'noticing a dead machine' },
-  { loop: 'ReplicaSet loop', watching: 'Pods wanted vs. Pods in the record, per ReplicaSet',
-    doing: 'writes new Pod records, or removes extras', job: 'replacing' },
-  { loop: 'scheduler', watching: 'Pods with no node',
-    doing: 'picks a node with room for each (Chapter 5)', job: 'placing' },
-  { loop: 'node agent', per: 'one per node', watching: 'Pods assigned to its node',
-    doing: 'downloads the image, starts the containers, restarts any that crash, reports back',
+  { loop: 'ReplicaSet loop', wants: 'each ReplicaSet’s number of Pods', sees: 'the Pod records it has',
+    does: 'writes new Pod records, or removes extras', job: 'replacing' },
+  { loop: 'scheduler', wants: 'every Pod on a node', sees: 'Pods with no node',
+    does: 'picks a node with room for each (Chapter 5)', job: 'placing' },
+  { loop: 'node agent', per: 'one per node', wants: 'its node’s assigned Pods running',
+    sees: 'the containers running on its node',
+    does: 'downloads the image, starts the containers, restarts any that crash, reports back',
     job: 'restarting' },
-  { loop: 'another loop', per: 'Chapter 7', watching: 'where each service’s Pods are running',
-    doing: 'keeps callers’ routes current', job: 'connecting', chapter: 7 }
+  { loop: 'another loop', per: 'Chapter 7', wants: 'callers reaching each service’s Pods',
+    sees: 'where each service’s Pods are running',
+    does: 'keeps callers’ routes current', job: 'connecting', chapter: 7 }
 ];
 
 (function () {
@@ -156,10 +159,10 @@ var CH04_LOOPS = [
       th.appendChild(per);
     }
     tr.appendChild(th);
-    [r.watching, r.doing, r.job].forEach(function (text, i) {
+    [r.wants, r.sees, r.does, r.job].forEach(function (text, i) {
       var td = document.createElement('td');
       if (labels[i]) td.setAttribute('data-label', labels[i]);
-      if (i === 2) td.className = 'lens__job';
+      if (i === 3) td.className = 'lens__job';
       td.textContent = text;
       tr.appendChild(td);
     });

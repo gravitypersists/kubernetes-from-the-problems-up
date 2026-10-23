@@ -19,4 +19,3 @@ This scrollytelling section is doing a lot of heavy lifting. Let's try and break
 
 Similar to the previous chapter, let's establish first the learner understands that "Each node’s agent checks in regularly" which also gets ahead of the gap here, because we can answer "checks in where?"
 
-### THIS HAS NOT BEEN APPLIED YET. AFTER WE APPLY IT, DELETE THIS LINE.

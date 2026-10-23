@@ -359,24 +359,25 @@ body.d-body { -webkit-font-smoothing: antialiased; }
 .lens tfoot td { border-top: var(--stroke) solid var(--ink); border-bottom: 0; font: 400 var(--fs-caption)/var(--lh-caption) var(--font-sans); color: var(--ink-2); }
 .lens td[data-label]::before { display: none; }
 @media (max-width: 599px) {
-  /* phone: one card per loop. Header row = the loop pill (left) and Sam's job (right); then WATCHING and
-     DOING with their labels inline, so the five cards stay about 850px tall at 360. */
+  /* phone: one card per loop. Header row = the loop pill (left) and Sam's job (right); then WANTS, SEES
+     and DOES with their labels inline. */
   .lens { padding: var(--sp-2) var(--sp-1); }
   .lens table, .lens tbody, .lens tfoot, .lens td { display: block; width: auto; }
   .lens table { background: none; border: 0; }
   .lens thead { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
   .lens tbody tr {
-    display: grid; grid-template-columns: max-content minmax(0, 1fr); grid-template-areas: "loop job" "w w" "d d";
+    display: grid; grid-template-columns: max-content minmax(0, 1fr); grid-template-areas: "loop job" "w w" "s s" "d d";
     margin-bottom: var(--sp-1); background: var(--surface); border: var(--stroke) solid var(--ink); border-radius: var(--radius-1);
   }
   .lens tbody tr.is-later { border-style: dashed; border-color: var(--ink-3); }
   .lens tbody th { grid-area: loop; width: auto; white-space: normal; padding: var(--sp-half) var(--sp-1); border-bottom: var(--stroke) solid var(--line); }
   .lens tbody td:nth-of-type(1) { grid-area: w; }
-  .lens tbody td:nth-of-type(2) { grid-area: d; }
+  .lens tbody td:nth-of-type(2) { grid-area: s; }
+  .lens tbody td:nth-of-type(3) { grid-area: d; }
   .lens tbody td.lens__job { grid-area: job; padding: var(--sp-half) var(--sp-1); border-bottom: var(--stroke) solid var(--line); text-align: right; }
   .lens tr.is-later th, .lens tr.is-later td { border-top: 0; }
   .lens td { padding: var(--sp-half) var(--sp-1); border-bottom: 0; }
-  .lens tbody td:nth-of-type(2) { padding-bottom: var(--sp-1); }
+  .lens tbody td:nth-of-type(3) { padding-bottom: var(--sp-1); }
   .lens td[data-label]::before {
     content: attr(data-label); display: inline; margin-right: var(--sp-1);
     font: 700 var(--fs-caption)/var(--lh-caption) var(--font-mono); font-style: normal; letter-spacing: .08em; text-transform: uppercase; color: var(--ink-3);

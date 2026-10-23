@@ -76,3 +76,24 @@ answer: "I think the language on this page overall is very difficult to read. I'
 decision: approved
 applies_to: site (prose, check feedback, figure captions, lane step text)
 notes: done directly in the main session, no dispatch (as Ch 3 d-16). Reading-time constraints are lifted for this pass: favour flowing sentences over brevity. Keys, facts, hedges and vocabulary guard unchanged.
+
+### d-12 · 2026-10-22T19:45:00 · post-delivery
+question: Address the user's human review 02 (run/review/human-review-02.md): moving day unexplained, "the tool", record and API server ungrounded ("front door"), loops not shown running before the apply, the loop lens too vague and tied to moving day, node check-ins ungrounded.
+answer: "okay, let's handle chapter 4 human review then. I haven't solidified those thoughts yet and wanted to see chapter 5 first, so take them as recommendation and input rather than must haves."
+decision: approved
+applies_to: site (§04, §05 prose, k-03 wording, lane A/B step text, f-04, §07, recap)
+notes: done directly in the main session, as d-11. Keys, facts and hedges unchanged.
+
+### d-13 · 2026-10-22T19:45:00 · post-delivery
+question: How should the loop lens be worded, keeping the pattern (observe → compare → act) distinct from each loop that implements it? (Goes into CURRICULUM §2.3.)
+answer: "Wants / sees / does (Recommended)"
+decision: approved
+applies_to: site (TERM 03, §04 lens paragraph, f-04, canvas lens line, recap); other (CURRICULUM.md §2.3)
+notes: lens = which loop, what it wants, what it sees, what it does about a gap. f-04 gains a Wants column; the canvas lens line stays two lines (SEES / DOES).
+
+### d-14 · 2026-10-22T21:50:00 · post-delivery
+question: (from Ch 5's checkpoint, Ch 5 run d-04) Ch 4's moving day puts two storefront Pods on node 01, but the default scheduler would spread them across 01, 04 and 02. How should we handle it?
+answer: "(b) Fix Ch 4 (Recommended)"
+decision: approved
+applies_to: site (w-cluster-scrolly data.js lanes A4–A5, B1–B6; f-05 sketch); other (CURRICULUM §3 Ch 4 facts)
+notes: done directly in the main session. storefront on 01, 04, 02; at 03:04 orders → 04 (one of two nodes with room), the lost dispatch copy → 01; B5 text and aria labels updated. Keys, timings and k-05 unchanged.

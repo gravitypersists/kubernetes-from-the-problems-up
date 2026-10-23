@@ -227,6 +227,9 @@
          loop lens, and the helmsman aside -->
     <section id="s-04" data-segment="s-04">
       <h2 id="moving-day"><span class="cp-sec">§ 04 </span>Moving day: what “apply” does</h2>
+      <p>Fennel didn’t move to Kubernetes all at once. Ari’s team moved its services onto the cluster one at a time, and by the morning of moving day, <code>orders</code>, <code>payments</code> and <code>dispatch</code> were already running there. Moving day is the day the last service, <code>storefront</code>, moves too. Ari has written its manifest, the one in Fig. 02, and all that’s left is to hand it to Kubernetes.</p>
+      <p>Two parts of Kubernetes matter for what happens next. The first is the cluster’s record. It holds every goal Fennel has declared, such as “<code>orders</code>: 1 copy”, together with what Kubernetes knows is actually there: which Pods exist, and which node each one is on. The second is the <dfn id="dfn-api-server">API server</dfn>, the program through which everything reads and changes that record. When Ari applies a manifest, the command sends it to the API server. The loops read the record through the API server and write their results back the same way. And on every node, a small program called the node agent regularly reports to the API server what is running on its node, so the record stays up to date.</p>
+      <p>Kubernetes was already busy before Ari applied anything. Several loops, each a small program that looks after one kind of thing, run all the time, and each one repeats the same three steps: it observes part of the cluster, compares what it sees with what the record says is wanted, and acts if the two differ. On the morning of moving day, <code>orders</code>, <code>payments</code> and <code>dispatch</code> were running exactly as declared, so every comparison came out even and the loops had nothing to do. Lane A shows what changes when <code>storefront</code> arrives.</p>
       <noscript><p class="cs-noscript">The drawings and step text in §04 and §05 need JavaScript. The rest of the page reads without it.</p></noscript>
 
       <!--
@@ -236,8 +239,9 @@
         reserved canvas heights are new. Everything else is as Ch 3.
 
         The page owns everything in this file, including the markup below and its layout CSS
-        (assets/page.css, ".cs-*"). The widget owns widgets/w-cluster-scrolly/ (data.js, index.js, index.css)
-        and renders only into the three kinds of slot named here. It never moves, adds or removes
+        (assets/page.css, ".cs-*"). The widget owns widgets/w-cluster-scrolly/ (data.js; index.js and
+        index.css are glue over the shared renderer and lane controller in pool/cluster/, see the pool
+        README) and renders only into the three kinds of slot named here. It never moves, adds or removes
         page elements, and never touches the .cp-check cards or any <details> disclosure.
 
         Mounts  TWO elements carry [data-widget="w-cluster-scrolly"] (class "d-wide cs"):
@@ -302,9 +306,9 @@
                 <div class="cs-step__text" data-step-text></div>
                 <div class="cp-check" role="group" aria-labelledby="k-03-q" data-check="k-03">
                   <div class="cp-check__head"><span class="cp-chip">PREDICT</span><span class="cp-label">Check 03 / 09</span></div>
-                  <p class="cp-check__q" id="k-03-q">Ari applies the <code>storefront</code> manifest, and the tool answers <code>created</code> in under a second. At that moment, what is new in the cluster?</p>
+                  <p class="cp-check__q" id="k-03-q">Ari applies the <code>storefront</code> manifest, and Kubernetes answers <code>created</code> in under a second. At that moment, what is new in the cluster?</p>
                   <ul class="cp-options">
-                    <li><button type="button" class="cp-option" data-fb="That’s how a deploy script behaves: when it says done, the thing is running. Applying a manifest only writes the intention into the record. Other loops start the Pods, usually within seconds, so on a good day you can’t see the difference. The next steps show it."><span class="cp-option__key">A</span><span>Three <code>storefront</code> Pods, already running on nodes with room, since the tool said <code>created</code>.</span><span class="cp-option__tag"></span></button></li>
+                    <li><button type="button" class="cp-option" data-fb="That’s how a deploy script behaves: when it says done, the thing is running. Applying a manifest only writes the intention into the record. Other loops start the Pods, usually within seconds, so on a good day you can’t see the difference. The next steps show it."><span class="cp-option__key">A</span><span>Three <code>storefront</code> Pods, already running on nodes with room, since Kubernetes said <code>created</code>.</span><span class="cp-option__tag"></span></button></li>
                     <li><button type="button" class="cp-option" data-fb="There’s no queue and no release window. The intention is recorded straight away, and the loops that act on it run all the time, whether or not there’s a release."><span class="cp-option__key">B</span><span>A job that will start three <code>storefront</code> copies at the next release window.</span><span class="cp-option__tag"></span></button></li>
                     <li><button type="button" class="cp-option" data-ok data-fb="Right. created means the intention has been recorded. Watch what happens to that line next."><span class="cp-option__key">C</span><span>Only a line in the cluster’s record saying three <code>storefront</code> copies are wanted.</span><span class="cp-option__tag"></span></button></li>
                   </ul>
@@ -336,17 +340,17 @@
         </div>
       </div>
 
-      <p>Each loop on moving day followed the same pattern. It looked at the record and at the cluster, compared what’s wanted with what’s there, and acted to close any gap. Then it went back to looking. This pattern is called a <dfn id="dfn-reconcile-loop" aria-describedby="term-03">reconcile loop</dfn>. A <dfn id="dfn-controller" aria-describedby="term-03">controller</dfn> is a part of Kubernetes that runs one reconcile loop for one kind of thing; for example, the ReplicaSet loop is the controller for ReplicaSets. Engineers call one pass of the loop “reconciling”. The scheduler and the node agent work the same way, though engineers don’t usually call them controllers.</p>
+      <p>Every loop in lane A followed the three steps described at the start of this section: observe, compare with what’s wanted, act to close any gap, and then start again. That pattern is called a <dfn id="dfn-reconcile-loop" aria-describedby="term-03">reconcile loop</dfn>, and it isn’t special to moving day, because almost everything Kubernetes does is built from it. A <dfn id="dfn-controller" aria-describedby="term-03">controller</dfn> is one implementation of the pattern: a part of Kubernetes that runs a reconcile loop for one kind of thing. The ReplicaSet loop, for example, is the controller for ReplicaSets. Engineers call one pass of the loop “reconciling”. The scheduler and the node agent work the same way, though engineers don’t usually call them controllers.</p>
 
       <div class="cp-term cp-term--payoff cp-blueprint" id="term-03" role="note" aria-label="New term 3 of 4">
         <p class="cp-term__kicker">New term · 03 / 04</p>
         <p class="cp-term__term">reconcile loop <span class="cp-term__sep">·</span> controller</p>
         <p class="cp-term__def">A loop that compares what the record says is wanted with what it observes, acts to close the gap, and then repeats, forever. A controller runs one such loop for one kind of thing.</p>
-        <p class="cp-term__jobs">the loop lens: which loop · watching what · doing what</p>
+        <p class="cp-term__jobs">the loop lens: which loop · wants · sees · does</p>
         <p class="cp-term__back">You watched three of them on moving day.</p>
       </div>
 
-      <p>You can describe each loop you watched by answering three questions: <strong>which loop, watching what, doing what?</strong> Together, these questions make up the <strong>loop lens</strong>, and you can ask them whenever Kubernetes does something. Each step of moving day answered them. At the fourth step, for example, the loop was the scheduler; it was watching for Pods with no node, and it wrote a node into each one. Because Kubernetes is built from many loops like these, the loop lens will help explain each new part of Kubernetes in the chapters ahead.</p>
+      <p>The pattern is the same for every loop, but each loop fills it in differently, and filling it in is the quickest way to understand any one of them. Ask four questions: <strong>which loop is it, what does it want, what does it see, and what does it do about a gap?</strong> Together, these questions make up the <strong>loop lens</strong>. At the fourth step of lane A, for example, the loop was the scheduler. It wants every Pod to have a node; it saw three Pods with none; and it wrote a node into each one. Each new part of Kubernetes in the chapters ahead is another loop, so the loop lens will explain those too.</p>
 
       <div class="cp-aside">
         <p><b>ANALOGY</b>The name fits. Kubernetes is Greek for helmsman, or pilot. A helmsman doesn’t plan for every wave; they hold a heading and correct the wheel whenever the ship drifts off it. Engineers often shorten the name to K8s, which is a K, then the number of letters in between, then an s.</p>
@@ -433,12 +437,12 @@
            array and add rows). Job names in Ch 3's words. No status colours. -->
       <figure class="cp-fig d-wide" id="f-04" aria-labelledby="f-04-cap">
         <div class="cp-fig__plate">
-          <div class="cp-fig__bar"><span class="cp-label">Fig. 04</span><span class="cp-label">Which loop, watching what, doing what</span></div>
+          <div class="cp-fig__bar"><span class="cp-label">Fig. 04</span><span class="cp-label">Which loop: wants, sees, does</span></div>
           <div class="cp-blueprint lens">
-            <table data-labels="Watching|Doing|Sam’s job">
-              <thead><tr><th scope="col">Loop</th><th scope="col">Watching</th><th scope="col">Doing</th><th scope="col">Sam’s job, now a loop’s</th></tr></thead>
+            <table data-labels="Wants|Sees|Does|Sam’s job">
+              <thead><tr><th scope="col">Loop</th><th scope="col">Wants</th><th scope="col">Sees</th><th scope="col">Does</th><th scope="col">Sam’s job, now a loop’s</th></tr></thead>
               <tbody data-loop-lens></tbody>
-              <tfoot><tr><td colspan="4">Updating and scaling are handled by loops too, in Chapters 6 and 8.</td></tr></tfoot>
+              <tfoot><tr><td colspan="5">Updating and scaling are handled by loops too, in Chapters 6 and 8.</td></tr></tfoot>
             </table>
             <noscript><p class="cs-noscript">This table is drawn by JavaScript.</p></noscript>
           </div>
@@ -544,7 +548,7 @@
                 <div class="cl__nodegrid">
                   <div class="cl__node">
                     <div class="cl__nodebar"><span class="cp-label">Node · 01</span><span class="cp-loop" data-k="agent"><span class="cp-loop__mark">↻</span>agent</span></div>
-                    <div class="cl__nodebody"><span class="cl__pod"></span><span class="cl__pod"></span><span class="cl__pod"></span><p class="cl__podlabel">Pods</p></div>
+                    <div class="cl__nodebody"><span class="cl__pod"></span><span class="cl__pod"></span><p class="cl__podlabel">Pods</p></div>
                   </div>
                   <div class="cl__node">
                     <div class="cl__nodebar"><span class="cp-label">Node · 02</span><span class="cp-loop" data-k="agent"><span class="cp-loop__mark">↻</span>agent</span></div>
@@ -578,7 +582,7 @@
         <figcaption id="f-05-cap"><span class="cp-label">Fig. 05</span><span>Every part talks only to the API server, and through it to the record. The provider runs everything in the top band, but what goes into the record is always yours.</span></figcaption>
       </figure>
 
-      <p>You met the <dfn id="dfn-api-server">API server</dfn> on moving day as the front door to the record. Everything that reads or writes the record goes through it, whether that’s a person applying a manifest or one of the loops. The node agent on each node is what engineers call the kubelet; it starts whatever has been assigned to its node and reports back. Together, the API server, the record behind it, and the loops that work on that record, apart from the node agents, make up the <dfn id="dfn-control-plane" aria-describedby="term-04">control plane</dfn>.</p>
+      <p>You met the API server in §04. Everything that reads or writes the record goes through it, whether that’s a person applying a manifest, one of the loops, or a node agent reporting in. The node agent on each node is what engineers call the kubelet; it starts whatever has been assigned to its node and reports back. Together, the API server, the record behind it, and the loops that work on that record, apart from the node agents, make up the <dfn id="dfn-control-plane" aria-describedby="term-04">control plane</dfn>.</p>
 
       <div class="cp-term" id="term-04" role="note" aria-label="New term 4 of 4">
         <p class="cp-term__kicker">New term · 04 / 04</p>
@@ -653,7 +657,7 @@
           <li>Kubernetes runs Pods, and Pods are disposable. When a node dies, its Pods are replaced by new ones within minutes with default settings, and nobody has to be awake. The app has to cope with that, and the loops can’t fix an app that is broken.</li>
           <li>Your provider runs the control plane. What goes into the record, and whether your apps survive being replaced, stays your responsibility.</li>
         </ul>
-        <p>From here on, whenever Kubernetes does something, the loop lens is the first question to ask: which loop, watching what, doing what? In the next chapter, Morgan, the co-founder who runs Fennel’s money, opens the first cloud bill since the move and finds it has gone up. That story starts with the loop that picked node 04 for <code>orders</code>.</p>
+        <p>From here on, whenever Kubernetes does something, the loop lens is the first thing to reach for: which loop is acting, what does it want, what does it see, and what does it do about the gap? In the next chapter, Morgan, the co-founder who runs Fennel’s money, opens the first cloud bill since the move and finds it has gone up. That story starts with the loop that picked node 04 for <code>orders</code>.</p>
       </div>
     </section>
 
@@ -683,8 +687,11 @@
 <script src="pool/arrow.js"></script>
 <script src="assets/page.js"></script>
 <script src="pool/widget.js"></script>
+<link rel="stylesheet" href="pool/cluster/cluster.css">
 <link rel="stylesheet" href="widgets/w-cluster-scrolly/index.css">
 <script src="widgets/w-cluster-scrolly/data.js"></script>
+<script src="pool/cluster/cluster.js"></script>
+<script src="pool/cluster/lanes.js"></script>
 <script src="widgets/w-cluster-scrolly/index.js"></script>
 </body>
 </html>
