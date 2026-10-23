@@ -254,3 +254,13 @@ Gate (page) round 11: **PASS**. Reading ~14.4 min (brief: ~17 min; reported, not
 Human review follow-up (d-16): §06 container vs Docker + OCI 2015 (sourced), §07 new k-09 and Part I → II transition; gate round 11 PASS
 - [run/review/human-review.md](run/review/human-review.md)
 - [run/gate/page-round-11.json](run/gate/page-round-11.json)
+
+### 2026-10-22T21:21:27-04:00 · verify · gate
+Gate (page) round 12: **PASS**. Reading ~14.4 min (brief: ~17 min; reported, not gated); 247 KB, 16 requests.
+- [gate/page-round-12.json](gate/page-round-12.json)
+- [screenshots/page-round-12](screenshots/page-round-12)
+
+### 2026-10-23T02:30:00-04:00 · verify · gate
+Gate (page) round 13: **PASS**. Reading ~14.4 min (brief: ~17 min; reported, not gated); 377 KB, 16 requests.
+- [gate/page-round-13.json](gate/page-round-13.json)
+- [screenshots/page-round-13](screenshots/page-round-13)

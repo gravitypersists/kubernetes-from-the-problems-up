@@ -14,7 +14,7 @@ import fs from 'node:fs';
 import http from 'node:http';
 import path from 'node:path';
 import { EXPLAINERS, POOL, ROOT, SHELL, loadCourse } from './course.mjs';
-import { chapters as chapterNames, inspect, poolHashes } from './sync.mjs';
+import { chapters as chapterNames, inspect, poolHashes, shipped } from './sync.mjs';
 
 const argv = process.argv.slice(2);
 const flag = (name) => { const i = argv.indexOf(name); return i < 0 ? null : (argv[i + 1] && !argv[i + 1].startsWith('--') ? argv[i + 1] : true); };
@@ -241,7 +241,7 @@ if (problems) process.exit(1);
 
 fs.rmSync(OUT, { recursive: true, force: true });
 fs.mkdirSync(OUT, { recursive: true });
-fs.cpSync(POOL, path.join(OUT, 'pool'), { recursive: true, filter: (p) => path.basename(p) !== 'README.md' });
+fs.cpSync(POOL, path.join(OUT, 'pool'), { recursive: true, filter: (p) => shipped(path.relative(POOL, p)) });
 fs.mkdirSync(path.join(OUT, 'course'));
 for (const f of ['course.css', 'course.js']) fs.copyFileSync(path.join(SHELL, f), path.join(OUT, 'course', f));
 for (const ch of running) chapterPage(ch);

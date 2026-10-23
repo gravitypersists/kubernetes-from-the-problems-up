@@ -213,3 +213,13 @@ Ch 1 delivered: site/ ~17 min, 307 KB; 0 blocking; P-01 should open; P-12 disput
 
 ### 2026-10-21T08:23:17-04:00 · orchestrator · stage
 Stage: deliver → **done**
+
+### 2026-10-22T21:20:36-04:00 · verify · gate
+Gate (page) round 9: **PASS**. Reading ~11.5 min (brief: ~17 min; reported, not gated); 434 KB, 18 requests.
+- [gate/page-round-9.json](gate/page-round-9.json)
+- [screenshots/page-round-9](screenshots/page-round-9)
+
+### 2026-10-23T02:29:09-04:00 · verify · gate
+Gate (page) round 10: **PASS**. Reading ~11.5 min (brief: ~17 min; reported, not gated); 387 KB, 18 requests.
+- [gate/page-round-10.json](gate/page-round-10.json)
+- [screenshots/page-round-10](screenshots/page-round-10)

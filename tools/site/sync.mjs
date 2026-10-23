@@ -23,7 +23,11 @@ export function walk(dir, base = dir) {
   });
 }
 
-export const poolHashes = () => Object.fromEntries(walk(POOL).filter((f) => f !== 'README.md').map((f) => [f, hash(path.join(POOL, f))]));
+// What a chapter (and dist/pool/) gets of _pool/: everything but READMEs and test/ folders (a pool test
+// page such as cluster/test/index.html is for builders, not readers).
+export const shipped = (f) => path.basename(f) !== 'README.md' && !f.split(path.sep).includes('test');
+
+export const poolHashes = () => Object.fromEntries(walk(POOL).filter(shipped).map((f) => [f, hash(path.join(POOL, f))]));
 
 export function chapters(names = []) {
   const all = fs.readdirSync(EXPLAINERS).filter((n) => /^ch-\d{2}-/.test(n) && fs.existsSync(path.join(EXPLAINERS, n, 'site')));

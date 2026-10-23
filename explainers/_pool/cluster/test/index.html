@@ -1,0 +1,219 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Cluster drawing: optional features</title>
+<!-- Builder test page for pool/cluster/ (not shipped: sync and build skip test/ folders).
+     Open this file directly (file://) or serve explainers/_pool/. ?theme=dark forces the dark theme.
+     One snapshot per optional feature, each drawn at a desktop canvas width (560px) and a phone width
+     (360px); the data below is a sample in Ch 05's units (GB, cores), not chapter content. The last
+     group (pool-02) draws the narrow-width fallbacks, at the plate width of a 360px phone's inline
+     snapshot (314px) where that is where they apply. -->
+<link rel="stylesheet" href="../../tokens.css">
+<link rel="stylesheet" href="../cluster.css">
+<style>
+  body { margin: 0; padding: var(--sp-3) var(--sp-2) var(--sp-8); background: var(--bg); color: var(--ink); font: 400 var(--fs-small)/var(--lh-small) var(--font-sans); }
+  h1 { font: 700 var(--fs-h3)/var(--lh-h3) var(--font-sans); margin: 0 0 var(--sp-1); }
+  h2 { font: 700 var(--fs-body)/var(--lh-body) var(--font-sans); margin: var(--sp-5) 0 var(--sp-half); }
+  p, li { max-width: 80ch; margin: 0 0 var(--sp-1); }
+  code { font: 400 var(--fs-caption)/var(--lh-caption) var(--font-mono); }
+  .row { display: flex; flex-wrap: wrap; gap: var(--sp-3); align-items: flex-start; }
+  .fig { flex: none; max-width: 100%; }
+  .fig > p { font: 700 var(--fs-caption)/var(--lh-caption) var(--font-mono); color: var(--ink-3); margin: 0 0 var(--sp-half); text-transform: uppercase; letter-spacing: .06em; }
+</style>
+</head>
+<body>
+<h1>pool/cluster: optional features</h1>
+<p>Each section draws one snapshot that uses one optional field (named in the heading) at 560px and 360px. Without these fields the drawing is Ch 04's, unchanged. Format: <code>explainers/_pool/README.md</code>, "Cluster drawing". Outlined parts carry the step highlight.</p>
+<div id="cases"></div>
+
+<script src="../cluster.js"></script>
+<script>
+(function () {
+  if (/theme=dark/.test(location.search)) document.documentElement.setAttribute('data-theme', 'dark');
+  if (/theme=light/.test(location.search)) document.documentElement.setAttribute('data-theme', 'light');
+
+  /* ---- a sample chapter data object in Ch 05's units ---- */
+  var DATA = {
+    NODES: ['01', '02', '04'],
+    CAPACITY: { memory: 13, cpu: 3.9 },   /* room for Pods per node */
+    UNIT: 'GB',
+    ROOM_UNIT: 2,                          /* one drawn unit of room (Ch 04's) = 2 GB */
+    SERVICES: {
+      storefront:    { size: 4, cpu: 0.5,  label: 'storefront',    breaks: ['store-', 'front'] },
+      orders:        { size: 6, cpu: 1,    label: 'orders',        breaks: ['orders'] },
+      payments:      { size: 2, cpu: 0.25, label: 'payments',      breaks: ['pay-', 'ments'] },
+      dispatch:      { size: 2, cpu: 1,    label: 'dispatch',      breaks: ['dis-', 'patch'] },
+      notifications: { size: 2, cpu: 0.25, label: 'notifications', breaks: ['notifi-', 'cations'] }
+    },
+    LOOPS: { rs: { label: 'ReplicaSet loop' }, sched: { label: 'scheduler' } },
+    PODS: {
+      pa1: { service: 'payments' }, sf1: { service: 'storefront' }, di1: { service: 'dispatch' }, no1: { service: 'notifications' },
+      di2: { service: 'dispatch' }, di3: { service: 'dispatch' }, sf2: { service: 'storefront' }, no2: { service: 'notifications' },
+      pa2: { service: 'payments' }, sf3: { service: 'storefront' }, or1: { service: 'orders' },
+      di5: { service: 'dispatch' }, di6: { service: 'dispatch' }, di7: { service: 'dispatch' }
+    },
+    STRINGS: {
+      widget: 'W-01 · The cluster', widgetShort: 'W-01', step: 'Step', node: 'Node', free: 'free', down: 'DOWN',
+      status: { running: 'RUNNING', notstarted: 'NOT STARTED', starting: 'STARTING', lost: 'LOST', crashed: 'CRASHED', waiting: 'WAITING' },
+      statusBreaks: { notstarted: ['NOT', 'STARTED'] },
+      nodeStatus: { unknown: 'UNKNOWN' },
+      record: { title: 'The cluster’s record · API server', titleShort: 'The record · API server', want: 'WANT', running: 'RUNNING', short: 'SHORT', unknown: 'UNKNOWN', waiting: 'WAITING' },
+      loopMark: '↻', agent: 'agent', agents: 'agents',
+      lens: { watching: 'Sees', doing: 'Does' },
+      /* the optional features' strings */
+      cpu: 'CPU',
+      waiting: 'Waiting · no room',
+      verdict: { fits: 'Fits', mem: 'No memory', cpu: 'No processor', cores: 'cores', free: 'free',
+                 short: { fits: '✓ Fits', mem: '✕ Mem', cpu: '✕ CPU' } },
+      scheduler: 'Scheduler',
+      newNode: 'New',
+      spare: 'Spare',
+      use: { over: 'Uses more than it reserves', overBreaks: ['Uses more', 'than it', 'reserves'], overShort: 'Over' }
+    }
+  };
+  var ROWS = ['orders', 'payments', 'dispatch', 'storefront', 'notifications'];
+  var WANT = { orders: 1, payments: 2, dispatch: 6, storefront: 3, notifications: 2 };
+  var PODS6 = { orders: ['or1'], payments: ['pa1', 'pa2'], dispatch: ['di1', 'di2', 'di3', 'di5', 'di6', 'di7'], storefront: ['sf1', 'sf2', 'sf3'], notifications: ['no1', 'no2'] };
+  var START = { '01': ['pa1', 'sf1', 'di1', 'no1'], '02': ['di2', 'di3', 'sf2', 'no2'], '04': ['pa2', 'sf3', 'or1'] };
+  var SHOWN = ['rs', 'sched'];
+
+  /* a five-step lane in the shape of Ch 05's plan, so lane-wide choices (five columns reserved from
+     the first step, bar and footer forms) apply as they will in the chapter */
+  var F1 = { nodes: START, record: { rows: ROWS, want: WANT, pods: { orders: ['or1'], payments: ['pa1', 'pa2'], dispatch: ['di1', 'di2', 'di3', 'di5', 'di6', 'di7'], storefront: ['sf1', 'sf2', 'sf3'], notifications: ['no1', 'no2'] } },
+    loops: { shown: SHOWN, active: ['rs'], agents: [], lens: { watching: 'dispatch: 6 wanted, 3 Pods', doing: 'writes 3 new Pod records' } }, notes: [], clock: '17:45' };
+  var F2 = { nodes: { '01': ['pa1', 'sf1', 'di1', 'no1', 'di5:notstarted'], '02': ['di2', 'di3', 'sf2', 'no2', 'di6:notstarted'], '04': ['pa2', 'sf3', 'or1'] },
+    record: { rows: ROWS, want: WANT, pods: PODS6 },
+    verdicts: { '01': { verdict: 'mem cpu', memory: 1, cpu: 0.9 }, '02': { verdict: 'fits', memory: 3, cpu: 1.15 }, '04': 'mem' },
+    loops: { shown: SHOWN, active: ['sched'], agents: [], lens: { watching: '3 Pods with no node', doing: 'places 2: dispatch → 01, dispatch → 02' } }, notes: [], clock: 'Seconds later' };
+  var F3NODES = { '01': ['pa1', 'sf1', 'di1', 'no1', 'di5'], '02': ['di2', 'di3', 'sf2', 'no2', 'di6'], '04': ['pa2', 'sf3', 'or1'] };
+  var REASON = { id: 'reason', type: 'scheduler', text: '0/3 nodes are available: 2 Insufficient cpu, 3 Insufficient memory.' };
+  var F3 = { nodes: F3NODES, waiting: ['di7'], record: { rows: ROWS, want: WANT, pods: PODS6 },
+    verdicts: { '01': 'mem cpu', '02': 'mem cpu', '04': 'mem' },
+    loops: { shown: SHOWN, active: ['sched'], agents: [], lens: { watching: '1 Pod with no node; no node with room', doing: 'leaves it unplaced; records why' } },
+    notes: [REASON], clock: 'Seconds later' };
+  var F4 = { nodes: F3NODES, waiting: ['di7'], record: { rows: ROWS, want: WANT, pods: PODS6 },
+    loops: { shown: SHOWN, active: ['sched'], agents: [], lens: { watching: '1 Pod with no node', doing: 'tries again whenever the cluster changes' } },
+    notes: [REASON, { id: 'dispatch', label: 'Dispatch', text: '5 of 6 copies running at the rush', tone: 'warn' }], clock: '18:00–18:40' };
+  var F5 = { nodes: { '01': F3NODES['01'], '02': F3NODES['02'], '04': F3NODES['04'], '05': ['di7:notstarted'], '06': [] },
+    newNodes: ['05', '06'], verdicts: { '05': 'fits', '06': 'fits' }, record: { rows: ROWS, want: WANT, pods: PODS6 },
+    loops: { shown: SHOWN, active: ['sched'], agents: [], lens: { watching: '1 Pod with no node; two new nodes', doing: 'dispatch → 05' } },
+    notes: [], clock: '~18:40' };
+  var LANE = [F1, F2, F3, F4, F5];
+
+  /* the sandbox: nodes only, use fills, fractional requests, a spare node, rows of four */
+  var SAND = JSON.parse(JSON.stringify(DATA));
+  SAND.NODES = [];
+  SAND.PODS.or1.size = 4.5;                              /* orders request 4.5 GB, used 5.5 */
+  ['di1', 'di2', 'di3', 'di5', 'di6', 'di7'].forEach(function (id) { SAND.PODS[id].size = 0.5; });   /* used 1 */
+  var SANDSTATE = {
+    nodes: { '1': ['sf1:placed', 'or1:placed', 'pa1:placed', 'no1:placed'], '2': ['sf2:placed', 'sf3:placed', 'di1:placed', 'di2:placed'],
+             '3': ['di3:placed', 'di5:placed', 'di6:placed', 'pa2:placed', 'no2:placed'], '4': ['di7:placed'], '5': [] },
+    spare: ['5'],
+    use: { sf1: 2, sf2: 2, sf3: 2, or1: 5.5, pa1: 0.5, pa2: 0.5, no1: 0.5, no2: 0.5, di1: 1, di2: 1, di3: 1, di5: 1, di6: 1, di7: 1 }
+  };
+
+  var LANE_R = ClusterCanvas.create(DATA);
+  var SAND_R = ClusterCanvas.create(SAND);
+
+  var CASES = [
+    { title: '1 · Capacity and unit: CAPACITY { memory, cpu }, UNIT, ROOM_UNIT; fractional sizes',
+      note: 'Chip height = memory request (ROOM_UNIT 2: one Ch 04 unit = 2 GB); free room reads “N GB FREE”. Lane step F1; five columns reserved because a later step has five nodes.',
+      lane: 1, state: F1, highlight: ['row:dispatch', 'loop:rs', 'lens', 'free:01'] },
+    { title: '2 · Processor footer (computed from SERVICES[s].cpu; any CAPACITY.cpu)',
+      note: 'CPU reserved / room for Pods on each node, ink-2; highlight key cpu:&lt;node&gt;.',
+      lane: 1, state: F1, highlight: ['cpu:01', 'cpu:02', 'cpu:04'] },
+    { title: '3 · waiting: [podIds] — the WAITING strip and the “n WAITING” row word',
+      note: 'Highlight keys waiting (the strip) and p:&lt;pod&gt;. Lane step F4.',
+      lane: 1, state: F4, highlight: ['waiting', 'row:dispatch', 'note:dispatch'] },
+    { title: '4 · verdicts: { node: "fits" | "mem" | "cpu" | "mem cpu" | { verdict, memory, cpu } }',
+      note: 'Wide form with free amounts (computed, or given at the moment of the check); narrow form at 360px. Lane step F2 (02’s free amounts given in the object form).',
+      lane: 1, state: F2, highlight: ['verdict:01', 'verdict:02', 'verdict:04', 'p:di5', 'p:di6'] },
+    { title: '4b · verdicts, NO MEMORY · NO PROCESSOR (lane step F3)',
+      lane: 1, state: F3, highlight: ['verdict:01', 'verdict:02', 'verdict:04', 'p:di7', 'note:reason'] },
+    { title: '5 · notes: [{ type: "scheduler", text }] — the recorded reason',
+      note: 'Labelled SCHEDULER (STRINGS.scheduler, or the note’s own label); wraps.',
+      lane: 1, state: F3, highlight: ['note:reason'] },
+    { title: '6 · newNodes: [ids] — the NEW tag (lane step F5)',
+      note: 'Highlight key new:&lt;node&gt;; the tag sits on the id line, the pill row or its own line, whichever fits.',
+      lane: 1, state: F5, highlight: ['new:05', 'new:06', 'n:05', 'n:06', 'p:di7', 'verdict:05', 'verdict:06'] },
+    { title: '7 · use: { podId: amount } — use fill, and the overflow form (hatched, warn)',
+      note: 'Status “placed”: a Pod in a what-if packing, no status word. orders requests 4.5 GB and used 5.5; dispatch requests 0.5 and used 1 (on node 3, top Pod: the overflow is clipped at the node’s top, dashed edge). Highlight key use:&lt;pod&gt;.',
+      sand: 1, state: SANDSTATE, highlight: ['use:or1'] },
+    { title: '8 · opts.nodesOnly (no record, no loop pills, no step counter); opts.columns: 4; spare: [ids]',
+      note: 'The sandbox drawing. Header given with no n: title only. spare draws a dashed c6 frame with SPARE in its body.',
+      sand: 1, state: SANDSTATE, header: { lane: '', n: null }, highlight: [] },
+    { title: '8b · opts.labels: false (chips show only outline and fill)',
+      sand: 1, state: SANDSTATE, labels: false, highlight: [] },
+
+    /* ---- pool-02: narrow-width fallbacks. "360" = the plate of an inline snapshot on a 360px phone
+       (314px: the step card's width plus its bleed), as lanes.js draws it; nothing here is a new field */
+    { group: 'pool-02 · narrow-width fallbacks (each applies only where the drawing doesn’t fit; Ch 04 is unchanged)' },
+    { title: 'P1 · node ids: NODE 01 → bare 01 when “NODE 01” misses any node’s bar (lane-wide)',
+      note: 'Lane step F5 in five columns on a 360px phone (314px plate): all five bars read 01 … 06 rather than a clipped “NODE 0”. At 560px: NODE · 01.',
+      lane: 1, state: F5, widths: [560, 314], highlight: ['new:05', 'new:06'] },
+    { title: 'P2 · record row word: smaller marks, then the word on its own line',
+      note: 'Lane step F3. 314px: the compact word (1 WAITING) would overlap six 10px marks, so the marks draw at 8px, 2px apart. 250px: still too narrow, so each row’s word takes a line under its row (here in full: 5 RUNNING · 1 WAITING).',
+      lane: 1, state: F3, widths: [314, 250], highlight: ['row:dispatch'] },
+    { title: 'P3 · per-state columns in inline snapshots (lanes.js)',
+      note: 'Lane step F3 at 314px. Left: the lane-wide reservation (five columns, as the sticky canvas draws it). Right: the inline snapshot, sized to its own state’s three nodes; F5’s snapshot keeps five. Default for lanes whose node count varies; lane option snapColumns: \'lane\' turns it off.',
+      lane: 1, state: F3, widths: [314, 314], perState: [false, true], highlight: ['waiting', 'p:di7'] },
+    { title: 'P5 · very short chips: no label below one line’s glyphs',
+      note: 'Sandbox requests: dispatch 0.5 GB, payments 1 GB, notifications 1.5 GB (unit 22 at 360, 28 at 560). A chip whose text room is under 10px draws outline and fill only (0 lines) instead of a clipped 13px line; from 10px it holds one tight line, as before.',
+      sand: 2, state: null, widths: [560, 360], highlight: [] },
+    { title: 'P6 · free room shorter than a line: the amount alone, or no label',
+      note: 'Same drawing. A free box shorter than 16px shows only the amount (“1.5 GB”) where its inside holds the glyphs (≥ 10px), and no label below that (1 GB at unit 22–28 is 9.5–12px), instead of “1 GB FREE” over its dashed edges.',
+      sand: 2, state: null, widths: [560, 360], highlight: ['free:1', 'free:2', 'free:3'] }
+  ];
+
+  /* P5/P6: short Pods and short free boxes */
+  var SHORT = JSON.parse(JSON.stringify(DATA));
+  SHORT.NODES = [];
+  ['di1', 'di2', 'di3', 'di5', 'di6', 'di7'].forEach(function (id) { SHORT.PODS[id].size = 0.5; });
+  ['pa1', 'pa2'].forEach(function (id) { SHORT.PODS[id].size = 1; });
+  ['no1', 'no2'].forEach(function (id) { SHORT.PODS[id].size = 1.5; });
+  SHORT.PODS.or1.size = 4.5;
+  SHORT.SERVICES.dispatch.cpu = 0.25;   /* keeps each node's processor within its room */
+  var SHORTSTATE = {
+    nodes: { '1': ['or1:placed', 'sf1:placed', 'pa1:placed', 'no1:placed', 'di1:placed', 'di2:placed'],   /* 12 GB: 1 GB free */
+             '2': ['sf2:placed', 'sf3:placed', 'pa2:placed', 'no2:placed', 'di3:placed', 'di5:placed'],   /* 11.5 GB: 1.5 GB free */
+             '3': ['di6:placed', 'di7:placed'], '4': [] },
+    spare: ['4']
+  };
+  var SHORT_R = ClusterCanvas.create(SHORT);
+
+  var host = document.getElementById('cases');
+  CASES.forEach(function (c) {
+    if (c.group) { var g = document.createElement('h1'); g.style.marginTop = 'var(--sp-8)'; g.textContent = c.group; host.appendChild(g); return; }
+    var h = document.createElement('h2'); h.textContent = c.title; host.appendChild(h);
+    if (c.note) { var p = document.createElement('p'); p.innerHTML = c.note; host.appendChild(p); }
+    var row = document.createElement('div'); row.className = 'row'; host.appendChild(row);
+    (c.widths || [560, 360]).forEach(function (w, wi) {
+      var fig = document.createElement('div'); fig.className = 'fig'; fig.style.width = w + 'px';
+      var cap = document.createElement('p');
+      cap.textContent = w + 'px' + (w === 314 ? ' (360px phone)' : '') + (c.perState ? (c.perState[wi] ? ' · per state' : ' · lane-wide') : '');
+      fig.appendChild(cap);
+      var target = document.createElement('div'); fig.appendChild(target); row.appendChild(fig);
+      if (c.lane) {
+        var header = { lane: 'Friday, 17:45', n: LANE.indexOf(c.state) + 1, total: LANE.length };
+        /* as lanes.js: an inline snapshot sized to its own state's node count (P3) */
+        var lo = c.perState && c.perState[wi] ? { columns: LANE_R.nodeIds(c.state).length } : undefined;
+        var layout = LANE_R.laneLayout(w, LANE, header, lo);
+        var ro = { width: w, layout: layout, header: header };
+        if (lo) ro.columns = lo.columns;
+        var reserve = LANE_R.measureReserve(target, LANE, ro);
+        LANE_R.renderCluster(target, c.state, { width: w, layout: layout, reserve: reserve, header: header, highlight: c.highlight });
+      } else if (c.sand === 2) {
+        SHORT_R.renderCluster(target, SHORTSTATE, { width: w, nodesOnly: true, columns: 4, unit: w < 440 ? 22 : 28, highlight: c.highlight });
+      } else {
+        var o = { width: w, nodesOnly: true, columns: 4, labels: c.labels, highlight: c.highlight };
+        if (c.header) { SAND.STRINGS.widget = 'W-02 · Ari’s sizing sheet'; SAND.STRINGS.widgetShort = 'W-02'; o.header = c.header; }
+        SAND_R.renderCluster(target, c.state, o);
+      }
+    });
+  });
+})();
+</script>
+</body>
+</html>

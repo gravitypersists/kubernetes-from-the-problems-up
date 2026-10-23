@@ -262,3 +262,13 @@ Human review applied (d-11): §02 now scrollytelling (w-samecode-scrolly), §03 
 - [run/review/human-review.md](run/review/human-review.md)
 - [run/gate/page-round-9.json](run/gate/page-round-9.json)
 - **decision:** d-11
+
+### 2026-10-22T21:21:01-04:00 · verify · gate
+Gate (page) round 10: **PASS**. Reading ~14.2 min (brief: ~18 min; reported, not gated); 283 KB, 17 requests.
+- [gate/page-round-10.json](gate/page-round-10.json)
+- [screenshots/page-round-10](screenshots/page-round-10)
+
+### 2026-10-23T02:29:34-04:00 · verify · gate
+Gate (page) round 11: **PASS**. Reading ~14.2 min (brief: ~18 min; reported, not gated); 368 KB, 17 requests.
+- [gate/page-round-11.json](gate/page-round-11.json)
+- [screenshots/page-round-11](screenshots/page-round-11)
