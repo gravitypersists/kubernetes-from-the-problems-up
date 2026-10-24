@@ -1,0 +1,19 @@
+/* w-rollout-scrolly · Ch 06's load-time height reservation for lane R. The drawing's styles, the step
+   kicker and the measured inline fallback are the pool's (pool/cluster/cluster.css); the lane scaffold
+   (.cs-*) is the page's (assets/page.css).
+
+   The page reserves the canvas slot (min-height): 540px from 900px wide, min(452px, 50vh + 16px) under
+   900px. Measured drawing heights (two node columns, a Deployment row over two ReplicaSet rows, the
+   loop pills and lens, two note lines):
+   - from 900px wide: 562px at 1280 (the canvas is about 476px wide; the agents pill takes a second
+     pill row in R2), 534px at 1000;
+   - under 900px: 440px at 360×900 plus the slot's 16px padding (unit 22); where the drawing can't fit
+     50vh (most phones, and 600–899px wide, where the wide chrome is taller) the lane shows inline
+     snapshots per step instead and hides this slot (data-cs-fit="inline"). */
+[data-widget="w-rollout-scrolly"] .cs-lane[data-lane="R"] .cs-canvas { min-height: min(456px, calc(50vh + 16px)); }
+@media (min-width: 900px) {
+  [data-widget="w-rollout-scrolly"] .cs-lane[data-lane="R"] .cs-canvas { min-height: min(562px, calc(100vh - 48px)); }
+}
+@media (max-height: 559px) {
+  [data-widget="w-rollout-scrolly"] .cs-lane[data-lane="R"] .cs-canvas { min-height: 0; }
+}

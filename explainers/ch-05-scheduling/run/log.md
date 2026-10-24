@@ -232,3 +232,8 @@ After-ship updates applied to CURRICULUM.md (§8 step 8): Ch 5 story facts in §
 
 ### 2026-10-24T09:08:01-04:00 · orchestrator · stage
 Stage: deliver → **done**
+
+### 2026-10-24T10:34:16-04:00 · verify · gate
+Gate (page) round 11: **PASS**. Reading ~26.7 min (brief: ~26 min; reported, not gated); 401 KB, 23 requests.
+- [gate/page-round-11.json](gate/page-round-11.json)
+- [screenshots/page-round-11](screenshots/page-round-11)

@@ -29,7 +29,8 @@ re-gate every chapter (`verify.mjs` on each), because every chapter picks the ch
 data format here, keep the promoted chapter drawing exactly as before (compare its DOM and screenshots),
 and give new features optional fields that are off when absent. A pool test page goes in a `test/`
 folder, which is never shipped. Promoted so far: Ch 4's cluster renderer and lane controller (Ch 5
-pool-01; narrow-width fallbacks, pool-02). Still a candidate: Ch 3's `renderFleet` in `w-fleet-scrolly`, which `cluster/` supersedes.
+pool-01; narrow-width fallbacks, pool-02; Ch 6's Deployment group, `notready`, series colour and
+`STATUS_INLINE`, pool-03). Still a candidate: Ch 3's `renderFleet` in `w-fleet-scrolly`, which `cluster/` supersedes.
 
 ## Cluster drawing (`cluster/cluster.js`, `cluster/cluster.css`)
 
@@ -56,7 +57,8 @@ fonts load). Styles are scoped under the drawing's root, `.wc`.
 | `ROOM_UNIT` | optional, default 1. How many `UNIT`s one drawn unit of room is (Ch 5: `2`, so a 2 GB Pod is Ch 4's one-unit chip) |
 | `SERVICES` | `{ svc: { size, cpu?, label, breaks } }`. `size` in `UNIT` (fractions allowed); `cpu` in cores; `breaks` = where the label may break on a narrow chip |
 | `LOOPS` | `{ id: { label } }`, the loop pills |
-| `PODS` | `{ id: { service, version?, name?, size?, cpu?, use? } }`. `size` / `cpu` override the service's for this Pod; `use` = what it used (also settable per state) |
+| `PODS` | `{ id: { service, version?, name?, size?, cpu?, use?, series? } }`. `size` / `cpu` override the service's for this Pod; `use` = what it used (also settable per state) |
+| `STATUS_INLINE` | optional (pool-03). `true`: a chip with no line of its own for its status word puts it beside its label |
 | `STRINGS` | every reader-visible string (below) |
 | `CLUSTER_LANES` (or `LANES`) | lanes for `lanes.js` |
 
@@ -177,6 +179,53 @@ No new fields; the test page's last group draws each one at a 360px phone's snap
    inside holds the glyphs (10px or more), and no label where it doesn't, as under 8px; a box of a line
    or more is labelled as before (`3 GB FREE`, two lines, or the amount).
 
+### Optional fields (pool-03, Ch 06)
+
+Each is drawn only when present; with none of them the drawing is Ch 04's and Ch 05's, unchanged.
+
+1. **Deployment group in the record**: `record.deployment: { name, want, version, rows }` draws a header
+   row `DEPLOYMENT · catalog · WANT 3 · v63` (`STRINGS.record.deployment`, uppercased; the version in
+   bold) above the first of the listed `rows`, which are drawn indented under it (a thin c4 elbow) and
+   named `ReplicaSet v62` (`STRINGS.record.replicaSet` + the row key). Where any row of the lane would
+   then miss its full word, every grouped row is named by its key alone (`v62`), lane-wide (`L.rsForm`);
+   where the header doesn't fit one line, it takes two (`DEPLOYMENT · catalog` / `WANT 3 · v63`,
+   `L.depWrap`). A grouped row with WANT 0 and no Pod records reads `KEPT` (`STRINGS.record.kept`,
+   ink-3) instead of `0 RUNNING`: kept, not deleted. A ReplicaSet not yet created has no row (leave it
+   out of `rows`). Rows outside the group draw as before, and the indent sits inside the name column, so
+   mixed records stay aligned. Rows are keyed like services (`want`, `pods`, `deleting` by row key).
+   Highlight keys `dep:<name>` (the header row) and `dep:<name>:version` (its version).
+2. **Status `notready`**: `'n1:notready'`, a Pod whose container runs but hasn't passed its readiness
+   check: a solid chip (as running), a hollow lamp, the word `STRINGS.status.notready` in warn
+   (`statusBreaks.notready` allowed); its record mark is hollow (the existing rule: only running and
+   lost Pods fill a mark). A chapter that uses it usually also sets `status.running` and
+   `record.running` to `'READY'`.
+3. **Per-Pod series colour**: `PODS[id].series: 1–6` draws that Pod's chip in `cN` on `cN-soft` instead
+   of c1; the ring stays ink. Absent = c1. NOT STARTED, STOPPED and LOST keep their own looks; a WAITING
+   chip's dashed edge and a use fill take the series colour. Status words keep their tone colours on
+   every fill (contrast on c2-soft and c5-soft is the same as on c1-soft, within 0.1).
+4. **`STATUS_INLINE: true`** (data): where a chip has no line of its own for its status word (a one-unit
+   Pod, such as a 2 GB Pod at `ROOM_UNIT` 2), the word goes beside the label's last line
+   (`catalog v63 ■ READY`), else beside the version alone (`v63 □ NOT READY`), before the usual
+   fallbacks; RUNNING included, which without the flag stays unmarked on such a chip. Added for Ch 06,
+   whose READY / NOT READY difference must show on every chip.
+
+Example (Ch 06's lane step R3; `PODS.c2.series = 5`, `PODS.n1.series = 2`):
+
+```js
+{ nodes: { '05': ['di7', 'c1', 'n1'], '06': ['c2:stopped', 'c3'] },
+  record: { deployment: { name: 'catalog', want: 3, version: 'v63', rows: ['v62', 'v63'] },
+            rows: ['v62', 'v63'], want: { v62: 2, v63: 1 }, pods: { v62: ['c1', 'c3'], v63: ['n1'] },
+            deleting: { v62: ['c2'] } },
+  loops: { shown: ['deploy', 'rs', 'sched'], active: ['deploy'], agents: [],
+           lens: { watching: '1 v63 Pod ready', doing: 'v62 down to 2' } },
+  notes: [{ id: 'customers', label: 'Customers', text: 'served by v62 ×2 · v63 ×1', tone: 'good' }],
+  clock: '~10:15:20' }
+```
+
+Strings these use: `record.deployment` (`'Deployment'`), `record.replicaSet` (`'ReplicaSet'`),
+`record.kept` (`'KEPT'`), `status.notready` (`'NOT READY'`). The test page's pool-03 group draws each
+at 560px, 360px and a 360px phone's snapshot width (314px), in both themes (`?theme=dark`).
+
 `renderCluster` options, all optional: `width` (the plate's width; with `bleed`, the target's width plus
 the bleed), `unit` (px per drawn unit of room; default 32, 22 narrow), `layout` (from `laneLayout`),
 `reserve` (from `measureReserve`), `highlight` (keys below), `lit` (false = highlight drawn but not yet
@@ -185,7 +234,8 @@ canvas under 440px wide uses the narrow chrome.
 
 Highlight keys (the step highlight, a 3px ink outline): `p:<pod>`, `n:<node>`, `status:<node>`,
 `free:<node>`, `row:<service>`, `loop:<id>`, `agent:<node>`, `note:<id>`, `lens`, `banner`; new:
-`verdict:<node>`, `cpu:<node>`, `new:<node>`, `waiting`, `use:<pod>`.
+`verdict:<node>`, `cpu:<node>`, `new:<node>`, `waiting`, `use:<pod>`; pool-03: `dep:<name>`,
+`dep:<name>:version`.
 
 Example (Ch 5 lane step F3):
 

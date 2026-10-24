@@ -264,3 +264,8 @@ Gate (page) round 12: **PASS**. Reading ~14.4 min (brief: ~17 min; reported, not
 Gate (page) round 13: **PASS**. Reading ~14.4 min (brief: ~17 min; reported, not gated); 377 KB, 16 requests.
 - [gate/page-round-13.json](gate/page-round-13.json)
 - [screenshots/page-round-13](screenshots/page-round-13)
+
+### 2026-10-24T10:33:07-04:00 · verify · gate
+Gate (page) round 14: **PASS**. Reading ~14.4 min (brief: ~17 min; reported, not gated); 381 KB, 16 requests.
+- [gate/page-round-14.json](gate/page-round-14.json)
+- [screenshots/page-round-14](screenshots/page-round-14)

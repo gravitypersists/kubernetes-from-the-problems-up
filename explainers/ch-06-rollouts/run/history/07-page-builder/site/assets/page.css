@@ -1,0 +1,704 @@
+/* Ch 06 page layer. The course's page components are reimplemented from Ch 05's assets/page.css (the
+   reference implementation, itself from Ch 04 and Ch 03): base, hero, page column, prose, asides with
+   their breaks line, quotes, recap, sources, cast strip, disclosures (.cp-more), term cards (.cp-term and
+   its payoff variant), figure plates, status words, the record and loop grammar, the manifest plate, the
+   loop lens table and its NEW IN CH N tag, the widget caption line (.cp-wcap), the question list
+   (.cp-qs), the scrollytelling scaffold (.cs-*) and the check card look and behave as in Ch 05, including
+   Ch 05's late fix: TRY AGAIN sits on its own line, so its 44px target opens no gap in the feedback line.
+   Control Plane treatments (design/control-plane/components/bundle.css) fitted to the kit skeleton
+   (pool/components.css). Every value is a token; no raw colours.
+   New in Ch 06 (plan ## Visual grammar): the version colours (v63 = c2, the other version = c5), the
+   Jordan-and-Ari exchange, f-01's bracket, the static Pod chip, f-02 (two checks on one Pod), the gated
+   blocks, f-03's two-panel plate, f-04's timeline with its PRICES band, f-05's record panels and f-06's
+   tag-and-digest plate. */
+
+
+/* ---------- base ---------- */
+body.d-body { -webkit-font-smoothing: antialiased; }
+:where(body) :focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+
+.cp-label {
+  font: 700 var(--fs-caption)/var(--lh-caption) var(--font-mono);
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+}
+.cp-blueprint {
+  background-color: var(--surface);
+  background-image:
+    linear-gradient(var(--line) 1px, transparent 1px),
+    linear-gradient(90deg, var(--line) 1px, transparent 1px);
+  background-size: var(--sp-4) var(--sp-4);
+  background-position: -1px -1px;
+}
+
+/* ---------- hero ---------- */
+.cp-hero { padding: var(--sp-11) var(--sp-3) var(--sp-6); border-bottom: 3px solid var(--ink); }
+.cp-hero__inner { max-width: 960px; margin: 0 auto; }
+.cp-hero__kicker { display: flex; flex-wrap: wrap; gap: var(--sp-1) var(--sp-2); align-items: center; margin: 0 0 var(--sp-3); }
+.cp-hero__idx {
+  background: var(--accent); color: var(--accent-ink);
+  padding: 0 var(--sp-1); border-radius: var(--radius-1);
+  font: 700 var(--fs-caption)/var(--lh-caption) var(--font-mono); letter-spacing: .08em;
+}
+.cp-hero__title {
+  margin: 0 0 var(--sp-3); max-width: 18ch;
+  font: 800 var(--fs-h1)/var(--lh-h1) var(--font-sans);
+  font-stretch: 112%; letter-spacing: -0.02em; color: var(--ink); text-wrap: balance;
+}
+.cp-hero__standfirst { margin: 0 0 var(--sp-5); max-width: var(--measure); font: italic 400 22px/32px var(--font-serif); color: var(--ink-2); }
+.cp-meta { display: flex; flex-wrap: wrap; margin: 0; padding: 0; border-top: var(--stroke) solid var(--ink); }
+.cp-meta > div { display: flex; flex-direction: column; gap: 2px; padding: var(--sp-1) var(--sp-3) 0 0; margin-right: var(--sp-3); }
+.cp-meta dt { font: 400 var(--fs-caption)/var(--lh-caption) var(--font-mono); text-transform: uppercase; letter-spacing: .08em; color: var(--ink-3); }
+.cp-meta dd { margin: 0; font: 700 var(--fs-caption)/var(--lh-caption) var(--font-mono); color: var(--ink); font-variant-numeric: tabular-nums; }
+@media (max-width: 640px) {
+  .cp-hero { padding: var(--sp-8) var(--sp-2) var(--sp-5); }
+  .cp-hero__standfirst { font-size: 19px; line-height: 28px; }
+}
+
+/* ---------- page column ---------- */
+.d-page { padding-top: var(--sp-4); }
+.d-rail { padding-top: var(--sp-6); }
+/* Sections hold the prose measure (66ch in body type); wide blocks break out symmetrically,
+   bounded by the main column (container query units), so the left edge of all prose lines up. */
+.d-main { container-type: inline-size; }
+.d-main > * { margin-inline: auto; }
+.d-main section > .d-wide {
+  width: min(960px, 100cqw); max-width: none;
+  margin-left: calc((100% - min(960px, 100cqw)) / 2);
+}
+.d-main section > .cp-check {
+  width: min(720px, 100cqw); max-width: none;
+  margin-left: calc((100% - min(720px, 100cqw)) / 2);
+}
+
+/* ---------- prose ---------- */
+.d-main p { hanging-punctuation: first; }
+.d-main h2 {
+  margin: var(--sp-9) auto var(--sp-3);
+  padding-top: var(--sp-2);
+  border-top: var(--stroke) solid var(--ink);
+  font: 700 var(--fs-h2)/var(--lh-h2) var(--font-sans);
+  font-stretch: 106%; letter-spacing: -0.01em; text-wrap: balance;
+}
+.d-main section:first-of-type h2 { margin-top: var(--sp-4); }
+.cp-sec {
+  display: block; margin-bottom: var(--sp-1);
+  font: 700 var(--fs-caption)/var(--lh-caption) var(--font-mono);
+  letter-spacing: .08em; color: var(--accent);
+}
+.d-main a {
+  color: var(--accent);
+  text-decoration: underline; text-decoration-thickness: var(--stroke); text-underline-offset: 3px;
+  transition: color var(--dur-1) var(--ease-out);
+}
+.d-main a:hover { color: var(--ink); }
+.d-main dfn { font-style: normal; font-weight: 600; box-shadow: inset 0 -0.35em 0 var(--c1-soft); }
+.d-main ul { padding-left: var(--sp-3); }
+.d-main li { margin-bottom: var(--sp-1); }
+.cp-aside {
+  margin-top: var(--sp-4); margin-bottom: var(--sp-4);
+  padding: var(--sp-2) 0 var(--sp-2) var(--sp-3);
+  border-top: var(--stroke) solid var(--line); border-bottom: var(--stroke) solid var(--line);
+  font: var(--fs-small)/var(--lh-small) var(--font-sans); color: var(--ink-2);
+}
+.cp-aside p { margin: 0 0 var(--sp-1); }
+.cp-aside p:last-child { margin-bottom: 0; }
+.cp-aside b { font: 700 var(--fs-caption)/var(--lh-caption) var(--font-mono); letter-spacing: .08em; color: var(--ink); margin-right: var(--sp-1); }
+.cp-aside .cp-breaks b { color: var(--ink-3); }
+.cp-quote {
+  margin: var(--sp-3) 0;
+  padding: var(--sp-1) 0 var(--sp-1) var(--sp-3);
+  border-left: 3px solid var(--ink);
+  font: italic 400 22px/32px var(--font-serif); color: var(--ink);
+}
+.cp-quote p { margin: 0; }
+.cp-quote cite { display: block; margin-top: var(--sp-half); font: 400 var(--fs-caption)/var(--lh-caption) var(--font-mono); font-style: normal; letter-spacing: .08em; text-transform: uppercase; color: var(--ink-3); }
+.cp-recap { margin-top: var(--sp-6); padding-top: var(--sp-2); border-top: var(--stroke) solid var(--ink); }
+.cp-recap ul { margin: var(--sp-1) 0 var(--sp-3); padding-left: var(--sp-3); }
+.cp-recap li { margin-bottom: var(--sp-1); }
+.cp-sources { margin-top: var(--sp-9); padding-top: var(--sp-2); border-top: var(--stroke) solid var(--line); font: var(--fs-small)/var(--lh-small) var(--font-sans); color: var(--ink-2); }
+.cp-sources ol { margin: var(--sp-1) 0 var(--sp-2); padding-left: var(--sp-3); }
+.cp-sources li { margin-bottom: var(--sp-half); }
+.cp-sources p { margin: 0 0 var(--sp-1); }
+
+/* ---------- cast strip (course convention from Ch 03, CURRICULUM §2.11) ---------- */
+.cp-cast {
+  margin-top: 0; margin-bottom: var(--sp-2); padding: var(--sp-2) 0;
+  border-top: var(--stroke) solid var(--line); border-bottom: var(--stroke) solid var(--line);
+  font: var(--fs-small)/var(--lh-small) var(--font-sans); color: var(--ink-2);
+}
+.d-main .cp-cast > .cp-label { margin: 0 0 var(--sp-1); }
+.cp-cast dl { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: var(--sp-half) var(--sp-2); margin: 0; }
+.cp-cast dt { font: 700 var(--fs-caption)/var(--lh-small) var(--font-mono); letter-spacing: .08em; text-transform: uppercase; color: var(--ink); }
+.cp-cast dd { margin: 0; }
+
+/* ---------- disclosures: optional notes, collapsed by default (ink ▸ / ▾ markers, as Ch 02's "why" lists) ---------- */
+.d-more.cp-more { margin: var(--sp-2) auto var(--sp-3); padding-left: var(--sp-2); border-left: var(--stroke) solid var(--ink); }
+.cp-more > summary {
+  display: flex; align-items: center; min-height: var(--tap); cursor: pointer; list-style: none;
+  font: 600 var(--fs-small)/var(--lh-small) var(--font-sans); color: var(--ink);
+}
+.cp-more > summary::-webkit-details-marker { display: none; }
+.cp-more > summary::before { content: "▸"; flex: none; margin-right: var(--sp-1); font-family: var(--font-mono); color: var(--ink); }
+.cp-more[open] > summary::before { content: "▾"; }
+.cp-more__body { padding-bottom: var(--sp-1); font: var(--fs-small)/var(--lh-small) var(--font-serif); color: var(--ink-2); }
+.cp-more__body p, .cp-more__body ul { margin: 0 0 var(--sp-1); }
+.cp-more__body p:last-child, .cp-more__body ul:last-child { margin-bottom: 0; }
+.cp-more__body ul { padding-left: var(--sp-3); }
+.cp-more__body li { margin-bottom: var(--sp-half); }
+
+/* ---------- term cards (course convention from Ch 03, CURRICULUM §8 step 4; plan ## Figures) ----------
+   Outlined plate, no shadow (not interactive). One accent mark: the kicker. The payoff variant
+   (blueprint ground, larger term, job strip) appears at most once per chapter. Static: no animation. */
+.cp-term {
+  margin-top: var(--sp-6); margin-bottom: var(--sp-6);
+  padding: var(--sp-3);
+  background-color: var(--surface); border: var(--stroke) solid var(--ink); border-radius: var(--radius-1);
+}
+.cp-term > p { margin: 0; }
+.cp-term__kicker { font: 700 var(--fs-caption)/var(--lh-caption) var(--font-mono); letter-spacing: .08em; text-transform: uppercase; color: var(--accent); }
+.cp-term .cp-term__term {
+  margin: var(--sp-1) 0 var(--sp-2);
+  font: 800 32px/36px var(--font-sans); font-stretch: 112%; letter-spacing: -0.02em; color: var(--ink);
+  text-wrap: balance; overflow-wrap: anywhere;
+}
+.cp-term__sep { font-family: var(--font-mono); font-weight: 400; color: var(--ink-3); }
+.cp-term .cp-term__def { margin-bottom: var(--sp-2); font: 400 var(--fs-body)/var(--lh-body) var(--font-serif); color: var(--ink); }
+.cp-term__back { font: 400 var(--fs-caption)/var(--lh-caption) var(--font-mono); letter-spacing: .04em; color: var(--ink-3); }
+.cp-term--payoff { padding: var(--sp-4) var(--sp-3); }
+.cp-term--payoff .cp-term__term { font-size: 40px; line-height: 44px; }
+.cp-term__jobs {
+  padding-top: var(--sp-1); border-top: var(--stroke) solid var(--ink);
+  font: 700 var(--fs-caption)/var(--lh-caption) var(--font-mono); letter-spacing: .04em; color: var(--ink);
+}
+@media (max-width: 640px) {
+  .cp-term { padding: var(--sp-2); }
+  .cp-term .cp-term__term { font-size: 28px; line-height: 32px; }
+  .cp-term--payoff { padding: var(--sp-3) var(--sp-2); }
+  .cp-term--payoff .cp-term__term { font-size: 32px; line-height: 36px; }
+}
+
+/* ---------- figure plate ---------- */
+.cp-fig { margin: var(--sp-8) 0; }
+.cp-fig__plate { border: var(--stroke) solid var(--ink); border-radius: var(--radius-1); overflow: hidden; }
+.cp-fig__bar {
+  display: flex; justify-content: space-between; flex-wrap: wrap; gap: 0 var(--sp-2);
+  padding: var(--sp-1) var(--sp-2);
+  border-bottom: var(--stroke) solid var(--ink);
+  background: var(--surface);
+}
+.cp-fig__bar .cp-label:first-child { color: var(--ink); }
+.cp-fig svg { display: block; width: 100%; height: auto; }
+.cp-fig figcaption {
+  display: grid; grid-template-columns: auto 1fr; gap: var(--sp-2);
+  max-width: var(--measure); margin-top: var(--sp-1);
+  font: 400 var(--fs-caption)/var(--lh-caption) var(--font-sans); color: var(--ink-2);
+}
+.cp-fig figcaption .cp-label { color: var(--ink); }
+
+/* ---------- status words and lamps (word + colour, never colour alone) ---------- */
+.st { font: 700 var(--fs-caption)/var(--lh-caption) var(--font-mono); letter-spacing: .08em; text-transform: uppercase; white-space: nowrap; }
+.st--good { color: var(--good); }
+.st--bad { color: var(--bad); }
+.st--warn { color: var(--warn); }
+.lamp { display: inline-block; width: var(--sp-1); height: var(--sp-1); margin-right: var(--sp-half); vertical-align: 1px; }
+.st--good .lamp { background: var(--good); }
+.st--bad .lamp { background: var(--bad); }
+.st--warn .lamp { background: var(--warn); }
+.cp-rec {
+  min-width: 0;
+  background: var(--c4-soft); border: var(--stroke) solid var(--c4); border-radius: var(--radius-1);
+  color: var(--ink);
+}
+.cp-loop {
+  display: inline-flex; align-items: center; gap: var(--sp-half);
+  padding: 2px var(--sp-1); border-radius: var(--radius-3);
+  background: var(--c3-soft); border: var(--stroke) solid var(--c3);
+  font: 700 var(--fs-caption)/var(--lh-caption) var(--font-mono); color: var(--ink);
+  white-space: nowrap;
+}
+.cp-loop__mark { font-weight: 700; }
+.cp-loop--later { background: none; border-style: dashed; border-color: var(--ink-3); color: var(--ink-3); }
+/* ---------- f-01 and f-04: manifest plates (Ch 04's f-02 treatment) ----------
+   One row per line: the code line (record ground) and, beside it on wide plates, its annotation;
+   under 600px the annotation drops under its line, so the block never scrolls sideways. */
+.mf { padding: var(--sp-3); }
+.mf__code { padding: var(--sp-1) 0; }
+.mf__row { display: grid; grid-template-columns: minmax(0, 1fr); padding: 0 var(--sp-2); }
+.cp-fig .mf__line {
+  display: block; margin: 0; white-space: pre;
+  font: 400 var(--fs-caption)/var(--lh-small) var(--font-mono); color: var(--ink);
+  background: none; padding: 0;
+}
+.mf__line .mf__k { font-weight: 700; }
+.mf__line .mf__c { color: var(--ink-2); font-style: italic; }
+.cp-fig .mf__ann {
+  margin: 0 0 var(--sp-half); padding-left: var(--sp-2);
+  font: italic 400 var(--fs-caption)/var(--lh-caption) var(--font-sans); color: var(--ink-2);
+}
+.cp-fig .mf__ann::before { content: "↑ "; font-style: normal; font-family: var(--font-mono); color: var(--ink-3); }
+.cp-fig .mf__ann--key { font: 700 var(--fs-caption)/var(--lh-caption) var(--font-sans); font-style: normal; color: var(--accent); }
+.mf__row--key .mf__line { font-weight: 700; }
+@media (min-width: 600px) {
+  .mf__row { grid-template-columns: minmax(0, 30ch) minmax(0, 1fr); column-gap: var(--sp-2); align-items: baseline; }
+  .cp-fig .mf__ann { margin: 0; padding-left: 0; }
+  .cp-fig .mf__ann::before { content: "← "; }
+}
+@media (max-width: 599px) { .mf { padding: var(--sp-2) var(--sp-1); } .mf__row { padding: 0 var(--sp-1); } }
+/* ---------- f-07: the loop lens table (built from CH06_LOOPS in assets/page.js; Ch 04's f-04, Ch 05's f-06) ----------
+   A table on the blueprint plate; under 600px each row becomes a card (the loop as its header, then
+   three labelled lines). Rows for loops met later (Ch 07, Ch 08) are dashed and muted. */
+.lens { padding: var(--sp-3); }
+.lens table { width: 100%; border-collapse: collapse; background: var(--surface); border: var(--stroke) solid var(--ink); }
+.lens th, .lens td { padding: var(--sp-1) var(--sp-2); text-align: left; vertical-align: top; border-bottom: var(--stroke) solid var(--line); }
+.lens thead th { font: 700 var(--fs-caption)/var(--lh-caption) var(--font-mono); letter-spacing: .08em; text-transform: uppercase; color: var(--ink-3); border-bottom: var(--stroke) solid var(--ink); }
+.lens tbody th { width: 1%; white-space: nowrap; font-weight: 400; }
+.lens td { font: 400 var(--fs-small)/var(--lh-small) var(--font-serif); color: var(--ink); }
+.lens td.lens__job { font-style: italic; }
+.lens__per { display: block; margin-top: var(--sp-half); font: 400 var(--fs-caption)/var(--lh-caption) var(--font-sans); color: var(--ink-2); white-space: normal; }
+.lens tr.is-later td, .lens tr.is-later .lens__per { color: var(--ink-3); }
+.lens tr.is-later th, .lens tr.is-later td { border-top: var(--stroke) dashed var(--ink-4); }
+.lens tfoot td { border-top: var(--stroke) solid var(--ink); border-bottom: 0; font: 400 var(--fs-caption)/var(--lh-caption) var(--font-sans); color: var(--ink-2); }
+.lens td[data-label]::before { display: none; }
+@media (max-width: 599px) {
+  /* phone: one card per loop. Header row = the loop pill (left) and Sam's job (right); then WANTS, SEES
+     and DOES with their labels inline. */
+  .lens { padding: var(--sp-2) var(--sp-1); }
+  .lens table, .lens tbody, .lens tfoot, .lens td { display: block; width: auto; }
+  .lens table { background: none; border: 0; }
+  .lens thead { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+  .lens tbody tr {
+    display: grid; grid-template-columns: minmax(0, 1fr) max-content; grid-template-areas: "loop job" "w w" "s s" "d d";
+    margin-bottom: var(--sp-1); background: var(--surface); border: var(--stroke) solid var(--ink); border-radius: var(--radius-1);
+  }
+  .lens tbody tr.is-later { border-style: dashed; border-color: var(--ink-3); }
+  .lens tbody th { grid-area: loop; width: auto; white-space: normal; padding: var(--sp-half) var(--sp-1); border-bottom: var(--stroke) solid var(--line); }
+  /* Sam's job keeps its width (the column is max-content), so a long loop name wraps inside its pill
+     instead of pushing "SAM'S JOB" against the card's edge */
+  .lens tbody th .cp-loop { white-space: normal; max-width: 100%; }
+  .lens tbody td:nth-of-type(1) { grid-area: w; }
+  .lens tbody td:nth-of-type(2) { grid-area: s; }
+  .lens tbody td:nth-of-type(3) { grid-area: d; }
+  .lens tbody td.lens__job { grid-area: job; padding: var(--sp-half) var(--sp-1); border-bottom: var(--stroke) solid var(--line); text-align: right; }
+  .lens tr.is-later th, .lens tr.is-later td { border-top: 0; }
+  .lens td { padding: var(--sp-half) var(--sp-1); border-bottom: 0; }
+  .lens tbody td:nth-of-type(3) { padding-bottom: var(--sp-1); }
+  .lens td[data-label]::before {
+    content: attr(data-label); display: inline; margin-right: var(--sp-1);
+    font: 700 var(--fs-caption)/var(--lh-caption) var(--font-mono); font-style: normal; letter-spacing: .08em; text-transform: uppercase; color: var(--ink-3);
+  }
+  .lens td.lens__job::before { display: block; margin-right: 0; white-space: nowrap; }
+  .lens tfoot tr { display: block; margin-top: var(--sp-2); }
+  .lens tfoot td { border-top: 0; padding: 0 var(--sp-1); }
+}
+/* ---------- term card additions (Ch 04's mono line under the definition) ---------- */
+.cp-term__jobs + .cp-term__back { margin-top: var(--sp-1); }
+.cp-term__line {
+  margin-bottom: var(--sp-2) !important;
+  font: 700 var(--fs-caption)/var(--lh-caption) var(--font-mono); letter-spacing: .04em; color: var(--ink-2);
+}
+/* ---------- comprehension checks (copied from Ch 03, itself from Ch 02) ---------- */
+.cp-check {
+  margin-top: var(--sp-6); margin-bottom: var(--sp-6);
+  background: var(--surface);
+  border: var(--stroke) solid var(--ink); border-radius: var(--radius-1);
+  box-shadow: var(--shadow-1);
+  padding: var(--sp-3);
+}
+@media (max-width: 599px) { .cp-check { padding: var(--sp-2); } }
+@media (min-width: 560px) { .cp-check { padding: var(--sp-4); } }
+.cp-check__head { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--sp-1) var(--sp-2); margin-bottom: var(--sp-2); }
+.cp-chip {
+  display: inline-block; padding: var(--sp-half) var(--sp-1);
+  background: var(--accent); color: var(--accent-ink); border-radius: var(--radius-1);
+  font: 700 var(--fs-caption)/var(--lh-caption) var(--font-mono); letter-spacing: .1em;
+}
+.cp-chip--explain { background: var(--ink); color: var(--bg); }
+.cp-chip--apply { background: var(--surface); color: var(--ink); box-shadow: inset 0 0 0 var(--stroke) var(--ink); }
+.cp-check__q { margin: 0 0 var(--sp-3) !important; font: 600 20px/28px var(--font-serif); color: var(--ink); }
+.cp-check__q code, .cp-option code { font: 700 0.9em var(--font-mono); background: var(--surface-2); padding: 0.1em 0.3em; border-radius: var(--radius-1); }
+.cp-chores { margin: 0 0 var(--sp-3); padding-left: var(--sp-4); font: 400 var(--fs-small)/var(--lh-small) var(--font-serif); color: var(--ink); }
+.d-main .cp-chores li { margin-bottom: var(--sp-half); padding-left: var(--sp-half); }
+.cp-chores li::marker { font: 700 var(--fs-caption)/1 var(--font-mono); color: var(--ink-3); }
+.cp-options { display: grid; gap: var(--sp-1); margin: 0; padding: 0; list-style: none; }
+.d-main .cp-options { padding: 0; }
+.d-main .cp-options li { margin: 0; }
+.cp-option {
+  display: grid; grid-template-columns: var(--sp-4) minmax(0, 1fr) auto; align-items: center; gap: var(--sp-2);
+  width: 100%; min-height: calc(var(--tap) + var(--sp-1));
+  padding: var(--sp-1) var(--sp-2);
+  background: var(--surface); color: var(--ink);
+  border: var(--stroke) solid var(--ink); border-radius: var(--radius-1);
+  font: 500 var(--fs-small)/var(--lh-small) var(--font-sans); text-align: left;
+  cursor: pointer;
+  transition: background var(--dur-1) var(--ease-out), transform var(--dur-1) var(--ease-out), box-shadow var(--dur-1) var(--ease-out);
+}
+@media (min-width: 560px) { .cp-option { font-size: 17px; line-height: 24px; } }
+@media (max-width: 599px) { .cp-option { gap: var(--sp-1); padding-inline: var(--sp-1); } }
+.cp-option__key {
+  display: grid; place-items: center; width: var(--sp-4); height: var(--sp-4);
+  border: var(--stroke) solid var(--ink); border-radius: var(--radius-1);
+  font: 700 var(--fs-caption)/1 var(--font-mono);
+}
+.cp-option__tag { font: 700 var(--fs-caption)/1 var(--font-mono); letter-spacing: .08em; }
+.cp-option:hover:not(:disabled) { background: var(--surface-2); transform: translate(-2px, -2px); box-shadow: 2px 2px 0 0 var(--ink); }
+.cp-option:active:not(:disabled) { transform: none; box-shadow: none; }
+.cp-option:disabled { cursor: default; color: var(--ink-3); border-color: var(--ink-4); }
+.cp-option:disabled .cp-option__key { border-color: var(--ink-4); }
+.cp-option.is-right { color: var(--ink); border: 3px solid var(--good); padding-inline: calc(var(--sp-2) - 1.5px); }
+.cp-option.is-right .cp-option__key { background: var(--good); border-color: var(--good); color: var(--surface); }
+.cp-option.is-right .cp-option__tag { color: var(--good); }
+.cp-option.is-wrong { color: var(--ink); border: 3px solid var(--bad); padding-inline: calc(var(--sp-2) - 1.5px); }
+.cp-option.is-wrong .cp-option__key { background: var(--bad); border-color: var(--bad); color: var(--surface); }
+.cp-option.is-wrong .cp-option__tag { color: var(--bad); }
+@media (max-width: 599px) { .cp-option.is-right, .cp-option.is-wrong { padding-inline: calc(var(--sp-1) - 1.5px); } }
+.cp-feedback {
+  margin-top: var(--sp-2); padding-top: var(--sp-2);
+  border-top: var(--stroke) dashed var(--ink-4);
+  font: var(--fs-small)/var(--lh-small) var(--font-serif); color: var(--ink-2);
+  animation: cp-in var(--dur-2) var(--ease-out);
+}
+.cp-feedback[hidden] { display: none; }
+.cp-feedback p { margin: 0 0 var(--sp-1); }
+.cp-feedback p:last-child { margin-bottom: 0; }
+.cp-feedback > p > b, .cp-why li > b { font: 700 var(--fs-caption)/var(--lh-caption) var(--font-mono); letter-spacing: .08em; margin-right: var(--sp-1); color: var(--ink); }
+.cp-feedback.is-right .cp-feedback__lead { color: var(--good); }
+.cp-feedback.is-wrong .cp-feedback__lead { color: var(--bad); }
+/* on its own line under the feedback sentence, so its 44px target doesn't open a gap inside the line */
+.cp-retry {
+  display: block; margin: var(--sp-half) 0 0; min-height: var(--tap); min-width: var(--tap); padding: 0;
+  background: none; border: 0; color: var(--accent); cursor: pointer;
+  font: 700 var(--fs-caption)/1 var(--font-mono); letter-spacing: .08em; text-decoration: underline; text-underline-offset: 3px;
+}
+.cp-why { margin-top: var(--sp-2); }
+.cp-why summary {
+  display: flex; align-items: center; min-height: var(--tap); cursor: pointer;
+  font: 700 var(--fs-caption)/var(--lh-caption) var(--font-mono); letter-spacing: .08em; text-transform: uppercase; color: var(--ink);
+}
+.cp-why summary { list-style: none; }
+.cp-why summary::-webkit-details-marker { display: none; }
+.cp-why summary::before { content: "▸"; margin-right: var(--sp-1); color: var(--ink); }
+.cp-why[open] > summary::before { content: "▾"; }
+.cp-why ul { margin: 0; padding: 0; list-style: none; display: grid; gap: var(--sp-1); }
+.d-main .cp-why li { margin: 0; }
+/* think-then-reveal (k-09), as Ch 01 */
+.cp-reveal {
+  display: inline-flex; align-items: center; gap: var(--sp-1);
+  min-height: calc(var(--tap) + var(--sp-1)); padding: 0 var(--sp-3);
+  background: var(--surface); color: var(--ink);
+  border: var(--stroke) solid var(--ink); border-radius: var(--radius-1);
+  font: 700 var(--fs-caption)/1 var(--font-mono); letter-spacing: .08em; text-transform: uppercase;
+  cursor: pointer;
+  transition: background var(--dur-1) var(--ease-out), transform var(--dur-1) var(--ease-out), box-shadow var(--dur-1) var(--ease-out);
+}
+.cp-reveal:hover:not(:disabled) { background: var(--surface-2); transform: translate(-2px, -2px); box-shadow: 2px 2px 0 0 var(--ink); }
+.cp-reveal:disabled { cursor: default; color: var(--ink-3); border-color: var(--ink-4); }
+.cp-think { margin: 0 0 var(--sp-2) !important; font: italic var(--fs-small)/var(--lh-small) var(--font-serif); color: var(--ink-2); }
+.cp-answer { margin: var(--sp-1) 0; padding-left: var(--sp-3); }
+.d-main .cp-answer li { margin-bottom: var(--sp-half); }
+.cp-answer li > b:first-child { font: 700 15px/var(--lh-small) var(--font-mono); letter-spacing: 0; margin-right: 0; color: var(--ink); }
+.cp-feedback > .cp-more { margin: var(--sp-2) 0 0; }
+@keyframes cp-in { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: none; } }
+@media (prefers-reduced-motion: reduce) {
+  .cp-feedback, .cs-step.is-unlocked > * { animation: none; }
+  .cp-option, .cp-reveal, .cs-step { transition: none; }
+}
+/* ---------- prose additions ---------- */
+/* the questions a symptom raises: a short list of quoted questions (§03) */
+.cp-qs { margin: 0 0 var(--sp-3); padding-left: var(--sp-3); }
+.d-main .cp-qs li { margin-bottom: var(--sp-1); font-style: italic; }
+/* the line under a widget: what it shows and where it simplifies (page-owned, outside the mount) */
+.cp-wcap {
+  display: grid; grid-template-columns: auto 1fr; gap: var(--sp-2);
+  margin-top: calc(-1 * var(--sp-5)) !important; margin-bottom: var(--sp-6) !important;
+  font: 400 var(--fs-caption)/var(--lh-caption) var(--font-sans); color: var(--ink-2);
+}
+.cp-wcap .cp-label { color: var(--ink); }
+/* ---------- f-07: the NEW IN CH 6 tag ---------- */
+.lens__new {
+  display: inline-block; margin: 0 0 var(--sp-half); padding: 0 var(--sp-half);
+  border: var(--stroke) solid var(--accent); border-radius: var(--radius-1);
+  font: 700 11px/16px var(--font-mono); font-style: normal; letter-spacing: .08em; text-transform: uppercase; color: var(--accent);
+  white-space: nowrap;
+}
+.lens td .lens__new { display: table; }
+.lens td .lens__new.lens__new--inline { display: inline-block; margin: 0 var(--sp-half) 0 0; vertical-align: 1px; }
+.lens tbody th .lens__new { display: block; width: max-content; margin-top: var(--sp-half); }
+@media (max-width: 599px) {
+  .lens td .lens__new { display: inline-block; margin: 0 var(--sp-1) 0 0; vertical-align: 1px; }
+}
+
+/* ---------- §03 scrollytelling scaffold: w-rollout-scrolly, lane R (course convention, CURRICULUM §8 step 7) ----------
+   Ch 04's .cs-* scaffold (as Ch 05 used it), unchanged except for the reserved heights. The page owns this
+   layout; the widget (widgets/w-rollout-scrolly/, data over pool/cluster/) renders into the [data-canvas],
+   [data-step-text] and [data-step-snap] slots and runs activation and gates. Mount contract: see the
+   comment above the mount in index.html §03.
+   Reserved canvas heights (plan w-rollout-scrolly size:, about 520px on desktop with a Deployment row over
+   two ReplicaSet rows and two node columns; about 420px at 360px): 540px from 900px wide; min(452px, 50vh
+   + 16px) under 900px. The widget's index.css may raise these to its measured heights. */
+.cs { margin-top: var(--sp-5); margin-bottom: var(--sp-8); }
+.cs-lane__grid { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--sp-3); }
+.cs-canvas {
+  position: sticky; top: 0; z-index: 2; align-self: start;
+  min-height: min(452px, calc(50vh + 16px)); padding: var(--sp-1) 0;
+  background: var(--bg);
+}
+.cs-steps { position: relative; z-index: 1; display: grid; gap: var(--sp-3); margin: 0; padding: 0; list-style: none; }
+.d-main .cs-steps > li { margin: 0; }
+.cs-step {
+  position: relative; min-height: 40vh;
+  padding: var(--sp-3);
+  background: var(--surface); border: var(--stroke) solid var(--line); border-radius: var(--radius-1);
+  transition: border-color var(--dur-2) var(--ease-out);
+}
+.cs-step.is-active { border-color: var(--ink); }
+.cs-step__text { font: 400 var(--fs-body)/var(--lh-body) var(--font-serif); color: var(--ink); }
+.cs-step__text p { margin: 0 0 var(--sp-2); }
+.cs-step__text p:last-child { margin-bottom: 0; }
+.cs-step__snap { display: none; }
+.cs-step > .cp-check { margin: var(--sp-3) 0 0; padding: var(--sp-3) var(--sp-2); }
+.cs-step__lock { display: none; }
+.cs-step.is-locked { border-style: dashed; border-color: var(--ink-4); }
+.cs-step.is-locked > :not(.cs-step__lock) { visibility: hidden; }
+.cs-step.is-locked > .cs-step__lock {
+  display: block; position: absolute; top: var(--sp-3); left: var(--sp-3); right: var(--sp-3); margin: 0;
+  font: 700 var(--fs-caption)/var(--lh-caption) var(--font-mono); letter-spacing: .08em; text-transform: uppercase; color: var(--ink-3);
+}
+.cs-step.is-unlocked > * { animation: cp-in var(--dur-2) var(--ease-out); }
+@media (max-width: 599px) {
+  .cs-step { padding: var(--sp-2); }
+  .cs-step.is-locked > .cs-step__lock { top: var(--sp-2); left: var(--sp-2); right: var(--sp-2); }
+  .cs-step > .cp-check { padding: var(--sp-2) var(--sp-1); }
+}
+@media (min-width: 900px) {
+  .cs-lane__grid { grid-template-columns: minmax(0, 11fr) minmax(0, 9fr); column-gap: var(--sp-4); align-items: start; }
+  .cs-canvas { top: var(--sp-4); z-index: auto; min-height: 540px; padding: 0; background: none; }
+}
+@media (max-height: 559px) {
+  .cs-lane__grid { grid-template-columns: minmax(0, 1fr); }
+  .cs-canvas { display: none; }
+  .cs-step { min-height: 0; }
+  .cs-step__snap { display: block; margin-bottom: var(--sp-2); }
+}
+.cs-noscript { padding: var(--sp-2); border: var(--stroke) dashed var(--ink-4); font: var(--fs-small)/var(--lh-small) var(--font-sans); color: var(--ink-2); }
+@media (prefers-reduced-motion: reduce) { .cs-step.is-unlocked > * { animation: none; } .cs-step { transition: none; } }
+
+/* ======================================================================================================
+   New in Ch 06 (plan ## Figures, ## Visual grammar)
+   ====================================================================================================== */
+
+/* ---------- version colours (fixed across the chapter): v63 = c2; the other version in a drawing = c5 ---------- */
+.v63 { --v: var(--c2); --v-soft: var(--c2-soft); }
+.v62, .v64 { --v: var(--c5); --v-soft: var(--c5-soft); }
+
+/* ---------- §01: Jordan and Ari, a short exchange (.cp-quote with a speaker per line) ---------- */
+.cp-dialog { margin: var(--sp-3) 0; padding: var(--sp-1) 0 var(--sp-1) var(--sp-3); border-left: 3px solid var(--ink); }
+.cp-dialog p {
+  display: grid; grid-template-columns: 8ch minmax(0, 1fr); column-gap: var(--sp-2); align-items: baseline;
+  margin: 0 0 var(--sp-1) !important;
+  font: italic 400 22px/32px var(--font-serif); color: var(--ink);
+}
+.cp-dialog p:last-child { margin-bottom: 0 !important; }
+.cp-dialog b { font: 400 var(--fs-caption)/var(--lh-caption) var(--font-mono); font-style: normal; letter-spacing: .08em; text-transform: uppercase; color: var(--ink-3); }
+@media (max-width: 599px) {
+  .cp-dialog p { grid-template-columns: minmax(0, 1fr); font-size: 19px; line-height: 28px; }
+  .cp-dialog b { display: block; }
+}
+
+/* ---------- f-01 and f-06: manifest additions ----------
+   f-01's margin bracket: the rows Chapter 4's ReplicaSet already held get a thin ink-3 rule on the left
+   and a mono label at its top. */
+.mf__held { margin: var(--sp-half) 0; border-left: var(--stroke) solid var(--ink-3); }
+.cp-fig .mf__heldlabel {
+  margin: 0; padding: 0 var(--sp-2);
+  font: 700 11px/16px var(--font-mono); letter-spacing: .08em; text-transform: uppercase; color: var(--ink-3);
+}
+@media (max-width: 599px) { .cp-fig .mf__heldlabel { padding: 0 var(--sp-1); } }
+
+/* ---------- a static Pod chip (the canvas's Pod grammar: a version-coloured chip inside an inset ink ring) ---------- */
+.pod { display: inline-flex; padding: 2px; background: var(--surface); border: var(--stroke) solid var(--ink); border-radius: var(--radius-1); }
+.pod__chip {
+  display: inline-flex; flex-wrap: wrap; align-items: baseline; gap: 0 var(--sp-1);
+  padding: 2px var(--sp-1);
+  background: var(--v-soft, var(--c1-soft)); border: var(--stroke) solid var(--v, var(--c1)); border-radius: 1px;
+  font: 700 var(--fs-caption)/var(--lh-caption) var(--font-mono); color: var(--ink);
+}
+
+/* ---------- f-02: two checks on one Pod ----------
+   Contrasting cases: two columns with the same rows (subgrid, so rows line up), labelled on the left;
+   only row 4 (what happens on failure) differs in kind, and both its cells carry the 3px ink highlight. Under
+   600px two stacked cards, readiness first, each repeating the row labels. */
+.pr { padding: var(--sp-3); }
+.pr__top { display: flex; flex-wrap: wrap; align-items: center; gap: var(--sp-1) var(--sp-2); margin-bottom: var(--sp-2); }
+.cp-fig .pr__agent { margin: 0; font: 700 var(--fs-caption)/var(--lh-caption) var(--font-mono); letter-spacing: .06em; text-transform: uppercase; color: var(--ink-2); }
+.pr__grid { position: relative; display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--sp-2); }
+.pr__col { min-width: 0; display: grid; background: var(--surface); border: var(--stroke) solid var(--ink); border-radius: var(--radius-1); }
+.pr__labels { display: none; }
+.cp-fig .pr__name {
+  margin: 0; padding: var(--sp-half) var(--sp-1); border-bottom: var(--stroke) solid var(--ink);
+  font: 700 var(--fs-caption)/var(--lh-caption) var(--font-mono); letter-spacing: .08em; text-transform: uppercase; color: var(--ink);
+}
+.pr__cell { min-width: 0; padding: var(--sp-1); border-bottom: var(--stroke) solid var(--line); font: 400 var(--fs-small)/var(--lh-small) var(--font-sans); color: var(--ink); }
+.pr__cell:last-child { border-bottom: 0; }
+.pr__cell > p { margin: 0; }
+.pr__lab { display: block; margin-bottom: 2px; font: 700 11px/16px var(--font-mono); letter-spacing: .08em; text-transform: uppercase; color: var(--ink-3); }
+.pr__code { display: block; margin: 0 0 var(--sp-half); padding: var(--sp-half) var(--sp-1); background: var(--c4-soft); border: var(--stroke) solid var(--c4); border-radius: var(--radius-1); white-space: pre; overflow-x: auto; font: 400 var(--fs-caption)/var(--lh-caption) var(--font-mono); color: var(--ink); }
+.pr__code b { font-weight: 700; }
+.pr__say { font: italic 400 var(--fs-caption)/var(--lh-caption) var(--font-sans); color: var(--ink-2); }
+.pr__cell--fail { outline: 3px solid var(--ink); outline-offset: -3px; border-radius: var(--radius-1); }
+.pr__cell--fail .st { display: block; margin-bottom: 2px; }
+@media (min-width: 600px) {
+  .pr__grid { grid-template-columns: max-content minmax(0, 1fr) minmax(0, 1fr); grid-template-rows: repeat(6, auto); column-gap: var(--sp-2); row-gap: 0; }
+  .pr__col, .pr__labels { grid-row: 1 / span 6; grid-template-rows: subgrid; }
+  .pr__labels { display: grid; }
+  .pr__labels > p { margin: 0; padding: var(--sp-1) 0; border-bottom: var(--stroke) solid transparent; font: 700 11px/22px var(--font-mono); letter-spacing: .08em; text-transform: uppercase; color: var(--ink-3); }
+  .pr__labels > p:first-child { padding: var(--sp-half) 0; line-height: var(--lh-caption); visibility: hidden; border-bottom-width: var(--stroke); }
+  .pr__lab { display: none; }
+  /* the one row that differs: its label in full ink beside the two outlined cells */
+  .pr__labels > p.pr__labfail { color: var(--ink); }
+}
+@media (max-width: 599px) { .pr { padding: var(--sp-2) var(--sp-1); } }
+
+/* ---------- gated blocks (k-04 → f-03 and its reveal; k-06 → f-05 and its reveal) ----------
+   The lane's lock pattern: the block keeps its height (visibility: hidden), a mono line says what unlocks
+   it, and it opens on the page's 'didactician:check-commit' for its check. Never re-locks. Without JS
+   nothing is locked. */
+.cp-gate { position: relative; }
+.d-main section > .cp-gate > .d-wide {
+  width: min(960px, 100cqw); max-width: none;
+  margin-left: calc((100% - min(960px, 100cqw)) / 2);
+}
+.cp-gate__lock { display: none; }
+.cp-gate.is-locked > :not(.cp-gate__lock) { visibility: hidden; }
+.cp-gate.is-locked > .cp-gate__lock {
+  display: block; position: absolute; z-index: 1; top: 0; left: 0; right: 0; margin: 0;
+  padding: var(--sp-3) var(--sp-2);
+  border: var(--stroke) dashed var(--ink-4); border-radius: var(--radius-1);
+  font: 700 var(--fs-caption)/var(--lh-caption) var(--font-mono); letter-spacing: .08em; text-transform: uppercase; color: var(--ink-3);
+  text-align: center;
+}
+.cp-gate.is-unlocked > * { animation: cp-in var(--dur-2) var(--ease-out); }
+@media (prefers-reduced-motion: reduce) { .cp-gate.is-unlocked > * { animation: none; } }
+
+/* ---------- f-03: two ways v64 could be bad ----------
+   Two snapshots drawn by the pooled renderCluster (pool/cluster/) from the lane's data file, side by side
+   from 900px with matching heads, stacked under 900px (crash case first). Each drawing slot reserves its
+   height so the figure doesn't jump when it is drawn. */
+.f3 { padding: var(--sp-3); }
+.f3__grid { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--sp-3); }
+@media (min-width: 900px) { .f3__grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--sp-2); } }
+.f3__panel { min-width: 0; }
+.cp-fig .f3__head { margin: 0 0 var(--sp-1); font: 700 var(--fs-caption)/var(--lh-caption) var(--font-mono); letter-spacing: .08em; text-transform: uppercase; color: var(--ink); }
+.f3__draw { min-height: 330px; }
+@media (min-width: 900px) { .f3__draw { min-height: 420px; } }
+@media (max-width: 599px) { .f3 { padding: var(--sp-2) var(--sp-1); } }
+
+/* ---------- f-04: Thursday, 14:02–14:08 (Ch 01's incident timeline grammar, data-driven) ----------
+   A status band down the left edge (one segment per row, coloured by the price status), then the time,
+   the event and the PRICES word (word + colour). The last row has no time and no band. */
+.tl { margin: 0; padding: var(--sp-2) var(--sp-2) var(--sp-2) 0; list-style: none; }
+.d-main .tl li { margin: 0; }
+.tl__row {
+  display: grid; column-gap: var(--sp-2);
+  grid-template-columns: var(--sp-3) 84px minmax(0, 1fr) 84px;
+  grid-template-areas: "band time event price";
+}
+.tl__row > * { padding-block: var(--sp-1); }
+.tl__row > .tl__band { padding: 0; position: relative; }
+.tl__head > * { padding-block: 0 var(--sp-1); }
+.tl__row:not(.tl__head):not(:last-child) > :not(.tl__band) { border-bottom: 1px solid var(--line); }
+.tl__band { grid-area: band; }
+.tl__band::before { content: ""; position: absolute; top: 0; bottom: 0; left: var(--sp-1); width: 6px; }
+.tl__row.is-good .tl__band::before { background: var(--good); }
+.tl__row.is-warn .tl__band::before { background: var(--warn); }
+.tl__row.is-bad .tl__band::before { background: var(--bad); }
+.tl__time { grid-area: time; font: 700 var(--fs-caption)/var(--lh-small) var(--font-mono); color: var(--ink); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.tl__event { grid-area: event; font: var(--fs-small)/var(--lh-small) var(--font-sans); color: var(--ink); }
+.tl__price { grid-area: price; line-height: var(--lh-small); }
+.tl__row.is-after .tl__event { color: var(--ink-3); font-style: italic; }
+.tl__head .tl__band, .tl__head .tl__time, .tl__head .tl__event, .tl__head .tl__price {
+  font: 700 var(--fs-caption)/var(--lh-caption) var(--font-mono); letter-spacing: .08em; text-transform: uppercase; color: var(--ink-3);
+}
+@media (max-width: 599px) {
+  .tl { padding-right: var(--sp-1); }
+  .tl__row {
+    column-gap: var(--sp-1);
+    grid-template-columns: 20px 76px minmax(0, 1fr);
+    grid-template-areas: "band time event" "band time price";
+  }
+  .tl__band::before { left: 4px; }
+  .tl__row > .tl__event { padding-bottom: 0; }
+  .tl__row:not(.tl__head):not(:last-child) > .tl__event { border-bottom: 0; }
+  .tl__row > .tl__price { padding-top: var(--sp-half); }
+  .tl__row.is-after > .tl__price { display: none; }
+  .tl__head .tl__price { display: none; }
+}
+
+/* ---------- f-05: the record, three times (Ch 04's record grammar, static) ----------
+   Three record panels with the same rows (a Deployment row over its ReplicaSet rows), so only the changed
+   values move; changed values carry the 3px ink highlight. The v63 ReplicaSet row, the same object in
+   all three, is tied together by a dashed ink-3 connector across the gaps (from 600px) and a labelled
+   rule under the panels. Stacked under 600px. */
+.rk { padding: var(--sp-3); }
+.rk__grid { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--sp-2); }
+@media (min-width: 600px) { .rk__grid { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--sp-3); } }
+.rk__panel { min-width: 0; }
+.cp-fig .rk__time { margin: 0 0 var(--sp-half); font: 700 var(--fs-caption)/var(--lh-caption) var(--font-mono); letter-spacing: .08em; color: var(--ink); font-variant-numeric: tabular-nums; }
+.rk__rec { padding: var(--sp-half) var(--sp-1) var(--sp-1); }
+.cp-fig .rk__head { margin: 0 calc(-1 * var(--sp-1)) var(--sp-half); padding: 0 var(--sp-1) 2px; border-bottom: var(--stroke) solid var(--c4); font: 700 var(--fs-caption)/var(--lh-caption) var(--font-mono); letter-spacing: .06em; text-transform: uppercase; }
+.rk__row { position: relative; display: flex; flex-wrap: wrap; align-items: center; gap: 2px var(--sp-1); padding: 2px var(--sp-half); border-radius: var(--radius-1); font: 400 var(--fs-caption)/var(--lh-caption) var(--font-mono); color: var(--ink); }
+.rk__row + .rk__row { margin-top: 2px; }
+.rk__row--rs { margin-left: var(--sp-2); }
+.rk__name { flex: 1 0 100%; font-weight: 700; }
+.rk__want { color: var(--ink-2); }
+.rk__ver { font-weight: 700; }
+.rk__marks { display: inline-flex; gap: 4px; }
+.rk__mark { display: inline-block; width: 10px; height: 10px; background: var(--good); }
+.rk__word { margin-left: auto; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; }
+.rk__word--kept { color: var(--ink-3); }
+.rk__row--none { color: var(--ink-3); border: var(--stroke) dashed var(--ink-4); font-weight: 700; }
+.rk__sep { color: var(--ink-3); }
+.rk .is-hl { outline: 3px solid var(--ink); outline-offset: 1px; border-radius: var(--radius-1); }
+.rk__row--same { box-shadow: inset 3px 0 0 var(--ink-3); }
+@media (min-width: 600px) {
+  /* the connector: from each panel's v63 row across the gap to the next panel's */
+  .rk__panel:not(:last-child) .rk__row--same::after {
+    content: ""; position: absolute; top: 50%; left: 100%; width: calc(var(--sp-3) + var(--sp-1) + 3px);
+    border-top: var(--stroke) dashed var(--ink-3);
+  }
+}
+.rk__link { display: flex; align-items: center; gap: var(--sp-1); margin: var(--sp-2) 0 0; font: 700 var(--fs-caption)/var(--lh-caption) var(--font-mono); letter-spacing: .08em; text-transform: uppercase; color: var(--ink-3); }
+.rk__link::before { content: ""; flex: none; width: 3px; height: var(--lh-caption); background: var(--ink-3); }
+@media (max-width: 599px) { .rk { padding: var(--sp-2) var(--sp-1); } }
+
+/* ---------- f-06: a tag and a digest, beside Ch 02's registry ----------
+   Left: the two image lines (manifest plate). Right: Ch 02's registry frame with image chips (c1 on
+   c1-soft, older ones faded), a short digest under each tag; an old image deleted by the registry's
+   clean-up is a dashed empty chip. Stacked under 600px. */
+.rg { padding: var(--sp-3); }
+.rg__grid { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--sp-3); align-items: start; }
+@media (min-width: 600px) { .rg__grid { grid-template-columns: minmax(0, 3fr) minmax(0, 2fr); } }
+.rg .mf__row { grid-template-columns: minmax(0, 1fr); }
+.rg .mf__ann { margin: 0 0 var(--sp-1); padding-left: var(--sp-2); }
+.rg .mf__ann::before { content: "↑ "; }
+.cp-machine { min-width: 0; background: var(--surface); border: var(--stroke) solid var(--ink); border-radius: var(--radius-1); }
+.cp-machine__bar { padding: var(--sp-half) var(--sp-1); border-bottom: var(--stroke) solid var(--ink); }
+.cp-machine__bar .cp-label { color: var(--ink); letter-spacing: .06em; }
+.rg__chips { display: grid; gap: var(--sp-1); margin: 0; padding: var(--sp-1); list-style: none; }
+.d-main .rg__chips li { margin: 0; }
+.cp-img {
+  display: inline-flex; flex-direction: column; gap: 0;
+  padding: 2px var(--sp-1); border-radius: var(--radius-1);
+  background: var(--c1-soft); border: var(--stroke) solid var(--c1);
+  font: 700 var(--fs-caption)/var(--lh-caption) var(--font-mono); color: var(--ink);
+}
+.cp-img small { font: 400 11px/16px var(--font-mono); color: var(--ink-2); }
+.cp-img.is-old { opacity: .55; }
+.cp-img.is-named { outline: 3px solid var(--ink); outline-offset: 1px; }
+.cp-img.is-gone { background: none; border-style: dashed; border-color: var(--ink-4); color: var(--ink-3); }
+.cp-img.is-gone small { color: var(--ink-3); }
+.rg__chiprow { display: flex; flex-wrap: wrap; align-items: center; gap: var(--sp-half) var(--sp-1); }
+.rg__note { font: italic 400 var(--fs-caption)/var(--lh-caption) var(--font-sans); color: var(--ink-2); }
+.cp-fig .rg__rule { margin: var(--sp-2) 0 0; font: 700 var(--fs-caption)/var(--lh-caption) var(--font-mono); letter-spacing: .08em; text-transform: uppercase; color: var(--ink); }
+@media (max-width: 599px) { .rg { padding: var(--sp-2) var(--sp-1); } }

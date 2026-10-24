@@ -350,3 +350,59 @@
 .wc .wc-rec--tight .wc-mark--unk { line-height: 8px; }
 .wc .wc-rec--below .wc-rec__row { row-gap: 0; }
 .wc .wc-rec--below .wc-rec__word { grid-column: 1 / -1; }
+
+
+/* ---------------- optional features (pool-03, Ch 06; drawn only when their fields are present) ---------------- */
+
+/* 1 · a Deployment group in the record: a header row over its ReplicaSet rows, which are indented and
+   joined to it by a thin c4 elbow. DEPLOYMENT · catalog · WANT 3 · v63; wraps to two lines where the
+   lane-wide layout says one doesn't hold it. An emptied row reads KEPT (ink-3, a computed word). */
+.wc .wc-rec__dep {
+  padding: 0 2px; border-radius: var(--radius-1);
+  font: 700 var(--fs-caption)/17px var(--font-mono); white-space: nowrap;
+}
+.wc.wc--narrow .wc-rec__dep { line-height: 15px; }
+.wc .wc-rec__dep.is-hl { outline-offset: -1px; }
+.wc .wc-rec__dkind { letter-spacing: .06em; }
+.wc .wc-rec__dep .wc-rec__want { font-weight: 400; }
+.wc .wc-rec__ver { display: inline-block; padding: 0 2px; line-height: 13px; border-radius: var(--radius-1); }
+.wc .wc-rec__ver.is-hl { outline-offset: 0; }
+.wc .wc-rec__dep--wrap .wc-rec__dpart { display: block; }
+.wc .wc-rec__row--in .wc-rec__name { position: relative; padding-left: var(--wc-depin, 12px); }
+.wc .wc-rec__row--in .wc-rec__name::before {
+  content: ''; position: absolute;
+  left: calc(var(--wc-depin, 12px) / 2 - 2px); top: -4px; bottom: 50%; width: calc(var(--wc-depin, 12px) / 2);
+  border-left: 1px solid var(--c4); border-bottom: 1px solid var(--c4);
+}
+
+/* 2 · NOT READY: the container runs, so a solid chip, but its lamp is hollow and its word warn; its
+   record mark is hollow (computed: only running and lost Pods fill a mark) */
+.wc .wc-st--notready { color: var(--warn); }
+.wc .wc-st--notready > .wc-lamp { background: transparent; border: var(--stroke) solid currentColor; }
+
+/* 3 · a Pod's series colour (PODS[id].series 1–6): the chip in cN on cN-soft; the ring stays ink.
+   :where() keeps these at the base chip's specificity, so NOT STARTED, STOPPED, LOST and WAITING keep
+   their own looks (a waiting chip's dashed edge takes the series colour) */
+.wc :where(.wc-ser--1) > .wc-c { background: var(--c1-soft); border-color: var(--c1); }
+.wc :where(.wc-ser--2) > .wc-c { background: var(--c2-soft); border-color: var(--c2); }
+.wc :where(.wc-ser--3) > .wc-c { background: var(--c3-soft); border-color: var(--c3); }
+.wc :where(.wc-ser--4) > .wc-c { background: var(--c4-soft); border-color: var(--c4); }
+.wc :where(.wc-ser--5) > .wc-c { background: var(--c5-soft); border-color: var(--c5); }
+.wc :where(.wc-ser--6) > .wc-c { background: var(--c6-soft); border-color: var(--c6); }
+.wc .wc-p--waiting.wc-ser--2 .wc-c { border-color: var(--c2); }
+.wc .wc-p--waiting.wc-ser--3 .wc-c { border-color: var(--c3); }
+.wc .wc-p--waiting.wc-ser--4 .wc-c { border-color: var(--c4); }
+.wc .wc-p--waiting.wc-ser--5 .wc-c { border-color: var(--c5); }
+.wc .wc-p--waiting.wc-ser--6 .wc-c { border-color: var(--c6); }
+.wc .wc-ser--2 .wc-use, .wc .wc-ser--2 .wc-over { --wc-ser: var(--c2); }
+.wc .wc-ser--3 .wc-use, .wc .wc-ser--3 .wc-over { --wc-ser: var(--c3); }
+.wc .wc-ser--4 .wc-use, .wc .wc-ser--4 .wc-over { --wc-ser: var(--c4); }
+.wc .wc-ser--5 .wc-use, .wc .wc-ser--5 .wc-over { --wc-ser: var(--c5); }
+.wc .wc-ser--6 .wc-use, .wc .wc-ser--6 .wc-over { --wc-ser: var(--c6); }
+.wc [class*="wc-ser--"] .wc-use { background: var(--wc-ser, var(--c1)); }
+.wc [class*="wc-ser--"] .wc-over { background: repeating-linear-gradient(-45deg, var(--wc-ser, var(--c1)) 0 2px, transparent 2px 6px); }
+.wc .wc-ser--2 .wc-c--use .wc-c__ln { background: var(--c2-soft); }
+.wc .wc-ser--3 .wc-c--use .wc-c__ln { background: var(--c3-soft); }
+.wc .wc-ser--4 .wc-c--use .wc-c__ln { background: var(--c4-soft); }
+.wc .wc-ser--5 .wc-c--use .wc-c__ln { background: var(--c5-soft); }
+.wc .wc-ser--6 .wc-c--use .wc-c__ln { background: var(--c6-soft); }

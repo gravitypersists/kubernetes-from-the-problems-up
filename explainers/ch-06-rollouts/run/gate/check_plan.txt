@@ -1,0 +1,15 @@
+segments:
+  s-01   Year 3: releases without a release night
+  s-02   One record per service: the Deployment
+  s-03   Thursday, 10:15: catalog v63
+  s-04   Room to ship
+  s-05   What "ready" means
+  s-06   Two ways to be bad
+  s-07   Thursday, 14:02: six minutes at $0
+  s-08   What going back assumes
+  s-09   The loops so far
+  s-10   The conversation
+objectives: 3 · segments: 10 · reader's time: 20 min
+widgets: w-rollout-scrolly (low)
+checks: 7 · acceptance criteria: 15
+RESULT: PASS

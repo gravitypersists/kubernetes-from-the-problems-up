@@ -1,0 +1,700 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Shipping without downtime: rollouts and rollbacks</title>
+<meta name="description" content="Chapter 06. Fennel’s teams now ship several times a day without a release night. One Thursday of catalog releases, one routine and one that went wrong, shows how Kubernetes replaces one version with the next, which bad releases its health checks stop and which they don’t, and what going back really does.">
+<link rel="stylesheet" href="pool/tokens.css">
+<link rel="stylesheet" href="pool/components.css">
+<link rel="stylesheet" href="assets/page.css">
+</head>
+<body class="d-body">
+
+<header class="cp-hero cp-blueprint">
+  <div class="cp-hero__inner">
+    <p class="cp-hero__kicker"><span class="cp-hero__idx">CHAPTER 06</span><span class="cp-label">Part II · Fennel, year 3</span></p>
+    <h1 class="cp-hero__title">Shipping without downtime: rollouts and rollbacks</h1>
+    <p class="cp-hero__standfirst">Fennel’s teams used to save their changes for a release night. Now they ship several times a day while everyone keeps working. This chapter follows one Thursday of <code>catalog</code> releases, one routine and one that went wrong, to show how Kubernetes replaces one version of a service with the next, which bad releases its health checks stop and which they don’t, and what going back really does.</p>
+    <dl class="cp-meta">
+      <div><dt>Read</dt><dd>27 MIN</dd></div>
+      <div><dt>For</dt><dd>TECHNICAL MANAGERS</dd></div>
+      <div><dt>Chapter</dt><dd>06 / 15</dd></div>
+      <div><dt>Checks</dt><dd>07</dd></div>
+    </dl>
+  </div>
+</header>
+
+<div class="d-page">
+  <aside class="d-rail" data-toc data-minutes="27"></aside>
+  <main class="d-main" id="main">
+    <details class="d-toc-mobile" data-toc-mobile></details>
+
+    <!-- s-01 · Year 3: releases without a release night · o-1 · claim c-01 · cast strip + D1 (CURRICULUM §2.11)
+         before k-01 (retrieval: Ch 3's Sam's Tuesday through Ch 4's declare vs. command) · then the scene:
+         Thursday nights and "Nobody deploy anything" before today's pipeline · the section ends on Ari's
+         "That depends on how it's bad." (ac-01) · catalog and Thursday are Fennel fiction (R2) -->
+    <section id="s-01" data-segment="s-01">
+      <h2 id="releases"><span class="cp-sec">§ 01 </span>Year 3: releases without a release night</h2>
+
+      <div class="cp-cast">
+        <p class="cp-label" id="cast-label">Cast</p>
+        <dl aria-labelledby="cast-label">
+        <dt>Jordan</dt><dd>Co-founder, managing the engineers: that’s you, in this story.</dd>
+        <dt>Ari</dt><dd>Platform lead. Runs Fennel’s cluster.</dd>
+        <dt>Riley</dt><dd>An engineer on the <code>catalog</code> team.</dd>
+        <dt>Morgan</dt><dd>Co-founder. Runs Fennel’s money.</dd>
+        <dt>Sam</dt><dd>The founding engineer, who used to run every release by hand.</dd>
+        </dl>
+      </div>
+
+      <!-- D1 -->
+      <details class="d-more cp-more">
+        <summary>I didn’t read the last chapter. What happened?</summary>
+        <div class="cp-more__body">
+          <ul>
+            <li>In Chapter 4, Fennel moved onto managed Kubernetes. The cluster keeps a record of what Fennel wants running, and many small loops each compare one part of that record with what is actually running, and act to close any gap. The ReplicaSet loop keeps a set number of Pods (Kubernetes’ wrapper around a running container), the scheduler gives each new Pod a node (a machine in the cluster), and the node agent on that node starts it, and restarts it if it crashes.</li>
+            <li>In Chapter 5, Morgan asked why the first cloud bill after the move had gone up. The answer lay in two numbers each team writes down for its Pods: what each Pod reserves, its requests, in GB of memory and processor cores, which the scheduler places Pods by; and the most it may use, its limits. On a Friday at 17:45, a <code>dispatch</code> Pod waited, pending, because no node had room for it, until Ari’s team added two more nodes. The cluster has had five nodes since: 01, 02, 04, 05 and 06.</li>
+            <li>To understand any loop, ask four things: which loop is it, what does it want, what does it see, and what does it do about a gap?</li>
+          </ul>
+        </div>
+      </details>
+
+      <div class="cp-check" role="group" aria-labelledby="k-01-q" data-check="k-01">
+        <div class="cp-check__head"><span class="cp-chip">RETRIEVE</span><span class="cp-label">Check 01 / 07</span></div>
+        <p class="cp-check__q" id="k-01-q">In Chapter 3, Sam updated <code>storefront</code> from v12 to v13 by hand: start one v13 copy, send customers to it, stop one v12 copy, three times over, while nobody else shipped anything. On Kubernetes, what does a team write down to release a new version?</p>
+        <ul class="cp-options">
+          <li><button type="button" class="cp-option" data-fb="That would be a script: it does the steps once, in order, and knows nothing about what’s actually running. Chapter 4’s record holds what Fennel wants, not how to get there."><span class="cp-option__key">A</span><span>Sam’s steps, saved in a file that the cluster runs from top to bottom at release time.</span><span class="cp-option__tag"></span></button></li>
+          <li><button type="button" class="cp-option" data-ok data-fb="Right: Chapter 4’s rule. Fennel declares the version and the number of copies, and a loop compares that with what runs and works out the steps. This chapter is about that loop."><span class="cp-option__key">B</span><span>The version it wants running and how many copies; a loop works out the steps.</span><span class="cp-option__tag"></span></button></li>
+          <li><button type="button" class="cp-option" data-fb="That’s still commanding, only from further away: someone has to type each step and notice when one goes wrong. On Kubernetes you declare what you want, and a loop works out the steps."><span class="cp-option__key">C</span><span>One command per step of Sam’s, typed by whoever releases, but sent to the cluster instead of to each machine.</span><span class="cp-option__tag"></span></button></li>
+        </ul>
+        <div class="cp-feedback" role="status" hidden></div>
+      </div>
+
+      <p>In Fennel’s first years, a release was an event. Every team’s changes waited for a release night, when Sam put the new versions out by hand, one copy at a time, after posting in the team chat: “Nobody deploy anything, I’m updating storefront.” The update you may remember from Chapter 3, <code>storefront</code> from v12 to v13 on a Tuesday, went the same way. It took Sam the evening, and until it was done nobody else could ship anything.</p>
+      <p>Year 3 looks different. A few weeks after Morgan’s question about the bill, the team that looks after product listings and prices moved them out of <code>storefront</code> into a service of its own, <code>catalog</code>, so that it could change prices and listings without waiting for the website’s releases. Riley’s team now ships <code>catalog</code> two or three times a day. When one of their changes is merged, Fennel’s build pipeline builds a new image and hands it to the cluster, and the release happens while everyone keeps working. Nobody posts in the chat any more.</p>
+      <p>This chapter follows one Thursday of those releases, and it starts with a question Jordan put to Ari a few days before.</p>
+      <blockquote class="cp-dialog">
+        <p><b>Jordan</b><span>“So who’s doing what Sam did on release nights?”</span></p>
+        <p><b>Ari</b><span>“A loop. We tell it which version we want.”</span></p>
+        <p><b>Jordan</b><span>“And if the version is bad?”</span></p>
+        <p><b>Ari</b><span>“That depends on how it’s bad.”</span></p>
+      </blockquote>
+    </section>
+
+    <!-- s-02 · One record per service: the Deployment · o-1 · claim c-01 (Ch 2 claims 04, 07 by reference) ·
+         Ch 4's ReplicaSet recalled in words before f-01 (ac-02) · f-01 then the dfn and TERM 01 (payoff, the
+         chapter's only one) · one ReplicaSet per version, template changes start a rollout, scaling doesn't ·
+         the Deployment loop's lens as one implementation of Ch 4's pattern · the pipeline introduced before
+         any step or figure shows the record changing (ac-03) -->
+    <section id="s-02" data-segment="s-02">
+      <h2 id="the-deployment"><span class="cp-sec">§ 02 </span>One record per service: the Deployment</h2>
+      <p>In Chapter 4, the manifest Ari applied for <code>storefront</code> described a ReplicaSet: a record that says “keep this many identical copies of this Pod”, together with the image each copy runs. The ReplicaSet loop then keeps that many Pods running and replaces any that disappear. That is all a ReplicaSet does: it keeps a number of copies of one Pod description, and engineers rarely write one themselves. What they write instead looks almost the same, and Fig. 01 shows a shortened version of <code>catalog</code>’s.</p>
+
+      <!-- f-01: static HTML, Ch 04's f-02 manifest plate (code on the record ground, c4 on c4-soft), annotations
+           beside each line from 600px, under it below 600px. Two key annotations (kind, image), as the plan
+           marks them. The rows Ch 04's ReplicaSet held sit inside a thin ink-3 margin bracket with its label.
+           Lines ≤ 28 characters, so nothing scrolls at 360px. -->
+      <figure class="cp-fig" id="f-01" aria-labelledby="f-01-cap">
+        <div class="cp-fig__plate">
+          <div class="cp-fig__bar"><span class="cp-label">Fig. 01</span><span class="cp-label">A Deployment · catalog</span></div>
+          <div class="cp-blueprint mf">
+            <div class="cp-rec mf__code">
+              <div class="mf__row mf__row--key"><code class="mf__line"><span class="mf__k">kind:</span> Deployment</code><p class="mf__ann mf__ann--key">the kind of record: a version, and how many copies</p></div>
+              <div class="mf__row"><code class="mf__line"><span class="mf__k">metadata:</span></code></div>
+              <div class="mf__row"><code class="mf__line">  <span class="mf__k">name:</span> catalog</code></div>
+              <div class="mf__row"><code class="mf__line"><span class="mf__k">spec:</span></code></div>
+              <div class="mf__held">
+                <p class="mf__heldlabel">Chapter 4’s ReplicaSet held this part</p>
+                <div class="mf__row"><code class="mf__line">  <span class="mf__k">replicas:</span> 3</code><p class="mf__ann">as in Chapter 4: three copies</p></div>
+                <div class="mf__row"><code class="mf__line">  <span class="mf__k">template:</span></code><p class="mf__ann">what each copy is; changing it starts a rollout</p></div>
+                <div class="mf__row"><code class="mf__line"><span class="mf__c">    # … labels, checks and</span></code></div>
+                <div class="mf__row"><code class="mf__line"><span class="mf__c">    # other details left out</span></code></div>
+                <div class="mf__row"><code class="mf__line">    <span class="mf__k">spec:</span></code></div>
+                <div class="mf__row"><code class="mf__line">      <span class="mf__k">containers:</span></code></div>
+                <div class="mf__row"><code class="mf__line">      - <span class="mf__k">name:</span> catalog</code></div>
+                <div class="mf__row mf__row--key"><code class="mf__line">        <span class="mf__k">image:</span> catalog:v62</code><p class="mf__ann mf__ann--key">the version to run; the pipeline changes this line</p></div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <figcaption id="f-01-cap"><span class="cp-label">Fig. 01</span><span>Engineers write a Deployment rather than a ReplicaSet. It keeps the same description of each copy and adds what Chapter 4’s manifest couldn’t do: move from one version to the next. Shortened; real ones have a few more lines.</span></figcaption>
+      </figure>
+
+      <p>The first line names the kind of record. This one is a <dfn id="dfn-deployment" aria-describedby="term-01">Deployment</dfn>, and it’s what Fennel’s teams write for each of their services.</p>
+
+      <div class="cp-term cp-term--payoff cp-blueprint" id="term-01" role="note" aria-label="New term 1 of 4">
+        <p class="cp-term__kicker">New term · 01 / 04</p>
+        <p class="cp-term__term">Deployment</p>
+        <p class="cp-term__def">A record of which version of a service should run, and how many copies. Its loop gets there by keeping one ReplicaSet per version and resizing them.</p>
+        <p class="cp-term__back">What engineers write instead of Chapter 4’s ReplicaSet.</p>
+      </div>
+
+      <p>A Deployment doesn’t run Pods itself. For the version it currently wants, it keeps a ReplicaSet, and Chapter 4’s ReplicaSet loop keeps that ReplicaSet’s Pods running. When someone changes the Pod description, which usually means the image line, the <dfn id="dfn-deployment-loop">Deployment loop</dfn> makes a new ReplicaSet for the new version and then, gradually, makes the new ReplicaSet bigger and the old one smaller. Changing only the number of copies doesn’t start any of this, because every copy is still the same version; changing what each copy is does. So engineers write and change the Deployment, and leave its ReplicaSets to it, as its machinery.</p>
+      <p>In Chapter 4’s terms, the Deployment loop is one more implementation of the same reconcile pattern, and you can fill in its loop lens. It wants the version and the number of copies that its record names. It sees its ReplicaSets, one per version, and how many of their Pods are ready. What it does about a gap is move copies from the old version’s ReplicaSet to the new one, a few at a time. What “a few at a time” means, and what “ready” means, are what the next three sections are about.</p>
+      <p>Where does a new version come from? When Riley’s team merges a change, Fennel’s build pipeline, which engineers call CI, builds a new image, <code>catalog:v63</code>, and pushes it to Fennel’s registry, where images are kept and, as Chapter 2 showed, never change once they are built. Then the pipeline does one more thing: it writes the new tag into the image line of <code>catalog</code>’s Deployment. That one edit to the record is the whole release, and everything that happens after it is the loops’ work. (Pipelines differ from team to team; this is how Fennel’s works.)</p>
+    </section>
+
+    <!-- s-03 · Thursday, 10:15: a routine release (plan: "Thursday, 10:15: catalog v63") · o-1 · claims c-01, c-02, c-03, c-09 · scene set-up BEFORE the lane
+         (ac-04: where catalog runs, why only 05 and 06 are drawn, what's about to change, what READY means) ·
+         w-rollout-scrolly lane R (widgets/w-rollout-scrolly/, built by the widget builder) · k-02 in R2's step
+         column gates R3–R5 · TERM 02 right after the lane · Sam's Tuesday compared (Ch 3 by reference) -->
+    <section id="s-03" data-segment="s-03">
+      <h2 id="thursday-1015"><span class="cp-sec">§ 03 </span>Thursday, 10:15: a routine release</h2>
+      <p>When <code>catalog</code> arrived in the cluster, the scheduler put its three Pods where there was room, which by then meant the two newest nodes: one on node 05, next to the <code>dispatch</code> Pod that waited for room on that Friday at 17:45 in Chapter 5, and two on node 06. Each <code>catalog</code> Pod reserves 2 GB of memory. The other three nodes, 01, 02 and 04, are nearly full and nothing on them changes this morning, so the drawing leaves them out. At 10:15 on Thursday, the pipeline writes <code>catalog:v63</code> into the Deployment’s record.</p>
+      <p>W-01 follows the next minute step by step as you scroll. The drawing is Chapter 5’s, with three changes. The record now has a Deployment row, showing the version it wants, above one row for each of its ReplicaSets. Each <code>catalog</code> Pod carries its version in its label and in its colour: v62 in magenta, v63 in blue. And Pods say READY rather than RUNNING, because from now on that is the difference that matters: Kubernetes sends a Pod customers’ requests only once it is ready, which means once it passes a check that the team wrote. §05 opens that check up.</p>
+      <noscript><p class="cs-noscript">The drawing and step text in §03, and Fig. 03 in §06, need JavaScript. The rest of the page reads without it.</p></noscript>
+
+      <!--
+        ===== MOUNT CONTRACT · w-rollout-scrolly (page builder ↔ widget builder) =====
+        Ch 05's w-friday-scrolly contract (ch-05-scheduling/site/index.html §03), adapted to ONE lane with
+        steps R1–R5 and the gate on k-02. The class prefix stays .cs-*; the drawing and the lane controller
+        are the course pool's (pool/cluster/cluster.js and pool/cluster/lanes.js; data format, options and
+        highlight keys in explainers/_pool/README.md, "Cluster drawing" and "Cluster lanes", plus pool-03's
+        three optional fields: record.deployment, status notready, PODS[id].series). Never copy pool files.
+
+        The page owns everything in this file, including the markup below, the caption under the lane, and
+        its layout CSS (assets/page.css, ".cs-*"). The widget owns widgets/w-rollout-scrolly/:
+          data.js    defines window.ClusterData (the pool's default name), with NODES ['05', '06'],
+                     CAPACITY { memory: 13, cpu: 3.9 }, UNIT 'GB', ROOM_UNIT 2, SERVICES, LOOPS, PODS
+                     (version, series), STRINGS and CLUSTER_LANES.R = { name, steps: [R1 … R5] }; and
+                     FIGURES.crash and FIGURES.shipped, the two snapshots of Fig. 03 in §06 (see the
+                     contract above Fig. 03). Every reader-visible string of the canvas and the step text
+                     lives here.
+          index.js   glue: ClusterCanvas.lanes('w-rollout-scrolly', window.ClusterData).
+          index.css  only a load-time height reservation, scoped under [data-widget="w-rollout-scrolly"].
+        It renders only into the three kinds of slot named here. It never moves, adds or removes page
+        elements, and never touches the .cp-check card or any <details> disclosure.
+
+        Mount   ONE element, [data-widget="w-rollout-scrolly"] (class "d-wide cs", data-lanes="R"), here in
+                §03 (s-03). lanes.js mounts it itself (it collects every [data-widget="w-rollout-scrolly"]).
+        Lane    .cs-lane[data-lane="R"]                   aria-labelledby the section h2
+                  .cs-lane__grid                          page-owned layout grid (sticky rules in page.css)
+                    .cs-canvas[data-canvas]               SLOT 1. The lane's drawing: header bar ("W-01 · THE
+                                                          CLUSTER", lane name "THURSDAY · CATALOG",
+                                                          the clock kicker, "STEP n / 5"), the record panel (a
+                                                          Deployment row over the v62 and v63 ReplicaSet rows),
+                                                          the loop pills and lens line, nodes 05 and 06 with
+                                                          agent pills, the CUSTOMERS and NOT DRAWN notes.
+                                                          role="img", aria-label = the active step's ariaLabel.
+                                                          Before any step is active, show R1.
+                    ol.cs-steps > li.cs-step[data-step="R1" … "R5"]
+                      [data-step-snap]                    SLOT 2. renderCluster() of this step's state, shown by
+                                                          CSS only where the canvas can't fit (max-height: 559px,
+                                                          or the controller's data-cs-fit="inline").
+                      [data-step-text]                    SLOT 3. The step's text from data.js (clock kicker
+                                                          included). Draft wording: plan ## Widgets, shows:.
+                      p.cs-step__lock[data-step-lock]     page-owned "Answer the question above to see what
+                                                          happens", shown by CSS only while .is-locked.
+                      .cp-check                           page-owned (k-02, in R2); leave alone.
+                The controller toggles .is-active (the step whose top last crossed 55% of the viewport),
+                .is-locked and .is-unlocked, as in Ch 04 and Ch 05.
+        Gates   data-gate="k-02" on R3, R4 and R5 (the page's attributes are authoritative). Unlock on
+                document 'didactician:check-commit' (detail { id, option, correct }, dispatched by
+                assets/page.js on every commit, any option), or a .cp-check[data-committed] at init. Never
+                re-lock.
+        Heights The page reserves the canvas slot (min-height): 540px from 900px wide; min(452px, 50vh +
+                16px) under 900px (plan size: about 520px on desktop, about 420px at 360px, plus the slot's
+                16px padding). Raise these in index.css to the measured heights where the drawing is
+                taller, so nothing below shifts.
+        Motion  State changes ≤ 300ms, instant under prefers-reduced-motion. No autoplay.
+        No JS   Slots stay empty, nothing is locked, and the <noscript> line above explains.
+        Checked by the page: R1–R5 mention the Pods by version, never by colour alone; k-02's prompt names
+                "running on node 05 but isn't ready yet" and "four Pods where the record wants three", so R2
+                must draw the v63 Pod on 05, NOT READY, beside three v62 Pods.
+      -->
+      <div data-widget="w-rollout-scrolly" data-lanes="R" class="d-wide cs">
+        <div class="cs-lane" data-lane="R" aria-labelledby="thursday-1015">
+          <div class="cs-lane__grid">
+            <div class="cs-canvas" data-canvas></div>
+            <ol class="cs-steps">
+              <li class="cs-step" data-step="R1">
+                <div class="cs-step__snap" data-step-snap></div>
+                <div class="cs-step__text" data-step-text></div>
+              </li>
+              <li class="cs-step" data-step="R2">
+                <div class="cs-step__snap" data-step-snap></div>
+                <div class="cs-step__text" data-step-text></div>
+                <div class="cp-check" role="group" aria-labelledby="k-02-q" data-check="k-02">
+                  <div class="cp-check__head"><span class="cp-chip">PREDICT</span><span class="cp-label">Check 02 / 07</span></div>
+                  <p class="cp-check__q" id="k-02-q">The v63 Pod is running on node 05 but isn’t ready yet, and <code>catalog</code> now has four Pods where the record wants three. What does the Deployment loop do next?</p>
+                  <ul class="cp-options">
+                    <li><button type="button" class="cp-option" data-fb="The fourth Pod is on purpose: it’s the one extra the rollout is allowed. Stopping a v62 Pod now would leave only two Pods serving while the new one isn’t ready, and with three copies the default settings never let that happen. Scroll on: it waits."><span class="cp-option__key">A</span><span>It stops one v62 Pod straight away, since four Pods is one more than the three it wants.</span><span class="cp-option__tag"></span></button></li>
+                    <li><button type="button" class="cp-option" data-ok data-fb="Right. An old Pod goes only once a new one is ready, so three Pods can serve customers at every moment. Scroll on to see it."><span class="cp-option__key">B</span><span>It waits until the v63 Pod is ready, and only then stops one v62 Pod.</span><span class="cp-option__tag"></span></button></li>
+                    <li><button type="button" class="cp-option" data-fb="That would need six Pods at once, and room for them; with three copies the default settings allow only one extra. It also wouldn’t wait for each new Pod to pass its check. Scroll on: it moves one at a time."><span class="cp-option__key">C</span><span>It starts the other two v63 Pods now, then stops all three v62 Pods once those three are running.</span><span class="cp-option__tag"></span></button></li>
+                  </ul>
+                  <div class="cp-feedback" role="status" hidden></div>
+                </div>
+              </li>
+              <li class="cs-step" data-step="R3" data-gate="k-02">
+                <p class="cs-step__lock" data-step-lock>Answer the question above to see what happens</p>
+                <div class="cs-step__snap" data-step-snap></div>
+                <div class="cs-step__text" data-step-text></div>
+              </li>
+              <li class="cs-step" data-step="R4" data-gate="k-02">
+                <p class="cs-step__lock" data-step-lock>Answer the question above to see what happens</p>
+                <div class="cs-step__snap" data-step-snap></div>
+                <div class="cs-step__text" data-step-text></div>
+              </li>
+              <li class="cs-step" data-step="R5" data-gate="k-02">
+                <p class="cs-step__lock" data-step-lock>Answer the question above to see what happens</p>
+                <div class="cs-step__snap" data-step-snap></div>
+                <div class="cs-step__text" data-step-text></div>
+              </li>
+            </ol>
+          </div>
+        </div>
+      </div>
+      <p class="cp-wcap"><span class="cp-label">W-01</span><span>Fennel’s nodes, versions and timings are fiction. With three copies and the default settings, the Deployment loop ran one extra Pod at most and kept three ready throughout.</span></p>
+
+      <p>What the Deployment loop did between 10:15 and about 10:16 has a name: a <dfn id="dfn-rolling-update" aria-describedby="term-02">rolling update</dfn>.</p>
+
+      <div class="cp-term" id="term-02" role="note" aria-label="New term 2 of 4">
+        <p class="cp-term__kicker">New term · 02 / 04</p>
+        <p class="cp-term__term">rolling update</p>
+        <p class="cp-term__def">Replacing a service’s Pods with a new version a few at a time, keeping enough Pods ready throughout: old ones go only as new ones become ready.</p>
+        <p class="cp-term__back">Sam’s Tuesday, done by a loop.</p>
+      </div>
+
+      <p>If those rounds looked familiar, they should. In Chapter 3, Sam updated <code>storefront</code> from v12 to v13 in the same three rounds of start one, stop one, using one copy’s worth of spare room. What changed is everything around the rounds. The loop took about a minute rather than an evening. Nobody had to post “Nobody deploy anything”, so the other teams could go on shipping while it ran. And it was the team’s check, rather than Sam looking, that decided when each new copy was ready. One detail is easy to miss: the emptied v62 ReplicaSet is still in the record, and §07 shows why that matters.</p>
+    </section>
+
+    <!-- s-04 · Room to ship · o-1 · claims c-02, c-03 (Ch 5 claims 20, 21) · the default pace with "by default"
+         and its meaning for three copies (ac-07) · the cost in spare room · k-03 BEFORE the debrief · the
+         four-copy case (x-02) only in D2, hedged -->
+    <section id="s-04" data-segment="s-04">
+      <h2 id="room-to-ship"><span class="cp-sec">§ 04 </span>Room to ship</h2>
+      <p>How many Pods the Deployment loop moves at a time is set by two numbers in the Deployment. With default settings, a rolling update may run up to a quarter more Pods than the record wants, rounded up, and may let up to a quarter of the wanted Pods be unavailable, rounded down. For <code>catalog</code>’s three copies, a quarter is three-quarters of a Pod, which rounds up to one extra Pod and down to none short. So at every moment of the rollout at least three Pods are ready to serve customers, and the loop never adds more than one extra Pod. Teams can change both numbers; that’s for your engineers to tune.</p>
+      <p>The extra Pod has a cost. While it runs, it needs room on some node, which for <code>catalog</code> means 2 GB of memory and a quarter of a processor core. In Chapter 5, room kept free on purpose looked like insurance against losing a node. It turns out to be room to ship as well.</p>
+
+      <div class="cp-check" role="group" aria-labelledby="k-03-q" data-check="k-03">
+        <div class="cp-check__head"><span class="cp-chip cp-chip--apply">APPLY</span><span class="cp-label">Check 03 / 07</span></div>
+        <p class="cp-check__q" id="k-03-q">Suppose the cluster were as full as on that Friday at 17:45 in Chapter 5, when a <code>dispatch</code> Pod waited for room: no node has 2 GB free. With the default settings, what happens when the pipeline writes <code>catalog:v63</code> into the record?</p>
+        <ul class="cp-options">
+          <li><button type="button" class="cp-option" data-fb="With three copies the default settings allow no Pod short, so no v62 Pod goes until a v63 Pod is ready, and that Pod can’t start without room. (With more copies the defaults do allow one short: open ‘What about a service with more copies?’ below.)"><span class="cp-option__key">A</span><span>The Deployment loop stops one of the three v62 Pods first, so that the v63 Pod has room to start in its place.</span><span class="cp-option__tag"></span></button></li>
+          <li><button type="button" class="cp-option" data-ok data-fb="Right. It’s Chapter 5’s pending Pod: the scheduler keeps trying, the old version keeps serving, and nothing changes until someone makes room. Nothing breaks, but nothing ships either."><span class="cp-option__key">B</span><span>The v63 Pod waits, pending; the three v62 Pods keep serving, and the release waits for room.</span><span class="cp-option__tag"></span></button></li>
+          <li><button type="button" class="cp-option" data-fb="Nothing has failed: the Pod is waiting for room, and the v62 Pods never stopped serving. And Kubernetes doesn’t switch back by itself, even when a rollout really is stuck (§06)."><span class="cp-option__key">C</span><span>Kubernetes marks the rollout as failed straight away and switches <code>catalog</code> back to v62, so that customers aren’t affected.</span><span class="cp-option__tag"></span></button></li>
+        </ul>
+        <div class="cp-feedback" role="status" hidden></div>
+      </div>
+
+      <p>In that case nothing breaks, and nothing rolls back. The new Pod waits, pending, as the <code>dispatch</code> Pod did on that Friday, and the scheduler keeps trying to place it. Meanwhile the three v62 Pods go on serving customers, and the release simply doesn’t happen until someone makes room. So releases, too, depend on the spare room Chapter 5 was about, and that gives Jordan a question for the list.</p>
+      <blockquote class="cp-quote"><p>“Do we keep enough spare room to release during the busiest hour?”</p><cite>The question to ask</cite></blockquote>
+
+      <!-- D2 (c-02 note, x-02, hedged) -->
+      <details class="d-more cp-more">
+        <summary>What about a service with more copies?</summary>
+        <div class="cp-more__body"><p>With four copies, a quarter is exactly one Pod, so the default settings allow one extra Pod and one short. The Deployment loop may then remove an old Pod before any new one is ready, and it moves roughly two at a time, running at three of four ready copies for a while. That means a larger service can make progress even when there’s no spare room at all, by giving up a copy for a while. Teams can set both numbers to suit each service, including allowing no extra Pod at all.</p></div>
+      </details>
+    </section>
+
+    <!-- s-05 · What "ready" means · o-2 · claims c-06, c-07 (Ch 3's "running but stuck", Ch 4's crash loop) ·
+         the node agent named as the one running the checks, "every ten seconds by default" (ac-08) · f-02
+         (two checks, same rows; only the failure row differs) · TERM 03 · liveness (dfn only) · no probe =
+         passing · "only ready Pods are sent traffic" attributed to "a loop we'll name in Chapter 7" · k-05 -->
+    <section id="s-05" data-segment="s-05">
+      <h2 id="what-ready-means"><span class="cp-sec">§ 05 </span>What “ready” means</h2>
+      <p>How did the Deployment loop know that the first v63 Pod was ready? It didn’t look at the Pod; it read a result. The node agent on each node, Chapter 4’s loop that starts and restarts containers, also runs checks that the team wrote into the Deployment’s description of each Pod. It runs them again and again, every ten seconds by default, and reports each result. Engineers call these checks probes, and a Pod can have two kinds, which ask different questions. Fig. 02 puts them side by side.</p>
+
+      <!-- f-02: static HTML. One v63 Pod chip (c2) with the node agent's pill. Two columns with the same five
+           rows (subgrid from 600px, labels on the left); row 4 (what happens on failure) is the only row whose
+           cells differ in kind; both its cells carry the 3px ink outline. Under 600px two stacked cards, readiness
+           first, each repeating the row labels. -->
+      <figure class="cp-fig d-wide" id="f-02" aria-labelledby="f-02-cap">
+        <div class="cp-fig__plate">
+          <div class="cp-fig__bar"><span class="cp-label">Fig. 02</span><span class="cp-label">Two checks on one Pod</span></div>
+          <div class="cp-blueprint pr">
+            <div class="pr__top">
+              <span class="pod v63"><span class="pod__chip">catalog v63 <span class="st st--good"><span class="lamp" aria-hidden="true"></span>Ready</span></span></span>
+              <span class="cp-loop"><span class="cp-loop__mark" aria-hidden="true">↻</span>node agent</span>
+              <p class="pr__agent">Runs both, every 10 s by default</p>
+            </div>
+            <div class="pr__grid">
+              <div class="pr__labels" aria-hidden="true">
+                <p>&nbsp;</p>
+                <p>Asks</p>
+                <p>Catalog’s check</p>
+                <p>Passes when</p>
+                <p class="pr__labfail">When it fails</p>
+                <p>With no probe</p>
+              </div>
+              <div class="pr__col">
+                <p class="pr__name">Readiness probe</p>
+                <div class="pr__cell"><span class="pr__lab">Asks</span><p>“Ready for traffic?”</p></div>
+                <div class="pr__cell"><span class="pr__lab">Catalog’s check</span><code class="pr__code"><b>readinessProbe:</b>
+  <b>httpGet:</b>
+    <b>path:</b> /healthz</code><p class="pr__say">the app is up and can reach its database</p></div>
+                <div class="pr__cell"><span class="pr__lab">Passes when</span><p>any success code (200–399)</p></div>
+                <div class="pr__cell pr__cell--fail"><span class="pr__lab">When it fails</span><span class="st st--warn"><span class="lamp" aria-hidden="true"></span>No traffic</span><p>keeps running; sent no requests; a rollout doesn’t count it</p></div>
+                <div class="pr__cell"><span class="pr__lab">With no probe</span><p>always passes: ready once running</p></div>
+              </div>
+              <div class="pr__col">
+                <p class="pr__name">Liveness probe</p>
+                <div class="pr__cell"><span class="pr__lab">Asks</span><p>“Still alive?”</p></div>
+                <div class="pr__cell"><span class="pr__lab">Catalog’s check</span><code class="pr__code"><b>livenessProbe:</b>
+  <b>httpGet:</b>
+    <b>path:</b> /livez</code><p class="pr__say">the app is up and not stuck</p></div>
+                <div class="pr__cell"><span class="pr__lab">Passes when</span><p>any success code (200–399)</p></div>
+                <div class="pr__cell pr__cell--fail"><span class="pr__lab">When it fails</span><span class="st st--bad"><span class="lamp" aria-hidden="true"></span>Restarted</span><p>the node agent restarts the container</p></div>
+                <div class="pr__cell"><span class="pr__lab">With no probe</span><p>always passes</p></div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <figcaption id="f-02-cap"><span class="cp-label">Fig. 02</span><span>Both checks ask a question the team wrote, and pass on any success code. Only what happens on failure differs: no traffic, or a restart.</span></figcaption>
+      </figure>
+
+      <p>The left-hand check is the one the rollout relied on. It is called a <dfn id="dfn-readiness-probe" aria-describedby="term-03">readiness probe</dfn>.</p>
+
+      <div class="cp-term" id="term-03" role="note" aria-label="New term 3 of 4">
+        <p class="cp-term__kicker">New term · 03 / 04</p>
+        <p class="cp-term__term">readiness probe</p>
+        <p class="cp-term__def">A check, written by the team and run by the node agent throughout a Pod’s life, that decides whether the Pod may be sent traffic.</p>
+        <p class="cp-term__back">Ready for traffic. Not “correct”.</p>
+      </div>
+
+      <p><code>catalog</code>’s readiness probe asks its question by requesting a path, <code>/healthz</code>, from the app, and any success code counts as a pass. While the probe fails, the Pod keeps running, but it is sent no customer requests (that’s the work of a loop we’ll name in Chapter 7), and a rollout doesn’t count it as ready. The probe goes on running for the Pod’s whole life, not only when the Pod starts, so a Pod that stops being ready later is taken out of traffic, and put back once it passes again.</p>
+      <p>The right-hand check is the <dfn id="dfn-liveness-probe">liveness probe</dfn>, and it asks a different question: is the container still alive? When it fails, the node agent restarts the container, just as it restarted the crash-looping <code>notifications</code> after each crash in Chapter 4. It’s there for a job that Chapter 3 left for later, noticing a container that is running but stuck: one that has stopped making progress, for example because it is waiting for something that will never happen, which no crash would ever reveal.</p>
+      <p>And if a team writes no probe at all? Then Kubernetes treats the missing check as passing. Without a readiness probe, a Pod counts as ready as soon as its container is running.</p>
+
+      <div class="cp-check" role="group" aria-labelledby="k-05-q" data-check="k-05">
+        <div class="cp-check__head"><span class="cp-chip cp-chip--apply">APPLY</span><span class="cp-label">Check 04 / 07</span></div>
+        <p class="cp-check__q" id="k-05-q">During Friday’s rush, one <code>catalog</code> Pod loses its connection to the database for a minute. <code>catalog</code>’s readiness check asks whether the app can reach its database; its liveness check asks only whether the app is up and not stuck. What happens to that Pod?</p>
+        <ul class="cp-options">
+          <li><button type="button" class="cp-option" data-fb="Restarting is what a failed liveness check does, and that check still passes: the app is up and not stuck. Only the readiness check fails."><span class="cp-option__key">A</span><span>The node agent restarts its container, as it restarted <code>notifications</code> in Chapter 4, until the database answers again.</span><span class="cp-option__tag"></span></button></li>
+          <li><button type="button" class="cp-option" data-ok data-fb="Right. A failed readiness check takes the Pod out of traffic without touching it, and puts it back as soon as it passes. A restart wouldn’t have brought the database back."><span class="cp-option__key">B</span><span>Nothing restarts it; customers’ requests go to the other two Pods until its check passes again.</span><span class="cp-option__tag"></span></button></li>
+          <li><button type="button" class="cp-option" data-fb="The Deployment loop doesn’t replace Pods that fail a check; it manages versions. The Pod keeps running, sent no traffic, until its readiness check passes."><span class="cp-option__key">C</span><span>The Deployment loop replaces it with a fresh Pod on another node, because one of its three copies has failed.</span><span class="cp-option__tag"></span></button></li>
+        </ul>
+        <div class="cp-feedback" role="status" hidden></div>
+      </div>
+    </section>
+
+    <!-- s-06 · Two ways to be bad · o-2 · claims c-04, c-05, c-07, c-08, c-12 · m-09 stated fairly · k-04 (core
+         predict-then-reveal; m-09, local-01, local-02) · f-03 and the paragraphs that explain it are gated on
+         k-04 (ac-09: nothing says the $0 version rolled out completely before the commit) · the stall is
+         "its Pods never become ready", never "stopped by health checks" · stalled isn't rolled back · D3 ·
+         the handover aside after f-03 with its breaks line (ac-10) · canary and blue-green, one sentence each -->
+    <section id="s-06" data-segment="s-06">
+      <h2 id="two-ways-to-be-bad"><span class="cp-sec">§ 06 </span>Two ways to be bad</h2>
+      <p>What you watched at 10:15 is a real safety net. At no moment were fewer than three <code>catalog</code> Pods ready, and each v63 Pod took over from a v62 Pod only after its check had passed. So it’s tempting to conclude that a release which finishes rolling out must be a good release, and engineers say as much when they report that a new version “passed its health checks”. Before you read on, test that conclusion on the afternoon’s release, v64.</p>
+
+      <div class="cp-check" role="group" aria-labelledby="k-04-q" data-check="k-04">
+        <div class="cp-check__head"><span class="cp-chip">PREDICT</span><span class="cp-label">Check 05 / 07</span></div>
+        <p class="cp-check__q" id="k-04-q">Two ways v64 could be bad. In the first, it crashes as soon as it starts, because of a missing setting (as <code>notifications</code> did in Chapter 4). In the second, it starts, connects to its database and serves pages normally, but every price shows as $0.00. With the default settings, what does the rollout do with each?</p>
+        <ul class="cp-options">
+          <li><button type="button" class="cp-option" data-fb="`catalog`’s readiness check asks whether the app is up and can reach its database (Fig. 02), and v64 is both. A check tests what the team wrote it to test and passes on a success code; it never looks at a price. So the $0 version passes."><span class="cp-option__key">A</span><span>It stops both before they replace v63, because a version that shows $0 fails its health check too.</span><span class="cp-option__tag"></span></button></li>
+          <li><button type="button" class="cp-option" data-ok data-fb="Right. A Pod that crashes on start never becomes ready, so no v63 Pod is ever removed. The $0 version passes its check, so every v63 Pod is replaced. See Fig. 03."><span class="cp-option__key">B</span><span>It stalls the first with v63 still serving, and replaces every v63 Pod with the second.</span><span class="cp-option__tag"></span></button></li>
+          <li><button type="button" class="cp-option" data-fb="That’s the liveness probe. The readiness probe decides whether a Pod gets traffic and whether a rollout counts it, so the crashing version never takes over."><span class="cp-option__key">C</span><span>It rolls both out completely: the checks only decide when a container is restarted, not when it gets traffic.</span><span class="cp-option__tag"></span></button></li>
+          <li><button type="button" class="cp-option" data-fb="Half right: the first never takes over. But Kubernetes doesn’t roll back by itself. It stops advancing, the crashing Pod keeps crash-looping, and someone has to roll back or ship a fix."><span class="cp-option__key">D</span><span>It rolls the first back to v63 by itself, and rolls the second out to every Pod.</span><span class="cp-option__tag"></span></button></li>
+        </ul>
+        <div class="cp-feedback" role="status" hidden></div>
+      </div>
+
+      <!-- gate k-04: f-03, the paragraphs that explain it, D3, the analogy aside and the canary/blue-green
+           paragraph (plan s-06 pacing; P-02: nothing after k-04 is visible before the commit). While locked,
+           the gate collapses to its mono lock plate (no reserved height); it opens on any commit to k-04,
+           and never re-locks. -->
+      <div class="cp-gate" data-gate="k-04">
+        <p class="cp-gate__lock">Answer the question above to see the two outcomes</p>
+
+        <!--
+          ===== FIG. 03 CONTRACT · drawn from w-rollout-scrolly's data (page builder ↔ widget builder) =====
+          The page owns this figure: the plate, the two panel heads, the caption, the gate and the drawing
+          code (assets/page.js, "f-03"). The widget's data.js supplies the content, as
+            window.ClusterData.FIGURES = { crash: F, shipped: F }
+          where F is either a complete snapshot (README "Snapshot format": nodes, record with deployment,
+          loops with lens, notes, restarts) or { state: snapshot, highlight: [keys], ariaLabel: 'the state
+          in words' }. page.js draws each [data-cluster-figure="crash" | "shipped"] slot with the pooled
+          renderer over window.ClusterData (one ClusterCanvas.create per page script), both slots sharing
+          one laneLayout and one measureReserve, no header bar (opts.header omitted, so no step counter),
+          at window load, when the gate opens, on resize and after web fonts load; it sets the slot's
+          aria-label from F.ariaLabel when given (the page's own aria-label below stays otherwise) and
+          marks it data-drawn. The widget's index.js needn't draw these; if it does, renderCluster
+          replaces the slot's content, so nothing doubles.
+          Content (plan f-03): left, if v64 crashed on start, 14:03: Deployment WANT 3 · v64; ReplicaSet
+          v63 WANT 3 ●●● 3 READY; ReplicaSet v64 WANT 1, hollow mark, 0 READY; 05 dispatch, v63, v63;
+          06 v63, v64 CRASHED ↻ 3; CUSTOMERS (good) served by v63 ×3 · prices correct; lens SEES v64 Pod
+          not ready / DOES waits; removes no v63 Pod. Right, v64 as shipped, 14:03: Deployment WANT 3 ·
+          v64; v63 WANT 0 · KEPT; v64 WANT 3 ●●● 3 READY; 05 dispatch, v64, v64; 06 v64; CUSTOMERS (bad)
+          served by v64 ×3 · every price $0.00; lens SEES 3 v64 Pods ready, as wanted / DOES nothing more.
+          Only the CUSTOMERS lines and the v64 chips carry the step highlight.
+        -->
+        <figure class="cp-fig d-wide" id="f-03" aria-labelledby="f-03-cap">
+          <div class="cp-fig__plate">
+            <div class="cp-fig__bar"><span class="cp-label">Fig. 03</span><span class="cp-label">Two ways <span class="nocaps">v64</span> could be bad</span></div>
+            <div class="cp-blueprint f3">
+              <div class="f3__grid">
+                <div class="f3__panel">
+                  <p class="f3__head" id="f-03-crash">If <span class="nocaps">v64</span> crashed on start · 14:03</p>
+                  <div class="f3__draw" data-cluster-figure="crash" role="img" aria-label="If v64 had crashed on start, at 14:03. The record wants 3 catalog Pods at v64. The v63 ReplicaSet still wants 3 and has 3 ready. The v64 ReplicaSet wants 1 and has 0 ready. Node 05 runs the dispatch Pod and two v63 Pods; node 06 runs one v63 Pod and the v64 Pod, crashed and restarted 3 times. Customers are served by the three v63 Pods, and prices are correct. The Deployment loop sees a v64 Pod that isn't ready, so it waits and removes no v63 Pod."></div>
+                </div>
+                <div class="f3__panel">
+                  <p class="f3__head" id="f-03-shipped"><span class="nocaps">v64</span> as shipped · 14:03</p>
+                  <div class="f3__draw" data-cluster-figure="shipped" role="img" aria-label="v64 as it was shipped, at 14:03. The record wants 3 catalog Pods at v64. The v63 ReplicaSet wants 0 and is kept, empty. The v64 ReplicaSet wants 3 and has 3 ready. Node 05 runs the dispatch Pod and two v64 Pods; node 06 runs one v64 Pod; all are ready. Customers are served by the three v64 Pods, and every price shows $0.00. The Deployment loop sees three ready v64 Pods, as wanted, and does nothing more."></div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <figcaption id="f-03-cap"><span class="cp-label">Fig. 03</span><span>The rollout stops a version whose Pods never become ready (one that started but failed its readiness check would stall the same way). A version that passes its check rolls out completely, whatever it shows customers.</span></figcaption>
+        </figure>
+
+        <p>The right-hand panel is what happened on Thursday at 14:02. About a minute after the pipeline wrote <code>catalog:v64</code> into the record, every <code>catalog</code> Pod was running v64, and every customer was seeing prices of $0.00.</p>
+        <p>Why did the rollout treat the two versions so differently? A container that crashes as soon as it starts never stays up long enough to be ready, so the Deployment loop never has a ready v64 Pod to count, never removes a v63 Pod, and the rollout stops where it is. The $0 version, on the other hand, started normally and answered its check with a success code, so it was ready by every measure Kubernetes has. A check passes on the response’s status code alone, and nothing in Kubernetes looks at what the app sends back. <code>catalog</code>’s check asks whether the app is up and can reach its database; it never looks at a price. A rolling update protects availability, which means there are always enough copies running to serve customers. It knows nothing about correctness, whether those copies are doing the right thing.</p>
+        <p>Notice, too, what “stops” means in the left-hand panel. The rollout stops advancing: the v64 Pod keeps crash-looping, the v63 Pods keep serving, and Kubernetes waits for someone to roll back or ship a fix. It doesn’t go back to v63 by itself.</p>
+
+        <!-- D3 (c-05; c-03 and c-07 notes for the second paragraph, A-02): the only place the deadline and
+             "failed to progress" appear -->
+        <details class="d-more cp-more">
+          <summary>How long does Kubernetes wait on a stuck rollout?</summary>
+          <div class="cp-more__body"><p>By default, if a rollout makes no progress for 10 minutes, Kubernetes marks it as having failed to progress, and keeps retrying. That’s all it does. A pipeline or an add-on tool can watch for that mark and roll back automatically, if a team sets one up.</p><p>A rollout gets stuck only when the new Pods never become ready. A version that runs for a few seconds before it crashes can briefly count as ready, and the rollout can move on past it. That is one reason teams write a readiness check, and they can also ask for a new Pod to stay ready for a while before it counts.</p></div>
+        </details>
+
+        <div class="cp-aside">
+          <p><b>ANALOGY</b>You know this from shift changes. A shop manager sends the morning cashier home only once the afternoon cashier has signed in and opened a till, so that the shop is never left without someone serving. Here, the Deployment loop works the same way: it removes an old Pod only once a new one has passed its check.</p>
+          <p class="cp-breaks"><b>WHERE THIS ANALOGY BREAKS</b>A manager at the counter would notice a new cashier charging nothing for the groceries within a minute. The Deployment loop never sees a single sale. It sees only the result of the check the team wrote, and as long as that passes, it carries on.</p>
+        </div>
+
+        <p>To catch wrong behaviour before every customer sees it, teams add a step that a plain rolling update doesn’t have. In a <dfn id="dfn-canary">canary release</dfn>, the new version goes to a small share of customers first, while someone, or something, watches whether it behaves correctly, and only then replaces the rest. In a <dfn id="dfn-blue-green">blue-green release</dfn>, the new version runs beside the old one and is tested there, before all traffic is switched over to it at once. A plain Deployment does neither by itself, and it doesn’t roll back on its own either; tools such as Argo Rollouts add these on top of Kubernetes. Fennel uses neither, yet.</p>
+      </div>
+    </section>
+
+    <!-- s-07 · Thursday, 14:02: going back (plan: "Thursday, 14:02: six minutes at $0"; retitled so the
+         contents list doesn't announce k-04's outcome, P-01) · o-3 · claims c-01, c-09, c-10 (medium: hedged, "with the
+         default settings") · f-04 (CH06_INCIDENT; doesn't reveal how the rollback proceeds) · who noticed ·
+         k-06 · f-05, the reveal, TERM 04 and the level-based paragraph gated on k-06 (ac-11) · how far back ·
+         D4 (command vs. file; GitOps named only) -->
+    <section id="s-07" data-segment="s-07">
+      <h2 id="thursday-1402"><span class="cp-sec">§ 07 </span>Thursday, 14:02: going back</h2>
+      <p>The afternoon’s release, v64, changed how <code>catalog</code> reads prices from its database. One field in the database had been renamed, so every price came back empty, and the app showed an empty price as $0.00. The change passed the team’s tests, the pipeline built <code>catalog:v64</code>, and at 14:02 it wrote the new tag into the Deployment. Fig. 04 shows the six minutes that followed.</p>
+
+      <!-- f-04: a data-driven list (CH06_INCIDENT in assets/page.js), Ch 01's timeline grammar with a PRICES
+           band: CORRECT (good), SOME $0 (warn), ALL $0 (bad), word + colour. One column with the band on the
+           left edge under 600px. -->
+      <figure class="cp-fig" id="f-04" aria-labelledby="f-04-cap">
+        <div class="cp-fig__plate">
+          <div class="cp-fig__bar"><span class="cp-label">Fig. 04</span><span class="cp-label">Thursday, 14:02–14:08</span></div>
+          <ol class="tl" data-timeline="ch06-thursday"></ol>
+          <noscript><p class="cs-noscript">This timeline is drawn by JavaScript. In words: at 14:02 the pipeline writes v64 into the Deployment; by about 14:03 three v64 Pods are ready and every price shows $0.00; at 14:05 Morgan asks why orders are coming in at $0.00; at 14:07 Riley changes the image line back to v63; by about 14:08:20 every catalog Pod runs v63 again. 23 orders were placed at $0.00 in between.</p></noscript>
+        </div>
+        <figcaption id="f-04-cap"><span class="cp-label">Fig. 04</span><span>Six minutes of $0 prices: nearly five before anyone acted, and about one more to roll back. Times are approximate.</span></figcaption>
+      </figure>
+
+      <p>Look at who noticed. Not Kubernetes, which had done exactly what it was built to do, and not a dashboard: it was Morgan, about three minutes in, from the orders. (How a team notices this kind of problem sooner is a subject for Chapter 12.)</p>
+
+      <div class="cp-check" role="group" aria-labelledby="k-06-q" data-check="k-06">
+        <div class="cp-check__head"><span class="cp-chip">PREDICT</span><span class="cp-label">Check 06 / 07</span></div>
+        <p class="cp-check__q" id="k-06-q">At 14:07 Riley changes <code>catalog</code>’s image line back to v63, and the pipeline writes it into the record. What does Kubernetes do?</p>
+        <ul class="cp-options">
+          <li><button type="button" class="cp-option" data-fb="Kubernetes keeps no snapshot of the cluster to go back to, and it never touches Fennel’s database. The record now says v63, and the loop closes that gap, like any other. The orders stay as they were (§08)."><span class="cp-option__key">A</span><span>It returns the whole cluster to the way it was at 14:01, so the orders customers placed at $0 in between are undone too.</span><span class="cp-option__tag"></span></button></li>
+          <li><button type="button" class="cp-option" data-ok data-fb="Right. To the Deployment loop, going back is just another change of version: with the default settings it fills the v63 ReplicaSet it kept and empties v64’s, the same gradual way. See Fig. 05."><span class="cp-option__key">B</span><span>It replaces v64 with v63 a few Pods at a time, the same way it rolled v64 out.</span><span class="cp-option__tag"></span></button></li>
+          <li><button type="button" class="cp-option" data-fb="That would leave no Pod serving for a moment. Going back is a change of version like any other, so the loop moves one Pod at a time, and keeps v64’s ReplicaSet, emptied."><span class="cp-option__key">C</span><span>It stops all three v64 Pods at once, then starts three v63 Pods from the v63 image.</span><span class="cp-option__tag"></span></button></li>
+        </ul>
+        <div class="cp-feedback" role="status" hidden></div>
+      </div>
+
+      <!-- gate k-06: f-05, the reveal, TERM 04, the level-based paragraph, how far back, and D4. Collapses
+           to its lock plate while locked (P-02). -->
+      <div class="cp-gate" data-gate="k-06">
+        <p class="cp-gate__lock">Answer the question above to see what Kubernetes did</p>
+
+        <!-- f-05: static HTML, Ch 04's record grammar (c4 on c4-soft). Three panels with the same rows; the
+             changed values (the wanted version, the two WANTs) carry the 3px ink highlight; the v63 row is
+             the same ReplicaSet in all three (from 600px a dashed connector across each gap, labelled "same"
+             above the line; under 600px a labelled rule under the panels). Stacked under 600px. -->
+        <figure class="cp-fig d-wide" id="f-05" aria-labelledby="f-05-cap">
+          <div class="cp-fig__plate">
+            <div class="cp-fig__bar"><span class="cp-label">Fig. 05</span><span class="cp-label">The record, three times</span></div>
+            <div class="cp-blueprint rk" role="img" aria-label="catalog's record at three moments. At 14:01 the Deployment wants 3 Pods at v63; the v63 ReplicaSet wants 3 and has 3 ready; there is no v64 ReplicaSet yet. At 14:04 the Deployment wants v64; the v63 ReplicaSet wants 0 and is kept; the v64 ReplicaSet wants 3 and has 3 ready. At about 14:08:30 the Deployment wants v63 again; the same v63 ReplicaSet wants 3 and has 3 ready again; the v64 ReplicaSet wants 0 and is kept.">
+              <div class="rk__grid">
+                <div class="rk__panel">
+                  <p class="rk__time">14:01</p>
+                  <div class="cp-rec rk__rec">
+                    <p class="rk__head">Record</p>
+                    <div class="rk__row rk__row--dep"><span class="rk__name">Deployment · catalog</span><span class="rk__want">Want 3</span><span class="rk__sep" aria-hidden="true">·</span><span class="rk__ver">v63</span></div>
+                    <div class="rk__row rk__row--rs rk__row--same"><span class="rk__name">ReplicaSet v63</span><span class="rk__want">Want 3</span><span class="rk__marks"><i class="rk__mark"></i><i class="rk__mark"></i><i class="rk__mark"></i></span><span class="rk__word st--good">3 ready</span><span class="rk__conn" aria-hidden="true">same</span></div>
+                    <div class="rk__row rk__row--rs rk__row--none"><span>v64: not yet created</span></div>
+                  </div>
+                </div>
+                <div class="rk__panel">
+                  <p class="rk__time">14:04</p>
+                  <div class="cp-rec rk__rec">
+                    <p class="rk__head">Record</p>
+                    <div class="rk__row rk__row--dep"><span class="rk__name">Deployment · catalog</span><span class="rk__want">Want 3</span><span class="rk__sep" aria-hidden="true">·</span><span class="rk__ver is-hl">v64</span></div>
+                    <div class="rk__row rk__row--rs rk__row--same"><span class="rk__name">ReplicaSet v63</span><span class="rk__want is-hl">Want 0</span><span class="rk__word rk__word--kept">Kept</span><span class="rk__conn" aria-hidden="true">same</span></div>
+                    <div class="rk__row rk__row--rs"><span class="rk__name">ReplicaSet v64</span><span class="rk__want is-hl">Want 3</span><span class="rk__marks"><i class="rk__mark"></i><i class="rk__mark"></i><i class="rk__mark"></i></span><span class="rk__word st--good">3 ready</span></div>
+                  </div>
+                </div>
+                <div class="rk__panel">
+                  <p class="rk__time">~14:08:30</p>
+                  <div class="cp-rec rk__rec">
+                    <p class="rk__head">Record</p>
+                    <div class="rk__row rk__row--dep"><span class="rk__name">Deployment · catalog</span><span class="rk__want">Want 3</span><span class="rk__sep" aria-hidden="true">·</span><span class="rk__ver is-hl">v63</span></div>
+                    <div class="rk__row rk__row--rs rk__row--same"><span class="rk__name">ReplicaSet v63</span><span class="rk__want is-hl">Want 3</span><span class="rk__marks"><i class="rk__mark"></i><i class="rk__mark"></i><i class="rk__mark"></i></span><span class="rk__word st--good">3 ready</span></div>
+                    <div class="rk__row rk__row--rs"><span class="rk__name">ReplicaSet v64</span><span class="rk__want is-hl">Want 0</span><span class="rk__word rk__word--kept">Kept</span></div>
+                  </div>
+                </div>
+              </div>
+              <p class="rk__link">The same ReplicaSet, kept and reused</p>
+            </div>
+          </div>
+          <figcaption id="f-05-cap"><span class="cp-label">Fig. 05</span><span>Rolling back changes the wanted version back to v63. The Deployment fills the v63 ReplicaSet it kept, as it would for any new version, and keeps v64’s in turn.</span></figcaption>
+        </figure>
+
+        <p>Rolling back is a change to the record like any other. Riley’s edit put v63’s description of each Pod back into the Deployment, and the Deployment loop saw what it always looks for: a gap between the version the record wants and the version its Pods run. It closed that gap in the usual way. It already had a ReplicaSet for v63, kept with no Pods since about 14:03, so it used that one, and, with the default settings, it filled it and emptied v64’s in the same gradual way it handles any change of version. That’s why going back took about a minute too, and why it needed the same spare room.</p>
+        <p>Declaring an earlier version again like this is a <dfn id="dfn-rollback" aria-describedby="term-04">rollback</dfn>.</p>
+
+        <div class="cp-term" id="term-04" role="note" aria-label="New term 4 of 4">
+          <p class="cp-term__kicker">New term · 04 / 04</p>
+          <p class="cp-term__term">rollback</p>
+          <p class="cp-term__def">Declaring an earlier version again. The Deployment rolls it out like any other change, from the ReplicaSet it kept, if it still has one.</p>
+          <p class="cp-term__back">It changes what runs, not what already happened.</p>
+        </div>
+
+        <p>Notice what the loop didn’t need to know: that this was an “undo”. It keeps no list of the steps it took at 14:02 to replay backwards. It compares the latest record with what is running now, and heads for the record; engineers call this level-based behaviour, because the loop acts on the gap it sees, not on a history of what happened. If the record had changed again halfway through, the loop would simply have headed for the newer version instead.</p>
+
+        <p>The ReplicaSets a Deployment keeps are also its history. By default it keeps the last ten old ones, emptied, and the command engineers use to undo a rollout (below) can step back only through those: once one is deleted, that version is gone from the history. Declaring an older version in the files, as Riley did, reaches further back than that, because the loop simply makes a new ReplicaSet for it, as it would for any new version, as long as the image is still in the registry (§08).</p>
+
+        <!-- D4 (c-10 note): the only place kubectl rollout undo and GitOps appear -->
+        <details class="d-more cp-more">
+          <summary>Undo with a command, or change the file back?</summary>
+          <div class="cp-more__body"><p>Engineers can roll back in two ways. One is a command, <code>kubectl rollout undo</code>, which changes the cluster’s record directly. The other is to change the image line back in the team’s files and let the pipeline apply them, as Riley did. The command is quicker, but it leaves the files still naming v64, so the next time the pipeline applies them, v64 rolls out again. Kubernetes’ documentation warns against managing one object both ways. Changing the file back is the declarative way to roll back, and GitOps tools (Chapter 13) make it the only way.</p></div>
+        </details>
+      </div>
+    </section>
+
+    <!-- s-08 · What going back assumes · o-3 · claims c-01 (note), c-09, c-11 (Ch 2 claims 07, 08) · the kept
+         ReplicaSet holds the image's name, not the image · f-06 · a tag can be moved, a digest can't · the 23
+         orders remain (local-03) · two questions for Jordan (ac-12) -->
+    <section id="s-08" data-segment="s-08">
+      <h2 id="what-going-back-assumes"><span class="cp-sec">§ 08 </span>What going back assumes</h2>
+      <p>Riley’s rollback rested on two assumptions, and on Thursday both held. The first is that the old image still exists. The kept v63 ReplicaSet holds the image’s name, <code>catalog:v63</code>, not the image itself: the image lives in Fennel’s registry, and a node downloads it from there when it doesn’t already have a copy. If the image had been deleted, a rolled-back Pod could have started only on a node that still had a copy; anywhere else it would have waited, retrying, and the rollback could have stalled like any bad rollout. Fennel’s registry deletes <code>catalog</code> images after 30 days to save space, so Riley’s team can go back about a month, and no further.</p>
+
+      <!-- f-06: static HTML. Left: two image lines on the manifest plate (c4), each annotated. Right: Ch 02's
+           registry frame with image chips (c1 on c1-soft; older faded), a short digest under each tag, the
+           image both lines name outlined, and the clean-up's deleted images as a dashed empty chip. The
+           digests are made up. Stacked under 600px. -->
+      <figure class="cp-fig" id="f-06" aria-labelledby="f-06-cap">
+        <div class="cp-fig__plate">
+          <div class="cp-fig__bar"><span class="cp-label">Fig. 06</span><span class="cp-label">Which <span class="nocaps">v63</span>?</span></div>
+          <div class="cp-blueprint rg">
+            <div class="rg__grid">
+              <div class="cp-rec mf__code">
+                <div class="mf__row"><code class="mf__line"><span class="mf__k">image:</span> catalog:v63</code><p class="mf__ann">a tag: a name that can be moved</p></div>
+                <div class="mf__row mf__row--key"><code class="mf__line"><span class="mf__k">image:</span> catalog@sha256:9d2e…41a7</code><p class="mf__ann mf__ann--key">a digest: names one exact image, forever</p></div>
+              </div>
+              <div class="cp-machine">
+                <div class="cp-machine__bar"><span class="cp-label">Registry</span></div>
+                <ul class="rg__chips">
+                  <li><span class="cp-img">catalog:v64<small>sha256:5b07…c2e9</small></span></li>
+                  <li class="rg__chiprow"><span class="cp-img is-named">catalog:v63<small>sha256:9d2e…41a7</small></span><span class="rg__note">← both lines name this image today</span></li>
+                  <li><span class="cp-img is-old">catalog:v62<small>sha256:e41c…07bd</small></span></li>
+                  <li><span class="cp-img is-old">catalog:v61<small>sha256:2a9f…d310</small></span></li>
+                  <li><span class="cp-img is-gone">older catalog images<small>deleted after 30 days</small></span></li>
+                </ul>
+              </div>
+            </div>
+            <p class="rg__rule">Fennel’s pipeline never reuses a tag</p>
+          </div>
+        </div>
+        <figcaption id="f-06-cap"><span class="cp-label">Fig. 06</span><span>Going back works reliably only if the old image is still in the registry and its tag still points at it. A digest can’t be moved; a tag can, unless the team never reuses one.</span></figcaption>
+      </figure>
+
+      <p>The second assumption is that <code>v63</code> still means the image it meant at 10:15. An image never changes once it is built (Chapter 2), but the tag that points at it can: a tag such as <code>v63</code> or <code>latest</code> can be moved to a different image, and Pods started from it at different times would then run different code. A <dfn id="dfn-digest">digest</dfn>, the image’s fingerprint, always names one exact image. Fennel’s pipeline never reuses a tag, and that is what makes “go back to v63” mean the same v63.</p>
+      <p>Beyond those two assumptions there is a limit that no amount of care removes: rolling back changes which version the Pods run, and nothing that the bad version already did. Twenty-three orders went through at $0.00 between 14:02 and 14:08, and they stayed that way, as would any emails sent or records written in those minutes. Jordan and Morgan decided to honour the orders. Data that has to outlive the Pods that wrote it is the subject of Chapter 10.</p>
+      <p>Each of these points turns into a question for Jordan’s list:</p>
+      <ul class="cp-qs">
+        <li>“Do we keep old images for as long as we might need to go back, and do our tags ever move?”</li>
+        <li>“If a bad version runs for six minutes, what will it have written that rolling back won’t fix?”</li>
+      </ul>
+    </section>
+
+    <!-- s-09 · The loops so far · o-1 · claims c-01, c-06 · f-07 from CH06_LOOPS (Ch 05's CH05_LOOPS copied
+         forward, Ch 05's tags dropped; the Deployment loop row and the node agent's and Chapter 7's readiness
+         clauses tagged NEW IN CH 6; ac-13) -->
+    <section id="s-09" data-segment="s-09">
+      <h2 id="the-loops-so-far"><span class="cp-sec">§ 09 </span>The loops so far</h2>
+      <p>The Deployment loop joins the loops from Chapters 4 and 5. It doesn’t replace any of them: it works through the ReplicaSet loop, which works through the scheduler and the node agents. Fig. 07 shows all of them through the loop lens, with what this chapter added.</p>
+
+      <!-- f-07: the loop lens table. Rows are built by assets/page.js from CH06_LOOPS. Changed or new cells carry
+           NEW IN CH 6. Rows for loops met later are dashed. No status colours. -->
+      <figure class="cp-fig d-wide" id="f-07" aria-labelledby="f-07-cap">
+        <div class="cp-fig__plate">
+          <div class="cp-fig__bar"><span class="cp-label">Fig. 07</span><span class="cp-label">Which loop: wants, sees, does</span></div>
+          <div class="cp-blueprint lens">
+            <table data-labels="Wants|Sees|Does|Sam’s job" data-new="New in Ch 6">
+              <thead><tr><th scope="col">Loop</th><th scope="col">Wants</th><th scope="col">Sees</th><th scope="col">Does</th><th scope="col">Sam’s job, now a loop’s</th></tr></thead>
+              <tbody data-loop-lens></tbody>
+              <tfoot><tr><td colspan="5">The memory kill itself is the operating system’s, on the node; the node agent restarts the container afterwards.</td></tr></tfoot>
+            </table>
+            <noscript><p class="cs-noscript">This table is drawn by JavaScript.</p></noscript>
+          </div>
+        </div>
+        <figcaption id="f-07-cap"><span class="cp-label">Fig. 07</span><span>The Deployment loop doesn’t run a single Pod itself: it resizes ReplicaSets, and the loops below it do the rest.</span></figcaption>
+      </figure>
+    </section>
+
+    <!-- s-10 · The conversation · o-2, o-3 · claims c-08, c-10, c-11, c-12 · Riley's line, then k-07 (think, then
+         reveal; states its own question; model answer hidden until revealed; names m-09 once) · recap (five
+         lines) · bridge to Ch 7 -->
+    <section id="s-10" data-segment="s-10">
+      <h2 id="the-conversation"><span class="cp-sec">§ 10 </span>The conversation</h2>
+      <p>On Friday morning, the team meets to review Thursday’s incident. Riley, a little defensive, speaks first.</p>
+      <blockquote class="cp-quote"><p>“The rollout passed health checks, so it wasn’t the deploy.”</p><cite>Riley</cite></blockquote>
+
+      <div class="cp-check" role="group" aria-labelledby="k-07-q" data-check="k-07" data-reveal>
+        <div class="cp-check__head"><span class="cp-chip cp-chip--apply">APPLY</span><span class="cp-label">Check 07 / 07 · think, then reveal</span></div>
+        <p class="cp-check__q" id="k-07-q">At Friday’s review of Thursday’s incident, Riley says: “The rollout passed health checks, so it wasn’t the deploy.” What would you ask Riley, and why? Think of your questions, then show the answer.</p>
+        <button type="button" class="cp-reveal" aria-expanded="false" aria-controls="k-07-a">Show the answer</button>
+        <div class="cp-feedback" id="k-07-a" role="status" hidden>
+          <p><b>ANSWER</b>“What do our health checks actually test? Would they catch wrong behaviour, or only crashes?”</p>
+          <p><code>catalog</code>’s readiness check passes when the app is up and can reach its database, and a check passes on a success code alone, so a version that shows $0 passes by design. “Passed health checks” only proves that v64 started and could reach its database. It was the deploy: the rollout did exactly what it is built to do, and it is built to protect availability, not correctness. A rollout that completes has proved only that every new Pod passed its checks, not that the release is good.</p>
+          <p>Then, to follow up:</p>
+          <ul class="cp-answer">
+            <li>“What would have caught wrong prices before every customer saw them: a check that tests a real price, or a release that goes to a small share of customers first while something watches, a canary?”</li>
+            <li>“Who noticed, and how fast?” Morgan noticed from the orders after about three minutes. What would have noticed without Morgan?</li>
+            <li>“If v63 had been bad too, could we have gone back further? Are old images kept, and do our tags ever move?”</li>
+            <li>“And what do we do about the 23 orders?” Rolling back didn’t change them.</li>
+          </ul>
+          <p>Noticing wrong behaviour sooner is where Chapter 12 picks up.</p>
+        </div>
+      </div>
+
+      <div class="cp-recap">
+        <p class="cp-label">In short</p>
+        <ul>
+          <li>A Deployment is a record of which version of a service should run, and how many copies. Its loop keeps one ReplicaSet per version and shifts copies between them a few at a time, keeping enough Pods ready throughout (with three copies and the default settings, an old Pod goes only once a new one is ready), which needs spare room while both versions run.</li>
+          <li>The readiness probe decides whether a Pod is ready for traffic; the liveness probe decides whether it is still alive, or has to be restarted.</li>
+          <li>A version whose Pods crash on start or never become ready stalls the rollout, with the old version still serving. A version that passes its checks and does the wrong thing rolls out completely.</li>
+          <li>Rolling back is declaring the old version again. The same loop rolls it out the same way, from the ReplicaSet the Deployment kept if it still has one, as long as the old image is still there.</li>
+          <li>Rolling back changes what runs, not what the bad version already did.</li>
+        </ul>
+        <p>All through this chapter, “only ready Pods are sent traffic” was the work of a loop we haven’t named. Every release gives <code>catalog</code> three new Pods, with new names and new addresses, and <code>storefront</code> still has to find them, at once, and only the ready ones. Chapter 7 is about how callers find a service whose Pods never stay put.</p>
+      </div>
+    </section>
+
+    <footer class="cp-sources" data-toc-skip>
+      <p class="cp-label">Sources</p>
+      <ol>
+        <li>Kubernetes documentation, <a href="https://kubernetes.io/docs/concepts/workloads/controllers/deployment/">“Deployments”</a>: a new ReplicaSet for a changed Pod template, scaled up while the old one scales down; only a template change starts a rollout; the default 25% extra and 25% unavailable, rounded up and down; old Pods removed only once enough new ones are up; a rollout whose new Pods never become ready stops scaling up; a stalled rollout is only reported, after 600 seconds by default; old ReplicaSets kept, 10 by default, for rolling back; rolling back writes an earlier Pod template back.</li>
+        <li>Kubernetes documentation, <a href="https://kubernetes.io/docs/concepts/workloads/pods/probes/">the page on probes</a>: a failed liveness probe restarts the container, a failed readiness probe stops traffic without a restart; probes every 10 seconds by default; a missing probe counts as passing; an HTTP check passes on a status code from 200 to 399 alone.</li>
+        <li>Kubernetes documentation, <a href="https://kubernetes.io/docs/concepts/containers/images/">“Images”</a>: tags can be moved to different images, digests are fixed.</li>
+        <li>Kubernetes documentation, <a href="https://kubernetes.io/docs/concepts/overview/working-with-objects/object-management/">“Kubernetes Object Management”</a>: one object should be managed by one technique.</li>
+        <li>Argo Rollouts documentation, <a href="https://argo-rollouts.readthedocs.io/en/stable/">overview</a> and <a href="https://argo-rollouts.readthedocs.io/en/stable/concepts/">concepts</a>: what a plain rolling update can’t do; canary and blue-green releases.</li>
+      </ol>
+      <p>Facts carried over from earlier chapters (images that never change and the registry, declaring rather than commanding, the loops, crash-loop restarts, pending Pods) are sourced in Chapters 2, 4 and 5.</p>
+      <p>Fennel, its people, services, versions, times, prices, orders and incidents are fiction, made up to illustrate the mechanisms above. The digests in Fig. 06 are made up, too.</p>
+    </footer>
+  </main>
+</div>
+
+<script src="pool/toc.js"></script>
+<script src="assets/page.js"></script>
+<script src="pool/widget.js"></script>
+<link rel="stylesheet" href="pool/cluster/cluster.css">
+<link rel="stylesheet" href="widgets/w-rollout-scrolly/index.css">
+<script src="widgets/w-rollout-scrolly/data.js"></script>
+<script src="pool/cluster/cluster.js"></script>
+<script src="pool/cluster/lanes.js"></script>
+<script src="widgets/w-rollout-scrolly/index.js"></script>
+</body>
+</html>

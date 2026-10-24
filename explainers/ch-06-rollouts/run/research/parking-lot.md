@@ -1,0 +1,18 @@
+# Parking lot
+
+- Change-causes-outages statistic (optional for Ch 6's opening): the Google SRE book (2016, "Introduction") says "SRE has found that roughly 70% of outages are due to changes in a live system". One source's figure from Google's own experience; no method, dataset or period is given. Promote to facts.md (swapping out a claim) only if the chapter uses it, and present it as "Google's SRE team has said…". (https://sre.google/sre-book/introduction/)
+- What teams shipping several times a day do differently (small batches, automated tests and pipelines, frequent low-risk deploys): DORA's research is the usual source; not fetched at light depth. Would resolve the practice half of q-2. (https://dora.dev/)
+- Rollover: changing a Deployment mid-rollout makes it head straight for the newest template and scale down the half-finished one; it doesn't wait. A clean example of level-based behaviour (Ch 4 claim 04) for a Ch 6 disclosure, if wanted. (https://kubernetes.io/docs/concepts/workloads/controllers/deployment/)
+- Recreate strategy: all old Pods are stopped before new ones start, so there is downtime; teams use it when two versions can't run side by side, e.g. around incompatible data changes. Ch 10. (https://kubernetes.io/docs/concepts/workloads/controllers/deployment/)
+- A failed readiness probe removes the Pod's address from the Services that match it (the EndpointSlice controller). Ch 7. (https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle/)
+- Liveness probes that are too strict, or that check back-end services, can restart healthy containers under load and cause cascading failures; readiness may check back-ends, liveness should test only the app itself. Ch 12. (https://kubernetes.io/docs/concepts/workloads/pods/probes/)
+- Startup probes give slow-starting apps time before liveness checks begin; probe timing settings (`periodSeconds` 10, `failureThreshold` 3, `timeoutSeconds` 1 by default). Ch 12. (https://kubernetes.io/docs/concepts/workloads/pods/probes/)
+- `minReadySeconds`: require a new Pod to stay ready for a while before it counts as available, a cheap way to slow a rollout. Ch 12 / Ch 13. (https://kubernetes.io/docs/concepts/workloads/controllers/deployment/)
+- Pause and resume a rollout to batch several template changes into one. (https://kubernetes.io/docs/concepts/workloads/controllers/deployment/)
+- Higher-level tools (Argo Rollouts, Flagger) and pipelines can watch the ProgressDeadlineExceeded condition or metrics and roll back automatically; progressive delivery. Ch 13. (https://argo-rollouts.readthedocs.io/en/stable/)
+- Admission controllers can rewrite tags to digests when Pods are created, so the whole workload runs pinned code. Ch 13. (https://kubernetes.io/docs/concepts/containers/images/)
+- Pinning digests means not picking up a rebuilt image automatically (e.g. a security patch under the same tag): a real trade-off. Ch 9 / Ch 14. (Ch 2 parking lot; https://docs.docker.com/reference/cli/docker/image/pull/)
+- Changing a Pod's resource requests in the Deployment's template triggers a rollout (new Pods), unlike in-place resize. Ch 8. (https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle/)
+- Editing a configuration object that Pods read doesn't by itself change the Pod template, so it doesn't start a rollout; teams add tricks to force one. Ch 9. (model)
+- During node upgrades, PodDisruptionBudgets limit how many copies are taken down at once. Ch 14. (https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle/)
+- GitOps tools make "revert the file in version control" the only way to roll back, and undo by command gets reverted to match the files. Ch 13. (model)

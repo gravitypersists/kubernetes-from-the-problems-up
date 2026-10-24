@@ -1,0 +1,23 @@
+{
+  "data_origins": [],
+  "widgets": {
+    "w-rollout-scrolly": {
+      "segment": "s-03",
+      "mount": "[data-widget=\"w-rollout-scrolly\"]",
+      "mounts": {
+        "R": "[data-widget=\"w-rollout-scrolly\"][data-lanes=\"R\"] (s-03, lane R 'Thursday, 10:15 · catalog v63', steps R1–R5, gated on k-02 in R2)"
+      },
+      "figures": {
+        "f-03": "#f-03 [data-cluster-figure=\"crash\"] and [data-cluster-figure=\"shipped\"] (s-06, gated on k-04): ClusterData.FIGURES.crash / .shipped from this widget's data.js, drawn by the page (assets/page.js) with the pooled renderCluster"
+      },
+      "size": {
+        "desktop": "≥900px: .d-wide (≤960px); a two-column grid: canvas slot ~55% wide, sticky at top var(--sp-4), 540px reserved (two node columns, a Deployment row over two ReplicaSet rows); step cards ~45%, each ≥40vh. Fig. 03: two panels side by side, 420px reserved each",
+        "mobile": "<900px: one column; canvas slot sticky at top, opaque, ≤50vh (min(452px, 50vh + 16px) reserved); steps scroll beneath. Height <560px, or a canvas that can't fit (data-cs-fit=\"inline\"): canvas hidden, per-step snapshot in [data-step-snap]. Fig. 03: panels stacked, crash first, 330px reserved each"
+      },
+      "files": ["data.js", "index.js", "index.css"],
+      "pool": ["pool/cluster/cluster.css", "pool/cluster/cluster.js", "pool/cluster/lanes.js", "pool/widget.js"],
+      "cdn": [],
+      "data_origins": []
+    }
+  }
+}

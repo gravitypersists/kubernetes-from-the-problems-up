@@ -13,7 +13,9 @@
    record's view of the node on the bar, optional NEW tag and scheduler verdicts), whose bodies hold the
    node's room, Pods (a chip inside an inset ink ring, height = size) and "N FREE", with an optional
    processor footer; and note lines. Every reader-visible string comes from data.STRINGS; colours are
-   course tokens (cluster.css). The lane controller is pool/cluster/lanes.js. */
+   course tokens (cluster.css). The lane controller is pool/cluster/lanes.js. pool-03 (Ch 06) adds four
+   optional fields, each off when absent: record.deployment (a Deployment row over indented ReplicaSet
+   rows, KEPT for an emptied one), status 'notready', PODS[id].series and data STATUS_INLINE. */
 (function () {
   'use strict';
 
@@ -123,6 +125,8 @@
       var idx = podIndex(state);
       var unknown = state.nodeStatus || {};
       var waitIds = waitingList(state).map(function (w) { return w.id; });
+      /* pool-03: a Deployment group (record.deployment.rows are drawn indented under its header row) */
+      var dep = rec.deployment;
       return rec.rows.map(function (svc) {
         var pods = rec.pods[svc] || [];
         var want = rec.want[svc] || 0;
@@ -138,14 +142,29 @@
         var unk = marks.filter(function (m) { return m === 'unk'; }).length;
         var wait = pods.filter(function (id) { return has(waitIds, id); }).length;
         var word;
-        if (pods.length < want) word = [{ t: S.record.short + ' ' + (want - pods.length), tone: 'warn', rank: 3 }];
+        var inDep = !!dep && has(dep.rows, svc);
+        /* an emptied ReplicaSet in a Deployment group: kept, not deleted (pool-03) */
+        if (inDep && want === 0 && !marks.length) word = [{ t: str('record.kept'), tone: 'mute', rank: 1 }];
+        else if (pods.length < want) word = [{ t: S.record.short + ' ' + (want - pods.length), tone: 'warn', rank: 3 }];
         else {
           word = [{ t: run + ' ' + S.record.running, tone: run >= want ? 'good' : 'mute', rank: 1 }];
           if (unk) word.push({ t: unk + ' ' + S.record.unknown, tone: 'warn', rank: 2 });
           if (wait) word.push({ t: wait + ' ' + str('record.waiting'), tone: 'warn', rank: 2.5 });
         }
-        return { svc: svc, want: want, marks: marks, word: word };
+        var r = { svc: svc, want: want, marks: marks, word: word };
+        if (inDep) r.group = dep.name;
+        return r;
       });
+    }
+    /* a record row's name: the row key, or, in a Deployment group, "ReplicaSet v62" ('full') or the
+       key alone ('key'), the lane-wide form laneLayout picks (L.rsForm) */
+    function rowLabel(r, form) {
+      return r.group && form !== 'key' ? str('record.replicaSet') + ' ' + r.svc : r.svc;
+    }
+    function depIndent(g) { return g.narrow ? 8 : 12; }
+    /* the Deployment header row's two halves: "DEPLOYMENT · catalog" and "WANT 3 · v63" */
+    function depParts(dep) {
+      return [str('record.deployment').toUpperCase() + ' · ' + dep.name, S.record.want + ' ' + dep.want + ' · ' + dep.version];
     }
 
     /* ---------- layout ---------- */
@@ -330,6 +349,26 @@
         compW = Math.max(compW, textW(wordText(compactWord(r.word)), 700));
       });
       var marksW = Math.max(1, maxMarks) * (MARK + MARKGAP) - MARKGAP;
+      /* pool-03, Deployment groups: grouped rows are indented and named "ReplicaSet v62" where every row
+         then fits with its full word, else by the key alone ("v62"), lane-wide; the header row takes two
+         lines where one doesn't hold it */
+      var deps = [];
+      states.forEach(function (s) { if (s.record && s.record.deployment) deps.push(s.record.deployment); });
+      if (deps.length) {
+        var nameFor = function (form) {
+          return rows.reduce(function (w, r) {
+            return Math.max(w, textW(rowLabel(r, form), 700) + (r.group ? depIndent(g) : 0));
+          }, 0);
+        };
+        L.rsForm = 'full';
+        nameW = nameFor('full');
+        if (nameW + wantW + marksW + 3 * g.recGap + fullW > g.recInner + 0.5) { L.rsForm = 'key'; nameW = nameFor('key'); }
+        L.depWrap = deps.some(function (d) {
+          var kind = str('record.deployment').toUpperCase();
+          var rest = depParts(d)[0].slice(kind.length) + ' · ' + depParts(d)[1];
+          return textW(kind, 700, 0.06) + textW(rest, 700) > g.recInner + 0.5;
+        });
+      }
       var fixed = nameW + wantW + marksW + 3 * g.recGap;
       L.cols = { name: Math.ceil(nameW), want: Math.ceil(wantW), marks: Math.ceil(marksW), gap: g.recGap };
       L.fullWord = fixed + fullW <= g.recInner;
@@ -461,6 +500,17 @@
         stLines = S.statusBreaks[status].map(function (t) { return { st: status, t: t, lamp: false }; });
       }
       if (body.length + stLines.length <= maxLines) return body.concat(stLines);
+      /* pool-03, data STATUS_INLINE: where the word has no line of its own, it goes beside the label's
+         last line ("catalog v63 ■ READY"), else beside the version alone ("v63 □ NOT READY"), before
+         the fallbacks below; RUNNING (READY) included, since in such a chapter the word is the point */
+      if (D.STATUS_INLINE && maxLines >= 1) {
+        var lampW = NO_LAMP[status] ? 0 : LAMP;
+        var inl = function (pre) { return { pre: pre, st: status, t: word, lamp: !NO_LAMP[status] }; };
+        if (body.length <= maxLines && fits(body[body.length - 1].t + ' ' + word, lampW)) {
+          return body.slice(0, -1).concat([inl(body[body.length - 1].t)]);
+        }
+        if (extras.length && fits(extras.join(' ') + ' ' + word, lampW)) return [inl(extras.join(' '))];
+      }
       if (status !== 'running') {
         if (stLines.length > maxLines) {
           /* one line, and the word doesn't fit there: a NOT STARTED Pod keeps its name, since its dashed,
@@ -538,10 +588,34 @@
         rec.style.setProperty('--wc-recgap', L.cols.gap + 'px');
         rec.appendChild(el('p', 'wc-rec__head', L.recTitle));
         var rowsEl = el('div', 'wc-rec__rows');
+        /* pool-03: the Deployment header row, drawn above the first of its rows (or last, if none yet) */
+        var dep = (state.record || {}).deployment;
+        var depDrawn = false;
+        var drawDep = function () {
+          depDrawn = true;
+          var parts = depParts(dep);
+          var kind = str('record.deployment').toUpperCase();
+          var dr = mark(el('div', 'wc-rec__dep' + (L.depWrap ? ' wc-rec__dep--wrap' : '')), 'dep:' + dep.name);
+          dr.setAttribute('data-dep', dep.name);
+          var p1 = el('span', 'wc-rec__dpart');
+          p1.appendChild(el('span', 'wc-rec__dkind', kind));
+          p1.appendChild(el('span', 'wc-rec__sep', ' · '));
+          p1.appendChild(el('span', 'wc-rec__dname', parts[0].slice(kind.length + 3)));
+          var p2 = el('span', 'wc-rec__dpart');
+          if (!L.depWrap) p2.appendChild(el('span', 'wc-rec__sep', ' · '));
+          p2.appendChild(el('span', 'wc-rec__want', S.record.want + ' ' + dep.want));
+          p2.appendChild(el('span', 'wc-rec__sep', ' · '));
+          p2.appendChild(mark(el('span', 'wc-rec__ver', dep.version), 'dep:' + dep.name + ':version'));
+          dr.appendChild(p1);
+          dr.appendChild(p2);
+          rowsEl.appendChild(dr);
+        };
+        if (dep) rowsEl.style.setProperty('--wc-depin', depIndent(g) + 'px');
         recordRows(state).forEach(function (r) {
-          var row = mark(el('div', 'wc-rec__row'), 'row:' + r.svc);
+          if (r.group && !depDrawn) drawDep();
+          var row = mark(el('div', 'wc-rec__row' + (r.group ? ' wc-rec__row--in' : '')), 'row:' + r.svc);
           row.setAttribute('data-row', r.svc);
-          row.appendChild(el('span', 'wc-rec__name', r.svc));
+          row.appendChild(el('span', 'wc-rec__name', rowLabel(r, L.rsForm)));
           row.appendChild(el('span', 'wc-rec__want', S.record.want + ' ' + r.want));
           var mk = el('span', 'wc-rec__marks');
           r.marks.forEach(function (m) {
@@ -557,6 +631,7 @@
           row.appendChild(word);
           rowsEl.appendChild(row);
         });
+        if (dep && !depDrawn) drawDep();
         rec.appendChild(rowsEl);
         ground.appendChild(rec);
 
@@ -614,6 +689,8 @@
         var size = podSize(c.id);
         var pod = mark(el('div', 'wc-p wc-p--' + c.status), 'p:' + c.id);
         pod.setAttribute('data-p', c.id);
+        /* pool-03: the Pod's series colour (1–6: the chip in cN / cN-soft; the ring stays ink) */
+        if (info.series) pod.classList.add('wc-ser--' + info.series);
         pod.style.height = roomH(size) + 'px';
         var chip = el('div', 'wc-c');
         var uval = use[c.id] != null ? use[c.id] : info.use;
@@ -622,9 +699,16 @@
           var lines = chipLines(info, c.status, (state.restarts || {})[c.id], g, chipLinesMax(size), over);
           if (lines.length === 1 && roomH(size) - 4 * g.bw - 2 * g.ringPad < g.lh + 2) chip.classList.add('wc-c--tight');
           lines.forEach(function (ln) {
-            var span = el('span', 'wc-c__ln' + (ln.st ? ' wc-st wc-st--' + ln.st : ''));
-            if (ln.st && ln.lamp) { var lmp = el('i', 'wc-lamp'); lmp.setAttribute('aria-hidden', 'true'); span.appendChild(lmp); }
-            span.appendChild(document.createTextNode(ln.t));
+            var span = el('span', 'wc-c__ln' + (ln.st && ln.pre == null ? ' wc-st wc-st--' + ln.st : ''));
+            var wordEl = span;
+            if (ln.pre != null) {
+              /* STATUS_INLINE: the label, then the status word on the same line */
+              span.appendChild(document.createTextNode(ln.pre + ' '));
+              wordEl = el('span', 'wc-st wc-st--' + ln.st);
+              span.appendChild(wordEl);
+            }
+            if (ln.st && ln.lamp) { var lmp = el('i', 'wc-lamp'); lmp.setAttribute('aria-hidden', 'true'); wordEl.appendChild(lmp); }
+            wordEl.appendChild(document.createTextNode(ln.t));
             chip.appendChild(span);
           });
         }

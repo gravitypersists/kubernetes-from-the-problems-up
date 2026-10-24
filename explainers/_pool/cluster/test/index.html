@@ -183,6 +183,98 @@
   };
   var SHORT_R = ClusterCanvas.create(SHORT);
 
+  /* ---- pool-03 (Ch 06): a Deployment group in the record, status notready, per-Pod series colour, and
+     STATUS_INLINE. A sample in Ch 06's shape: catalog moving from v62 (series 5) to v63 (series 2) on two
+     nodes; one dispatch Pod in the default colour. ---- */
+  var ROLL = {
+    NODES: ['05', '06'], CAPACITY: { memory: 13, cpu: 3.9 }, UNIT: 'GB', ROOM_UNIT: 2, STATUS_INLINE: true,
+    SERVICES: {
+      catalog:  { size: 2, cpu: 0.25, label: 'catalog',  breaks: ['catalog'] },
+      dispatch: { size: 2, cpu: 1,    label: 'dispatch', breaks: ['dispatch'] }
+    },
+    LOOPS: { deploy: { label: 'Deployment loop' }, rs: { label: 'ReplicaSet loop' }, sched: { label: 'scheduler' } },
+    PODS: {
+      di7: { service: 'dispatch' },
+      c1: { service: 'catalog', version: 'v62', series: 5 }, c2: { service: 'catalog', version: 'v62', series: 5 },
+      c3: { service: 'catalog', version: 'v62', series: 5 },
+      n1: { service: 'catalog', version: 'v63', series: 2 }, n2: { service: 'catalog', version: 'v63', series: 2 },
+      n3: { service: 'catalog', version: 'v63', series: 2 },
+      x1: { service: 'catalog', version: 'v64', series: 5 }
+    },
+    STRINGS: JSON.parse(JSON.stringify(DATA.STRINGS))
+  };
+  ROLL.STRINGS.status.running = 'READY';
+  ROLL.STRINGS.status.notready = 'NOT READY';
+  ROLL.STRINGS.status.stopped = 'STOPPED';
+  ROLL.STRINGS.statusBreaks.notready = ['NOT', 'READY'];
+  ROLL.STRINGS.record.running = 'READY';
+  ROLL.STRINGS.record.deployment = 'Deployment';
+  ROLL.STRINGS.record.replicaSet = 'ReplicaSet';
+  ROLL.STRINGS.record.kept = 'KEPT';
+  var DEP = { name: 'catalog', want: 3, version: 'v63', rows: ['v62', 'v63'] };
+  var RSHOWN = ['deploy', 'rs', 'sched'];
+  var CUST = function (t, tone) { return { id: 'customers', label: 'Customers', text: t, tone: tone || 'good' }; };
+  var R1 = { nodes: { '05': ['di7', 'c1'], '06': ['c2', 'c3'] },
+    record: { deployment: DEP, rows: ['v62', 'v63'], want: { v62: 3, v63: 1 }, pods: { v62: ['c1', 'c2', 'c3'], v63: [] } },
+    loops: { shown: RSHOWN, active: ['deploy'], agents: [], lens: { watching: 'record wants v63; 3 Pods run v62', doing: 'makes a v63 ReplicaSet, wanting 1' } },
+    notes: [CUST('served by v62 ×3')], clock: '10:15:00' };
+  var R2 = { nodes: { '05': ['di7', 'c1', 'n1:notready'], '06': ['c2', 'c3'] },
+    record: { deployment: DEP, rows: ['v62', 'v63'], want: { v62: 3, v63: 1 }, pods: { v62: ['c1', 'c2', 'c3'], v63: ['n1'] } },
+    loops: { shown: RSHOWN, active: ['deploy'], agents: ['05'], lens: { watching: '4 Pods; the v63 Pod not ready', doing: 'waits' } },
+    notes: [CUST('served by v62 ×3')], clock: 'Seconds later' };
+  var R3 = { nodes: { '05': ['di7', 'c1', 'n1'], '06': ['c2:stopped', 'c3'] },
+    record: { deployment: DEP, rows: ['v62', 'v63'], want: { v62: 2, v63: 1 }, pods: { v62: ['c1', 'c3'], v63: ['n1'] }, deleting: { v62: ['c2'] } },
+    loops: { shown: RSHOWN, active: ['deploy'], agents: [], lens: { watching: '1 v63 Pod ready', doing: 'v62 down to 2' } },
+    notes: [CUST('served by v62 ×2 · v63 ×1')], clock: '~10:15:20' };
+  var R5 = { nodes: { '05': ['di7', 'n1', 'n3'], '06': ['n2'] },
+    record: { deployment: DEP, rows: ['v62', 'v63'], want: { v62: 0, v63: 3 }, pods: { v62: [], v63: ['n1', 'n2', 'n3'] } },
+    loops: { shown: RSHOWN, active: ['deploy'], agents: [], lens: { watching: '3 v63 Pods ready, as wanted', doing: 'nothing more; keeps the v62 ReplicaSet, empty' } },
+    notes: [CUST('served by v63 ×3')], clock: '~10:16' };
+  var RLANE = [R1, R2, R3, R5];
+  var CRASH = { nodes: { '05': ['di7', 'n1', 'n3'], '06': ['n2', 'x1:crashed'] }, restarts: { x1: 3 },
+    record: { deployment: { name: 'catalog', want: 3, version: 'v64', rows: ['v63', 'v64'] }, rows: ['v63', 'v64'], want: { v63: 3, v64: 1 }, pods: { v63: ['n1', 'n2', 'n3'], v64: ['x1'] } },
+    loops: { shown: RSHOWN, active: ['deploy'], agents: [], lens: { watching: 'v64 Pod not ready', doing: 'waits; removes no v63 Pod' } },
+    notes: [CUST('served by v63 ×3 · prices correct')] };
+  /* a record that mixes an ungrouped row with a group: the columns stay aligned */
+  var MIXED = { nodes: R2.nodes,
+    record: { deployment: DEP, rows: ['dispatch', 'v62', 'v63'], want: { dispatch: 6, v62: 3, v63: 1 }, pods: { dispatch: ['di7'], v62: ['c1', 'c2', 'c3'], v63: ['n1'] } },
+    loops: R2.loops, notes: [] };
+  /* every series colour, and the series on statuses that keep their own look */
+  var SER = JSON.parse(JSON.stringify(ROLL));
+  SER.NODES = [];
+  ['s1', 's2', 's3', 's4', 's5', 's6'].forEach(function (id, i) { SER.PODS[id] = { service: 'catalog', version: 'c' + (i + 1), series: i + 1 }; });
+  SER.PODS.w5 = { service: 'catalog', version: 'v64', series: 5 };
+  var SERSTATE = { nodes: { 'a': ['s1', 's2', 's3', 's4', 's5', 's6'], 'b': ['x1:crashed', 'c1:notready', 'c2:stopped', 'n1:notstarted', 'n2:starting', 'di7'] },
+    waiting: ['w5'], restarts: { x1: 3 },
+    record: { rows: [], want: {}, pods: {} }, loops: { shown: [], active: [], agents: [] } };
+  /* the same data with STATUS_INLINE off: a one-line chip drops READY (as in Ch 04–05) */
+  var ROLL_OFF = JSON.parse(JSON.stringify(ROLL)); delete ROLL_OFF.STATUS_INLINE;
+  var ROLL_R = ClusterCanvas.create(ROLL), SER_R = ClusterCanvas.create(SER), ROLL_OFF_R = ClusterCanvas.create(ROLL_OFF);
+  CASES.push(
+    { group: 'pool-03 · Ch 06 optional fields (each off when absent; Ch 04 and Ch 05 are unchanged)' },
+    { title: 'D1 · record.deployment: { name, want, version, rows } — a Deployment row over indented ReplicaSet rows',
+      note: 'Lane step R1. Header DEPLOYMENT · catalog · WANT 3 · v63 (STRINGS.record.deployment); rows named STRINGS.record.replicaSet + key where every row fits with its full word, else the key alone (lane-wide; 314px). Highlight keys dep:&lt;name&gt; and dep:&lt;name&gt;:version (here the version).',
+      roll: R1, rlane: RLANE, widths: [560, 360, 314], highlight: ['dep:catalog:version', 'row:v63'] },
+    { title: 'D2 · KEPT: a grouped row with WANT 0 and no Pods (STRINGS.record.kept, ink-3)',
+      note: 'Lane step R5. The emptied v62 ReplicaSet stays in the record. Whole header highlighted (dep:catalog).',
+      roll: R5, rlane: RLANE, widths: [560, 360, 314], highlight: ['dep:catalog', 'row:v62'] },
+    { title: 'D3 · a group beside an ungrouped row: columns stay aligned (the indent is inside the name column)',
+      roll: MIXED, rlane: [MIXED], widths: [560, 314], highlight: [] },
+    { title: 'N1 · status notready: solid chip, hollow lamp, NOT READY (warn), hollow record mark',
+      note: 'Lane step R2 (STATUS_INLINE on, so each one-line chip carries its word: “catalog v63 □ NOT READY”, or “v63 □ NOT READY” where the label doesn’t fit with it). STOPPED and the struck mark: step R3 below.',
+      roll: R2, rlane: RLANE, widths: [560, 360, 314], highlight: ['p:n1', 'row:v63'] },
+    { title: 'N2 · STOPPED and a record marked for deletion (lane step R3)',
+      roll: R3, rlane: RLANE, widths: [560, 314], highlight: ['p:n1', 'p:c2', 'row:v62'] },
+    { title: 'S1 · PODS[id].series 1–6: chip in cN on cN-soft, ring in ink; c5 beside a bad status word',
+      note: 'Left column: series 1–6. Right: series 5 CRASHED ↻ 3 (bad), NOT READY, STOPPED / NOT STARTED (keep their own looks), STARTING, and dispatch with no series (c1). Strip: a WAITING Pod in series 5 (dashed c5 edge).',
+      ser: 1, state: SERSTATE, widths: [560, 360], highlight: [] },
+    { title: 'S2 · Fig. 03’s crash panel: v64 (series 5) CRASHED ↻ 3 beside v63 (series 2)',
+      roll: CRASH, rlane: [CRASH], widths: [440, 328], highlight: ['p:x1', 'note:customers'] },
+    { title: 'I1 · STATUS_INLINE off (absent): the same R2, as Ch 04–05 draw one-line chips',
+      note: 'Without the flag a RUNNING (READY) chip with no line of its own stays unmarked and an abnormal one keeps only its word.',
+      rolloff: 1, roll: R2, rlane: RLANE, widths: [560, 314], highlight: [] }
+  );
+
   var host = document.getElementById('cases');
   CASES.forEach(function (c) {
     if (c.group) { var g = document.createElement('h1'); g.style.marginTop = 'var(--sp-8)'; g.textContent = c.group; host.appendChild(g); return; }
@@ -195,7 +287,16 @@
       cap.textContent = w + 'px' + (w === 314 ? ' (360px phone)' : '') + (c.perState ? (c.perState[wi] ? ' · per state' : ' · lane-wide') : '');
       fig.appendChild(cap);
       var target = document.createElement('div'); fig.appendChild(target); row.appendChild(fig);
-      if (c.lane) {
+      if (c.roll) {
+        var RR = c.rolloff ? ROLL_OFF_R : ROLL_R;
+        var hd = c.rlane.length > 1 ? { lane: 'Thursday, 10:15', n: c.rlane.indexOf(c.roll) + 1, total: c.rlane.length } : null;
+        var rl = RR.laneLayout(w, c.rlane, hd);
+        var rro = { width: w, layout: rl, header: hd };
+        var rres = RR.measureReserve(target, c.rlane, rro);
+        RR.renderCluster(target, c.roll, { width: w, layout: rl, reserve: rres, header: hd, highlight: c.highlight });
+      } else if (c.ser) {
+        SER_R.renderCluster(target, c.state, { width: w, columns: 2, unit: w < 440 ? 22 : 32, header: { lane: '', n: null }, highlight: c.highlight });
+      } else if (c.lane) {
         var header = { lane: 'Friday, 17:45', n: LANE.indexOf(c.state) + 1, total: LANE.length };
         /* as lanes.js: an inline snapshot sized to its own state's node count (P3) */
         var lo = c.perState && c.perState[wi] ? { columns: LANE_R.nodeIds(c.state).length } : undefined;

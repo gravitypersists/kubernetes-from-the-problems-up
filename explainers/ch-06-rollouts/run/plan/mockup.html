@@ -1,0 +1,336 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mockup: Ch 6 rollouts</title>
+<style>
+  :root {
+    --bg: #fafaf9; --panel: #fff; --ink: #1c1917; --ink-2: #57534e; --ink-3: #a8a29e;
+    --line: #e7e5e4; --fill: #f5f5f4; --accent: #2563eb; --warn: #b45309; --ok: #15803d;
+    --s1: 8px; --s2: 16px; --s3: 24px; --s4: 32px; --s6: 48px;
+    --mono: ui-monospace, SFMono-Regular, Menlo, monospace;
+    --sans: system-ui, -apple-system, "Segoe UI", sans-serif;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg:#0c0a09; --panel:#1c1917; --ink:#fafaf9; --ink-2:#d6d3d1; --ink-3:#78716c;
+            --line:#292524; --fill:#292524; --accent:#60a5fa; --warn:#f59e0b; --ok:#4ade80; }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--ink); font: 16px/1.5 var(--sans); }
+  .bar { position: sticky; top: 0; z-index: 2; display: flex; gap: var(--s2); align-items: center;
+         flex-wrap: wrap; padding: var(--s1) var(--s2); background: var(--panel); border-bottom: 1px solid var(--line);
+         font: 13px/1.4 var(--mono); }
+  .bar b { font-weight: 600; }
+  .bar .sp { flex: 1; }
+  .bar button { font: inherit; padding: 4px 8px; border: 1px solid var(--line); background: var(--fill);
+                color: var(--ink); border-radius: 4px; cursor: pointer; }
+  .bar button[aria-pressed="true"] { border-color: var(--accent); color: var(--accent); }
+  main { max-width: 1040px; margin: 0 auto; padding: var(--s4) var(--s2) var(--s6); }
+  body.mobile main { max-width: 360px; padding-left: 0; padding-right: 0; }
+  body.mobile .seg { grid-template-columns: 1fr; }
+  h1 { font-size: 28px; line-height: 1.2; margin: 0 0 var(--s1); }
+  h2 { font: 600 13px/1.4 var(--mono); letter-spacing: .04em; text-transform: uppercase; color: var(--ink-2);
+       margin: var(--s6) 0 var(--s2); }
+  .meta { color: var(--ink-2); font-size: 14px; }
+  .panel { background: var(--panel); border: 1px solid var(--line); border-radius: 8px; padding: var(--s2); }
+  .seg { display: grid; grid-template-columns: minmax(0, 3fr) minmax(0, 2fr); gap: var(--s2);
+         margin-bottom: var(--s3); }
+  .seg header { grid-column: 1 / -1; display: flex; gap: var(--s1); align-items: baseline; flex-wrap: wrap; }
+  .seg header .id { font: 12px var(--mono); color: var(--ink-3); }
+  .seg header h3 { margin: 0; font-size: 18px; }
+  .tag { font: 11px/1 var(--mono); padding: 3px 6px; border-radius: 3px; background: var(--fill); color: var(--ink-2); }
+  .intent { font-style: italic; color: var(--ink-2); margin: 0 0 var(--s1); }
+  .prose { color: var(--ink-2); font-size: 14px; }
+  .prose p { margin: 0 0 var(--s1); }
+  .fig { min-height: 160px; border: 2px dashed var(--ink-3); border-radius: 8px; background: var(--fill);
+         padding: var(--s2); font-size: 14px; color: var(--ink-2); display: flex; flex-direction: column; gap: var(--s1); }
+  .fig .kind { font: 600 11px var(--mono); letter-spacing: .04em; text-transform: uppercase; color: var(--ink); }
+  .check { border-left: 3px solid var(--accent); padding: var(--s1) var(--s2); background: var(--panel); margin-top: var(--s1); font-size: 14px; }
+  .check .kind { font: 600 11px var(--mono); text-transform: uppercase; color: var(--accent); }
+  table { width: 100%; border-collapse: collapse; font-size: 14px; }
+  th, td { text-align: left; padding: var(--s1); border-bottom: 1px solid var(--line); vertical-align: top; }
+  th { font: 600 12px var(--mono); color: var(--ink-2); }
+  .needs-user { color: var(--warn); font-weight: 600; }
+  .license { color: var(--ok); }
+  .warn { color: var(--warn); }
+  @media (max-width: 720px) { .seg { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body>
+<div class="bar">
+  <b>MOCKUP</b><span>Ch 6 · Shipping without downtime: rollouts and rollbacks</span><span class="sp"></span>
+  <button type="button" id="vw-desk" aria-pressed="true">desktop</button>
+  <button type="button" id="vw-mob" aria-pressed="false">mobile 360</button>
+</div>
+<main>
+  <section id="overview">
+    <h1>Shipping without downtime: rollouts and rollbacks</h1>
+    <p class="meta">For a somewhat technical manager (novice for infrastructure) · about 22 minutes planned (likely 23–25 built) · narrative article with one scrollytelling lane, a gated two-panel contrast figure and static figures · Chapter 6 of 15</p>
+    <div class="panel">
+      <p><b>Shape:</b> One Thursday of <code>catalog</code> releases. A routine morning release (v62 → v63) is the chapter's one lane, on the pooled cluster canvas: the Deployment loop swaps three Pods one at a time, removing an old one only once a new one is ready, in one copy's worth of spare room. The afternoon release (v64) shows every price as $0.00: the reader first predicts what a crashing v64 and a $0 v64 would each do (k-04), then sees both outcomes side by side (Fig. 03). Rollback is shown as the record changing back (Fig. 05), not as a second lane, because it is the same process again. Rejected: two lanes (+2 min, the mechanism a third time); a hands-on settings widget (busywork); opening on the incident (spoils k-04).</p>
+      <p><b>Objectives:</b></p>
+      <ul>
+        <li><b>o-1</b> Explain how a rolling update replaces one version with the next without downtime: the Deployment manages versions by managing ReplicaSets, brings new Pods up a few at a time, removes old ones only as new ones become ready, and needs spare room. <span class="meta">checks: k-01, k-02, k-03</span></li>
+        <li><b>o-2</b> Predict which bad releases health checks stop (crashes, never ready: stalls) and which they don't (healthy but wrong: rolls out completely, m-09); tell a readiness probe from a liveness probe. <span class="meta">checks: k-04, k-05, k-07</span></li>
+        <li><b>o-3</b> Explain rollback as declaring the old version again (rolled out the same way, from the kept ReplicaSet), what it assumes (old image kept; tags don't move) and what it doesn't undo (the 23 $0 orders). <span class="meta">checks: k-06, k-07</span></li>
+      </ul>
+      <p><b>Minutes:</b> hero + §01 2.5 · §02 2.75 · §03 lane 3.5 · §04 1.25 · §05 2.5 · §06 3.0 · §07 2.75 · §08 1.25 · §09 0.75 · §10 1.75 · <b>about 22</b> (checks ≈ 3.75, lane ≈ 2.0). One chapter recommended (Q1); cut order below recovers about 3.</p>
+      <p><b>Checkpoint questions</b> (recommended first): Q1 keep one chapter · Q2 approve <code>catalog</code>'s story facts · Q3 schedule three optional pool additions to <code>renderCluster</code> (Deployment row over ReplicaSet rows; NOT READY status; per-Pod series colour) before the build · Q4 include the shift-handover analogy.</p>
+      <p class="meta">check_plan warnings: see run/gate/check_plan.txt (expected: none)</p>
+    </div>
+  </section>
+
+  <section id="segments">
+    <h2>Segments</h2>
+    <p class="meta">Prose is draft wording: it shows what each segment says and in what order. The final prose is written for the reader at build time. Check prompts, options and answers are final.</p>
+
+    <article class="seg" id="s-01">
+      <header><span class="id">s-01</span><h3>Year 3: releases without a release night</h3><span class="tag">orientation → retrieval → story</span><span class="tag">o-1</span></header>
+      <div>
+        <p class="intent">Re-establish the cast, retrieve Sam's by-hand Tuesday through "declare, don't command", show how releases changed, and end on the chapter's question.</p>
+        <div class="prose">
+          <p><b>Cast strip:</b> Jordan (you) · Ari, platform lead · Riley, <code>catalog</code> team · Morgan, Fennel's money · Sam, who used to run every release by hand.</p>
+          <p><b>D1 (collapsed)</b> "I didn't read the last chapter. What happened?" — the record and loops; requests and the bill; Friday 17:45's waiting Pod; five nodes since (01, 02, 04, 05, 06); the loop lens.</p>
+          <p>In Fennel's first years, releases happened on Thursday nights. Sam ran them by hand, one copy at a time, after posting "Nobody deploy anything, I'm updating storefront."</p>
+          <p>Now: <code>catalog</code> (listings and prices) was split out of <code>storefront</code> so its team could ship on its own; Riley's team ships it two or three times a day. A merge → the pipeline builds an image and hands it to the cluster. Nobody posts in the chat.</p>
+          <p>Jordan: "So who's doing what Sam did on Thursday nights?" Ari: "A loop. We tell it which version we want." Jordan: "And if the version is bad?" Ari: "That depends on how it's bad."</p>
+        </div>
+        <div class="check">
+          <div class="kind">RETRIEVE · k-01</div>
+          In Chapter 3, Sam updated <code>storefront</code> from v12 to v13 by hand: start one v13 copy, send customers to it, stop one v12 copy, three times over, while nobody else shipped anything. On Kubernetes, what does a team write down to release a new version?<br>
+          A · Sam's steps, saved in a file that the cluster runs from top to bottom at release time.<br>
+          <b>B · The version it wants running and how many copies; a loop works out the steps.</b> (answer)<br>
+          C · One command per step of Sam's, typed by whoever releases, but sent to the cluster instead of to each machine.<br>
+          <span class="meta">Tempting: A (a deploy script) and C (commanding from further away).</span>
+        </div>
+      </div>
+      <div class="fig"><span class="kind">No figure</span>Cast strip wraps at 360px; options full width.</div>
+    </article>
+
+    <article class="seg" id="s-02">
+      <header><span class="id">s-02</span><h3>One record per service: the Deployment</h3><span class="tag">artefact → term → mechanism → lens</span><span class="tag">o-1</span></header>
+      <div>
+        <p class="intent">Recall Ch 4's ReplicaSet, show the Deployment that wraps it, explain "one ReplicaSet per version", fill in the lens, and say where a new version comes from.</p>
+        <div class="prose">
+          <p>In Chapter 4, Ari's manifest for <code>storefront</code> was a ReplicaSet: keep this many identical copies of this Pod. Engineers rarely write one themselves. Fig. 01 shows <code>catalog</code>'s.</p>
+          <p><b>TERM 01 · Deployment</b> (payoff variant): "A record of which version of a service should run, and how many copies. Its loop gets there by keeping one ReplicaSet per version and resizing them." Back: "What engineers write instead of Chapter 4's ReplicaSet."</p>
+          <p>Change the Pod description (usually the image line) and the Deployment loop makes a <i>new</i> ReplicaSet for the new version, then makes it bigger and the old one smaller. Changing only the number of copies doesn't start this.</p>
+          <p>Lens: wants the version and copies its record names · sees its ReplicaSets and how many of their Pods are ready · does: moves copies to the new version's ReplicaSet, a few at a time.</p>
+          <p>Where versions come from (light): a merge → the build pipeline (engineers call it CI) builds <code>catalog:v63</code>, pushes it to the registry (images never change once built, Chapter 2), and writes the tag into the Deployment's image line. That edit is the whole release.</p>
+        </div>
+      </div>
+      <div class="fig"><span class="kind">FIG. 01 · A Deployment · catalog (static)</span>Ch 4's manifest treatment (yellow record ground, annotations beside lines). <code>kind: Deployment</code> — "a version, and how many copies"; <code>replicas: 3</code> — "as in Chapter 4"; <code>template:</code> — "what each copy is; changing it starts a rollout"; <code># … labels, checks and other details left out</code>; <code>image: catalog:v62</code> — "the version to run; the pipeline changes this line". Margin bracket: CHAPTER 4'S REPLICASET HELD THIS PART. Mobile: annotations under their lines, ~560px.</div>
+    </article>
+
+    <article class="seg" id="s-03">
+      <header><span class="id">s-03</span><h3>Thursday, 10:15: catalog v63</h3><span class="tag">scrollytelling B1, gated</span><span class="tag">o-1</span></header>
+      <div>
+        <p class="intent">Show the Deployment loop replacing v62 with v63, one Pod at a time, removing old Pods only as new ones become ready; gate the key step on a prediction; name it; compare with Sam.</p>
+        <div class="prose">
+          <p><b>Set-up:</b> <code>catalog</code>'s three Pods (2 GB each) run on the two newest nodes: one on 05, beside the <code>dispatch</code> Pod that waited on Chapter 5's Friday, and two on 06; the other three nodes are nearly full and not drawn. At 10:15 the pipeline writes <code>catalog:v63</code> into the record. Reading the canvas: a Deployment row over one row per ReplicaSet; each Pod's version in label and colour; Pods say READY, because Kubernetes sends a Pod customers' requests only once it passes a check the team wrote (§05).</p>
+          <p><b>R1 · 10:15</b> The Deployment loop sees the wanted version differs from what runs; makes a v63 ReplicaSet wanting 1.</p>
+          <p><b>R2 · seconds later</b> A v63 Pod starts on 05, NOT READY. Four Pods for three wanted: the extra is the spare room a rollout uses. Customers still go to the three v62 Pods.</p>
+          <p><b>R3 · ~10:15:20</b> v63 Pod READY, sent traffic; only now v62 goes from 3 to 2, one v62 Pod STOPPED.</p>
+          <p><b>R4 · ~10:15:40</b> The same round again.</p>
+          <p><b>R5 · ~10:16</b> All v63. About a minute, nobody waited. The v62 ReplicaSet is kept, empty: WANT 0 · KEPT.</p>
+          <p><b>TERM 02 · rolling update</b>: "Replacing a service's Pods with a new version a few at a time, removing old Pods only as new ones become ready." Back: "Sam's Tuesday, done by a loop."</p>
+          <p>Compared with Sam: the same three rounds and the same spare room, but a minute instead of an evening, no "Nobody deploy anything", and "ready" decided by the team's check rather than by Sam looking.</p>
+        </div>
+        <div class="check">
+          <div class="kind">PREDICT · k-02 (gates R3–R5)</div>
+          The v63 Pod is running on node 05 but isn't ready yet, and <code>catalog</code> now has four Pods where the record wants three. What does the Deployment loop do next?<br>
+          A · It stops one v62 Pod straight away, since four Pods is one more than the three it wants.<br>
+          <b>B · It waits until the v63 Pod is ready, and only then stops one v62 Pod.</b> (answer)<br>
+          C · It starts the other two v63 Pods now, then stops all three v62 Pods once those three are running.<br>
+          <span class="meta">Tempting: A (count logic).</span>
+        </div>
+      </div>
+      <div class="fig"><span class="kind">WIDGET · w-rollout-scrolly · complexity low (data only, pooled renderer + lane controller)</span>Header W-01 · THE CLUSTER, lane THURSDAY, 10:15 · CATALOG v63, STEP n / 5. Two node columns (05, 06), 13 GB each, chips sized by GB. v63 Pods blue (c2), v62 Pods magenta (c5), version printed on every chip; the dispatch Pod orange (c1). Record (yellow): DEPLOYMENT · catalog · WANT 3 · v63 over "ReplicaSet v62 · WANT n · marks · n READY" and "ReplicaSet v63 …"; emptied row WANT 0 · KEPT. Pills: ↻ Deployment loop (active), ReplicaSet loop, scheduler; lens line SEES / DOES. Note lines: CUSTOMERS · served by v62 ×2 · v63 ×1; NOT DRAWN · nodes 01, 02, 04. Step highlight on what changed only. Desktop: canvas left, sticky, ~520px; steps right. Mobile: canvas sticky on top (≤50vh, ~420px), two ~150px columns, steps beneath; inline snapshot per step where it doesn't fit. R3–R5 locked until k-02.</div>
+    </article>
+
+    <article class="seg" id="s-04">
+      <header><span class="id">s-04</span><h3>Room to ship</h3><span class="tag">rule → apply</span><span class="tag">o-1</span></header>
+      <div>
+        <p class="intent">State the default pace and its cost in spare room; let the reader predict what happens with no room.</p>
+        <div class="prose">
+          <p>By default a rolling update may run up to a quarter more Pods than wanted (rounded up) and let up to a quarter be unavailable (rounded down). For three copies: one extra, none short. At least three ready at every moment, at most four in all.</p>
+          <p>The extra Pod needs room: 2 GB and a quarter core. Room kept free as insurance (Chapter 5) is also room to ship.</p>
+          <p>Debrief (after k-03): the v63 Pod waits, pending; v62 keeps serving; the release doesn't happen until someone makes room. Question for the list: "Do we keep enough spare room to release during the busiest hour?"</p>
+          <p><b>D2 (collapsed)</b> "What about a service with more copies?" — four copies: one extra and one short; moves roughly two at a time, at three of four for a while (hedged).</p>
+        </div>
+        <div class="check">
+          <div class="kind">APPLY · k-03</div>
+          Suppose the cluster were as full as on that Friday at 17:45 in Chapter 5, when a <code>dispatch</code> Pod waited for room: no node has 2 GB free. With the default settings, what happens when the pipeline writes <code>catalog:v63</code> into the record?<br>
+          A · The Deployment loop stops one of the three v62 Pods first, so that the v63 Pod has room to start in its place.<br>
+          <b>B · The v63 Pod waits, pending; the three v62 Pods keep serving, and the release waits for room.</b> (answer)<br>
+          C · Kubernetes marks the rollout as failed straight away and switches <code>catalog</code> back to v62, so that customers aren't affected.
+        </div>
+      </div>
+      <div class="fig"><span class="kind">No figure</span>Two short paragraphs, the check, a debrief, a disclosure.</div>
+    </article>
+
+    <article class="seg" id="s-05">
+      <header><span class="id">s-05</span><h3>What "ready" means</h3><span class="tag">contrasting cases → term → apply</span><span class="tag">o-2</span></header>
+      <div>
+        <p class="intent">Open up the check behind READY: readiness (traffic, no restart) vs. liveness (restart), run by the node agent; what happens with no probe; apply it.</p>
+        <div class="prose">
+          <p>How did the loop know the first v63 Pod was ready? It read a result. The node agent on each node runs checks the team wrote into the Pod description, again and again (by default every ten seconds).</p>
+          <p><b>TERM 03 · readiness probe</b>: "A check, written by the team and run by the node agent throughout a Pod's life, that decides whether the Pod may be sent traffic." Back: "Ready for traffic. Not 'correct'."</p>
+          <p>While it fails the Pod keeps running but is sent no requests (by a loop we'll name in Chapter 7), and a rollout doesn't count it. The <dfn>liveness probe</dfn> asks "still alive?"; when it fails, the node agent restarts the container: the job "noticing a container that's running but stuck". With no probe at all, a container is treated as passing: ready once running.</p>
+        </div>
+        <div class="check">
+          <div class="kind">APPLY · k-05</div>
+          During Friday's rush, one <code>catalog</code> Pod loses its connection to the database for a minute. <code>catalog</code>'s readiness check asks whether the app can reach its database; its liveness check asks only whether the app is up and not stuck. What happens to that Pod?<br>
+          A · The node agent restarts its container, as it restarted <code>notifications</code> in Chapter 4, until the database answers again.<br>
+          <b>B · Nothing restarts it; customers' requests go to the other two Pods until its check passes again.</b> (answer)<br>
+          C · The Deployment loop replaces it with a fresh Pod on another node, because one of its three copies has failed.
+        </div>
+      </div>
+      <div class="fig"><span class="kind">FIG. 02 · Two checks on one Pod (static)</span>One v63 Pod chip with a ↻ agent pill "RUNS BOTH, EVERY 10 S BY DEFAULT". Two columns, same rows: ASKS ("Ready for traffic?" | "Still alive?") · CATALOG'S CHECK (<code>/healthz</code>: up and can reach its database | <code>/livez</code>: up and not stuck) · PASSES WHEN (any success code, both) · WHEN IT FAILS (NO TRAFFIC, warn: keeps running, a rollout doesn't count it | RESTARTED, bad: the node agent restarts it) — outlined as the one row that differs · WITH NO PROBE (always passes, both). Mobile: two stacked cards, ~640px.</div>
+    </article>
+
+    <article class="seg" id="s-06">
+      <header><span class="id">s-06</span><h3>Two ways to be bad</h3><span class="tag">predict → reveal (B4) → model → analogy</span><span class="tag">o-2</span></header>
+      <div>
+        <p class="intent">Confront m-09: a crashing v64 stalls, a $0 v64 rolls out completely; availability, not correctness; stalled isn't rolled back; checks test what they were written to test.</p>
+        <div class="prose">
+          <p><b>The fair part:</b> never fewer than three ready Pods; a new Pod took over only after its check passed. Tempting to conclude a finished rollout must be fine: "it passed its health checks".</p>
+          <p><i>(Locked until k-04.)</i> Fig. 03. The second panel is what happened on Thursday at 14:02.</p>
+          <p><b>Why:</b> a crashing container never becomes ready, so no v63 Pod is removed. The $0 version answered its check with a success code; a check passes on the status code alone, and nothing in Kubernetes looks at what the app sends back. <code>catalog</code>'s check never looks at a price. A rolling update protects availability, not correctness.</p>
+          <p><b>Stalled isn't rolled back:</b> the crashing Pod keeps crash-looping, v63 keeps serving, and someone has to roll back or ship a fix. <b>D3 (collapsed)</b> "How long does Kubernetes wait on a stuck rollout?" — 10 minutes by default, then only a "failed to progress" mark.</p>
+          <p><b>ANALOGY aside:</b> a shift change: the manager sends the morning cashier home only once the afternoon cashier has signed in and opened a till. <b>WHERE THIS ANALOGY BREAKS:</b> a manager at the counter would notice a cashier charging nothing within a minute; the loop never sees a sale, only the check's result, and carries on while it passes.</p>
+          <p>Canary (a small share of customers first, while something watches) and blue-green (the new version beside the old, tested, then traffic switched at once): not built into a plain Deployment; tools such as Argo Rollouts add them.</p>
+        </div>
+        <div class="check">
+          <div class="kind">PREDICT · k-04 (gates Fig. 03)</div>
+          Two ways v64 could be bad. In the first, it crashes as soon as it starts, because of a missing setting (as <code>notifications</code> did in Chapter 4). In the second, it starts, answers its readiness check with a success code, and shows every price as $0.00. With the default settings, what does the rollout do with each?<br>
+          A · It stops both before they replace v63, because a version that shows $0 fails its health check too.<br>
+          <b>B · It stalls the first with v63 still serving, and replaces every v63 Pod with the second.</b> (answer)<br>
+          C · It rolls both out completely: the checks only decide when a container is restarted, not when it gets traffic.<br>
+          D · It rolls the first back to v63 by itself, and rolls the second out to every Pod.<br>
+          <span class="meta">Tempting: A (m-09 / local-02), D (local-01).</span>
+        </div>
+      </div>
+      <div class="fig"><span class="kind">FIG. 03 · Two ways v64 could be bad (pooled renderer, two snapshots; locked until k-04)</span>Left "IF v64 CRASHED ON START · 14:03": record wants v64; ReplicaSet v63 3 READY; ReplicaSet v64 WANT 1, 0 READY; on 06 a magenta v64 chip CRASHED ↻ 3; CUSTOMERS (good): served by v63 ×3 · prices correct. Right "v64 AS SHIPPED · 14:03": v63 WANT 0 · KEPT; v64 3 READY; three magenta v64 chips READY; CUSTOMERS (bad): served by v64 ×3 · every price $0.00. Caption adds that a v64 failing its readiness check would stall the same way. Desktop side by side (~420px tall); under 900px stacked, crash first, ~330px each.</div>
+    </article>
+
+    <article class="seg" id="s-07">
+      <header><span class="id">s-07</span><h3>Thursday, 14:02: six minutes at $0</h3><span class="tag">timeline → predict → mechanism → term</span><span class="tag">o-3</span></header>
+      <div>
+        <p class="intent">Tell the incident; let the reader predict what rolling back does; explain rollback as declaring v63 again, from the kept ReplicaSet; bring level-based behaviour into the main text.</p>
+        <div class="prose">
+          <p>v64 read prices from a renamed database field, so every price came back empty and showed as $0.00. It passed the team's tests; at 14:02 the pipeline wrote <code>catalog:v64</code> into the record. Fig. 04. Who noticed: not Kubernetes, not a dashboard — Morgan, from the orders.</p>
+          <p><i>(Locked until k-06.)</i> Rolling back puts v63's Pod description back into the Deployment. The loop sees the gap it always looks for and closes it, using the v63 ReplicaSet it kept since 14:03; with the default settings, the same gradual way, which is why it took about a minute and needed the same spare room. Fig. 05.</p>
+          <p><b>TERM 04 · rollback</b>: "Declaring an earlier version again. The Deployment rolls it out like any other change, from the ReplicaSet it kept." Back: "It changes what runs, not what already happened."</p>
+          <p>The loop doesn't know it's an "undo": no list of steps to replay; it compares the latest record with what runs now. By default it keeps its last ten old ReplicaSets.</p>
+          <p><b>D4 (collapsed)</b> "Undo with a command, or change the file back?" — the command changes the record and leaves the files naming v64, so the next pipeline run ships v64 again; Riley changed the file back; GitOps (Chapter 13) makes that the only way.</p>
+        </div>
+        <div class="check">
+          <div class="kind">PREDICT · k-06 (gates Fig. 05)</div>
+          At 14:07 Riley changes <code>catalog</code>'s image line back to v63, and the pipeline writes it into the record. What does Kubernetes do?<br>
+          A · It returns the whole cluster to the way it was at 14:01, so the orders customers placed at $0 in between are undone too.<br>
+          <b>B · It replaces v64 with v63 a few Pods at a time, using the v63 ReplicaSet it kept.</b> (answer)<br>
+          C · It stops all three v64 Pods at once, then starts three v63 Pods from the v63 image.<br>
+          <span class="meta">Tempting: A (local-03).</span>
+        </div>
+      </div>
+      <div class="fig"><span class="kind">FIG. 04 · Thursday, 14:02–14:08 (static timeline) · FIG. 05 · The record, three times (static; locked until k-06)</span>Fig. 04: rows with a PRICES band (CORRECT / SOME $0 / ALL $0): 14:02:00 pipeline writes v64 · ~14:02:20 first v64 Pod ready, some see $0 · ~14:03:00 rollout complete, v63 ReplicaSet kept · 14:05 Morgan: "Why are orders coming in at $0.00?" · 14:06 Riley confirms in the app · 14:07 Riley changes the image line back to v63 · ~14:08:20 last v64 Pod removed · 23 orders placed at $0.00 stay that way. Fig. 05: three yellow record panels — 14:01 (wants v63; v63 3 READY; v64 not yet created) · 14:04 (wants v64; v63 WANT 0 · KEPT; v64 3 READY) · ~14:08:30 (wants v63; the same v63 row 3 READY; v64 KEPT), linked by "THE SAME REPLICASET, KEPT AND REUSED". Mobile: timeline one column ~600px; panels stacked ~520px.</div>
+    </article>
+
+    <article class="seg" id="s-08">
+      <header><span class="id">s-08</span><h3>What going back assumes</h3><span class="tag">assumptions → questions</span><span class="tag">o-3</span></header>
+      <div>
+        <p class="intent">The old image must still exist; the tag must still mean the same image; rollback doesn't undo the $0 orders. Each becomes a question.</p>
+        <div class="prose">
+          <p>The kept ReplicaSet holds the image's <i>name</i>; the image lives in the registry. Deleted, and the rollback stalls like any bad rollout. Fennel's registry deletes <code>catalog</code> images after 30 days.</p>
+          <p>An image never changes, but a tag can be moved; a digest names one exact image. Fennel's pipeline never reuses a tag.</p>
+          <p>Twenty-three orders went through at $0 and stayed that way; Jordan and Morgan honoured them. Chapter 10 is about data that outlives the Pods that wrote it.</p>
+          <p>Questions: "Do we keep old images for as long as we might need to go back, and do our tags ever move?" · "If a bad version runs for six minutes, what will it have written that rolling back won't fix?"</p>
+        </div>
+      </div>
+      <div class="fig"><span class="kind">FIG. 06 · Which v63? (static)</span>Left: <code>image: catalog:v63</code> — "a tag: a name that can be moved"; <code>image: catalog@sha256:9d2e…41a7</code> — "a digest: one exact image, forever". Right: Ch 2's REGISTRY frame, chips v64, v63, v62, v61 (older faded), each with a short digest; a dashed empty chip "catalog:v31 · DELETED AFTER 30 DAYS". Line: FENNEL'S PIPELINE NEVER REUSES A TAG. Mobile: stacked, ~460px.</div>
+    </article>
+
+    <article class="seg" id="s-09">
+      <header><span class="id">s-09</span><h3>The loops so far</h3><span class="tag">consolidation</span><span class="tag">o-1</span></header>
+      <div>
+        <p class="intent">Add the Deployment loop's row to the course's loop lens table.</p>
+        <div class="prose"><p>"The Deployment loop joins the loops from Chapters 4 and 5. It doesn't replace any of them: it works through the ReplicaSet loop, which works through the scheduler and the node agents."</p></div>
+      </div>
+      <div class="fig"><span class="kind">FIG. 07 · Which loop: wants, sees, does (CH06_LOOPS)</span>Ch 5's table copied forward. New row (NEW IN CH 6), above the ReplicaSet loop: Deployment loop · wants each Deployment's Pods running the version its record names, as many as it names · sees its ReplicaSets, one per version, and how many Pods are ready · does: a new ReplicaSet per version, copies shifted a few at a time, old Pods removed only as new ones become ready, old ReplicaSets kept empty · job: updating. Node agent gains "runs each container's checks…"; dashed Ch 7 row gains "ready". Mobile: stacked cards ~1000px.</div>
+    </article>
+
+    <article class="seg" id="s-10">
+      <header><span class="id">s-10</span><h3>The conversation</h3><span class="tag">think-then-reveal → recap → bridge</span><span class="tag">o-2</span><span class="tag">o-3</span></header>
+      <div>
+        <p class="intent">Rehearse the conversation, recap, and look ahead to Chapter 7.</p>
+        <div class="prose">
+          <p>Friday morning's review. Riley, a little defensive: "The rollout passed health checks, so it wasn't the deploy."</p>
+          <p><b>Recap:</b> Deployment = which version, how many; one ReplicaSet per version, shifted a few at a time, old Pods out only as new ones are ready, needing spare room · readiness = ready for traffic, liveness = still alive or restart · crashing or never ready → stalls; passes but wrong → rolls out completely · rollback = declaring the old version again, from the kept ReplicaSet, if the old image is there; it doesn't undo what the bad version did.</p>
+          <p><b>Bridge:</b> "only ready Pods are sent traffic" was the work of a loop we haven't named. Every release gives <code>catalog</code> three new Pods with new addresses, and <code>storefront</code> has to find the ready ones at once. Chapter 7.</p>
+        </div>
+        <div class="check">
+          <div class="kind">APPLY · think-then-reveal · k-07</div>
+          At Friday's review of Thursday's incident, Riley says: "The rollout passed health checks, so it wasn't the deploy." What would you ask Riley, and why? Think of your questions, then show the answer.<br>
+          <b>Model answer:</b> "What do our health checks actually test? Would they catch wrong behaviour, or only crashes?" The check passes when the app is up and reaches its database, on a success code alone, so a $0 version passes by design; "passed health checks" only proves v64 started. It was the deploy: the rollout protects availability, not correctness. Then: what would have caught wrong prices first (a check on a real price, or a canary)? Who noticed, and how fast, and what would have noticed without Morgan? Are old images kept, and do tags move? What about the 23 orders?
+        </div>
+      </div>
+      <div class="fig"><span class="kind">No figure</span>Full width at 360px.</div>
+    </article>
+  </section>
+
+  <section id="cuts">
+    <h2>Cut list (researched, deliberately left out)</h2>
+    <table>
+      <thead><tr><th>What</th><th>Why it's out</th><th>Cost to add back</th></tr></thead>
+      <tbody>
+        <tr><td>A second lane for the $0 rollout and the rollback</td><td>Time; it would show the mechanism a second and third time</td><td>A 5-step lane on the same data; ~2 min</td></tr>
+        <tr><td>A hands-on rollout-settings widget</td><td>Engineer territory; busywork for this reader</td><td>A widget builder; ~2 min</td></tr>
+        <tr><td>Opening on the $0 incident</td><td>Spoils k-04</td><td>A two-line teaser</td></tr>
+        <tr><td>Google SRE "~70% of outages are changes"</td><td>One source, no method; Fennel's pain suffices</td><td>Promote to facts; one sentence</td></tr>
+        <tr><td>What fast-shipping teams do (DORA)</td><td>Not researched</td><td>A research pass, a paragraph</td></tr>
+        <tr><td>Rollover; Recreate; terminating Pods uncounted; minReadySeconds; pause/resume</td><td>Engineer detail or later chapters (Ch 10)</td><td>A disclosure each</td></tr>
+        <tr><td>Startup probes, timing, liveness pitfalls (cascading restarts)</td><td>Overloads s-05; Ch 12</td><td>A paragraph in s-05; ~0.5 min</td></tr>
+        <tr><td>EndpointSlice; auto-rollback tools in depth; admission controllers; GitOps in depth</td><td>Ch 7 and Ch 13</td><td>Those chapters</td></tr>
+        <tr><td>Digest pinning trade-off; requests or config changes and rollouts; disruption budgets</td><td>Ch 8, 9, 14</td><td>Those chapters</td></tr>
+        <tr><td>Rolling back a stalled rollout (the docs' own example)</td><td>A third scenario</td><td>A sentence in D3 or D4</td></tr>
+      </tbody>
+    </table>
+
+    <h2>If it runs long (in the plan now; cut in this order)</h2>
+    <p class="meta">The prose is written at whatever length clarity needs. If the built page runs long, you pick cuts from here.</p>
+    <table>
+      <thead><tr><th>#</th><th>Cut</th><th>What the reader loses</th></tr></thead>
+      <tbody>
+        <tr><td>1</td><td>The shift-handover analogy aside (s-06)</td><td>The management bridge for m-09; its point said once in prose (~0.5 min)</td></tr>
+        <tr><td>2</td><td>Fig. 06 → inline code</td><td>The registry picture (~0.25 min)</td></tr>
+        <tr><td>3</td><td>k-03 → one sentence</td><td>Rehearsing Ch 5's pending in a release (~0.5 min)</td></tr>
+        <tr><td>4</td><td>Fig. 05 → one sentence</td><td>Seeing the kept ReplicaSet fill again (~0.5 min)</td></tr>
+        <tr><td>5</td><td>Lane step R4 merged into R5</td><td>Round two drawn on its own (~0.25 min)</td></tr>
+        <tr><td>6</td><td>k-05</td><td>The only check on readiness vs. liveness (~0.5 min)</td></tr>
+        <tr><td>7</td><td>D2–D4</td><td>Optional depth only (not counted)</td></tr>
+        <tr><td>8</td><td>Fig. 07 → a recap sentence (not recommended)</td><td>Breaks the course's loop lens table (~0.75 min)</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section id="assets">
+    <h2>Third-party assets</h2>
+    <table>
+      <thead><tr><th>#</th><th>Asset</th><th>Used in</th><th>Licence</th><th>Clearance</th></tr></thead>
+      <tbody><tr><td>—</td><td>None</td><td>—</td><td>—</td><td class="license">no third-party assets</td></tr></tbody>
+    </table>
+    <p class="meta">No third-party assets: every figure is drawn in the page from the course's tokens and the pooled renderer; fonts come from the style guide's Google Fonts import, as in Ch 1–5.</p>
+  </section>
+</main>
+<script>
+  const d = document.getElementById('vw-desk'), m = document.getElementById('vw-mob');
+  function set(mobile) {
+    document.body.classList.toggle('mobile', mobile);
+    d.setAttribute('aria-pressed', String(!mobile)); m.setAttribute('aria-pressed', String(mobile));
+  }
+  d.onclick = () => set(false); m.onclick = () => set(true);
+</script>
+</body>
+</html>

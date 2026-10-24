@@ -1,0 +1,287 @@
+{
+  "next": {
+    "A": 8,
+    "P": 11
+  },
+  "findings": {
+    "A-01": {
+      "severity": "blocking",
+      "criterion": "o-3 (rollback in terms of desired state, and what it assumes)",
+      "location": "s-07, paragraph after TERM 04 (\"Going back works only as far as the record reaches, though. By default, a Deployment keeps its last ten old ReplicaSets, emptied, and each one is a version it can go back to; once one is deleted, that version is gone from the record.\"). Related wording: TERM 04 definition \"\u2026from the ReplicaSet it kept\"; s-08 \"Riley's team can go back about a month, and no further.\"",
+      "evidence": "The page defines rollback as \"declaring an earlier version again\" and shows Riley doing it by changing the image line in the files (s-07, D4). Declaring an image tag works whether or not a ReplicaSet for it is still kept. If none matches the template, the Deployment simply creates a new ReplicaSet, as it does for any template change (c-01; Deployment docs, \"Rollover\": \"Each time a new Deployment is observed by the Deployment controller, a ReplicaSet is created to bring up the desired Pods\"). The ten-ReplicaSet limit (c-09: \"once an old ReplicaSet is deleted, you lose the ability to rollback to that revision\") applies to rolling back by revision, which is the `kubectl rollout undo` path in D4. As written, the reader concludes that a Deployment can only ever return to its last ten versions. The page then contradicts itself. Riley's team ships \"two or three times a day\" (s-01), so ten kept ReplicaSets cover about 3\u20135 days, yet s-08 says the team \"can go back about a month, and no further\", the registry's 30-day limit. Only one of the two limits can be the real one for Riley's method, and it is the image retention.",
+      "expected_fix": "Rewrite the paragraph so that the kept ReplicaSet is a convenience and the record of revisions, not a precondition for declaring an old version. For example: \"The kept ReplicaSets are also the Deployment's history: by default it keeps the last ten, and the undo command (below) can step back only through those. Declaring an older version in the file works further back than that, because the loop simply makes a new ReplicaSet for it, as long as the image is still in the registry (\u00a708).\" Keep TERM 04 and \"In short\" consistent with that: \"\u2026from the ReplicaSet it kept, if it still has one\" or \"\u2026like any other change (here, from the ReplicaSet it kept)\". Then s-08's \"about a month\" is correct as it stands.",
+      "verdict": "contradicted",
+      "status": "open",
+      "round_opened": 1,
+      "source": "accuracy.md",
+      "history": [
+        [
+          1,
+          "open"
+        ]
+      ]
+    },
+    "A-02": {
+      "severity": "should",
+      "criterion": "o-2 (which bad releases health checks stop)",
+      "location": "s-06 prose \"A container that crashes never becomes ready, with or without a check, so the Deployment loop never has a ready v64 Pod to count\u2026\"; k-05 correct-option feedback \"A crashing Pod never becomes ready, so no v63 Pod is ever removed.\"; s-05 is fine.",
+      "evidence": "For a container that crashes the instant it starts, as in k-05's scenario, this holds in practice. The page states it as universal, though, and \"with or without a check\" invites the conclusion that crashes need no readiness probe. Without a readiness probe, a container counts as ready as soon as it is running (c-07). A version that runs for a few seconds before crashing (say, it fails on its first database call) can therefore be ready briefly and counted as available, and the rollout can advance on it. The Deployment docs define `minReadySeconds` for exactly this case: \"the minimum number of seconds for which a newly created Pod should be ready without any of its containers crashing, for it to be considered available. This defaults to 0 (the Pod will be considered available as soon as it is ready)\" (kubernetes/website, concepts/workloads/controllers/deployment.md, \"Min Ready Seconds\"). facts.md c-04/c-07 notes state the absolute without this caveat.",
+      "expected_fix": "Limit the claim to the scenario and drop \"with or without a check\": \"A container that crashes as soon as it starts never stays up long enough to be ready, so the Deployment loop never has a ready v64 Pod to count\u2026\". Optionally add to D3 one line such as \"A version that runs for a few seconds before crashing can briefly count as ready, which is one reason teams write a readiness check and can ask for a Pod to stay ready for a while before it counts.\" In k-05's feedback, \"A Pod that crashes on start never becomes ready\" is enough. The key (B) is unaffected.",
+      "verdict": "misleading-simplification",
+      "status": "open",
+      "round_opened": 1,
+      "source": "accuracy.md",
+      "history": [
+        [
+          1,
+          "open"
+        ]
+      ]
+    },
+    "A-03": {
+      "severity": "should",
+      "criterion": "o-3 (what rollback assumes: the old image still exists)",
+      "location": "s-08 first paragraph: \"the image lives in Fennel's registry, and each new Pod downloads it from there when it starts. If the image had been deleted, the rolled-back Pods couldn't have started; they would have waited, retrying, and the rollback would have stalled like any bad rollout.\"",
+      "evidence": "By default, a container with a version tag (not `:latest`) and no pull policy written gets `IfNotPresent`: \"the image is pulled only if it is not already present locally\". Kubernetes images docs: \"if you omit the `imagePullPolicy` field, and you specify a tag for the container image that isn't `:latest`, the `imagePullPolicy` is automatically set to `IfNotPresent`\" (kubernetes/website, concepts/containers/images.md, \"Image pull policy\"). On Thursday, nodes 05 and 06 had been running `catalog:v63` until 14:03, so in the story they very likely still had it locally. A rollback onto them would have started even if the registry copy were gone. \"Each new Pod downloads it\u2026 when it starts\" is therefore false by default, and the counterfactual is overstated. The lesson still holds: a node that never had the image, or has cleaned it out, must download it, so teams keep old images.",
+      "expected_fix": "Change the sentence to \"\u2026and a node downloads it from there when it doesn't already have a copy. If the image had been deleted, a rolled-back Pod could start only on a node that still had a copy; anywhere else it would wait, retrying, and the rollback could stall like any bad rollout.\" Fig. 06's caption (\"Going back works only if the old image is still in the registry\") can stay as the safe rule, or say \"reliably only if\".",
+      "verdict": "misleading-simplification",
+      "status": "open",
+      "round_opened": 1,
+      "source": "accuracy.md",
+      "history": [
+        [
+          1,
+          "open"
+        ]
+      ]
+    },
+    "A-04": {
+      "severity": "should",
+      "criterion": "o-1 (how a rolling update replaces a version)",
+      "location": "TERM 02 definition \"Replacing a service's Pods with a new version a few at a time, removing old Pods only as new ones become ready.\"; \"In short\" bullet 1 \"removing old Pods only as new ones become ready\"; f-07 `CH06_LOOPS` Deployment row `does` (\"removing old Pods only as new ones become ready\"); s-06 analogy (\"it removes an old Pod only once a new one has passed its check\").",
+      "evidence": "These are general definitions, but the rule is true only when `maxUnavailable` rounds to 0, which with the defaults means fewer than four copies (c-02). The page's own D2 says that with four copies the loop \"may then remove an old Pod before any new one is ready\". The docs' wording is \"does not kill old Pods until a sufficient number of new Pods have come up\" (c-03), meaning enough new Pods, not each one. A reader who meets a service with more copies is left holding a definition that the page itself shows to be false.",
+      "expected_fix": "Qualify the general statements and keep the catalog-specific ones as they are. TERM 02: \"Replacing a service's Pods with a new version a few at a time, keeping enough Pods ready throughout: old ones go only as new ones become ready.\" \"In short\" and the f-07 row: \"removing old Pods only as fast as new ones become ready (with three copies and the defaults, one for one)\". The analogy is in catalog's three-copy context and can stay if it says \"Here, the Deployment loop works the same way\".",
+      "verdict": "misleading-simplification",
+      "status": "open",
+      "round_opened": 1,
+      "source": "accuracy.md",
+      "history": [
+        [
+          1,
+          "open"
+        ]
+      ]
+    },
+    "A-05": {
+      "severity": "nit",
+      "criterion": "o-1",
+      "location": "s-04 paragraph 1: \"\u2026at least three Pods are ready to serve customers, and there are never more than four in all.\"",
+      "evidence": "The limit counts Pods that aren't shutting down. Deployment docs: \"Kubernetes doesn't count terminating Pods\u2026 As a result, you might notice that there are more Pods than expected during a rollout, and that the total resources consumed by the Deployment is more than `replicas + maxSurge` until the `terminationGracePeriodSeconds` of the terminating Pods expires.\" The same docs show the controller scaling the old ReplicaSet to 2 and the new one to 2 in one step, so a stopping v62 Pod can briefly sit beside four others. The lane itself never shows more than four, so this matters only for the \"in all\" wording and the spare-room arithmetic (a stopping Pod still holds its room).",
+      "expected_fix": "\"\u2026and never more than four running at once\" or \"never more than one extra\". If a caveat is wanted, put one sentence in D2: \"A Pod that's shutting down isn't counted, so for a few seconds there can briefly be one more, still holding its room.\"",
+      "verdict": "misleading-simplification",
+      "status": "open",
+      "round_opened": 1,
+      "source": "accuracy.md",
+      "history": [
+        [
+          1,
+          "open"
+        ]
+      ]
+    },
+    "A-06": {
+      "severity": "nit",
+      "criterion": "fiction consistency (CURRICULUM \u00a73)",
+      "location": "s-01: \"Every team's changes waited for Thursday night, when Sam put the new versions out by hand\u2026 The update you may remember from Chapter 3, storefront from v12 to v13 on a Tuesday, went the same way.\"",
+      "evidence": "CURRICULUM \u00a73 puts Fennel's by-hand releases on Tuesdays: Ch 2's \"Tuesday's release replaces the container\" and Ch 3's Tuesday v12 \u2192 v13. \"Every team's changes waited for Thursday night\" contradicts them, and the next sentence calls the Tuesday update \"the same way\" without reconciling the day.",
+      "expected_fix": "Soften to \"a release was an evening event, usually on a Thursday night\" or \"Every team's changes waited for a release night\", keeping \"went the same way\" for the Tuesday.",
+      "verdict": "misleading-simplification",
+      "status": "open",
+      "round_opened": 1,
+      "source": "accuracy.md",
+      "history": [
+        [
+          1,
+          "open"
+        ]
+      ]
+    },
+    "A-07": {
+      "severity": "nit",
+      "criterion": "o-2",
+      "location": "s-10, k-07 answer: \"\u201cPassed health checks\u201d only proves that v64 started.\"",
+      "evidence": "catalog's readiness check, as the page defines it (Fig. 02, s-05), also proves that the app could reach its database. \"Only proves that v64 started\" understates what a check proves, though the paragraph's point (it proves nothing about prices) is right.",
+      "expected_fix": "\"\u2026only proves that v64 started and could reach its database.\"",
+      "verdict": "misleading-simplification",
+      "status": "open",
+      "round_opened": 1,
+      "source": "accuracy.md",
+      "history": [
+        [
+          1,
+          "open"
+        ]
+      ]
+    },
+    "P-01": {
+      "severity": "blocking",
+      "criterion": "ac-09; ac-14; engagement where intended (k-04 is the chapter's core predict-then-reveal for m-09 and local-02)",
+      "location": "`.cp-hero__standfirst` (and `<meta name=\"description\">`); s-06 k-04 prompt `#k-04-q` and option A; s-01 hand-off paragraph; optional: s-07 h2 `#thursday-1402`",
+      "evidence": "(1) The standfirst says the chapter follows \"one Thursday of `catalog` releases, one routine and one that showed every price as $0.00 for six minutes\". A reader arrives at k-04's second case (\"shows every price as $0.00\") already told that such a release reached customers for six minutes. This is the plan's rejected alternative (\"Opening on the $0 incident as a hook\u2026 would give away k-04's answer\"). (2) k-04's prompt says the second version \"starts, answers its readiness check with a success code, and shows every price as $0.00\". Two sections earlier the reader learned that passing the readiness check is what makes a rollout count a Pod. So the outcome follows from the prompt, and the misconception option A (\"a version that shows $0 fails its health check too\") contradicts the prompt as written. Any careful reader rules A out without holding the misconception, so the commit doesn't test whether the reader thinks checks test correctness (local-02). That belief is what f-03 and the \"why\" paragraph are built to overturn. (3) The \u00a707 heading \"Thursday, 14:02: six minutes at $0\" sits in the TOC rail from the first screen (desktop: \"Thursday, 14:02: six min\u2026\"; mobile TOC: full text).",
+      "expected_fix": "(a) Rewrite the standfirst without the $0 outcome, e.g. \"\u2026This chapter follows one Thursday of `catalog` releases, one routine and one that went wrong, to show how Kubernetes replaces one version of a service with the next, which bad releases its health checks stop and which they don't, and what going back really does.\" Make the same change to the meta description. Then change \u00a701's hand-off so it doesn't repeat the standfirst's sentence, e.g. \"It starts with a question Jordan put to Ari a few days before that Thursday.\" (b) Rewrite k-04's second case so the reader has to work out whether the check passes, from f-02's \"the app is up and can reach its database\": \"In the second, it starts, connects to its database and serves pages normally, but every price shows as $0.00.\" Keep option A as is; it now carries the misconception honestly. Change A's feedback to point at the evidence: \"`catalog`'s readiness check asks whether the app is up and can reach its database (Fig. 02), and v64 is both. A check tests what the team wrote it to test and passes on a success code; it never looks at a price. So the $0 version passes.\" Also wrap `catalog` in code in that feedback (it's plain text now). Leave B, C, D and their feedback as they are. (c) Optional, if the orchestrator agrees it is execution rather than plan shape: retitle \u00a707 so the TOC doesn't announce the outcome, e.g. \"Thursday, 14:02: going back\".",
+      "status": "open",
+      "round_opened": 1,
+      "source": "pedagogy-ux.md",
+      "history": [
+        [
+          1,
+          "open"
+        ]
+      ]
+    },
+    "P-02": {
+      "severity": "should",
+      "criterion": "mobile UX; CURRICULUM \u00a78 step 6 (no height reservation under 600px); ac-09 (content after a locked gate)",
+      "location": "`.cp-gate[data-gate=\"k-04\"]` and `.cp-gate[data-gate=\"k-06\"]` (assets/page.css `.cp-gate.is-locked > :not(.cp-gate__lock) { visibility: hidden; }`); `.cp-aside` and D3 after the k-04 gate",
+      "evidence": "Locked heights measured by probe: k-04 gate 1,283px at 1280, 1,887px at 768, 1,876px at 390, 1,990px at 360; k-06 gate 1,258 / 1,258 / 1,902 / 1,998px. Under the lock line the reader sees whole blank viewports: `pux-r1-360x740-light-k04-gate-top.png` (the lock plate, then empty), `pux-r1-360x740-light-k04-gate-mid.png` (a completely blank screen), `pux-r1-1280x900-light-k04-gate-locked.png` (blank apart from the rail). At 360 that is about 2.7 screens of nothing, which reads as a broken page. Reserving height protects nothing: the gate opens only when the reader commits to the check above it, so the content grows below where the reader is. \u00a78 step 6 says that under 600px a widget does not reserve height. Also, everything after the k-04 gate (D3 and the analogy aside) is visible while the gate is locked. A reader who scrolls past the blank reads the WHERE THIS ANALOGY BREAKS line (\"A manager\u2026 would notice a new cashier charging nothing\u2026 The Deployment loop never sees a single sale\u2026 as long as that passes, it carries on\") before committing to k-04.",
+      "expected_fix": "While a gate is locked, hide its content with `display: none` instead of `visibility: hidden`. The gate then collapses to its dashed lock plate (about 90px, as in the 360 screenshot), at every width, or at least under 600px. On commit, show the content with the existing `cp-in` fade. The content opens below the check the reader just answered, so nothing they're looking at moves. Move the handover aside, and D3, inside the k-04 gate, after the \"stops\" paragraph. If cut 1 of the cut list (the aside) is taken, move only D3. Don't change the lane's locked R3\u2013R5 steps: those follow the Ch 4\u20135 lane convention.",
+      "status": "open",
+      "round_opened": 1,
+      "source": "pedagogy-ux.md",
+      "history": [
+        [
+          1,
+          "open"
+        ]
+      ]
+    },
+    "P-03": {
+      "severity": "should",
+      "criterion": "ac-14 (no key repeated by text near the check); clarity of interaction (canvas matches step text)",
+      "location": "w-rollout-scrolly `data.js`, steps R2 and R3 (`loops.active`, `loops.agents`, `loops.lens`)",
+      "evidence": "While the reader answers k-02 (\"What does the Deployment loop do next?\"), the canvas beside it shows the Deployment loop highlighted with the lens line `SEES \u00b7 4 Pods; the v63 Pod not ready` / `DOES \u00b7 waits` (`pux-r1-1280x900-light-lane-R2.png`, `pux-r1-360x740-light-lane-R2.png`). The key is \"It waits until the v63 Pod is ready\u2026\", so the answer is printed next to the question. Separately, R2's step text names three actors (\"The ReplicaSet loop sees\u2026 writes a record\u2026 The scheduler puts that Pod on node 05\u2026 node 05's agent starts its container\"), but the canvas greys out the ReplicaSet loop and scheduler pills and highlights only the Deployment loop and the agents. R3's text has \"The ReplicaSet loop marks one v62 Pod for deletion, and node 06's agent stops it\", but only the Deployment loop is active and no agent pill is lit.",
+      "expected_fix": "In R2, make the drawing show the loops the text names, which also removes the giveaway: `active: ['rs', 'sched']`, `agents: ['05']`, lens = the ReplicaSet loop's, e.g. `watching: 'v63 ReplicaSet 1 Pod short'`, `doing: 'writes a new Pod record; the scheduler picks node 05'`. If the lens must belong to the Deployment loop, use `doing: '?  (Check 02)'` instead of `'waits'`. In R3, use `active: ['deploy', 'rs']`, `agents: ['06']`, keeping the lens as is (`1 v63 Pod ready` / `v62 down to 2`). Update R2's ariaLabel to match (\"\u2026The ReplicaSet loop has written a Pod record and the scheduler placed it on node 05\u2026\"). No pool change is needed.",
+      "status": "open",
+      "round_opened": 1,
+      "source": "pedagogy-ux.md",
+      "history": [
+        [
+          1,
+          "open"
+        ]
+      ]
+    },
+    "P-04": {
+      "severity": "should",
+      "criterion": "ac-14 (no key cued by a figure above the check); engagement where intended (k-06)",
+      "location": "s-07 f-04 rows 3 and 7 (`CH06_INCIDENT` in assets/page.js); k-06 option B",
+      "evidence": "Right above k-06, f-04's row 3 reads \"The rollout completes: three v64 Pods, all ready. The v63 ReplicaSet is kept, empty.\", and \u00a703 ended with \"the emptied v62 ReplicaSet is still in the record, and \u00a707 shows why that matters\". The key B is the only option that mentions it (\"\u2026using the v63 ReplicaSet it kept\"), so the reader can pick B by matching words rather than by predicting what the loop does. Row 7, \"The last v64 Pod is removed\" 80 seconds after 14:07, also hints at a gradual replacement against C (\"stops all three v64 Pods at once\").",
+      "expected_fix": "Cut \"The v63 ReplicaSet is kept, empty.\" from f-04's row 3 (f-05 shows the kept ReplicaSet after the commit, which is its job). Change row 7 to \"~14:08:20 \u00b7 Every `catalog` Pod runs v63 again.\" Shorten B to \"It replaces v64 with v63 a few Pods at a time, the same way it rolled v64 out.\" Keep B's feedback, which names the kept ReplicaSet and points to Fig. 05. Check option lengths afterwards (B must stay shorter than A).",
+      "status": "open",
+      "round_opened": 1,
+      "source": "pedagogy-ux.md",
+      "history": [
+        [
+          1,
+          "open"
+        ]
+      ]
+    },
+    "P-05": {
+      "severity": "should",
+      "criterion": "reading time vs. brief (d-01: 20 min; plan: about 22)",
+      "location": "page; hero `.cp-meta` \"Read 22 MIN\" and `.d-rail[data-minutes=\"22\"]`",
+      "evidence": "Gate: 21.6 min, text only. My estimate: about 27 min (about 24 reading at 240 wpm for about 5,850 words, plus about 3 thinking at seven checks and about 1.5 studying the lane and figures). See \"Reading time\" above. Earlier chapters' reviewers' estimates ran 3\u20134 min over the gate's figure, and this is consistent with that.",
+      "expected_fix": "Don't trim prose. Put the cut-list's `## If it runs long` order to the user at delivery. Cuts 1\u20136 recover about 2.5 min (to about 24\u201325). Cut 1 (the analogy) also removes the aside half of the gate finding above. If the user keeps everything, set the hero's \"Read\" and the rail's `data-minutes` to the measured figure (about 25\u201327), as Ch 5 did (\"26 MIN\").",
+      "status": "open",
+      "round_opened": 1,
+      "source": "pedagogy-ux.md",
+      "history": [
+        [
+          1,
+          "open"
+        ]
+      ]
+    },
+    "P-06": {
+      "severity": "nit",
+      "criterion": "split attention and redundancy; ac-15 (terms after the thing they name)",
+      "location": "s-03 `.cp-wcap` under lane R",
+      "evidence": "The caption reads \"With default settings and three copies, a rolling update runs at most one extra Pod and never fewer than three ready.\" It uses \"rolling update\" one line before the paragraph and TERM 02 name it, and it states \u00a704's rule (one extra, none short) before \u00a704 explains it and before k-03 applies it.",
+      "expected_fix": "Keep the caption to what W-01 showed: \"Fennel's nodes, versions and timings are fiction. With three copies and the default settings, the Deployment loop ran one extra Pod at most and kept three ready throughout.\"",
+      "status": "open",
+      "round_opened": 1,
+      "source": "pedagogy-ux.md",
+      "history": [
+        [
+          1,
+          "open"
+        ]
+      ]
+    },
+    "P-07": {
+      "severity": "nit",
+      "criterion": "precise language (user's human reviews)",
+      "location": "s-05, liveness paragraph (`#dfn-liveness-probe` paragraph)",
+      "evidence": "\"\u2026noticing a container that is running but stuck: one that has stopped making progress, for example because it is waiting on itself, which no crash would ever reveal.\" \"Waiting on itself\" is engineer shorthand for a deadlock, and a manager can't picture it.",
+      "expected_fix": "\"\u2026for example because it is waiting for something that will never happen, which no crash would ever reveal.\"",
+      "status": "open",
+      "round_opened": 1,
+      "source": "pedagogy-ux.md",
+      "history": [
+        [
+          1,
+          "open"
+        ]
+      ]
+    },
+    "P-08": {
+      "severity": "nit",
+      "criterion": "visual consistency and polish",
+      "location": "lane header (`STRINGS.lanes.R`), f-03 panel heads `.f3__head` and bar label; f-05 `.rk__want`, `.rk__link`; 360px chips in lane snapshots and f-03",
+      "evidence": "(1) Uppercase mono labels turn version strings into \"CATALOG V63\", \"IF V64 CRASHED ON START\", \"TWO WAYS V64 COULD BE BAD\", while chips, record rows and prose say \"v63\" and \"v64\". (2) f-05 writes \"Want 3\" in title case, where the canvas, f-03 and the course's record grammar use \"WANT 3\". (3) f-05's \"THE SAME REPLICASET, KEPT AND REUSED\" label sits under the first panel, away from the dashed connectors between the panels that it explains (`pux-r1-1280x900-light-f05.png`). (4) At 360 the `catalog` chips read only \"v62 READY\" / \"v64 READY\" (`pux-r1-360x740-light-f03.png`); the plan asked for whole labels (\"catalog v63\"), and the `dispatch` chip keeps its name.",
+      "expected_fix": "(1) Wrap version strings in uppercase labels in a `text-transform: none` span (or lowercase them in data), so a version always reads \"v63\". (2) Use \"WANT\" in f-05, as in the canvas. (3) Put the label on the connector between the panels: a small mono label centred above the dashed line from 600px, as it already is in the stacked layout. (4) Optional: if the pool can fit \"catalog v62\" at 360 (two columns of about 150px), use it; otherwise leave it, since versions are printed and only `catalog` has them.",
+      "status": "open",
+      "round_opened": 1,
+      "source": "pedagogy-ux.md",
+      "history": [
+        [
+          1,
+          "open"
+        ]
+      ]
+    },
+    "P-09": {
+      "severity": "nit",
+      "criterion": "precise language; consistency with \u00a705",
+      "location": "s-10 k-07 model answer (`#k-07-a`)",
+      "evidence": "\"'Passed health checks' only proves that v64 started.\" \u00a705 and f-02 say `catalog`'s readiness check also tests that the app can reach its database, so it proves slightly more than that. Also, the follow-up \"Could we have gone back further than v63?\" reads oddly, since going back to v63 was all that was needed. The underlying question is whether older versions would still have been there.",
+      "expected_fix": "\"'Passed health checks' only proves that v64 started and could reach its database.\" and \"If v63 had been bad too, could we have gone back further? Are old images kept, and do our tags ever move?\"",
+      "status": "open",
+      "round_opened": 1,
+      "source": "pedagogy-ux.md",
+      "history": [
+        [
+          1,
+          "open"
+        ]
+      ]
+    },
+    "P-10": {
+      "severity": "nit",
+      "criterion": "section purposes that are plain (user's human reviews)",
+      "location": "s-03 h2 `#thursday-1015`",
+      "evidence": "\"Thursday, 10:15: catalog v63\" names a time and a version but not what the section teaches. In the TOC rail it truncates to \"Thursday, 10:15: catalog\u2026\", so a reader scanning for \"how a rolling update works\" can't find it.",
+      "expected_fix": "e.g. \"Thursday, 10:15: a routine release\". Keep the lane's own name \"Thursday \u00b7 catalog v63\".",
+      "status": "open",
+      "round_opened": 1,
+      "source": "pedagogy-ux.md",
+      "history": [
+        [
+          1,
+          "open"
+        ]
+      ]
+    }
+  }
+}
