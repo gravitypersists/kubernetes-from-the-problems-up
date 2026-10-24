@@ -1,0 +1,230 @@
+{
+  "version": 1,
+  "slug": "ch-05-scheduling",
+  "created": "2026-10-22T19:28:47-04:00",
+  "depth": "standard",
+  "minutes": 20,
+  "stage": "done",
+  "caps": {
+    "spawns": 25,
+    "agent_minutes": 120,
+    "loops": {
+      "research": 2,
+      "checkpoint": 4,
+      "gate": 6,
+      "review": 1
+    }
+  },
+  "seq": 10,
+  "dispatches": [
+    {
+      "nn": 1,
+      "role": "researcher",
+      "loop": "research",
+      "label": "standard-research",
+      "writes": [
+        "run/research"
+      ],
+      "exclude": [],
+      "opened": "2026-10-22T19:56:43-04:00",
+      "closed": "2026-10-22T20:10:19-04:00",
+      "status": "done_with_concerns",
+      "ns_ok": true,
+      "pivot": false,
+      "reason": null,
+      "changed": 9
+    },
+    {
+      "nn": 2,
+      "role": "instructional-designer",
+      "loop": "checkpoint",
+      "label": "plan-and-mockup",
+      "writes": [
+        "run/plan"
+      ],
+      "exclude": [],
+      "opened": "2026-10-22T20:10:32-04:00",
+      "closed": "2026-10-22T20:47:36-04:00",
+      "status": "done_with_concerns",
+      "ns_ok": true,
+      "pivot": false,
+      "reason": null,
+      "changed": 8
+    },
+    {
+      "nn": 3,
+      "role": "page-builder",
+      "loop": "gate:page",
+      "label": "page-build",
+      "writes": [
+        "site"
+      ],
+      "exclude": [
+        "site/widgets/*/*"
+      ],
+      "opened": "2026-10-22T21:27:18-04:00",
+      "closed": "2026-10-22T21:48:35-04:00",
+      "status": "done_with_concerns",
+      "ns_ok": true,
+      "pivot": false,
+      "reason": null,
+      "changed": 46
+    },
+    {
+      "nn": 4,
+      "role": "widget-builder",
+      "loop": "gate:w-friday-scrolly",
+      "label": "friday-scrolly",
+      "writes": [
+        "site/widgets/w-friday-scrolly"
+      ],
+      "exclude": [],
+      "opened": "2026-10-22T21:49:03-04:00",
+      "closed": "2026-10-22T22:02:25-04:00",
+      "status": "done_with_concerns",
+      "ns_ok": true,
+      "pivot": false,
+      "reason": null,
+      "changed": 25
+    },
+    {
+      "nn": 5,
+      "role": "widget-builder",
+      "loop": "gate:w-sizing-sandbox",
+      "label": "sizing-sandbox",
+      "writes": [
+        "site/widgets/w-sizing-sandbox"
+      ],
+      "exclude": [],
+      "opened": "2026-10-22T21:49:03-04:00",
+      "closed": "2026-10-22T22:12:38-04:00",
+      "status": "done_with_concerns",
+      "ns_ok": true,
+      "pivot": false,
+      "reason": null,
+      "changed": 50
+    },
+    {
+      "nn": 6,
+      "role": "accuracy-reviewer",
+      "loop": "review:accuracy",
+      "label": "accuracy-r1",
+      "writes": [
+        "run/review/round-1",
+        "run/screenshots/probe"
+      ],
+      "exclude": [],
+      "opened": "2026-10-23T07:39:26-04:00",
+      "closed": "2026-10-23T07:49:12-04:00",
+      "status": "done",
+      "ns_ok": true,
+      "pivot": false,
+      "reason": null,
+      "changed": 173
+    },
+    {
+      "nn": 7,
+      "role": "pedagogy-ux-reviewer",
+      "loop": "review:pedagogy-ux",
+      "label": "pedagogy-ux-r1",
+      "writes": [
+        "run/review/round-1",
+        "run/screenshots/probe"
+      ],
+      "exclude": [],
+      "opened": "2026-10-23T07:39:27-04:00",
+      "closed": "2026-10-23T07:56:53-04:00",
+      "status": "done_with_concerns",
+      "ns_ok": true,
+      "pivot": false,
+      "reason": null,
+      "changed": 200
+    },
+    {
+      "nn": 8,
+      "role": "page-builder",
+      "loop": "gate:page",
+      "label": "r1-fixes-page",
+      "writes": [
+        "site"
+      ],
+      "exclude": [
+        "site/widgets/*/*"
+      ],
+      "opened": "2026-10-23T07:57:20-04:00",
+      "closed": "2026-10-23T08:07:41-04:00",
+      "status": "done_with_concerns",
+      "ns_ok": true,
+      "pivot": false,
+      "reason": null,
+      "changed": 49
+    },
+    {
+      "nn": 9,
+      "role": "widget-builder",
+      "loop": "gate:w-friday-scrolly",
+      "label": "r1-fixes-friday",
+      "writes": [
+        "site/widgets/w-friday-scrolly"
+      ],
+      "exclude": [],
+      "opened": "2026-10-23T07:57:24-04:00",
+      "closed": "2026-10-23T08:04:37-04:00",
+      "status": "done_with_concerns",
+      "ns_ok": true,
+      "pivot": false,
+      "reason": null,
+      "changed": 34
+    },
+    {
+      "nn": 10,
+      "role": "widget-builder",
+      "loop": "gate:w-sizing-sandbox",
+      "label": "r1-fixes-sandbox",
+      "writes": [
+        "site/widgets/w-sizing-sandbox"
+      ],
+      "exclude": [],
+      "opened": "2026-10-23T07:57:24-04:00",
+      "closed": "2026-10-23T08:11:28-04:00",
+      "status": "done_with_concerns",
+      "ns_ok": true,
+      "pivot": false,
+      "reason": null,
+      "changed": 60
+    }
+  ],
+  "loops": {
+    "research": 1,
+    "checkpoint": 1,
+    "gate:page": 2,
+    "gate:w-friday-scrolly": 2,
+    "gate:w-sizing-sandbox": 2,
+    "review:accuracy": 1,
+    "review:pedagogy-ux": 1
+  },
+  "gate_history": {
+    "gate:page": [
+      [],
+      [],
+      [],
+      [],
+      [],
+      [],
+      [],
+      [],
+      [],
+      []
+    ],
+    "gate:w-friday-scrolly": [
+      [],
+      []
+    ],
+    "gate:w-sizing-sandbox": [
+      [],
+      [],
+      []
+    ]
+  },
+  "noprogress": {}
+}

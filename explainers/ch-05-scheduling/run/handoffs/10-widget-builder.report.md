@@ -1,0 +1,23 @@
+status: done_with_concerns
+
+artifacts:
+- /Users/m/workspace/k8s-course/explainers/ch-05-scheduling/site/widgets/w-sizing-sandbox/data.js — new idle-bar head; whole-name `breaks` for dispatch, payments and notifications; new strings `idle.amountGb`, `idle.amountPct`, `idle.overTag` and `warnHatch`.
+- /Users/m/workspace/k8s-course/explainers/ch-05-scheduling/site/widgets/w-sizing-sandbox/index.js — new idle-label layout, an OVER tag inside the hatch, a warnings line that names the hatch, storefront falling back to its whole name, and trimmed glue for very short chips.
+- /Users/m/workspace/k8s-course/explainers/ch-05-scheduling/site/widgets/w-sizing-sandbox/index.css — label ticks, a label row sized for the tallest label form, hatch tag and swatch, chip names drawn above neighbouring hatches, and re-measured load-time heights.
+- model.js and selftest.mjs are unchanged.
+
+summary: All three findings are fixed. The model's numbers and behaviour are unchanged, and `selftest.mjs` still passes. Both gates pass: `verify.mjs --phase page` (rounds 8 and 9) and `verify.mjs --widget w-sizing-sandbox` (round 3). My Playwright script, adapted from handoff 05's check.mjs and kept in the scratchpad at /private/tmp/claude-501/-Users-m-workspace-k8s-course/d8bc0a64-bd33-45b0-aebe-f1572cb9838e/scratchpad/ss/check.mjs, clicked through 17 states at 360, 768 and 1280. The states included default, minimal (0.5/0.5/0.5) and inflated (8/13/6). Every ac-08 value matched, nothing overflowed, labels never collided, no hatch crossed a chip name, targets were at least 44px and text at least 13px, the keyboard checks passed, and the controls stayed in place in every state. I looked at screenshots at all three widths and in dark mode at 1280.
+
+concerns:
+- The widget is taller. The label row now has room for four lines at every width (+20px), and the worst-case warnings reserve now includes the hatch line. Measured heights: 934px at 1280 (was about 874), 1112 at 768, 1562 at 600–751, 1351 for the default state at 360. I re-measured and updated the load-time `min-height` values in index.css to match. This bears on d-05 (the sandbox is last in the cut order).
+- The page builder should know that the hatch is now named in the warnings list, as its first line: "Hatched on the bar: {gb} GB used above the requests, in room no Pod had reserved."
+- The storefront whole-name fallback never triggers at the tested widths: wherever chips show labels, "storefront" fits on one line. I kept it as a guard so a lone "store-" can't appear.
+
+relaxed:
+- none
+
+dispositions:
+- A-08: fixed — `SHEET.idle.head` is now exactly "Room for Pods on the rented nodes". No other reader-visible string or aria-label said "rented room"; the only remaining uses are code comments in model.js and the self-test's check name, both left as they were. The "of {rented} GB" readout is unchanged; the reviewer's expected fix only asked for the head.
+- P-14: fixed — labels now try two direct forms before falling back. First, amounts on one line. Second, GB and % on separate lines. In both forms a label starts at its segment's left edge and is pushed right; if the last one would pass the bar's end, the labels are pulled back left, 12px apart. Each label keeps at least 8px under its own segment, marked by a 2px tick. The stacked legend is now only a last resort, and none of the 17 states at 360, 768 or 1280 reached it. 768 uses the two-line form; inflated at 1280 uses the one-line form with labels overhanging their neighbours. The hatch is labelled twice: an OVER tag on a plate inside the hatch wherever it fits (the minimal state at every width), and the warnings line above, with a hatch swatch.
+- P-15: fixed — chip names now draw above neighbouring hatches (a scoped z-index above the pool's overflow layer). The overflow keeps its true height, and the name's plate covers the hatch, so names are never crossed (0 crossings by elementFromPoint in every state). Dispatch, payments and notifications have whole-name breaks, so the pool's CSS cuts them as "notificati…". Storefront keeps "store-/front" on chips with room for two lines, and index.js swaps in the whole name where only one line fits.
+- Glue cleanup: partly removed. My glue no longer deletes chip lines, because the pool's 0-line rule (pool-02 item 5) already leaves chips under 14px unlabelled. I kept the 1px edges and the removal of the step highlight on chips under 14px. With the pool's 2px strokes and ring inset, a 0.5–1 GB chip (about 4–12px) would be nothing but stroke, or would grow taller than its room, and a 3px outline would cover it completely. The pool rule doesn't cover strokes or outlines, so removing this part would be a visible regression.

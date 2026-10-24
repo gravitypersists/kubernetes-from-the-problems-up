@@ -3,3 +3,4 @@ explainers/*/run/screenshots/
 dist/
 node_modules/
 explainers/*/site/pool/
+explainers/*/run/history/*/run/screenshots/
