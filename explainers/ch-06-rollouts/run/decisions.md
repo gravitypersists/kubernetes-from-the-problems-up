@@ -50,3 +50,10 @@ answer: "Extend by 150 min (Recommended)"
 decision: extended
 applies_to: cap agent_minutes
 notes: 165 → 315 (extend --minutes is an increment).
+
+### d-08 · 2026-10-25T18:48:58 · delta
+question: (unprompted, after delivery) Move the run back to the human review step now that the skill has one?
+answer: "we'll want to perform the human review as a formal check from now on. In fact, I'd like to revert ch 5, 6 and 7 back to the human review step."
+decision: other
+applies_to: stage (done → human-review)
+notes: the run stopped after the round-1 fixes passed the gate, which is where Stage 4b sits; nothing in site/ is reverted. The next step is a site review session (human_review.mjs --target site). The chapter leaves the course build (dist/) until it is back at deliver. Curriculum updates already applied from this chapter's plan stay; the review may change them.

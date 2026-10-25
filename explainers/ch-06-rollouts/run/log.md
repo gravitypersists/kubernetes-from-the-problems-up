@@ -206,3 +206,6 @@ Gate (page) round 9: **PASS**. Reading ~20.5 min (brief: ~20 min; reported, not 
 Gate (page) round 10: **PASS**. Reading ~20.5 min (brief: ~20 min; reported, not gated); 292 KB, 19 requests.
 - [gate/page-round-10.json](gate/page-round-10.json)
 - [screenshots/page-round-10](screenshots/page-round-10)
+
+### 2026-10-25T18:48:58-04:00 · orchestrator · stage
+Stage: done → **human-review**

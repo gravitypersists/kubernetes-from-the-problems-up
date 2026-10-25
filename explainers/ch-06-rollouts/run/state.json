@@ -4,7 +4,7 @@
   "created": "2026-10-24T09:10:42-04:00",
   "depth": "light",
   "minutes": 20,
-  "stage": "done",
+  "stage": "human-review",
   "caps": {
     "spawns": 24,
     "agent_minutes": 315,
