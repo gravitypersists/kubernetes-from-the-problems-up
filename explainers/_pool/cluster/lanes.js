@@ -231,14 +231,38 @@
       }
       window.addEventListener('scroll', schedule, { passive: true });
 
+      /* a relayout must not move what the reader is looking at: layout() briefly drops data-cs-fit to
+         measure, and snapshots can change height, so the browser's scroll anchoring (or its absence)
+         would otherwise jump the page. Pin the first step (or mount end) that starts on screen, or failing
+         that the one the viewport top cuts through, and scroll back by however far it moved. */
+      function keepPlace(fn) {
+        var refs = [];
+        lanes.forEach(function (lane) {
+          lane.steps.forEach(function (s) { refs.push([s.li, 'top']); });
+          refs.push([lane.mount, 'bottom']);
+        });
+        var ref = null, cut = null, edge = 'top';
+        for (var i = 0; i < refs.length && !ref; i++) {
+          var r = refs[i][0].getBoundingClientRect();
+          if (r[refs[i][1]] >= 0) ref = refs[i];
+          else if (!cut && r.bottom > 0) cut = refs[i];
+        }
+        ref = ref || cut || refs[refs.length - 1];   /* every lane above the viewport: its mount's end */
+        if (ref) { edge = ref[1]; ref = ref[0]; }
+        var before = ref ? ref.getBoundingClientRect()[edge] : 0;
+        fn();
+        if (!ref) return;
+        var delta = ref.getBoundingClientRect()[edge] - before;
+        if (Math.abs(delta) >= 1) window.scrollBy(0, delta);
+      }
       var lastW = window.innerWidth, lastH = window.innerHeight;
-      function relayout() { layout(); schedule(); }
+      function relayout() { keepPlace(layout); schedule(); }
       var firstCall = true;   /* ctx.onResize calls back once at registration; layout() has just run */
       ctx.onResize(function () { if (firstCall) { firstCall = false; return; } relayout(); });
       window.addEventListener('resize', function () {
         var w = window.innerWidth, h = window.innerHeight;
-        /* ignore the small height changes of a phone's collapsing address bar */
-        if (w === lastW && Math.abs(h - lastH) < 80 && (h < 560) === (lastH < 560)) return;
+        /* ignore the height changes of a phone's collapsing address bar (iOS Safari's are 80–120px) */
+        if (w === lastW && Math.abs(h - lastH) < 160 && (h < 560) === (lastH < 560)) return;
         lastW = w; lastH = h;
         relayout();
       });
