@@ -406,3 +406,51 @@
 .wc .wc-ser--4 .wc-c--use .wc-c__ln { background: var(--c4-soft); }
 .wc .wc-ser--5 .wc-c--use .wc-c__ln { background: var(--c5-soft); }
 .wc .wc-ser--6 .wc-c--use .wc-c__ln { background: var(--c6-soft); }
+
+
+/* ---------------- optional feature (pool-04, Ch 07; drawn only when record.service is present) ---------------- */
+
+/* the Service block, inside the record and below its rows (or alone): a header row as written (the
+   record's c4 on c4-soft; the Service's own address in mono bold ink) over the list a loop keeps
+   (surface-2, a dashed c3 left rule: c3 is the loop colour). Each entry: a square in the Pod's series
+   colour, its version, its address (plain mono ink-2). Leaving entries are struck through in ink-3; an
+   empty list reads NONE (bad). Lines are packed by cluster.js (svcPack), so separators sit only between
+   entries on one line; the lane reserves its fullest state's line count (min-height). */
+.wc .wc-svc { display: flex; flex-direction: column; gap: 2px; padding: 4px calc(var(--wc-recpad, 8px) - 2px); }
+.wc.wc--narrow .wc-svc { padding-top: 2px; padding-bottom: 2px; }
+.wc .wc-svc--below { border-top: var(--stroke) solid var(--c4); }
+.wc .wc-svc__head {
+  padding: 0 2px; border-radius: var(--radius-1);
+  font: 700 var(--fs-caption)/17px var(--font-mono); white-space: nowrap; color: var(--ink);
+}
+.wc.wc--narrow .wc-svc__head { line-height: 15px; }
+.wc .wc-svc__head.is-hl { outline-offset: -1px; }
+.wc .wc-svc__kind { letter-spacing: .06em; text-transform: uppercase; }
+.wc .wc-svc--wrap .wc-svc__part { display: block; }
+.wc .wc-svc__addr { font-weight: 700; color: var(--ink); }
+.wc .wc-svc__list {
+  display: grid; grid-template-columns: auto minmax(0, 1fr); column-gap: var(--sp-1); align-items: start;
+  padding: 1px 4px 1px 6px;
+  background: var(--surface-2); border-left: var(--stroke) dashed var(--c3); border-radius: 0 var(--radius-1) var(--radius-1) 0;
+  font: 400 var(--fs-caption)/17px var(--font-mono);
+}
+.wc.wc--narrow .wc-svc__list { line-height: 15px; }
+.wc .wc-svc__list--above { grid-template-columns: minmax(0, 1fr); }
+.wc .wc-svc__list.is-hl { outline-offset: -1px; }
+.wc .wc-svc__label { font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--ink-2); white-space: nowrap; }
+.wc .wc-svc__lines { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.wc .wc-svc__ln { white-space: nowrap; }
+.wc .wc-svc__e { display: inline-block; padding: 0 2px; border-radius: var(--radius-1); color: var(--ink-2); }
+.wc.wc--narrow .wc-svc__e + .wc-svc__e { margin-left: 10px; }
+.wc .wc-svc__e.is-hl { outline-offset: -1px; }
+.wc .wc-svc__ver { font-weight: 700; color: var(--ink); }
+.wc .wc-svc__sq { display: inline-block; width: 10px; height: 10px; margin-right: 4px; vertical-align: -1px; background: var(--c1); font-style: normal; }
+.wc .wc-svc__sq--2 { background: var(--c2); }
+.wc .wc-svc__sq--3 { background: var(--c3); }
+.wc .wc-svc__sq--4 { background: var(--c4); }
+.wc .wc-svc__sq--5 { background: var(--c5); }
+.wc .wc-svc__sq--6 { background: var(--c6); }
+.wc .wc-svc__e--leaving,
+.wc .wc-svc__e--leaving .wc-svc__ver { color: var(--ink-3); text-decoration: line-through; text-decoration-thickness: 1.5px; }
+.wc .wc-svc__e--leaving .wc-svc__sq { background: transparent; border: var(--stroke) solid var(--ink-3); }
+.wc .wc-svc__none { font-weight: 700; text-transform: uppercase; }

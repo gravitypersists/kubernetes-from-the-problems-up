@@ -1,0 +1,14 @@
+segments:
+  s-01   Year 3: who passes on the addresses now?
+  s-02   Addresses that don't stay put
+  s-03   One name that stays put: the Service
+  s-04   Thursday, 10:15, from storefront's side
+  s-05   Where a call actually goes
+  s-06   Tuesday, 12:40: connection refused
+  s-07   From a customer's phone to a Pod
+  s-08   The loops so far
+  s-09   The conversation
+objectives: 3 · segments: 9 · reader's time: 20 min
+widgets: w-services-scrolly (low)
+checks: 7 · acceptance criteria: 14
+RESULT: PASS

@@ -237,3 +237,13 @@ Stage: deliver → **done**
 Gate (page) round 11: **PASS**. Reading ~26.7 min (brief: ~26 min; reported, not gated); 401 KB, 23 requests.
 - [gate/page-round-11.json](gate/page-round-11.json)
 - [screenshots/page-round-11](screenshots/page-round-11)
+
+### 2026-10-24T19:23:52-04:00 · verify · gate
+Gate (page) round 12: **PASS**. Reading ~26.7 min (brief: ~26 min; reported, not gated); 281 KB, 23 requests.
+- [gate/page-round-12.json](gate/page-round-12.json)
+- [screenshots/page-round-12](screenshots/page-round-12)
+
+### 2026-10-24T19:33:34-04:00 · verify · gate
+Gate (page) round 13: **PASS**. Reading ~26.7 min (brief: ~26 min; reported, not gated); 389 KB, 23 requests.
+- [gate/page-round-13.json](gate/page-round-13.json)
+- [screenshots/page-round-13](screenshots/page-round-13)

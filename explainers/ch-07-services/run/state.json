@@ -1,0 +1,176 @@
+{
+  "version": 1,
+  "slug": "ch-07-services",
+  "created": "2026-10-24T16:30:50-04:00",
+  "depth": "light",
+  "minutes": 20,
+  "stage": "done",
+  "caps": {
+    "spawns": 24,
+    "agent_minutes": 225,
+    "loops": {
+      "research": 2,
+      "checkpoint": 4,
+      "gate": 6,
+      "review": 1
+    }
+  },
+  "seq": 7,
+  "dispatches": [
+    {
+      "nn": 1,
+      "role": "researcher",
+      "loop": "research",
+      "label": "light-research",
+      "writes": [
+        "run/research"
+      ],
+      "exclude": [],
+      "opened": "2026-10-24T16:32:57-04:00",
+      "closed": "2026-10-24T16:41:45-04:00",
+      "status": "done_with_concerns",
+      "ns_ok": true,
+      "pivot": false,
+      "reason": null,
+      "changed": 9
+    },
+    {
+      "nn": 2,
+      "role": "instructional-designer",
+      "loop": "checkpoint",
+      "label": "plan-and-mockup",
+      "writes": [
+        "run/plan"
+      ],
+      "exclude": [],
+      "opened": "2026-10-24T16:41:49-04:00",
+      "closed": "2026-10-24T17:05:04-04:00",
+      "status": "done_with_concerns",
+      "ns_ok": true,
+      "pivot": false,
+      "reason": null,
+      "changed": 8
+    },
+    {
+      "nn": 3,
+      "role": "page-builder",
+      "loop": "gate:page",
+      "label": "page-build",
+      "writes": [
+        "site"
+      ],
+      "exclude": [
+        "site/widgets/*/*"
+      ],
+      "opened": "2026-10-24T17:30:30-04:00",
+      "closed": "2026-10-24T19:27:24-04:00",
+      "status": "done_with_concerns",
+      "ns_ok": true,
+      "pivot": false,
+      "reason": null,
+      "changed": 96
+    },
+    {
+      "nn": 4,
+      "role": "widget-builder",
+      "loop": "gate:w-services-scrolly",
+      "label": "pool04-and-lane",
+      "writes": [
+        "site/widgets/w-services-scrolly",
+        "site/pool"
+      ],
+      "exclude": [],
+      "opened": "2026-10-24T17:30:30-04:00",
+      "closed": "2026-10-24T19:31:07-04:00",
+      "status": "done_with_concerns",
+      "ns_ok": true,
+      "pivot": false,
+      "reason": null,
+      "changed": 111
+    },
+    {
+      "nn": 5,
+      "role": "accuracy-reviewer",
+      "loop": "review:accuracy",
+      "label": "accuracy-r1",
+      "writes": [
+        "run/review/round-1",
+        "run/screenshots/probe"
+      ],
+      "exclude": [],
+      "opened": "2026-10-24T19:34:44-04:00",
+      "closed": "2026-10-24T19:42:00-04:00",
+      "status": "done",
+      "ns_ok": true,
+      "pivot": false,
+      "reason": null,
+      "changed": 72
+    },
+    {
+      "nn": 6,
+      "role": "pedagogy-ux-reviewer",
+      "loop": "review:pedagogy-ux",
+      "label": "pedagogy-ux-r1",
+      "writes": [
+        "run/review/round-1",
+        "run/screenshots/probe"
+      ],
+      "exclude": [],
+      "opened": "2026-10-24T19:34:44-04:00",
+      "closed": "2026-10-24T19:45:20-04:00",
+      "status": "done_with_concerns",
+      "ns_ok": true,
+      "pivot": false,
+      "reason": null,
+      "changed": 75
+    },
+    {
+      "nn": 7,
+      "role": "page-builder",
+      "loop": "gate:page",
+      "label": "r1-fixes",
+      "writes": [
+        "site"
+      ],
+      "exclude": [
+        "site/pool/*"
+      ],
+      "opened": "2026-10-24T19:45:38-04:00",
+      "closed": "2026-10-24T20:02:28-04:00",
+      "status": "done_with_concerns",
+      "ns_ok": true,
+      "pivot": false,
+      "reason": null,
+      "changed": 43
+    }
+  ],
+  "loops": {
+    "research": 1,
+    "checkpoint": 1,
+    "gate:page": 2,
+    "gate:w-services-scrolly": 1,
+    "review:accuracy": 1,
+    "review:pedagogy-ux": 1
+  },
+  "gate_history": {
+    "gate:page": [
+      [
+        "console: [360, 768, 1280px] Failed to load resource: the server responded with a status of 404 (Not Found)",
+        "resources: [360, 768, 1280px] http://127.0.0.1:49839/__didactician/site/widgets/w-services-scrolly/index.css \u2192 HTTP 404"
+      ],
+      [
+        "console: [360, 768px] Failed to load resource: the server responded with a status of 404 (Not Found)",
+        "resources: [360, 768px] http://127.0.0.1:51125/__didactician/site/widgets/w-services-scrolly/index.css \u2192 HTTP 404"
+      ],
+      [],
+      [],
+      [],
+      [],
+      []
+    ],
+    "gate:w-services-scrolly": [
+      []
+    ]
+  },
+  "noprogress": {}
+}

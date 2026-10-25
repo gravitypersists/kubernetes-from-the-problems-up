@@ -1,0 +1,825 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Finding each other: services and traffic</title>
+<meta name="description" content="Chapter 07. The Pods behind Fennel’s services keep being replaced, yet storefront’s calls still find them. This chapter shows how a call finds a service whose Pods never stay put, why storefront’s calls to orders were refused one Tuesday, and what it costs to let customers in from the internet.">
+<link rel="stylesheet" href="pool/tokens.css">
+<link rel="stylesheet" href="pool/components.css">
+<link rel="stylesheet" href="assets/page.css">
+</head>
+<body class="d-body">
+
+<header class="cp-hero cp-blueprint">
+  <div class="cp-hero__inner">
+    <p class="cp-hero__kicker"><span class="cp-hero__idx">CHAPTER 07</span><span class="cp-label">Part II · Fennel, year 3</span></p>
+    <h1 class="cp-hero__title">Finding each other: services and traffic</h1>
+    <p class="cp-hero__standfirst">Fennel’s services call one another all day, and customers call <code>storefront</code> from their phones, while the Pods behind every service keep being replaced. This chapter shows how a call still finds its way, why <code>storefront</code>’s calls to <code>orders</code> were refused one Tuesday, and what it costs to let customers in.</p>
+    <dl class="cp-meta">
+      <div><dt>Read</dt><dd>24 MIN</dd></div>
+      <div><dt>For</dt><dd>TECHNICAL MANAGERS</dd></div>
+      <div><dt>Chapter</dt><dd>07 / 15</dd></div>
+      <div><dt>Checks</dt><dd>07</dd></div>
+    </dl>
+  </div>
+</header>
+
+<div class="d-page">
+  <aside class="d-rail" data-toc data-minutes="24"></aside>
+  <main class="d-main" id="main">
+    <details class="d-toc-mobile" data-toc-mobile></details>
+
+    <!-- s-01 · Year 3: who passes on the addresses now? · o-1 · claim c-01 · cast strip + D1 (CURRICULUM §2.11)
+         before k-01 (retrieval: Ch 4's orders-5c8x → orders-q2rw through the ReplicaSet loop's lens) · then the
+         scene: Sam passing on addresses by hand at 03:04 (Ch 3) before "nobody passes them on now"; Services have
+         worked since the move; the section ends on Jordan's "what refused us?" without saying why (ac-01) -->
+    <section id="s-01" data-segment="s-01">
+      <h2 id="who-passes-on-the-addresses"><span class="cp-sec">§ 01 </span>Year 3: who passes on the addresses now?</h2>
+
+      <div class="cp-cast">
+        <p class="cp-label" id="cast-label">Cast</p>
+        <dl aria-labelledby="cast-label">
+        <dt>Jordan</dt><dd>Co-founder, managing the engineers: that’s you, in this story.</dd>
+        <dt>Ari</dt><dd>Platform lead. Runs Fennel’s cluster.</dd>
+        <dt>Riley</dt><dd>An engineer on the <code>catalog</code> team.</dd>
+        <dt>Morgan</dt><dd>Co-founder. Runs Fennel’s money.</dd>
+        <dt>Sam</dt><dd>The founding engineer, who once passed on every new address by hand.</dd>
+        </dl>
+      </div>
+
+      <!-- D1 -->
+      <details class="d-more cp-more">
+        <summary>I didn’t read the last chapter. What happened?</summary>
+        <div class="cp-more__body">
+          <ul>
+            <li>In Chapter 4, Fennel moved onto managed Kubernetes. The cluster keeps a record of what Fennel wants running, and many small loops each compare one part of that record with what is actually running, and act to close any gap. A Pod, Kubernetes’ wrapper around a running container, is never moved or repaired: when one is lost, a loop replaces it with a new one.</li>
+            <li>In Chapter 6, the <code>catalog</code> team began shipping two or three times a day. For each release, a Deployment’s loop replaces a service’s Pods with the new version a few at a time, and removes an old Pod only once a new one is ready, which means it passes a check that the team wrote. A Pod that isn’t ready keeps running, but it is sent no requests.</li>
+            <li>On one Thursday, a routine release at 10:15 took about a minute. A second, at 14:02, showed every price as $0.00 for six minutes, until Riley rolled back to the previous version.</li>
+            <li>To understand any loop, ask four things: which loop is it, what does it want, what does it see, and what does it do about a gap?</li>
+          </ul>
+        </div>
+      </details>
+
+      <div class="cp-check" role="group" aria-labelledby="k-01-q" data-check="k-01">
+        <div class="cp-check__head"><span class="cp-chip">RETRIEVE</span><span class="cp-label">Check 01 / 07</span></div>
+        <p class="cp-check__q" id="k-01-q">At 03:04 in Chapter 4, node 03 died with <code>orders-5c8x</code> on it, and by 03:10 the ReplicaSet loop’s replacement, <code>orders-q2rw</code>, was running on node 04. Through the loop lens: what does the ReplicaSet loop want, and does that include telling <code>storefront</code> where the new Pod is?</p>
+        <ul class="cp-options">
+          <li><button type="button" class="cp-option" data-ok data-fb="Right. The ReplicaSet loop compares a count with a count. `orders-q2rw` was a new Pod with a new name and a new address, so something else had to make sure `storefront` found it. This chapter is about that something."><span class="cp-option__key">A</span><span>A set number of <code>orders</code> Pods. Where callers send their calls isn’t part of it.</span><span class="cp-option__tag"></span></button></li>
+          <li><button type="button" class="cp-option" data-fb="Its lens has no callers in it: it wants a number of Pods and sees the Pod records it has. And a new Pod doesn’t inherit an address: `orders-q2rw` got its own."><span class="cp-option__key">B</span><span><code>orders</code> working for its callers, so it gives the new Pod the old Pod’s address.</span><span class="cp-option__tag"></span></button></li>
+          <li><button type="button" class="cp-option" data-fb="Kubernetes never moves a Pod (Chapter 4). The ReplicaSet loop wrote a new one, `orders-q2rw`, with a new name and a new address; all it checked was the count."><span class="cp-option__key">C</span><span>Every Pod back as it was, so it moves the old Pod’s name and address to node 04.</span><span class="cp-option__tag"></span></button></li>
+        </ul>
+        <div class="cp-feedback" role="status" hidden></div>
+      </div>
+
+      <p>Think back to 03:04 on a Saturday in Chapter 3, before Fennel had Kubernetes. Machine 03 died and took <code>orders</code> with it. Sam started <code>orders</code> again on machine 04, the only running machine with room, but customers still couldn’t place an order, because <code>storefront</code>’s settings still named machine 03, and <code>storefront</code> went on sending orders there until Sam passed on the new address. Connecting the services to one another was one of Sam’s jobs, and Sam did it by hand, at three in the morning.</p>
+      <p>On Kubernetes, addresses change far more often than machines die. Every replacement gives a service a new Pod at a new address, as <code>orders-q2rw</code> was when it took over from <code>orders-5c8x</code> in Chapter 4, and every release gives it new Pods too: Riley’s team ships <code>catalog</code> two or three times a day, with three new Pods each time. Yet nobody passes on an address any more. Since <code>storefront</code> moved into the cluster, it has reached <code>orders</code> and <code>catalog</code> through every one of those changes, including at 03:10 that Saturday in Chapter 4, without anyone touching its settings.</p>
+      <blockquote class="cp-dialog">
+        <p><b>Jordan</b><span>“Sam used to pass on the new addresses. Who does that now?”</span></p>
+        <p><b>Ari</b><span>“Nobody. <code>storefront</code> doesn’t call an address any more. It calls a name.”</span></p>
+      </blockquote>
+      <p>There has been one wrinkle. On the Tuesday in Chapter 5 when <code>orders</code> ran out of memory three times and was restarted each time, customers saw errors for a moment at about 12:40, 18:50 and 20:10. Ari’s incident note adds what <code>storefront</code>’s log showed at each of those moments: <code>connection refused</code>, from <code>orders</code>. Jordan read the note twice.</p>
+      <blockquote class="cp-quote"><p>“If the name always finds <code>orders</code>, what refused us?”</p><cite>Jordan</cite></blockquote>
+      <p>To answer that, start with how <code>storefront</code> finds <code>orders</code> at all.</p>
+    </section>
+
+    <!-- s-02 · Addresses that don't stay put · o-1 · claim c-01 (c-06 note, hedged) · one paragraph, then k-02 ·
+         f-01 and the debrief are gated on k-02 (ac-02: nothing says the rollback brought new addresses before the
+         commit; the paragraph before k-02 says only that an address belongs to its Pod) -->
+    <section id="s-02" data-segment="s-02">
+      <h2 id="addresses-that-dont-stay-put"><span class="cp-sec">§ 02 </span>Addresses that don’t stay put</h2>
+      <p>Every Pod is given a network address of its own when it starts. The address belongs to the Pod, not to the node it runs on. Suppose, then, that someone had done what Sam once did, and copied <code>catalog</code>’s three addresses into <code>storefront</code>’s settings on the Thursday of Chapter 6’s releases, at 10:20, just after the morning release.</p>
+
+      <div class="cp-check" role="group" aria-labelledby="k-02-q" data-check="k-02">
+        <div class="cp-check__head"><span class="cp-chip">PREDICT</span><span class="cp-label">Check 02 / 07</span></div>
+        <p class="cp-check__q" id="k-02-q">Suppose someone had copied <code>catalog</code>’s three addresses into <code>storefront</code>’s settings at 10:20 on that Thursday, just after the morning release to v63. At 14:02 the $0 version, v64, replaced every Pod, and at 14:07 Riley rolled back to v63. After 14:08, with three v63 Pods serving again, do calls to the copied addresses work?</p>
+        <ul class="cp-options">
+          <li><button type="button" class="cp-option" data-fb="The kept ReplicaSet holds a description of v63’s Pods, not the Pods themselves: it had none from 14:03. Going back made three new Pods from it, each with a new name and a new address. Fig. 01 shows the whole day."><span class="cp-option__key">A</span><span>Yes: the rollback brought back the v63 Pods from the ReplicaSet the Deployment kept, addresses and all.</span><span class="cp-option__tag"></span></button></li>
+          <li><button type="button" class="cp-option" data-ok data-fb="Right. An address belongs to one Pod. The rollback made three new v63 Pods, so the addresses copied at 10:20 lead nowhere, as they had since 14:03. Fig. 01 shows the whole day."><span class="cp-option__key">B</span><span>No: the rollback started three new v63 Pods, and new Pods get new addresses.</span><span class="cp-option__tag"></span></button></li>
+          <li><button type="button" class="cp-option" data-fb="Kubernetes keeps no addresses for Pods to come back to; each new Pod simply gets one when it starts. The copied addresses lead nowhere. Fig. 01 shows the whole day."><span class="cp-option__key">C</span><span>Only some: Kubernetes gives a returning v63 Pod its old address back whenever no other Pod has taken it.</span><span class="cp-option__tag"></span></button></li>
+        </ul>
+        <div class="cp-feedback" role="status" hidden></div>
+      </div>
+
+      <!-- gate k-02: f-01, the debrief and what callers need. Collapses to its lock plate until committed. -->
+      <div class="cp-gate" data-gate="k-02">
+        <p class="cp-gate__lock">Answer the question above to see the whole day</p>
+
+        <!-- f-01: static HTML. Four time blocks, three outlined address chips each (no fill, no version colour:
+             the figure is about addresses, and colour would make the two v63 sets look alike); under them the
+             hand-copied list (c4 on c4-soft: written by a person) with its state in each block. The 14:08 block
+             and its band cell carry the 3px ink highlight. Under 600px a vertical list. Addresses: plan R2. -->
+        <figure class="cp-fig d-wide" id="f-01" aria-labelledby="f-01-cap">
+          <div class="cp-fig__plate">
+            <div class="cp-fig__bar"><span class="cp-label">Fig. 01</span><span class="cp-label">Catalog’s addresses, one Thursday</span></div>
+            <div class="cp-blueprint ad" role="img" aria-label="catalog’s three Pod addresses at four moments on Thursday. At 09:00, running v62: 10.4.5.12, 10.4.6.8 and 10.4.6.9. At 10:16, running v63: 10.4.5.14, 10.4.6.11 and 10.4.5.15. At 14:03, running v64: 10.4.6.13, 10.4.5.17 and 10.4.5.18. At 14:08, running v63 again: 10.4.6.15, 10.4.5.20 and 10.4.6.16. The three 10:16 addresses, copied into storefront’s settings at 10:20, all answer at 10:16, and none answers at 14:03 or at 14:08.">
+              <div class="ad__grid">
+                <div style="--col: 1" class="ad__block">
+                  <p class="ad__time">09:00 · <span class="nocaps">v62</span></p>
+                  <ul class="ad__chips">
+                    <li class="ad__chip">10.4.5.12<small>v62</small></li>
+                    <li class="ad__chip">10.4.6.8<small>v62</small></li>
+                    <li class="ad__chip">10.4.6.9<small>v62</small></li>
+                  </ul>
+                </div>
+                <div style="--col: 1" class="ad__cell ad__cell--before"><span class="ad__celllab">Copied at 10:20</span><p>Not copied yet</p></div>
+                <div style="--col: 2" class="ad__block">
+                  <p class="ad__time">10:16 · <span class="nocaps">v63</span></p>
+                  <ul class="ad__chips">
+                    <li class="ad__chip">10.4.5.14<small>v63</small></li>
+                    <li class="ad__chip">10.4.6.11<small>v63</small></li>
+                    <li class="ad__chip">10.4.5.15<small>v63</small></li>
+                  </ul>
+                </div>
+                <div style="--col: 2" class="ad__cell"><span class="ad__celllab">Copied at 10:20</span><p class="ad__copied"><span>10.4.5.14</span><span>10.4.6.11</span><span>10.4.5.15</span></p><span class="st st--good"><span class="lamp" aria-hidden="true"></span>10:16 · All 3 answer</span></div>
+                <div style="--col: 3" class="ad__block">
+                  <p class="ad__time">14:03 · <span class="nocaps">v64</span></p>
+                  <ul class="ad__chips">
+                    <li class="ad__chip">10.4.6.13<small>v64</small></li>
+                    <li class="ad__chip">10.4.5.17<small>v64</small></li>
+                    <li class="ad__chip">10.4.5.18<small>v64</small></li>
+                  </ul>
+                </div>
+                <div style="--col: 3" class="ad__cell is-dead"><span class="ad__celllab">Copied at 10:20</span><p class="ad__copied"><span>10.4.5.14</span><span>10.4.6.11</span><span>10.4.5.15</span></p><span class="st st--bad"><span class="lamp" aria-hidden="true"></span>14:03 · None answers</span></div>
+                <div style="--col: 4" class="ad__block is-hl">
+                  <p class="ad__time">14:08 · <span class="nocaps">v63</span> again</p>
+                  <ul class="ad__chips">
+                    <li class="ad__chip">10.4.6.15<small>v63</small></li>
+                    <li class="ad__chip">10.4.5.20<small>v63</small></li>
+                    <li class="ad__chip">10.4.6.16<small>v63</small></li>
+                  </ul>
+                </div>
+                <div style="--col: 4" class="ad__cell is-dead is-hl"><span class="ad__celllab">Copied at 10:20</span><p class="ad__copied"><span>10.4.5.14</span><span>10.4.6.11</span><span>10.4.5.15</span></p><span class="st st--bad"><span class="lamp" aria-hidden="true"></span>14:08 · None answers</span></div>
+                <p class="ad__band-head">Copied into storefront’s settings at 10:20</p>
+              </div>
+            </div>
+          </div>
+          <figcaption id="f-01-cap"><span class="cp-label">Fig. 01</span><span>Each release, and the rollback, gave <code>catalog</code> three new Pods with new addresses. Going back to v63 brought back the version, not its addresses. Addresses are illustrative.</span></figcaption>
+        </figure>
+
+        <p>Over that one Thursday, <code>catalog</code> had four complete sets of addresses. The rollback brought back version v63 but not one of its morning addresses, because a rollback makes new Pods from the ReplicaSet the Deployment kept, and new Pods are given new addresses. A caller still holding the copied addresses would usually have waited and then timed out, since nothing answered at them any more. A list kept by hand would have been wrong for most of that day, and the same would be true at every service, every day.</p>
+        <p>What callers need instead is one name and one address per service that stay the same however often its Pods change, with something else keeping track of which Pods are behind it at any moment. That’s what Ari meant by “it calls a name”.</p>
+      </div>
+    </section>
+
+    <!-- s-03 · One name that stays put: the Service · o-2 · claims c-02, c-03, c-07 · what Ari wrote, f-02, what
+         Kubernetes adds, then the dfn and TERM 01 (payoff, the chapter's only one; ac-03, ac-04) · the two meanings
+         of "service" said once · the DNS name (dfn) · D2 -->
+    <section id="s-03" data-segment="s-03">
+      <h2 id="one-name-that-stays-put"><span class="cp-sec">§ 03 </span>One name that stays put: the Service</h2>
+      <p>When Ari moved each of Fennel’s services into the cluster, they wrote one more short record beside its Deployment. For <code>orders</code>, the record gives a name, <code>orders</code>; a selector, <code>app: orders</code>, which says which Pods belong (any Pod carrying that label, and <code>orders</code>’ Deployment gives the label to every Pod it makes); and the port that callers connect to. Fig. 02 shows a shortened version of it, beside what Kubernetes adds.</p>
+
+      <!-- f-02: static HTML. Left, WRITTEN BY ARI: Ch 04's manifest plate (c4 on c4-soft, annotations beside the
+           lines from 900px, under them below), and the label from orders' Deployment. Right, ADDED AND KEPT BY
+           KUBERNETES: three rows, each a different look for a different kind (address: ink outline, mono bold;
+           DNS name: a dotted ink-3 frame; ready list: surface-2 with the dashed c3 rule, the lane's list look).
+           The right column drops under the left below 600px. -->
+      <figure class="cp-fig d-wide" id="f-02" aria-labelledby="f-02-cap">
+        <div class="cp-fig__plate">
+          <div class="cp-fig__bar"><span class="cp-label">Fig. 02</span><span class="cp-label">The orders Service</span></div>
+          <div class="cp-blueprint sv2">
+            <div class="sv2__grid">
+              <div class="sv2__col">
+                <p class="sv2__head">Written by Ari</p>
+                <div class="cp-rec mf__code">
+                  <div class="mf__row mf__row--key"><code class="mf__line"><span class="mf__k">kind:</span> Service</code><p class="mf__ann mf__ann--key">a record, like the others</p></div>
+                  <div class="mf__row"><code class="mf__line"><span class="mf__k">metadata:</span></code></div>
+                  <div class="mf__row"><code class="mf__line">  <span class="mf__k">name:</span> orders</code><p class="mf__ann">the name callers use</p></div>
+                  <div class="mf__row"><code class="mf__line"><span class="mf__k">spec:</span></code></div>
+                  <div class="mf__row"><code class="mf__line">  <span class="mf__k">selector:</span></code></div>
+                  <div class="mf__row"><code class="mf__line">    <span class="mf__k">app:</span> orders</code><p class="mf__ann">which Pods belong: those with this label</p></div>
+                  <div class="mf__row"><code class="mf__line">  <span class="mf__k">ports:</span></code></div>
+                  <div class="mf__row"><code class="mf__line">  - <span class="mf__k">port:</span> 80</code><p class="mf__ann">the port callers use</p></div>
+                </div>
+                <p class="sv2__head">From orders’ Deployment</p>
+                <div class="cp-rec mf__code">
+                  <div class="mf__row"><code class="mf__line"><span class="mf__k">labels:</span></code></div>
+                  <div class="mf__row"><code class="mf__line">  <span class="mf__k">app:</span> orders</code><p class="mf__ann">every Pod it makes carries this</p></div>
+                </div>
+              </div>
+              <div class="sv2__col">
+                <p class="sv2__head">Added and kept by Kubernetes</p>
+                <ul class="sv2__adds">
+                  <li><span class="sv2__lab">Address</span><span class="sv2__val sv2__val--addr">10.96.0.25</span><p class="sv2__sub">given once; the same for as long as the Service exists</p></li>
+                  <li><span class="sv2__lab">DNS name</span><span class="sv2__val sv2__val--dns">orders → <b>10.96.0.25</b></span><p class="sv2__sub">answered by the cluster’s DNS</p></li>
+                  <li><span class="sv2__lab">Ready Pods</span><span class="sv2__val sv2__val--list">10.4.4.7 (orders-q2rw)</span><p class="sv2__sub">kept current by a loop: §04</p></li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+        <figcaption id="f-02-cap"><span class="cp-label">Fig. 02</span><span>Ari wrote a name, a selector and a port. Kubernetes adds a stable address, a DNS name for it, and a list of the ready Pods behind it. Shortened; addresses are illustrative.</span></figcaption>
+      </figure>
+
+      <p>Kubernetes then adds three things of its own. It gives the record an address, <code>10.96.0.25</code> (engineers call it the cluster IP), which stays the same for as long as the record exists, however often the Pods behind it change. The cluster’s own DNS answers the name <code>orders</code> with that address, which is why <code>storefront</code>’s settings say only <code>orders</code>. And beside the record, Kubernetes keeps a list of the addresses of the Pods that match the selector and are ready. Since 03:10 that Saturday in Chapter 4, the only Pod on that list has been <code>orders-q2rw</code>.</p>
+      <p>The record and what Kubernetes adds to it together make up a <dfn id="dfn-service" aria-describedby="term-01">Service</dfn>.</p>
+
+      <div class="cp-term cp-term--payoff cp-blueprint" id="term-01" role="note" aria-label="New term 1 of 3">
+        <p class="cp-term__kicker">New term · 01 / 03</p>
+        <p class="cp-term__term">Service</p>
+        <p class="cp-term__def">A record that gives a set of Pods, picked out by a selector, one name and address that stay the same while the Pods change, with a list of which of them are ready.</p>
+        <p class="cp-term__back">What <code>storefront</code> has been calling since the move.</p>
+      </div>
+
+      <p>The word now has two meanings on this page, so it helps to keep them apart. At Fennel, <code>orders</code> is a service: a program the team writes and runs as Pods. Each of Fennel’s services also has a Service of the same name, the kind of record in Fig. 02. This chapter writes the program in code font, <code>orders</code>, and the record with a capital S, as in “the <code>orders</code> Service”.</p>
+      <p>The name a caller uses is a <dfn id="dfn-dns-name">DNS name</dfn>, the same kind of name as a website’s, except that only the cluster’s own DNS answers it. Inside Fennel’s cluster, <code>orders</code> on its own is enough.</p>
+
+      <!-- D2 (c-07 note) -->
+      <details class="d-more cp-more">
+        <summary>What’s the full name, and why doesn’t DNS just list the Pods?</summary>
+        <div class="cp-more__body"><p>The full name is <code>orders.&lt;area&gt;.svc.cluster.local</code>, where the area is a team’s area of the cluster (Chapter 11) and <code>cluster.local</code> is the usual default ending. A caller in the same area can use just <code>orders</code>.</p><p>DNS could have answered with every Pod’s address instead. But many programs remember a DNS answer long after they should, so they would keep calling Pods that had gone. One address that never changes avoids the problem. (There is an exception, for databases whose copies must be reached one by one, in Chapter 10.)</p></div>
+      </details>
+    </section>
+
+    <!-- s-04 · Thursday, 10:15, from storefront's side · o-2 · claims c-03, c-04, c-05 · scene set-up BEFORE the
+         lane (ac-05: which release, Ch 6 glossed; what is new on the canvas; the endpoints loop, where it runs,
+         what it watches, since when, before any step shows it acting) · w-services-scrolly lane S
+         (widgets/w-services-scrolly/, built by the widget builder) · k-03 in S2's step column gates S3–S4 · the
+         loop lens filled in after the lane (ac-08) · it checks nothing itself (local-01) · side by side and the
+         canary, hedged -->
+    <section id="s-04" data-segment="s-04">
+      <h2 id="thursday-1015"><span class="cp-sec">§ 04 </span>Thursday, 10:15, from <code>storefront</code>’s side</h2>
+      <p>Go back to that Thursday’s 10:15 release in Chapter 6, when <code>catalog</code> went from v62 to v63 in about a minute. The Deployment loop started one v63 Pod, waited until it was ready, stopped one v62 Pod, and did that three times over, on nodes 05 and 06, where <code>catalog</code>’s Pods run. All the while, <code>storefront</code> kept calling <code>catalog</code>. W-01 replays that minute, and this time it adds what <code>storefront</code> was relying on.</p>
+      <p>In the record panel, the drawing now shows the <code>catalog</code> Service. At the top are its name and its address, which is what <code>storefront</code> uses; under them is its list of ready Pods, each entry giving a Pod’s version and address. The other nodes are nearly full and nothing on them changes, so they’re left out, as in Chapter 6.</p>
+      <p>Keeping that list is the job of one more loop, which has been running in the control plane since the move, beside the loops from earlier chapters. It watches every Service’s selector and the Pods that match it, and it rewrites the Service’s list whenever one of those Pods becomes ready, stops being ready, or goes away. Engineers call the list the Service’s <dfn id="dfn-endpoints">endpoints</dfn>, and the loop the EndpointSlice controller, after the records that hold the lists; on this page it’s the <dfn id="dfn-endpoints-loop">endpoints loop</dfn>.</p>
+      <noscript><p class="cs-noscript">The drawing and step text in §04, and Fig. 04 in §06, need JavaScript. The rest of the page reads without it.</p></noscript>
+
+      <!--
+        ===== MOUNT CONTRACT · w-services-scrolly (page builder ↔ widget builder) =====
+        Ch 06's w-rollout-scrolly contract (ch-06-rollouts/site/index.html §03), adapted to ONE lane, S, with
+        steps S1–S4 and the gate on k-03. The class prefix stays .cs-*; the drawing and the lane controller
+        are the course pool's (pool/cluster/cluster.js and pool/cluster/lanes.js; data format, options and
+        highlight keys in explainers/_pool/README.md, "Cluster drawing" and "Cluster lanes", plus pool-04's
+        optional fields: record.service { name, addr, list, leaving? } and PODS[id].addr). Never copy pool files.
+
+        The page owns everything in this file, including the markup below, the caption under the lane, and
+        its layout CSS (assets/page.css, ".cs-*"). The widget owns widgets/w-services-scrolly/:
+          data.js    defines window.ClusterData (the pool's default name), with NODES ['05', '06'],
+                     CAPACITY { memory: 13, cpu: 3.9 }, UNIT 'GB', ROOM_UNIT 2, STATUS_INLINE true, SERVICES,
+                     LOOPS (ep, deploy), PODS (version, series, addr), STRINGS and CLUSTER_LANES.S =
+                     { name, steps: [S1 … S4] }; and FIGURES with the two snapshots of Fig. 04 in §06 (see the
+                     contract above Fig. 04). Every reader-visible string of the canvas and the step text
+                     lives here.
+          index.js   glue: ClusterCanvas.lanes('w-services-scrolly', window.ClusterData).
+          index.css  only a load-time height reservation, scoped under [data-widget="w-services-scrolly"].
+        It renders only into the three kinds of slot named here. It never moves, adds or removes page
+        elements, and never touches the .cp-check card or any <details> disclosure.
+
+        Mount   ONE element, [data-widget="w-services-scrolly"] (class "d-wide cs", data-lanes="S"), here in
+                §04 (s-04). lanes.js mounts it itself (it collects every [data-widget="w-services-scrolly"]).
+        Lane    .cs-lane[data-lane="S"]                   aria-labelledby the section h2
+                  .cs-lane__grid                          page-owned layout grid (sticky rules in page.css)
+                    .cs-canvas[data-canvas]               SLOT 1. The lane's drawing: header bar ("W-01 · THE
+                                                          CLUSTER", lane name "THURSDAY, 10:15 · CATALOG, FROM
+                                                          STOREFRONT'S SIDE", the clock kicker, "STEP n / 4"),
+                                                          the record panel holding only the catalog Service block
+                                                          (header SERVICE · catalog · 10.96.0.21; READY PODS list),
+                                                          the loop pills and lens line, nodes 05 and 06, the
+                                                          storefront → catalog and NOT DRAWN notes.
+                                                          role="img", aria-label = the active step's ariaLabel.
+                                                          Before any step is active, show S1.
+                    ol.cs-steps > li.cs-step[data-step="S1" … "S4"]
+                      [data-step-snap]                    SLOT 2. renderCluster() of this step's state, shown by
+                                                          CSS only where the canvas can't fit (max-height: 559px,
+                                                          or the controller's data-cs-fit="inline").
+                      [data-step-text]                    SLOT 3. The step's text from data.js (clock kicker
+                                                          included). Draft wording: plan ## Widgets, shows:.
+                      p.cs-step__lock[data-step-lock]     page-owned "Answer the question above to see what
+                                                          happens", shown by CSS only while .is-locked.
+                      .cp-check                           page-owned (k-03, in S2); leave alone.
+                The controller toggles .is-active (the step whose top last crossed 55% of the viewport),
+                .is-locked and .is-unlocked, as in Ch 04–06.
+        Gates   data-gate="k-03" on S3 and S4 (the page's attributes are authoritative). Unlock on document
+                'didactician:check-commit' (detail { id, option, correct }, dispatched by assets/page.js on every
+                commit, any option), or a .cp-check[data-committed] at init. Never re-lock.
+        Heights The page reserves the canvas slot (min-height): 520px from 900px wide; min(456px, 50vh + 16px)
+                under 900px (plan size: about 500px on desktop, about 440px at 360px, plus the slot's 16px
+                padding). Raise these in index.css to the measured heights where the drawing is taller, so
+                nothing below shifts.
+        Motion  State changes ≤ 300ms, instant under prefers-reduced-motion. No autoplay.
+        No JS   Slots stay empty, nothing is locked, and the <noscript> line above explains.
+        Checked by the page: S1–S4 name Pods by version and address, never by colour alone; k-03's prompt says
+                "About twenty seconds later, the v63 Pod has passed its readiness check, and the Deployment loop
+                has told one v62 Pod to stop", so S2 must draw the v63 Pod on 05, NOT READY and not listed, beside
+                three listed v62 Pods; k-03's feedback says "Scroll on", so S3 must show v62 ×2 and v63 ×1 on the
+                list and on the calls line.
+      -->
+      <div data-widget="w-services-scrolly" data-lanes="S" class="d-wide cs">
+        <div class="cs-lane" data-lane="S" aria-labelledby="thursday-1015">
+          <div class="cs-lane__grid">
+            <div class="cs-canvas" data-canvas></div>
+            <ol class="cs-steps">
+              <li class="cs-step" data-step="S1">
+                <div class="cs-step__snap" data-step-snap></div>
+                <div class="cs-step__text" data-step-text></div>
+              </li>
+              <li class="cs-step" data-step="S2">
+                <div class="cs-step__snap" data-step-snap></div>
+                <div class="cs-step__text" data-step-text></div>
+                <div class="cp-check" role="group" aria-labelledby="k-03-q" data-check="k-03">
+                  <div class="cp-check__head"><span class="cp-chip">PREDICT</span><span class="cp-label">Check 03 / 07</span></div>
+                  <p class="cp-check__q" id="k-03-q">About twenty seconds later, the v63 Pod has passed its readiness check, and the Deployment loop has told one v62 Pod to stop. <code>storefront</code> then opens three new connections to <code>catalog</code>. Which Pods can answer them?</p>
+                  <ul class="cp-options">
+                    <li><button type="button" class="cp-option" data-fb="The list doesn’t favour new Pods. Each new connection goes to one of the listed Pods, picked at random by default, so the two v62 Pods still on it answer most calls. Scroll on."><span class="cp-option__key">A</span><span>Only the v63 Pod, because a Pod that has just become ready takes the new calls.</span><span class="cp-option__tag"></span></button></li>
+                    <li><button type="button" class="cp-option" data-ok data-fb="Right. The list holds whichever Pods are ready: two v62 Pods and the new v63 one. Each new connection goes to one of them, picked at random by default, so for about a minute `storefront` gets answers from both versions. Scroll on."><span class="cp-option__key">B</span><span>Any of the Pods on the list by then, whether v62 or v63.</span><span class="cp-option__tag"></span></button></li>
+                    <li><button type="button" class="cp-option" data-fb="The list changes Pod by Pod, as each one becomes ready or is told to stop; nothing waits for the release to finish. So v63 answers some calls from now on. Scroll on."><span class="cp-option__key">C</span><span>Only the v62 Pods, until all three v63 Pods are ready and the list switches over.</span><span class="cp-option__tag"></span></button></li>
+                  </ul>
+                  <div class="cp-feedback" role="status" hidden></div>
+                </div>
+              </li>
+              <li class="cs-step" data-step="S3" data-gate="k-03">
+                <p class="cs-step__lock" data-step-lock>Answer the question above to see what happens</p>
+                <div class="cs-step__snap" data-step-snap></div>
+                <div class="cs-step__text" data-step-text></div>
+              </li>
+              <li class="cs-step" data-step="S4" data-gate="k-03">
+                <p class="cs-step__lock" data-step-lock>Answer the question above to see what happens</p>
+                <div class="cs-step__snap" data-step-snap></div>
+                <div class="cs-step__text" data-step-text></div>
+              </li>
+            </ol>
+          </div>
+        </div>
+      </div>
+      <p class="cp-wcap"><span class="cp-label">W-01</span><span>Fennel’s nodes, versions, addresses and timings are fiction. By default, a Service’s list holds only its ready Pods, and a Pod that is shutting down leaves it at once.</span></p>
+
+      <p>In Chapter 4’s terms, the endpoints loop is one more implementation of the same reconcile pattern, and its loop lens is easy to fill in. It wants each Service’s list to hold exactly the ready Pods that the Service’s selector matches. It sees every Service’s selector, the Pods that match it, and which of those Pods are ready. What it does about a gap is rewrite the list, and the change usually reaches callers within seconds.</p>
+      <p>This is the loop that put <code>orders-q2rw</code> on the <code>orders</code> list at 03:10 in Chapter 4, which is how <code>storefront</code> found the new Pod with nobody passing anything on. It is also the loop behind Chapter 6’s answer about a <code>catalog</code> Pod that lost its database connection: while that Pod’s readiness check failed, the loop kept it off the list, and it put the Pod back once the check passed again. Like every loop, it only writes into the record. How a call actually follows the list is the subject of §05.</p>
+      <p>It’s tempting to think that a Service keeps an eye on its Pods’ health, and stops sending calls to broken ones. It doesn’t. The endpoints loop copies each Pod’s ready or not-ready answer from the readiness check that the team wrote (Chapter 6), and does no checking of its own. So a Pod with no readiness check is listed as soon as its container is running, even if the app inside isn’t answering yet. And at 14:02 that Thursday, the v64 Pods that showed every price as $0.00 passed their check, so the loop listed them like any others.</p>
+      <p>The same list explains two more things from Chapter 6. Some customers saw $0 prices before the 14:02 rollout had finished, because for about forty seconds the list held v63 and v64 Pods together, and each new connection went to one of them, picked at random by default. It also explains why a canary release, which Chapter 6 described as sending a small share of customers to a new version first, takes more than starting one new Pod. With one v64 Pod among three on the list, roughly a third of new connections would reach it, on average, by chance. Sending exactly one customer in twenty to it takes routing rules that a plain Service doesn’t have.</p>
+    </section>
+
+    <!-- s-05 · Where a call actually goes · o-2 · claims c-02, c-05 · m-10 stated fairly before k-04 (ac-09) ·
+         f-03 and everything after it in the section gated on k-04 (nothing says no program sits on the path
+         before the commit) · kube-proxy named after the reveal describes the rules (ac-04) · the fair part
+         kept · spread, not balanced (local-02) · service mesh, one sentence · D3, D4 · the support-line aside
+         with its breaks line, after f-03 (ac-14) -->
+    <section id="s-05" data-segment="s-05">
+      <h2 id="where-a-call-goes"><span class="cp-sec">§ 05 </span>Where a call actually goes</h2>
+      <p>Ari’s team likes anything that every order depends on to run in more than one copy, so that one failure can’t take it down. Every call from <code>storefront</code> to <code>orders</code> uses the <code>orders</code> Service. The Service has an address and a name, as a server does, and at Fennel the word “service” has always meant a program that runs. So it’s natural to picture the Service as a box in the middle, taking each call and passing it on.</p>
+
+      <div class="cp-check" role="group" aria-labelledby="k-04-q" data-check="k-04">
+        <div class="cp-check__head"><span class="cp-chip">PREDICT</span><span class="cp-label">Check 04 / 07</span></div>
+        <p class="cp-check__q" id="k-04-q">Every call from <code>storefront</code> to <code>orders</code> uses the <code>orders</code> Service, and Ari’s team wants to be sure the Service itself can’t become the weak point. How many copies of the <code>orders</code> Service should they run?</p>
+        <ul class="cp-options">
+          <li><button type="button" class="cp-option" data-fb="That’s the right instinct for a server, but no server sits there. The Service’s address belongs to no machine: the caller’s own node sends each call straight to a ready `orders` Pod. It’s the `orders` Pods that need copies. See Fig. 03."><span class="cp-option__key">A</span><span>Two or more, on different nodes, as for any service that every order depends on.</span><span class="cp-option__tag"></span></button></li>
+          <li><button type="button" class="cp-option" data-fb="Nothing called the `orders` Service is running, so there’s nothing to crash or restart. The caller’s own node sends each call straight to a ready `orders` Pod. See Fig. 03."><span class="cp-option__key">B</span><span>One is enough: if it crashed, Kubernetes would restart it, as it would any Pod.</span><span class="cp-option__tag"></span></button></li>
+          <li><button type="button" class="cp-option" data-ok data-fb="Right. There’s no Service program to copy. Kubernetes turns the Service’s list into forwarding rules on every node, so a call leaves `storefront`’s node already headed for one `orders` Pod. Fig. 03 follows one call."><span class="cp-option__key">C</span><span>None: each caller’s own node sends the call straight to an <code>orders</code> Pod.</span><span class="cp-option__tag"></span></button></li>
+        </ul>
+        <div class="cp-feedback" role="status" hidden></div>
+      </div>
+
+      <!-- gate k-04: f-03, the reveal, kube-proxy, the fair part, D3, spreading, D4 and the analogy aside.
+           Collapses to its lock plate until committed. -->
+      <div class="cp-gate" data-gate="k-04">
+        <p class="cp-gate__lock">Answer the question above to follow one call</p>
+
+        <!-- f-03: static SVG, two layouts chosen by the figure's container width (wide from 760px: two node frames
+             side by side; narrow: a vertical path), so labels stay at 13px. Numbered path ① ② ③ labelled on its
+             lines; node 01's FORWARDING RULES band (surface-2, ↻ kube-proxy pill, c3) at its floor; node 04 has
+             the same band, without detail. The record strip (c4) sits under the nodes, with dashed c3 lines up to
+             each band ("kube-proxy copies every list into each node's rules"), so no copy line crosses a Pod. No
+             box labelled Service stands anywhere on the call's path. Hand-drawn markers, ended 0.9 × head short
+             of each tip (graphics.md §3). -->
+        <figure class="cp-fig d-wide" id="f-03" aria-labelledby="f-03-cap">
+          <div class="cp-fig__plate">
+            <div class="cp-fig__bar"><span class="cp-label">Fig. 03</span><span class="cp-label">One call, storefront to orders</span></div>
+            <div class="cp-blueprint f3c" role="img" aria-label="One call from storefront to orders. First, the storefront Pod on node 01 asks the cluster’s DNS for orders and gets the address 10.96.0.25. Second, it connects to 10.96.0.25, and node 01’s own forwarding rules, which map 10.96.0.25 to 10.4.4.7 and are written by kube-proxy, catch the connection. Third, the connection goes straight to the orders-q2rw Pod on node 04, at 10.4.4.7. Node 04 has the same rules. Under the nodes, the record holds the orders Service, 10.96.0.25, with one ready Pod, 10.4.4.7, kept by the endpoints loop; kube-proxy copies every list into each node’s rules. No Service program stands anywhere on the call’s path.">
+              <svg class="f3c__svg f3c__svg--wide" viewBox="0 0 864 432" aria-hidden="true" focusable="false">
+                <defs>
+                  <marker id="f3w-ah" viewBox="0 0 10 10" refX="1" refY="5" markerWidth="5" markerHeight="5" markerUnits="strokeWidth" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" style="fill: var(--ink)"/></marker>
+                  <marker id="f3w-ahc" viewBox="0 0 10 10" refX="1" refY="5" markerWidth="5" markerHeight="5" markerUnits="strokeWidth" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" style="fill: var(--c3)"/></marker>
+                </defs>
+                <!-- cluster DNS -->
+                <rect x="24" y="16" width="264" height="48" rx="2" style="fill: var(--surface); stroke: var(--ink); stroke-width: 1.5"/>
+                <text class="t-lab" x="40" y="35">CLUSTER DNS</text>
+                <text class="t-mono" x="40" y="55">orders → <tspan class="t-svc">10.96.0.25</tspan></text>
+                <!-- ① -->
+                <text class="t-path" x="156" y="92">① <tspan class="m">storefront</tspan> asks the DNS for <tspan class="m">orders</tspan></text>
+                <text class="t-path" x="156" y="108">and gets <tspan class="m">10.96.0.25</tspan></text>
+                <!-- node 01 -->
+                <rect x="24" y="120" width="312" height="208" rx="2" style="fill: var(--surface); stroke: var(--ink); stroke-width: 1.5"/>
+                <line x1="24" y1="148" x2="336" y2="148" style="stroke: var(--ink); stroke-width: 1.5"/>
+                <text class="t-lab t-lab--ink" x="36" y="139">NODE · 01</text>
+                <text class="t-lab" x="324" y="139" text-anchor="end">OTHER PODS NOT DRAWN</text>
+                <rect x="40" y="164" width="208" height="40" rx="2" style="fill: var(--surface); stroke: var(--ink); stroke-width: 1.5"/>
+                <rect x="44" y="168" width="200" height="32" rx="1" style="fill: var(--c1-soft); stroke: var(--c1); stroke-width: 1.5"/>
+                <text class="t-mono" x="54" y="189">storefront</text>
+                <rect x="186" y="181" width="8" height="8" style="fill: var(--good)"/>
+                <text class="t-ready" x="236" y="189" text-anchor="end">READY</text>
+                <line x1="140" y1="153.25" x2="140" y2="74.75" style="stroke: var(--ink); stroke-width: 1.5" marker-start="url(#f3w-ah)" marker-end="url(#f3w-ah)"/>
+                <!-- ② -->
+                <line x1="72" y1="208" x2="72" y2="253.25" style="stroke: var(--ink); stroke-width: 1.5" marker-end="url(#f3w-ah)"/>
+                <text class="t-path" x="88" y="228">② connects to <tspan class="m">10.96.0.25</tspan>;</text>
+                <text class="t-path" x="88" y="246">its node’s rules catch it</text>
+                <rect x="25.5" y="264" width="309" height="62.5" style="fill: var(--surface-2)"/>
+                <line x1="25.5" y1="264" x2="334.5" y2="264" style="stroke: var(--ink-3); stroke-width: 1"/>
+                <text class="t-lab" x="40" y="284">FORWARDING RULES</text>
+                <rect x="216" y="271" width="108" height="22" rx="11" style="fill: var(--c3-soft); stroke: var(--c3); stroke-width: 1.5"/>
+                <text class="t-pill" x="270" y="286.5" text-anchor="middle">↻ kube-proxy</text>
+                <text class="t-addr" x="40" y="312">10.96.0.25 → 10.4.4.7</text>
+                <!-- ③ -->
+                <text class="t-path" x="432" y="188" text-anchor="middle">③ straight to</text>
+                <text class="t-path" x="432" y="205" text-anchor="middle"><tspan class="m">orders-q2rw</tspan></text>
+                <!-- node 04 -->
+                <rect x="528" y="120" width="312" height="208" rx="2" style="fill: var(--surface); stroke: var(--ink); stroke-width: 1.5"/>
+                <line x1="528" y1="148" x2="840" y2="148" style="stroke: var(--ink); stroke-width: 1.5"/>
+                <text class="t-lab t-lab--ink" x="540" y="139">NODE · 04</text>
+                <text class="t-lab" x="828" y="139" text-anchor="end">OTHER PODS NOT DRAWN</text>
+                <rect x="544" y="196" width="208" height="40" rx="2" style="fill: var(--surface); stroke: var(--ink); stroke-width: 1.5"/>
+                <rect x="548" y="200" width="200" height="32" rx="1" style="fill: var(--c1-soft); stroke: var(--c1); stroke-width: 1.5"/>
+                <text class="t-mono" x="558" y="221">orders-q2rw</text>
+                <rect x="690" y="213" width="8" height="8" style="fill: var(--good)"/>
+                <text class="t-ready" x="740" y="221" text-anchor="end">READY</text>
+                <text class="t-addr" x="544" y="254">10.4.4.7</text>
+                <rect x="529.5" y="264" width="309" height="62.5" style="fill: var(--surface-2)"/>
+                <line x1="529.5" y1="264" x2="838.5" y2="264" style="stroke: var(--ink-3); stroke-width: 1"/>
+                <text class="t-lab" x="544" y="284">FORWARDING RULES</text>
+                <rect x="720" y="271" width="108" height="22" rx="11" style="fill: var(--c3-soft); stroke: var(--c3); stroke-width: 1.5"/>
+                <text class="t-pill" x="774" y="286.5" text-anchor="middle">↻ kube-proxy</text>
+                <text class="t-dim" x="544" y="312">the same rules as node 01</text>
+                <path d="M337 296 H432 V216 H533.25" style="fill: none; stroke: var(--ink); stroke-width: 1.5" marker-end="url(#f3w-ah)"/>
+                <!-- kube-proxy copies the lists -->
+                <line x1="180" y1="376" x2="180" y2="338.75" style="stroke: var(--c3); stroke-width: 1.5; stroke-dasharray: 4 3" marker-end="url(#f3w-ahc)"/>
+                <line x1="684" y1="376" x2="684" y2="338.75" style="stroke: var(--c3); stroke-width: 1.5; stroke-dasharray: 4 3" marker-end="url(#f3w-ahc)"/>
+                <text class="t-lab t-lab--mid" x="432" y="357" text-anchor="middle">KUBE-PROXY COPIES EVERY LIST INTO EACH NODE’S RULES</text>
+                <!-- the record -->
+                <rect x="24" y="376" width="816" height="40" rx="2" style="fill: var(--c4-soft); stroke: var(--c4); stroke-width: 1.5"/>
+                <text class="t-lab" x="40" y="401">RECORD</text>
+                <text x="112" y="401"><tspan class="t-lab t-lab--ink">SERVICE</tspan><tspan class="t-mono" dx="8">orders</tspan><tspan class="t-svc" dx="8">10.96.0.25</tspan></text>
+                <rect x="392" y="381" width="200" height="30" style="fill: var(--surface-2)"/>
+                <line x1="392.75" y1="381" x2="392.75" y2="411" style="stroke: var(--c3); stroke-width: 1.5; stroke-dasharray: 4 3"/>
+                <text class="t-lab" x="404" y="401">READY PODS</text>
+                <rect x="490" y="392" width="8" height="8" style="fill: var(--c1)"/>
+                <text class="t-addr" x="504" y="401">10.4.4.7</text>
+                <rect x="688" y="385" width="136" height="22" rx="11" style="fill: var(--c3-soft); stroke: var(--c3); stroke-width: 1.5"/>
+                <text class="t-pill" x="756" y="400.5" text-anchor="middle">↻ endpoints loop</text>
+              </svg>
+              <svg class="f3c__svg f3c__svg--narrow" viewBox="0 0 328 712" aria-hidden="true" focusable="false">
+                <defs>
+                  <marker id="f3n-ah" viewBox="0 0 10 10" refX="1" refY="5" markerWidth="5" markerHeight="5" markerUnits="strokeWidth" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" style="fill: var(--ink)"/></marker>
+                  <marker id="f3n-ahc" viewBox="0 0 10 10" refX="1" refY="5" markerWidth="5" markerHeight="5" markerUnits="strokeWidth" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" style="fill: var(--c3)"/></marker>
+                </defs>
+                <rect x="16" y="8" width="296" height="48" rx="2" style="fill: var(--surface); stroke: var(--ink); stroke-width: 1.5"/>
+                <text class="t-lab" x="32" y="27">CLUSTER DNS</text>
+                <text class="t-mono" x="32" y="47">orders → <tspan class="t-svc">10.96.0.25</tspan></text>
+                <text class="t-path" x="136" y="83">① <tspan class="m">storefront</tspan> asks for</text>
+                <text class="t-path" x="136" y="100"><tspan class="m">orders</tspan>, gets <tspan class="m">10.96.0.25</tspan></text>
+                <rect x="8" y="112" width="312" height="200" rx="2" style="fill: var(--surface); stroke: var(--ink); stroke-width: 1.5"/>
+                <line x1="8" y1="140" x2="320" y2="140" style="stroke: var(--ink); stroke-width: 1.5"/>
+                <text class="t-lab t-lab--ink" x="20" y="131">NODE · 01</text>
+                <text class="t-lab" x="308" y="131" text-anchor="end">OTHER PODS NOT DRAWN</text>
+                <rect x="24" y="156" width="208" height="40" rx="2" style="fill: var(--surface); stroke: var(--ink); stroke-width: 1.5"/>
+                <rect x="28" y="160" width="200" height="32" rx="1" style="fill: var(--c1-soft); stroke: var(--c1); stroke-width: 1.5"/>
+                <text class="t-mono" x="38" y="181">storefront</text>
+                <rect x="170" y="173" width="8" height="8" style="fill: var(--good)"/>
+                <text class="t-ready" x="220" y="181" text-anchor="end">READY</text>
+                <line x1="120" y1="145.25" x2="120" y2="66.75" style="stroke: var(--ink); stroke-width: 1.5" marker-start="url(#f3n-ah)" marker-end="url(#f3n-ah)"/>
+                <line x1="56" y1="200" x2="56" y2="237.25" style="stroke: var(--ink); stroke-width: 1.5" marker-end="url(#f3n-ah)"/>
+                <text class="t-path" x="72" y="218">② connects to <tspan class="m">10.96.0.25</tspan>;</text>
+                <text class="t-path" x="72" y="235">its node’s rules catch it</text>
+                <rect x="9.5" y="248" width="309" height="62.5" style="fill: var(--surface-2)"/>
+                <line x1="9.5" y1="248" x2="318.5" y2="248" style="stroke: var(--ink-3); stroke-width: 1"/>
+                <text class="t-lab" x="24" y="268">FORWARDING RULES</text>
+                <rect x="200" y="255" width="108" height="22" rx="11" style="fill: var(--c3-soft); stroke: var(--c3); stroke-width: 1.5"/>
+                <text class="t-pill" x="254" y="270.5" text-anchor="middle">↻ kube-proxy</text>
+                <text class="t-addr" x="24" y="296">10.96.0.25 → 10.4.4.7</text>
+                <text class="t-path" x="136" y="340">③ straight to <tspan class="m">orders-q2rw</tspan></text>
+                <rect x="8" y="360" width="312" height="200" rx="2" style="fill: var(--surface); stroke: var(--ink); stroke-width: 1.5"/>
+                <line x1="8" y1="388" x2="320" y2="388" style="stroke: var(--ink); stroke-width: 1.5"/>
+                <text class="t-lab t-lab--ink" x="20" y="379">NODE · 04</text>
+                <text class="t-lab" x="308" y="379" text-anchor="end">OTHER PODS NOT DRAWN</text>
+                <rect x="24" y="404" width="208" height="40" rx="2" style="fill: var(--surface); stroke: var(--ink); stroke-width: 1.5"/>
+                <rect x="28" y="408" width="200" height="32" rx="1" style="fill: var(--c1-soft); stroke: var(--c1); stroke-width: 1.5"/>
+                <text class="t-mono" x="38" y="429">orders-q2rw</text>
+                <rect x="170" y="421" width="8" height="8" style="fill: var(--good)"/>
+                <text class="t-ready" x="220" y="429" text-anchor="end">READY</text>
+                <text class="t-addr" x="24" y="463">10.4.4.7</text>
+                <rect x="9.5" y="496" width="309" height="62.5" style="fill: var(--surface-2)"/>
+                <line x1="9.5" y1="496" x2="318.5" y2="496" style="stroke: var(--ink-3); stroke-width: 1"/>
+                <text class="t-lab" x="24" y="516">FORWARDING RULES</text>
+                <rect x="200" y="503" width="108" height="22" rx="11" style="fill: var(--c3-soft); stroke: var(--c3); stroke-width: 1.5"/>
+                <text class="t-pill" x="254" y="518.5" text-anchor="middle">↻ kube-proxy</text>
+                <text class="t-dim" x="24" y="544">the same rules as node 01</text>
+                <line x1="120" y1="312" x2="120" y2="393.25" style="stroke: var(--ink); stroke-width: 1.5" marker-end="url(#f3n-ah)"/>
+                <line x1="56" y1="616" x2="56" y2="570.75" style="stroke: var(--c3); stroke-width: 1.5; stroke-dasharray: 4 3" marker-end="url(#f3n-ahc)"/>
+                <text class="t-lab t-lab--mid" x="72" y="586">KUBE-PROXY COPIES EVERY LIST</text>
+                <text class="t-lab t-lab--mid" x="72" y="602">INTO EACH NODE’S RULES</text>
+                <rect x="8" y="616" width="312" height="88" rx="2" style="fill: var(--c4-soft); stroke: var(--c4); stroke-width: 1.5"/>
+                <text class="t-lab" x="24" y="638">RECORD</text>
+                <rect x="176" y="623" width="136" height="22" rx="11" style="fill: var(--c3-soft); stroke: var(--c3); stroke-width: 1.5"/>
+                <text class="t-pill" x="244" y="638.5" text-anchor="middle">↻ endpoints loop</text>
+                <text x="24" y="662"><tspan class="t-lab t-lab--ink">SERVICE</tspan><tspan class="t-mono" dx="8">orders</tspan><tspan class="t-svc" dx="8">10.96.0.25</tspan></text>
+                <rect x="20" y="671" width="200" height="26" style="fill: var(--surface-2)"/>
+                <line x1="20.75" y1="671" x2="20.75" y2="697" style="stroke: var(--c3); stroke-width: 1.5; stroke-dasharray: 4 3"/>
+                <text class="t-lab" x="30" y="689">READY PODS</text>
+                <rect x="116" y="680" width="8" height="8" style="fill: var(--c1)"/>
+                <text class="t-addr" x="130" y="689">10.4.4.7</text>
+              </svg>
+            </div>
+          </div>
+          <figcaption id="f-03-cap"><span class="cp-label">Fig. 03</span><span>The Service’s address belongs to no machine or program. The caller’s own node sends the call straight to a ready Pod, using rules copied from the Service’s list. Addresses are illustrative.</span></figcaption>
+        </figure>
+
+        <p>There is no box in the middle. The address <code>10.96.0.25</code> belongs to no machine and no program. On every node, a small loop called <dfn id="dfn-kube-proxy">kube-proxy</dfn> reads each Service and its list from the record, and writes them into that node’s own forwarding rules, the instructions its operating system follows for where to send network traffic. So when <code>storefront</code> connects to <code>10.96.0.25</code>, the operating system on <code>storefront</code>’s own node catches the connection and sends it straight to one of the listed Pods. Nothing called “the <code>orders</code> Service” exists that could crash, slow down or need copies. It’s the <code>orders</code> Pods that need copies.</p>
+        <p>Despite its name, calls don’t pass through kube-proxy: it writes the rules that calls follow. Like the node agent, it runs on every node, and each copy acts only on its own node, working from the record. Some providers replace it with a component of their own that does the same job.</p>
+        <p>The picture of something running wasn’t wrong, only misplaced. For Services to work, two things do have to run: the endpoints loop in the control plane, which the provider runs for Fennel, and kube-proxy on every node. Neither of them sits on a call’s path.</p>
+
+        <!-- D3 (c-05 note; m-10's fair part) -->
+        <details class="d-more cp-more">
+          <summary>What if kube-proxy stops?</summary>
+          <div class="cp-more__body"><p>The rules it has already written keep forwarding calls, but they stop following the list. Calls can go on being sent to Pods that have since gone, while new Pods get none. That’s a different failure from “the Service went down”, and it calls for different questions to your engineers.</p><p>Some providers replace kube-proxy with a network component of their own. It does the same job, but details, such as what a caller gets when a Service’s list is empty, can differ.</p></div>
+        </details>
+
+        <p>Engineers often say that a Service “load-balances”, and it does spread calls out, but not by load. By default, the rule on the caller’s node picks one of the listed Pods at random each time a caller opens a connection, without knowing how busy any of them is. Over many short connections, that comes out roughly even. Teams that need calls balanced one by one, or encrypted and measured between services, add a layer called a <dfn id="dfn-service-mesh">service mesh</dfn>, one of Chapter 13’s tools.</p>
+
+        <!-- D4 (c-05 note; local-02) -->
+        <details class="d-more cp-more">
+          <summary>Why does one Pod get most of the calls?</summary>
+          <div class="cp-more__body"><p>The Pod is picked when a connection opens, not for each request. Some callers, such as database drivers, connection pools and some app frameworks, keep one connection open for a long time and send every request down it, so all of those requests reach the same Pod. A Pod added later may get little traffic until connections reopen. Chapter 8 comes back to this.</p></div>
+        </details>
+
+        <div class="cp-aside">
+          <p><b>ANALOGY</b>You know this arrangement from a team’s support line. Customers call one number rather than a person’s phone, and the phone system rings one of the people on today’s rota. People join, go home and come back, and the number never changes. A Service is the number and the rota together: one name and address, and a list of who can answer now.</p>
+          <p class="cp-breaks"><b>WHERE THIS ANALOGY BREAKS</b>A support line runs through a switchboard that every call passes, and someone decides who is fit to be on the rota. A Service has neither. Each caller’s own node connects the call straight to a Pod, and the endpoints loop judges nobody: it lists whichever Pods pass their own readiness checks.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- s-06 · Tuesday, 12:40: connection refused · o-2 · claims c-04, c-06 (medium: "in most clusters, by
+         default") · the scene (Ch 5's Tuesday glossed) before k-05 · f-04 and the rest gated on k-05 (ac-10) ·
+         a restart keeps the Pod's address · the fix is more copies, not a change to the Service · Jordan's
+         question · D5 -->
+    <section id="s-06" data-segment="s-06">
+      <h2 id="tuesday-1240"><span class="cp-sec">§ 06 </span>Tuesday, 12:40: connection refused</h2>
+      <p>Now back to Jordan’s question. <code>orders</code> runs a single copy, <code>orders-q2rw</code>, on node 04. On the Tuesday in Chapter 5, at about 12:40, its memory reached its limit, the operating system killed its container, and the node agent restarted the container in place, as Chapter 5 showed. For those few seconds, <code>storefront</code>’s log shows <code>connection refused</code>.</p>
+
+      <div class="cp-check" role="group" aria-labelledby="k-05-q" data-check="k-05">
+        <div class="cp-check__head"><span class="cp-chip cp-chip--explain">EXPLAIN</span><span class="cp-label">Check 05 / 07</span></div>
+        <p class="cp-check__q" id="k-05-q">On Tuesday at about 12:40, <code>orders-q2rw</code>, the only <code>orders</code> Pod, ran out of memory and the node agent restarted its container. For those seconds, <code>storefront</code>’s log shows <code>connection refused</code>. What refused the calls?</p>
+        <ul class="cp-options">
+          <li><button type="button" class="cp-option" data-fb="No Service program sits on the path to fill up (§05), and nothing held the calls. While the only `orders` Pod wasn’t ready, the `orders` list was empty, and the rule on `storefront`’s own node refused each call at once. See Fig. 04."><span class="cp-option__key">A</span><span>The <code>orders</code> Service, overloaded by calls that piled up while its only Pod restarted.</span><span class="cp-option__tag"></span></button></li>
+          <li><button type="button" class="cp-option" data-ok data-fb="Right. While the only `orders` Pod wasn’t ready, the endpoints loop had nothing to list, and with an empty list the rule on the caller’s node refuses a call at once rather than hold it, in most clusters, by default. Fig. 04 shows both moments."><span class="cp-option__key">B</span><span>The rules on <code>storefront</code>’s own node, because the <code>orders</code> list was empty.</span><span class="cp-option__tag"></span></button></li>
+          <li><button type="button" class="cp-option" data-fb="A restart isn’t a replacement. The node agent restarted the container inside the same Pod, which kept its name and its address. For a few seconds the Pod wasn’t ready, so it wasn’t on the list. See Fig. 04."><span class="cp-option__key">C</span><span>The restarted Pod, which came back at a new address that <code>storefront</code> didn’t know yet.</span><span class="cp-option__tag"></span></button></li>
+        </ul>
+        <div class="cp-feedback" role="status" hidden></div>
+      </div>
+
+      <!-- gate k-05: f-04, the explanation, the fix, Jordan's question and D5. Collapses until committed. -->
+      <div class="cp-gate" data-gate="k-05">
+        <p class="cp-gate__lock">Answer the question above to see both moments</p>
+
+        <!--
+          ===== FIG. 04 CONTRACT · drawn from w-services-scrolly's data (page builder ↔ widget builder) =====
+          The page owns this figure: the plate, the two panel heads, the caption, the gate and the drawing code
+          (assets/page.js, "f-04"). The widget's data.js supplies the content, as
+            window.ClusterData.FIGURES = { restarting: F, ready: F }
+          where F is either a complete snapshot (README "Snapshot format": nodes, record with service, loops
+          with lens, notes, restarts) or { state: snapshot, highlight: [keys], ariaLabel: 'the state in words' }.
+          If FIGURES uses two other keys, page.js falls back to them in order (first → left panel, second →
+          right). page.js draws each [data-cluster-figure] slot with the pooled renderer over
+          window.ClusterData (one ClusterCanvas.create per page script), both slots sharing one laneLayout and
+          one measureReserve, no header bar (opts.header omitted, so no step counter), at window load, when the
+          gate opens, on resize and after web fonts load; it sets the slot's aria-label from F.ariaLabel when
+          given (the page's own aria-label below stays otherwise) and marks it data-drawn.
+          Content (plan f-04): node 04 only (payments, storefront, orders; 12 of 13 GB reserved). Left, ~12:40:
+          or1 crashed with restarts 1, status OOM-KILLED; the orders Service block SERVICE · orders ·
+          10.96.0.25, list NONE (bad); lens SEES orders' only Pod not ready / DOES empties the list; notes
+          storefront → orders · connection refused (bad) and NOT DRAWN · NODES 01, 02, 05, 06 (mute). Right,
+          seconds later: or1 READY (restarts 1 kept); list orders 10.4.4.7 (highlighted); lens SEES the Pod
+          ready again / DOES lists it, same address; storefront → orders · answered (good). Only the list rows
+          and the storefront → orders lines carry the step highlight.
+        -->
+        <figure class="cp-fig d-wide" id="f-04" aria-labelledby="f-04-cap">
+          <div class="cp-fig__plate">
+            <div class="cp-fig__bar"><span class="cp-label">Fig. 04</span><span class="cp-label">Tuesday, 12:40</span></div>
+            <div class="cp-blueprint fp">
+              <div class="fp__grid">
+                <div class="fp__panel">
+                  <p class="fp__head" id="f-04-restarting">~12:40 · Restarting</p>
+                  <div class="fp__draw" data-cluster-figure="restarting" role="img" aria-label="About 12:40 on Tuesday. Node 04 runs payments, storefront and the only orders Pod, orders-q2rw, whose container has been OOM-killed and is restarting, restart 1. The orders Service, 10.96.0.25, has no ready Pods on its list. The endpoints loop sees that orders’ only Pod is not ready, and empties the list. storefront’s calls to orders are refused."></div>
+                </div>
+                <div class="fp__panel">
+                  <p class="fp__head" id="f-04-ready">Seconds later · Ready again</p>
+                  <div class="fp__draw" data-cluster-figure="ready" role="img" aria-label="Seconds later. orders-q2rw is ready again on node 04, restart count 1. The orders Service, 10.96.0.25, lists it again at the same address, 10.4.4.7. The endpoints loop sees the Pod ready again and lists it. storefront’s calls to orders are answered."></div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <figcaption id="f-04-cap"><span class="cp-label">Fig. 04</span><span>With one copy, each restart left the <code>orders</code> Service with no ready Pod, and calls were refused at once. The restarted Pod came back on the list at the same address: it was restarted, not replaced.</span></figcaption>
+        </figure>
+
+        <p>While its container was down and starting again, <code>orders</code>’ only Pod wasn’t ready, so the endpoints loop took it off the list, and the <code>orders</code> Service was left with no Pod to send anything to. With an empty list, the rule on each caller’s node refuses a call at once rather than holding on to it, in most clusters, by default, and that refusal is what <code>storefront</code> logged. Seconds later the restarted container was running and the Pod was ready again, so it went back on the list, at the same address, because a restart keeps the Pod, and with it the address, where a replacement doesn’t. The same happened at 18:50, and again at 20:10.</p>
+        <p>The Service did exactly its job here: it sent calls to every ready <code>orders</code> Pod, and for a few seconds there weren’t any. So the fix is in the Pods, not in the Service. With two copies on different nodes, one restarting Pod would have left the other on the list, and new calls would have gone to it. Why <code>orders</code> keeps running out of memory is still Chapter 5’s open question, but Ari’s incident note ends with a proposal for the meantime: run a second copy of <code>orders</code>, on another node. It also gives Jordan a question for the list.</p>
+        <blockquote class="cp-quote"><p>“Which of our services run a single copy, and what do their callers get while it restarts?”</p><cite>The question to ask</cite></blockquote>
+
+        <!-- D5 (c-06 note; x-02 alternatives, hedged) -->
+        <details class="d-more cp-more">
+          <summary>Other ways to get “connection refused”</summary>
+          <div class="cp-more__body"><p>A Service whose selector matches no Pods, for example because of a typo in a label, has an empty list from the start, so its callers are refused even while every Pod looks healthy. That’s why an engineer’s first check on a Service that refuses calls is whether its list, shown in an <code>ENDPOINTS</code> column, is empty.</p><p>A Pod with no readiness check is listed as soon as its container runs, and it may refuse calls until its app is listening. A caller that kept a replaced Pod’s old address, on the other hand, usually waits and times out instead.</p></div>
+        </details>
+      </div>
+    </section>
+
+    <!-- s-07 · From a customer's phone to a Pod · o-3 · claims c-02, c-08, c-09, c-10, c-11, c-12 · inside only
+         by default, before the two ways in (ac-11) · each way in said to be what it is and who runs it before
+         its term card · Fennel's set-up (R2) · k-06 · f-05, the costs and D6 gated on k-06 · prices labelled with
+         provider, product, region and date, and called modest -->
+    <section id="s-07" data-segment="s-07">
+      <h2 id="from-a-phone-to-a-pod"><span class="cp-sec">§ 07 </span>From a customer’s phone to a Pod</h2>
+      <p>Every Service so far has an address that works only inside the cluster: by default, a Service can be reached only from inside it. That’s all <code>storefront</code> needs to call <code>orders</code>. Customers’ phones, though, are out on the internet.</p>
+      <p>One way to let them in is one Service at a time. A team can set a Service’s <code>type</code> to <code>LoadBalancer</code>, and the cloud provider then creates a load balancer for that one Service: a machine that the provider runs, with a public address, which passes incoming connections on to the Service’s Pods. Each Service set up this way gets its own <dfn id="dfn-load-balancer" aria-describedby="term-02">load balancer</dfn>, its own public address and its own hourly charge.</p>
+
+      <div class="cp-term" id="term-02" role="note" aria-label="New term 2 of 3">
+        <p class="cp-term__kicker">New term · 02 / 03</p>
+        <p class="cp-term__term">load balancer</p>
+        <p class="cp-term__def">A machine the cloud provider runs, with a public address, that passes incoming connections on to what’s behind it; a Service of type LoadBalancer gets one of its own.</p>
+        <p class="cp-term__back">The provider’s machine, billed by the hour.</p>
+      </div>
+
+      <p>(Engineers also say that a Service “load-balances”, as §05 mentioned, meaning the spreading done by each node’s rules. Here, a load balancer is the provider’s machine.)</p>
+      <p>The other way in serves many Services at once, for web traffic. The cluster gets one entry point: a set of routing rules that sends each request to a Service according to the name or path it asks for, such as <code>fennel.example</code> to <code>storefront</code>. The rules do nothing by themselves. A controller carries them out, either one that the provider runs or one that the team installs and keeps up to date, and in the usual set-up it sits behind a single cloud load balancer. The older form of this entry point is called an ingress; the newer one, which the Kubernetes project now recommends, is a <dfn id="dfn-gateway" aria-describedby="term-03">gateway</dfn>.</p>
+
+      <div class="cp-term" id="term-03" role="note" aria-label="New term 3 of 3">
+        <p class="cp-term__kicker">New term · 03 / 03</p>
+        <p class="cp-term__term">gateway <span class="cp-term__sep">(or ingress)</span></p>
+        <p class="cp-term__def">One entry point for a cluster’s web traffic, whose rules send each request to a Service by the name or path it asks for; a controller carries the rules out.</p>
+        <p class="cp-term__back">One way in, for many Services.</p>
+      </div>
+
+      <p>Fennel has used the second way since the move: one gateway, run with the provider’s controller, behind one cloud load balancer with Fennel’s one public address. So far the gateway has a single route, which sends <code>fennel.example</code> to <code>storefront</code>.</p>
+
+      <div class="cp-check" role="group" aria-labelledby="k-06-q" data-check="k-06">
+        <div class="cp-check__head"><span class="cp-chip cp-chip--apply">APPLY</span><span class="cp-label">Check 06 / 07</span></div>
+        <p class="cp-check__q" id="k-06-q">A customer places an order on their phone at <code>fennel.example</code>. The request reaches a <code>storefront</code> Pod, which then calls <code>orders</code> to store the order. How many load balancers do the request and that call pass through between them?</p>
+        <ul class="cp-options">
+          <li><button type="button" class="cp-option" data-ok data-fb="Right. The cloud load balancer in front of the gateway is the only one. Inside the cluster, `storefront` reaches `orders` by its name and its Service’s address, which needs no load balancer. Fig. 05 traces it."><span class="cp-option__key">A</span><span>One, at the cluster’s edge; the call to <code>orders</code> uses its Service.</span><span class="cp-option__tag"></span></button></li>
+          <li><button type="button" class="cp-option" data-fb="Calls inside the cluster need no load balancer: `storefront` reaches `orders` through the `orders` Service, whose rules sit on `storefront`’s own node. Only the way in from the internet needs one. Fig. 05 traces it."><span class="cp-option__key">B</span><span>Two: one at the edge, and one in front of <code>orders</code> for the call inside.</span><span class="cp-option__tag"></span></button></li>
+          <li><button type="button" class="cp-option" data-fb="A Service is not a load balancer, and only a Service of type `LoadBalancer` gets one. Fennel’s Services stay inside the cluster, behind the one load balancer in front of the gateway. Fig. 05 traces it."><span class="cp-option__key">C</span><span>Three: one at the edge, and one in front of each of the two Services.</span><span class="cp-option__tag"></span></button></li>
+        </ul>
+        <div class="cp-feedback" role="status" hidden></div>
+      </div>
+
+      <!-- gate k-06: f-05, what each way in costs, and D6. Collapses until committed. -->
+      <div class="cp-gate" data-gate="k-06">
+        <p class="cp-gate__lock">Answer the question above to trace the order</p>
+
+        <!-- f-05: static HTML. A vertical path, each hop a different look and labelled with who runs it: the phone in
+             a dashed INTERNET band; the cloud load balancer as a solid 3px ink box straddling the 3px CLUSTER
+             frame's top edge (PROVIDER'S MACHINE · ONE PUBLIC ADDRESS); the gateway with its rules in the manifest
+             treatment (the route this request takes highlighted; a dashed placeholder) and its controller pill;
+             the storefront Service block (pool-04's look); a storefront Pod; and the internal call, labelled
+             INSIDE THE CLUSTER · NO LOAD BALANCER, to the right from 760px of figure width, under the Pod below. -->
+        <figure class="cp-fig d-wide" id="f-05" aria-labelledby="f-05-cap">
+          <div class="cp-fig__plate">
+            <div class="cp-fig__bar"><span class="cp-label">Fig. 05</span><span class="cp-label">One order, from a phone to a Pod</span></div>
+            <div class="cp-blueprint rt" role="img" aria-label="One order, traced. On the internet, a customer’s phone opens fennel.example. The request reaches the cloud load balancer at the cluster’s edge, a machine the provider runs, with Fennel’s one public address. It passes the request to the gateway, whose route sends fennel.example to storefront; the gateway’s controller is run by the provider, at Fennel. The storefront Service, 10.96.0.12, lists three ready Pods, and the request reaches one storefront Pod. That Pod then calls orders inside the cluster, through the orders Service, 10.96.0.25, to the orders-q2rw Pod, with no load balancer on the way.">
+              <div class="rt__inet">
+                <p class="rt__zone">Internet</p>
+                <div class="rt__box rt__phone"><span class="svc__kind">Phone</span> <span class="svc__sep">·</span> fennel.example</div>
+              </div>
+              <div class="rt__arr"></div>
+              <div class="rt__cluster">
+                <p class="rt__clab">Cluster</p>
+                <div class="rt__box rt__lb">
+                  <span class="rt__name">Cloud load balancer</span>
+                  <span class="rt__tag">Provider’s machine</span><span class="rt__tag rt__tag--mute">One public address</span>
+                </div>
+                <div class="rt__arr"></div>
+                <div class="rt__box rt__gw">
+                  <span class="rt__name">Gateway</span>
+                  <div class="rt__rules">
+                    <p class="rt__rule is-hl">fennel.example → storefront</p>
+                    <p class="rt__rule rt__rule--more">(more routes can be added)</p>
+                  </div>
+                  <div class="rt__ctl"><span class="cp-loop"><span class="cp-loop__mark" aria-hidden="true">↻</span>gateway controller</span><span class="rt__who">Run by the provider, at Fennel</span></div>
+                </div>
+                <div class="rt__arr"></div>
+                <div class="rt__box svc">
+                  <div class="svc__head"><span class="svc__kind">Service</span><span class="svc__sep">·</span><span>storefront</span><span class="svc__sep">·</span><span class="addr addr--svc">10.96.0.12</span></div>
+                  <div class="svc__list"><span class="svc__lab">Ready Pods</span><span class="svc__entry">10.4.1.6</span><span class="svc__entry">10.4.2.9</span><span class="svc__entry">10.4.4.5</span></div>
+                </div>
+                <div class="rt__arr"></div>
+                <div class="rt__bottom">
+                  <div class="rt__box rt__pod"><span class="pod"><span class="pod__chip">storefront <span class="st st--good"><span class="lamp" aria-hidden="true"></span>Ready</span></span></span></div>
+                  <div class="rt__harr"><span>calls orders</span></div>
+                  <div class="rt__branch">
+                    <p class="rt__blab">Inside the cluster · no load balancer</p>
+                    <div class="rt__arr rt__vonly"><span>calls <code>orders</code></span></div>
+                    <div class="rt__box svc">
+                      <div class="svc__head"><span class="svc__kind">Service</span><span class="svc__sep">·</span><span>orders</span><span class="svc__sep">·</span><span class="addr addr--svc">10.96.0.25</span></div>
+                      <div class="svc__list"><span class="svc__lab">Ready Pods</span><span class="svc__entry">10.4.4.7</span></div>
+                    </div>
+                    <div class="rt__arr"></div>
+                    <div class="rt__box rt__pod"><span class="pod"><span class="pod__chip">orders-q2rw <span class="st st--good"><span class="lamp" aria-hidden="true"></span>Ready</span></span></span></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <figcaption id="f-05-cap"><span class="cp-label">Fig. 05</span><span>A customer’s request passes one load balancer, at the edge; calls between services inside the cluster pass none. On some providers, the cloud load balancer carries the gateway’s rules itself.</span></figcaption>
+        </figure>
+
+        <p>What does each way in cost? On one provider, AWS, an Application Load Balancer in one US region was listed at $0.0225 an hour on 24 October 2026, which comes to about $16 a month, before charges for the traffic it handles. A separate one for each of Fennel’s six services would be about $99 a month before use, against about $16 for the one in front of the gateway; at the thirty or more services Fennel expects next year, it would be about $490. Other providers price differently.</p>
+        <p>At Fennel’s size those sums are modest, and the bigger cost isn’t the money. Each load balancer is one more public entry point to secure, give a certificate, watch and keep track of, and one gateway keeps all of that in one place. There are real reasons to have more than one, such as traffic that isn’t web traffic, which usually takes a load balancer of its own, or keeping one kind of traffic apart from another. They’re worth asking about rather than assuming.</p>
+
+        <!-- D6 (c-10, c-11; dated) -->
+        <details class="d-more cp-more">
+          <summary>Ingress or gateway?</summary>
+          <div class="cp-more__body"><p>The Kubernetes project has frozen the Ingress API and recommends the Gateway API instead. Ingress keeps working and won’t be removed, but it will get no new features.</p><p>Separately, one of the most widely used ingress controllers, Ingress NGINX, was retired on 24 March 2026. Existing installations keep running, but they get no more fixes, including security fixes, and moving off it takes planning. The questions for engineers: which controller do we run, and who keeps it up to date? Fennel’s gateway uses the provider’s controller, so the provider does.</p></div>
+        </details>
+      </div>
+    </section>
+
+    <!-- s-08 · The loops so far · o-2 · claims c-03, c-05 · f-06 from CH07_LOOPS (Ch 06's CH06_LOOPS copied
+         forward, Ch 06's tags dropped; the endpoints loop replaces the dashed Chapter 7 row; kube-proxy added, one
+         per node; both tagged NEW IN CH 7, job "connecting"; ac-12) -->
+    <section id="s-08" data-segment="s-08">
+      <h2 id="the-loops-so-far"><span class="cp-sec">§ 08 </span>The loops so far</h2>
+      <p>The connecting job that Sam did by hand at 03:04 is now split between two loops: one in the control plane keeps each Service’s list, and one on every node turns the lists into rules. Fig. 06 shows both beside the loops from earlier chapters.</p>
+
+      <!-- f-06: the loop lens table. Rows are built by assets/page.js from CH07_LOOPS. Changed or new cells carry
+           NEW IN CH 7. Rows for loops met later are dashed. No status colours. -->
+      <figure class="cp-fig d-wide" id="f-06" aria-labelledby="f-06-cap">
+        <div class="cp-fig__plate">
+          <div class="cp-fig__bar"><span class="cp-label">Fig. 06</span><span class="cp-label">Which loop: wants, sees, does</span></div>
+          <div class="cp-blueprint lens">
+            <table data-labels="Wants|Sees|Does|Sam’s job" data-new="New in Ch 7">
+              <thead><tr><th scope="col">Loop</th><th scope="col">Wants</th><th scope="col">Sees</th><th scope="col">Does</th><th scope="col">Sam’s job, now a loop’s</th></tr></thead>
+              <tbody data-loop-lens></tbody>
+              <tfoot><tr><td colspan="5">The memory kill itself is the operating system’s, on the node; the node agent restarts the container afterwards.</td></tr></tfoot>
+            </table>
+            <noscript><p class="cs-noscript">This table is drawn by JavaScript.</p></noscript>
+          </div>
+        </div>
+        <figcaption id="f-06-cap"><span class="cp-label">Fig. 06</span><span>Neither connecting loop sits on a call’s path: one keeps each Service’s list in the record, and kube-proxy, on every node, turns the lists into the rules that calls follow.</span></figcaption>
+      </figure>
+    </section>
+
+    <!-- s-09 · The conversation · o-3, o-2 · claims c-08, c-09, c-12 · Riley's line, then k-07 (think, then reveal;
+         states its own question; model answer hidden until revealed; names local-03 once) · recap · bridge to
+         Ch 8 -->
+    <section id="s-09" data-segment="s-09">
+      <h2 id="the-conversation"><span class="cp-sec">§ 09 </span>The conversation</h2>
+      <p>At a planning meeting a few weeks later, the talk turns to partners. Several partners’ apps want to read <code>catalog</code>’s prices directly, and Riley’s team wants a say in how those apps get in.</p>
+      <blockquote class="cp-quote"><p>“We want a separate load balancer for every service.”</p><cite>Riley</cite></blockquote>
+
+      <div class="cp-check" role="group" aria-labelledby="k-07-q" data-check="k-07" data-reveal>
+        <div class="cp-check__head"><span class="cp-chip cp-chip--apply">APPLY</span><span class="cp-label">Check 07 / 07 · think, then reveal</span></div>
+        <p class="cp-check__q" id="k-07-q">At a planning meeting, Riley’s team wants partners’ apps to read <code>catalog</code>’s prices directly, and wants control over how they get in. Riley says: “We want a separate load balancer for every service.” What would you ask Riley, and why? Think of your questions, then show the answer.</p>
+        <button type="button" class="cp-reveal" aria-expanded="false" aria-controls="k-07-a">Show the answer</button>
+        <div class="cp-feedback" id="k-07-a" role="status" hidden>
+          <p><b>ANSWER</b>“What does each one cost? Could one gateway route to all of them?”</p>
+          <p>Each Service of type <code>LoadBalancer</code> gets its own provider machine, with its own public address and hourly charge: on one provider, AWS, about $16 a month each before use (October 2026). That is about $99 a month for Fennel’s six services, against about $16 for the one Fennel already has, and about $490 at thirty services. The money is modest; the bigger cost is six public entry points to secure, give certificates, watch and keep track of. And Fennel’s gateway can already route by name or path, so partners could reach <code>catalog</code> through it with one more route.</p>
+          <p>Then, to follow up:</p>
+          <ul class="cp-answer">
+            <li>“Which of our services do customers or partners actually call from outside?” Only those need a way in at all. <code>orders</code>, <code>payments</code> and <code>dispatch</code> are called from inside the cluster, through their Services, and need no load balancer.</li>
+            <li>“Can each team manage its own routes on the shared gateway, so nobody waits on Ari’s team?” That’s the control Riley is really asking for.</li>
+            <li>“Is there a reason for a separate one here, such as traffic that isn’t web traffic, or keeping partners’ traffic apart?” If there is, one more load balancer may be worth its cost.</li>
+          </ul>
+          <p>Calls between services never need a load balancer, and one gateway can route many Services behind a single one. Chapter 14 returns to what the whole platform costs.</p>
+        </div>
+      </div>
+
+      <div class="cp-recap">
+        <p class="cp-label">In short</p>
+        <ul>
+          <li>Every replacement and every release, rollbacks included, gives a service new Pods at new addresses, so callers use a name instead of an address.</li>
+          <li>A Service is a record that gives a set of Pods, picked out by a selector, one stable name and address.</li>
+          <li>The endpoints loop keeps each Service’s list of ready Pods current, copying each Pod’s own readiness answer and checking nothing itself.</li>
+          <li>kube-proxy on every node turns the lists into forwarding rules, so a call goes from the caller’s node straight to one Pod, picked at random by default, with no server in between.</li>
+          <li>When a Service’s list is empty, callers are refused at once, and the fix is more ready Pods, not a different Service.</li>
+          <li>From the internet, a cloud load balancer is the provider’s machine, one for each Service of that type; one gateway can route many Services behind a single one.</li>
+        </ul>
+        <p>On a Friday evening, Fennel’s orders triple between five and seven. Every extra Pod that the cluster starts for the rush will join its Service’s list the moment it is ready, and <code>storefront</code> will never know that it was added. What decides to start those Pods, and whether they arrive in time, is Chapter 8.</p>
+      </div>
+    </section>
+
+    <footer class="cp-sources" data-toc-skip>
+      <p class="cp-label">Sources</p>
+      <ol>
+        <li>Kubernetes documentation, <a href="https://kubernetes.io/docs/concepts/services-networking/service/">“Service”</a>: every Pod has its own address and the set of Pods changes; a Service’s cluster IP; the controller that keeps each Service’s EndpointSlices current; Services reachable only inside the cluster by default; type LoadBalancer provisions a load balancer per Service; Ingress and the Gateway API as one entry point.</li>
+        <li>Kubernetes documentation, <a href="https://kubernetes.io/docs/concepts/services-networking/endpoint-slices/">“EndpointSlices”</a>: only ready endpoints are used for Service traffic, and terminating ones are normally ignored.</li>
+        <li>Kubernetes documentation, <a href="https://kubernetes.io/docs/reference/networking/virtual-ips/">“Virtual IPs and Service Proxies”</a>: kube-proxy on every node turns Services into forwarding rules that pick a backend at random by default, per connection; why DNS doesn’t list Pods.</li>
+        <li>Kubernetes source, <a href="https://github.com/kubernetes/kubernetes/blob/master/pkg/proxy/iptables/proxier.go">kube-proxy’s iptables proxier</a>: a Service with no endpoints gets a rule that rejects connections.</li>
+        <li>Kubernetes documentation, <a href="https://kubernetes.io/docs/concepts/services-networking/dns-pod-service/">“DNS for Services and Pods”</a>: a Service’s DNS name and its short form; <a href="https://kubernetes.io/docs/tasks/debug/debug-application/debug-service/">“Debug Services”</a>: an empty endpoints list as the first check.</li>
+        <li>Kubernetes documentation, <a href="https://kubernetes.io/docs/concepts/services-networking/ingress/">“Ingress”</a> and <a href="https://kubernetes.io/docs/concepts/services-networking/gateway/">“Gateway API”</a>: routing by host and path, controllers, the frozen Ingress API and the recommendation of Gateway; Kubernetes blog, <a href="https://kubernetes.io/blog/2025/11/11/ingress-nginx-retirement/">“Ingress NGINX Retirement”</a> (11 November 2025) and <a href="https://kubernetes.io/blog/2026/03/30/kubernetes-v1-36-sneak-peek/">“Kubernetes v1.36 sneak peek”</a> (30 March 2026): Ingress NGINX retired on 24 March 2026.</li>
+        <li>AWS, <a href="https://aws.amazon.com/elasticloadbalancing/pricing/">“Elastic Load Balancing pricing”</a>, read 24 October 2026: an Application Load Balancer in US East (N. Virginia) at $0.0225 an hour, plus capacity-unit charges.</li>
+      </ol>
+      <p>Facts carried over from earlier chapters (Pods replaced with new names and addresses, the loops, rolling updates, readiness checks, restarts in place) are sourced in Chapters 3 to 6.</p>
+      <p>Fennel, its people, services, versions, times, addresses, routes and incidents are fiction, made up to illustrate the mechanisms above. Every address on this page is illustrative.</p>
+    </footer>
+  </main>
+</div>
+
+<script src="pool/toc.js"></script>
+<script src="assets/page.js"></script>
+<script src="pool/widget.js"></script>
+<link rel="stylesheet" href="pool/cluster/cluster.css">
+<link rel="stylesheet" href="widgets/w-services-scrolly/index.css">
+<script src="widgets/w-services-scrolly/data.js"></script>
+<script src="pool/cluster/cluster.js"></script>
+<script src="pool/cluster/lanes.js"></script>
+<script src="widgets/w-services-scrolly/index.js"></script>
+</body>
+</html>

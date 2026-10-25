@@ -30,7 +30,8 @@ data format here, keep the promoted chapter drawing exactly as before (compare i
 and give new features optional fields that are off when absent. A pool test page goes in a `test/`
 folder, which is never shipped. Promoted so far: Ch 4's cluster renderer and lane controller (Ch 5
 pool-01; narrow-width fallbacks, pool-02; Ch 6's Deployment group, `notready`, series colour and
-`STATUS_INLINE`, pool-03). Still a candidate: Ch 3's `renderFleet` in `w-fleet-scrolly`, which `cluster/` supersedes.
+`STATUS_INLINE`, pool-03; Ch 7's Service block, `PODS[id].addr` and narrow chips that keep their
+service name, pool-04). Still a candidate: Ch 3's `renderFleet` in `w-fleet-scrolly`, which `cluster/` supersedes.
 
 ## Cluster drawing (`cluster/cluster.js`, `cluster/cluster.css`)
 
@@ -57,7 +58,7 @@ fonts load). Styles are scoped under the drawing's root, `.wc`.
 | `ROOM_UNIT` | optional, default 1. How many `UNIT`s one drawn unit of room is (Ch 5: `2`, so a 2 GB Pod is Ch 4's one-unit chip) |
 | `SERVICES` | `{ svc: { size, cpu?, label, breaks } }`. `size` in `UNIT` (fractions allowed); `cpu` in cores; `breaks` = where the label may break on a narrow chip |
 | `LOOPS` | `{ id: { label } }`, the loop pills |
-| `PODS` | `{ id: { service, version?, name?, size?, cpu?, use?, series? } }`. `size` / `cpu` override the service's for this Pod; `use` = what it used (also settable per state) |
+| `PODS` | `{ id: { service, version?, name?, size?, cpu?, use?, series?, addr? } }`. `size` / `cpu` override the service's for this Pod; `use` = what it used (also settable per state); `addr` = the Pod's address, printed only in a Service block (pool-04) |
 | `STATUS_INLINE` | optional (pool-03). `true`: a chip with no line of its own for its status word puts it beside its label |
 | `STRINGS` | every reader-visible string (below) |
 | `CLUSTER_LANES` (or `LANES`) | lanes for `lanes.js` |
@@ -226,6 +227,60 @@ Strings these use: `record.deployment` (`'Deployment'`), `record.replicaSet` (`'
 `record.kept` (`'KEPT'`), `status.notready` (`'NOT READY'`). The test page's pool-03 group draws each
 at 560px, 360px and a 360px phone's snapshot width (314px), in both themes (`?theme=dark`).
 
+### Optional field and chip rule (pool-04, Ch 07)
+
+Drawn only when present; with no `record.service` the drawing is Ch 04–06's. The chip rule in item 3
+changes only chips of a chapter with `STATUS_INLINE` that are too narrow for the full inline label (Ch 06
+at 360px, and Fig. 03's crash panel); Ch 04 and Ch 05 are unchanged.
+
+1. **The Service block**: `record.service: { name, addr, list: [podId…], leaving?: [podId…] }` draws, below
+   the record's other rows (or alone, when `rows` is `[]`, with no empty rows block), a header row
+   `SERVICE · catalog · 10.96.0.21` (`STRINGS.record.service`, uppercased; name and address in mono bold
+   ink: the Service as written, in the record's c4 on c4-soft) and under it a list row labelled `READY PODS`
+   (`STRINGS.record.list`) on `surface-2` with a 1.5px dashed c3 left rule (kept by a loop), holding one
+   entry per listed Pod in list order: a square in the Pod's series colour (c1 when it has none), its
+   `version` in bold ink if any, and its `PODS[id].addr` in ink-2. Pods in `leaving` follow, struck
+   through in ink-3 with a hollow square, and are not counted. An empty list reads `STRINGS.record.none`
+   (`NONE`, bad). The list is data, not computed: the chapter decides which Pods are listed (Ch 07: the
+   drawn Pods that are READY). With rows above it, a c4 rule separates the block from them.
+   Lane-wide (`laneLayout`): the header takes two lines (`SERVICE · catalog` / `10.96.0.21`) where one
+   doesn't hold it (`L.svcWrap`); the label sits beside the entries on a wide canvas where two entries
+   still fit a line (one, for a list that never holds more), else on a line of its own (`L.svcLabelAbove`, always on a narrow canvas); entries are
+   packed into whole-entry lines (separator dots between entries on a line, none on a narrow canvas,
+   where they sit 10px apart, two to a line at a 360px phone's 314px plate); and the list reserves its
+   fullest state's line count (`L.svcLines`), so the lane never changes height. Highlight keys
+   `svc:<name>` (the header), `svc:<name>:list` (the list row), `svc:<name>:<podId>` (one entry, listed
+   or leaving).
+2. **`PODS[id].addr`** (string): used only by the Service block; chips don't print it.
+3. **Narrow chips keep their service name** (Ch 06 review P-08): with `STATUS_INLINE`, a one-line chip
+   tries, in order, (1) `catalog v63 ■ READY` (as before); (2) the lamp gives way: `catalog v63 READY`
+   (the word keeps its tone colour, so word plus colour still holds); (3) the version gives way, the lamp
+   first kept, then not: `catalog □ NOT READY`, `catalog NOT READY` (the chip's series colour, the record
+   or Service list and the step text carry the version; restarts stay: `catalog ↻ 3 CRASHED`); (4) only
+   where even that misses, beside the version alone as before (`v63 □ NOT READY`). Each try is measured
+   as drawn: the label in the chip's letter-spacing, the word in its own (0), so a word that only just
+   missed before (READY touching the chip's edge at 360px) now drops its lamp instead of clipping.
+   At a 360px phone's 314px plate, Ch 06 and Ch 07 read `catalog v62 READY` and `catalog NOT READY`.
+
+Strings: `record.service` (`'Service'`), `record.list` (`'Ready Pods'`), `record.none` (`'None'`), needed
+only when `record.service` is present.
+
+Example (Ch 07's lane step S3; `PODS.c1.addr = '10.4.5.12'` and so on):
+
+```js
+{ nodes: { '05': ['di7', 'c1', 'n1'], '06': ['c2:stopped', 'c3'] },
+  record: { rows: [], want: {}, pods: {},
+            service: { name: 'catalog', addr: '10.96.0.21', list: ['c1', 'c3', 'n1'], leaving: ['c2'] } },
+  loops: { shown: ['deploy', 'ep'], active: ['ep'], agents: [],
+           lens: { watching: 'v63 Pod ready; a v62 Pod stopping', doing: 'adds one, removes one' } },
+  notes: [{ id: 'calls', label: 'storefront → catalog', text: 'answered by v62 ×2 · v63 ×1', tone: 'good' }],
+  clock: '~10:15:20' }
+```
+
+The test page's pool-04 group (V1–V5, C1–C2b) draws each at 560px, 360px and 314px, an empty list and a
+two-panel figure without a header at 440px and 314px, a block under a Deployment group, a wrapped
+header, and the chip rule in Ch 07's and Ch 06's samples, in both themes (`?theme=dark`).
+
 `renderCluster` options, all optional: `width` (the plate's width; with `bleed`, the target's width plus
 the bleed), `unit` (px per drawn unit of room; default 32, 22 narrow), `layout` (from `laneLayout`),
 `reserve` (from `measureReserve`), `highlight` (keys below), `lit` (false = highlight drawn but not yet
@@ -235,7 +290,7 @@ canvas under 440px wide uses the narrow chrome.
 Highlight keys (the step highlight, a 3px ink outline): `p:<pod>`, `n:<node>`, `status:<node>`,
 `free:<node>`, `row:<service>`, `loop:<id>`, `agent:<node>`, `note:<id>`, `lens`, `banner`; new:
 `verdict:<node>`, `cpu:<node>`, `new:<node>`, `waiting`, `use:<pod>`; pool-03: `dep:<name>`,
-`dep:<name>:version`.
+`dep:<name>:version`; pool-04: `svc:<name>`, `svc:<name>:list`, `svc:<name>:<podId>`.
 
 Example (Ch 5 lane step F3):
 

@@ -9,7 +9,8 @@
      One snapshot per optional feature, each drawn at a desktop canvas width (560px) and a phone width
      (360px); the data below is a sample in Ch 05's units (GB, cores), not chapter content. The last
      group (pool-02) draws the narrow-width fallbacks, at the plate width of a 360px phone's inline
-     snapshot (314px) where that is where they apply. -->
+     snapshot (314px) where that is where they apply. Then pool-03 (Ch 06) and pool-04 (Ch 07: the Service
+     block and narrow chips that keep their service name). -->
 <link rel="stylesheet" href="../../tokens.css">
 <link rel="stylesheet" href="../cluster.css">
 <style>
@@ -275,6 +276,77 @@
       rolloff: 1, roll: R2, rlane: RLANE, widths: [560, 314], highlight: [] }
   );
 
+  /* ---- pool-04 (Ch 07): the Service block (record.service, PODS[id].addr) and narrow chips that keep
+     their service name. The same rollout sample, now with Pod addresses and a catalog Service; the
+     record holds only the Service (rows: []), as in Ch 07's lane S. ---- */
+  var SVCD = JSON.parse(JSON.stringify(ROLL));
+  SVCD.NODES = [];
+  var ADDR = { c1: '10.4.5.12', c2: '10.4.6.8', c3: '10.4.6.9', n1: '10.4.5.14', n2: '10.4.6.11', n3: '10.4.5.15' };
+  Object.keys(ADDR).forEach(function (id) { SVCD.PODS[id].addr = ADDR[id]; });
+  SVCD.SERVICES.orders = { size: 6, cpu: 1, label: 'orders', breaks: ['orders'] };
+  SVCD.SERVICES.notifications = { size: 2, cpu: 0.25, label: 'notifications', breaks: ['notifi-', 'cations'] };
+  SVCD.PODS.or1 = { service: 'orders', addr: '10.4.4.7' };
+  SVCD.PODS.no1 = { service: 'notifications', addr: '10.4.1.21' };
+  SVCD.PODS.no2 = { service: 'notifications', addr: '10.4.2.30' };
+  SVCD.LOOPS.ep = { label: 'endpoints loop' };
+  SVCD.STRINGS.status.crashed = 'OOM-KILLED';
+  SVCD.STRINGS.statusBreaks.crashed = ['OOM-', 'KILLED'];
+  SVCD.STRINGS.record.service = 'Service';
+  SVCD.STRINGS.record.list = 'Ready Pods';
+  SVCD.STRINGS.record.none = 'None';
+  var SVC_R = ClusterCanvas.create(SVCD);
+  var CAT = function (list, leaving) { var s = { name: 'catalog', addr: '10.96.0.21', list: list }; if (leaving) s.leaving = leaving; return s; };
+  var EPL = function (w, d) { return { shown: ['deploy', 'ep'], active: ['ep'], agents: [], lens: { watching: w, doing: d } }; };
+  var CALLS = function (t, tone) { return { id: 'calls', label: 'storefront → catalog', text: t, tone: tone || 'good' }; };
+  var V1 = { nodes: { '05': ['di7', 'c1'], '06': ['c2', 'c3'] }, record: { rows: [], want: {}, pods: {}, service: CAT(['c1', 'c2', 'c3']) },
+    loops: EPL('3 Pods match, all ready', 'lists all 3'), notes: [CALLS('answered by v62 ×3')], clock: '10:15:00' };
+  var V2 = { nodes: { '05': ['di7', 'c1', 'n1:notready'], '06': ['c2', 'c3'] }, record: { rows: [], want: {}, pods: {}, service: CAT(['c1', 'c2', 'c3']) },
+    loops: EPL('a 4th matching Pod, not ready', 'leaves it off the list'), notes: [CALLS('answered by v62 ×3')], clock: 'Seconds later' };
+  var V3 = { nodes: { '05': ['di7', 'c1', 'n1'], '06': ['c2:stopped', 'c3'] }, record: { rows: [], want: {}, pods: {}, service: CAT(['c1', 'c3', 'n1'], ['c2']) },
+    loops: EPL('v63 Pod ready; a v62 Pod stopping', 'adds one, removes one'), notes: [CALLS('answered by v62 ×2 · v63 ×1')], clock: '~10:15:20' };
+  var V4 = { nodes: { '05': ['di7', 'n1', 'n3'], '06': ['c3:stopped', 'n2'] }, record: { rows: [], want: {}, pods: {}, service: CAT(['n1', 'n2', 'n3'], ['c3']) },
+    loops: EPL('3 Pods match, all ready', 'lists all 3'), notes: [CALLS('answered by v63 ×3')], clock: '~10:16' };
+  var VLANE = [V1, V2, V3, V4];
+  var ORD = function (list) { return { name: 'orders', addr: '10.96.0.25', list: list }; };
+  var E1 = { nodes: { '04': ['or1:crashed'] }, restarts: { or1: 1 }, record: { rows: [], want: {}, pods: {}, service: ORD([]) },
+    loops: { shown: ['ep'], active: ['ep'], agents: [], lens: { watching: 'orders’ only Pod not ready', doing: 'empties the list' } },
+    notes: [{ id: 'calls', label: 'storefront → orders', text: 'connection refused', tone: 'bad' }] };
+  var E2 = { nodes: { '04': ['or1'] }, restarts: { or1: 1 }, record: { rows: [], want: {}, pods: {}, service: ORD(['or1']) },
+    loops: { shown: ['ep'], active: ['ep'], agents: [], lens: { watching: 'the Pod ready again', doing: 'lists it, same address' } },
+    notes: [{ id: 'calls', label: 'storefront → orders', text: 'answered', tone: 'good' }] };
+  /* below a Deployment group: the block's top rule separates it from the rows */
+  var VDEP = { nodes: V3.nodes,
+    record: { deployment: DEP, rows: ['v62', 'v63'], want: { v62: 2, v63: 1 }, pods: { v62: ['c1', 'c3'], v63: ['n1'] }, deleting: { v62: ['c2'] }, service: CAT(['c1', 'c3', 'n1'], ['c2']) },
+    loops: EPL('v63 Pod ready; a v62 Pod stopping', 'adds one, removes one'), notes: [] };
+  /* a long name and address: the header wraps at a phone's width (svcWrap) */
+  var VLONG = { nodes: { '01': ['no1'], '02': ['no2'] }, record: { rows: [], want: {}, pods: {},
+    service: { name: 'notifications', addr: '10.96.100.214', list: ['no1', 'no2'] } }, loops: { shown: ['ep'], active: ['ep'], agents: [] }, notes: [] };
+  CASES.push(
+    { group: 'pool-04 · Ch 07: the Service block and narrow chips (each off when absent; Ch 04–06 unchanged except narrow STATUS_INLINE chips)' },
+    { title: 'V1 · record.service: { name, addr, list } — header SERVICE · catalog · 10.96.0.21 over the READY PODS list',
+      note: 'Lane step S1 (rows: [], so the Service is the record’s only block). Entries: a square in the Pod’s series colour, its version, PODS[id].addr. Wide: the label beside the entries, separator dots between entries on a line. Narrow (&lt; 440px): the label on its own line, entries two to a line, no dots. Highlight keys svc:&lt;name&gt; (header) and svc:&lt;name&gt;:list.',
+      svc: V1, slane: VLANE, widths: [560, 360, 314], highlight: ['svc:catalog', 'svc:catalog:list'] },
+    { title: 'V2 · leaving: [podIds] — struck through in ink-3, after the listed entries, not counted',
+      note: 'Lane step S3: one added (v63), one leaving (v62, its Pod STOPPED). The list reserves its fullest state’s line count lane-wide, so every step of the lane has the same height. Highlight key svc:&lt;name&gt;:&lt;podId&gt; (one entry).',
+      svc: V3, slane: VLANE, widths: [560, 360, 314], highlight: ['svc:catalog:n1', 'svc:catalog:c2', 'p:n1', 'p:c2'] },
+    { title: 'V3 · an empty list: NONE (STRINGS.record.none, bad)',
+      note: 'Ch 07’s Fig. 04 left panel: orders’ only Pod OOM-killed and restarting, so nothing is listed; right: the same Pod back on the list. No header bar; the two panels share one layout and reserve.',
+      svc: E1, slane: [E1, E2], noHeader: true, widths: [440, 314], highlight: ['svc:orders:list', 'note:calls'] },
+    { title: 'V3b · the same figure, right panel',
+      svc: E2, slane: [E1, E2], noHeader: true, widths: [440, 314], highlight: ['svc:orders:list', 'note:calls'] },
+    { title: 'V4 · below a Deployment group (rows above: a c4 rule between them)',
+      svc: VDEP, slane: [VDEP], noHeader: true, widths: [560, 314], highlight: [] },
+    { title: 'V5 · a header that doesn’t fit one line: the address on a second line (lane-wide svcWrap)',
+      svc: VLONG, slane: [VLONG], noHeader: true, widths: [560, 314], highlight: ['svc:notifications'] },
+    { title: 'C1 · narrow STATUS_INLINE chips keep the service name (Ch 06 P-08)',
+      note: 'Lane step S2 at 560, 360 and a 360px phone’s 314px plate. Order of tries on a one-line chip: “catalog v63 ■ READY”; then the lamp gives way (“catalog v62 READY”, the word keeps its colour); then the version (“catalog □ NOT READY”, then “catalog NOT READY”); only where even that misses, “v63 □ NOT READY” as before. Measured as drawn: the label in the chip’s letter-spacing, the word in its own.',
+      svc: V2, slane: VLANE, widths: [560, 360, 314], highlight: ['p:n1'] },
+    { title: 'C2 · the same in the pool-03 sample (Ch 06’s lane R2 and R3) at 314px',
+      roll: R2, rlane: RLANE, widths: [314], highlight: [] },
+    { title: 'C2b · R3 (a STOPPED chip) at 314px',
+      roll: R3, rlane: RLANE, widths: [314], highlight: [] }
+  );
+
   var host = document.getElementById('cases');
   CASES.forEach(function (c) {
     if (c.group) { var g = document.createElement('h1'); g.style.marginTop = 'var(--sp-8)'; g.textContent = c.group; host.appendChild(g); return; }
@@ -287,7 +359,12 @@
       cap.textContent = w + 'px' + (w === 314 ? ' (360px phone)' : '') + (c.perState ? (c.perState[wi] ? ' · per state' : ' · lane-wide') : '');
       fig.appendChild(cap);
       var target = document.createElement('div'); fig.appendChild(target); row.appendChild(fig);
-      if (c.roll) {
+      if (c.svc) {
+        var sh = c.noHeader ? null : { lane: 'Thursday, 10:15', n: c.slane.indexOf(c.svc) + 1, total: c.slane.length };
+        var sl = SVC_R.laneLayout(w, c.slane, sh);
+        var sres = SVC_R.measureReserve(target, c.slane, { width: w, layout: sl, header: sh });
+        SVC_R.renderCluster(target, c.svc, { width: w, layout: sl, reserve: sres, header: sh, highlight: c.highlight });
+      } else if (c.roll) {
         var RR = c.rolloff ? ROLL_OFF_R : ROLL_R;
         var hd = c.rlane.length > 1 ? { lane: 'Thursday, 10:15', n: c.rlane.indexOf(c.roll) + 1, total: c.rlane.length } : null;
         var rl = RR.laneLayout(w, c.rlane, hd);

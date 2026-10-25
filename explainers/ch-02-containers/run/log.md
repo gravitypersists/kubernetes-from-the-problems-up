@@ -277,3 +277,13 @@ Gate (page) round 11: **PASS**. Reading ~14.2 min (brief: ~18 min; reported, not
 Gate (page) round 12: **PASS**. Reading ~14.2 min (brief: ~18 min; reported, not gated); 370 KB, 17 requests.
 - [gate/page-round-12.json](gate/page-round-12.json)
 - [screenshots/page-round-12](screenshots/page-round-12)
+
+### 2026-10-24T19:22:16-04:00 · verify · gate
+Gate (page) round 13: **PASS**. Reading ~14.2 min (brief: ~18 min; reported, not gated); 423 KB, 17 requests.
+- [gate/page-round-13.json](gate/page-round-13.json)
+- [screenshots/page-round-13](screenshots/page-round-13)
+
+### 2026-10-24T19:31:57-04:00 · verify · gate
+Gate (page) round 14: **PASS**. Reading ~14.2 min (brief: ~18 min; reported, not gated); 383 KB, 17 requests.
+- [gate/page-round-14.json](gate/page-round-14.json)
+- [screenshots/page-round-14](screenshots/page-round-14)

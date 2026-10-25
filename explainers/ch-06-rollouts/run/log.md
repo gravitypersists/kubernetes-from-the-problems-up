@@ -196,3 +196,13 @@ Ch 6 after-ship updates applied to CURRICULUM.md (plan R1–R11) before human re
 
 ### 2026-10-24T16:30:16-04:00 · orchestrator · stage
 Stage: deliver → **done**
+
+### 2026-10-24T19:24:22-04:00 · verify · gate
+Gate (page) round 9: **PASS**. Reading ~20.5 min (brief: ~20 min; reported, not gated); 418 KB, 19 requests.
+- [gate/page-round-9.json](gate/page-round-9.json)
+- [screenshots/page-round-9](screenshots/page-round-9)
+
+### 2026-10-24T19:34:03-04:00 · verify · gate
+Gate (page) round 10: **PASS**. Reading ~20.5 min (brief: ~20 min; reported, not gated); 292 KB, 19 requests.
+- [gate/page-round-10.json](gate/page-round-10.json)
+- [screenshots/page-round-10](screenshots/page-round-10)

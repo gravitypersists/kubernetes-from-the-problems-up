@@ -15,7 +15,9 @@
    processor footer; and note lines. Every reader-visible string comes from data.STRINGS; colours are
    course tokens (cluster.css). The lane controller is pool/cluster/lanes.js. pool-03 (Ch 06) adds four
    optional fields, each off when absent: record.deployment (a Deployment row over indented ReplicaSet
-   rows, KEPT for an emptied one), status 'notready', PODS[id].series and data STATUS_INLINE. */
+   rows, KEPT for an emptied one), status 'notready', PODS[id].series and data STATUS_INLINE. pool-04 (Ch 07)
+   adds record.service (a Service's header over the list of ready Pods a loop keeps) and PODS[id].addr, and
+   lets a narrow STATUS_INLINE chip keep its service name (the lamp, then the version, give way first). */
 (function () {
   'use strict';
 
@@ -165,6 +167,44 @@
     /* the Deployment header row's two halves: "DEPLOYMENT · catalog" and "WANT 3 · v63" */
     function depParts(dep) {
       return [str('record.deployment').toUpperCase() + ' · ' + dep.name, S.record.want + ' ' + dep.want + ' · ' + dep.version];
+    }
+
+    /* ---------- pool-04: the Service block (record.service) ----------
+       A header row "SERVICE · catalog · 10.96.0.21" (the Service as written, in the record's c4) over a
+       list row "READY PODS" (kept by a loop: surface-2, dashed c3 left rule) holding one entry per listed
+       Pod (series-colour square, version, PODS[id].addr), then the Pods in `leaving`, struck through. The
+       list is data, not computed: the chapter says which Pods are listed. */
+    function svcOf(state) { return (state.record || {}).service || null; }
+    function svcEntries(svc) {
+      var out = [];
+      (svc.list || []).forEach(function (id) { out.push({ id: id, leaving: false }); });
+      (svc.leaving || []).forEach(function (id) { out.push({ id: id, leaving: true }); });
+      return out.map(function (e) {
+        var p = D.PODS[e.id] || {};
+        e.ver = p.version || '';
+        e.addr = p.addr || '';
+        e.series = p.series || 1;
+        return e;
+      });
+    }
+    var SVC_SQ = 10, SVC_SQGAP = 4, SVC_EPAD = 2, SVC_NGAP = 10;
+    function svcEntryW(e) {
+      return SVC_SQ + SVC_SQGAP + 2 * SVC_EPAD + (e.ver ? textW(e.ver + ' ', 700) : 0) + textW(e.addr, 400);
+    }
+    function svcSepW(narrow) { return narrow ? SVC_NGAP : textW(' · ', 400); }
+    /* greedy lines of whole entries; an empty list is one line (NONE) */
+    function svcPack(entries, maxW, narrow) {
+      if (!entries.length) return [[]];
+      var lines = [], cur = null, sep = svcSepW(narrow);
+      entries.forEach(function (e) {
+        var w = svcEntryW(e);
+        if (cur && cur.w + sep + w <= maxW + 0.5) { cur.items.push(e); cur.w += sep + w; }
+        else { cur = { items: [e], w: w }; lines.push(cur); }
+      });
+      return lines.map(function (l) { return l.items; });
+    }
+    function svcHeadW(svc) {
+      return textW(str('record.service').toUpperCase(), 700, 0.06) + textW(' · ' + svc.name + ' · ' + svc.addr, 700);
     }
 
     /* ---------- layout ---------- */
@@ -395,6 +435,28 @@
       }
       L.maxRows = Math.max.apply(null, states.map(function (s) { return (s.record || { rows: [] }).rows.length; }));
 
+      /* pool-04, the Service block: the header on two lines where one doesn't hold it (svcWrap); the list
+         row's label beside its entries on a wide canvas where two entries still fit a line, else on a line
+         of its own (svcLabelAbove; always on a narrow canvas, whose entries drop the separator dots); and
+         the list's line count, reserved lane-wide from its fullest state (svcLines) */
+      var svcs = states.map(svcOf).filter(Boolean);
+      if (svcs.length) {
+        var listW = g.recInner + 4 - BORDER - 10;   /* the list row's inside (cluster.css .wc-svc__list) */
+        var labelW = textW(str('record.list').toUpperCase(), 700, 0.06);
+        var widest = 0, most = 1;
+        svcs.forEach(function (sv) {
+          var es = svcEntries(sv);
+          most = Math.max(most, es.length);
+          es.forEach(function (e) { widest = Math.max(widest, svcEntryW(e)); });
+        });
+        L.svcWrap = svcs.some(function (sv) { return svcHeadW(sv) > g.recInner + 0.5; });
+        /* beside the entries where a line still holds two of them (one, for a list that never has more) */
+        var need = Math.min(2, most);
+        L.svcLabelAbove = g.narrow || listW - labelW - 8 < need * widest + (need - 1) * svcSepW(false);
+        L.svcListW = L.svcLabelAbove ? listW : listW - Math.ceil(labelW) - 8;
+        L.svcLines = Math.max.apply(null, svcs.map(function (sv) { return svcPack(svcEntries(sv), L.svcListW, g.narrow).length; }));
+      }
+
       /* loop pills: on a wide canvas all of them, dimmed unless acting, wherever a state's pills fit
          one row (renderCluster checks per state); on a narrow canvas only the acting one */
       L.pills = g.narrow ? 'active' : 'fit';
@@ -505,11 +567,28 @@
          the fallbacks below; RUNNING (READY) included, since in such a chapter the word is the point */
       if (D.STATUS_INLINE && maxLines >= 1) {
         var lampW = NO_LAMP[status] ? 0 : LAMP;
-        var inl = function (pre) { return { pre: pre, st: status, t: word, lamp: !NO_LAMP[status] }; };
-        if (body.length <= maxLines && fits(body[body.length - 1].t + ' ' + word, lampW)) {
-          return body.slice(0, -1).concat([inl(body[body.length - 1].t)]);
+        var inl = function (pre, lamp) { return { pre: pre, st: status, t: word, lamp: lamp && !NO_LAMP[status] }; };
+        /* pool-04: measured as drawn, the label in the chip's letter-spacing and the word in its own (0) */
+        var fitsInl = function (pre, lamp) {
+          return textW(pre + ' ', 700, g.chipLs) + textW(word, 700, 0) + (lamp ? lampW : 0) <= g.chipTextW + 0.5;
+        };
+        var lastT = body[body.length - 1].t;
+        var nameLast = nameLines[nameLines.length - 1].t;
+        /* 1 · label, version, lamp, word ("catalog v63 ■ READY") */
+        if (body.length <= maxLines && fitsInl(lastT, true)) return body.slice(0, -1).concat([inl(lastT, true)]);
+        /* pool-04 (Ch 06 P-08), so a narrow chip keeps its service name: 2 · the lamp gives way first
+           ("catalog v63 READY": the word keeps its tone colour, so word plus colour still holds); 3 · then
+           the version ("catalog □ NOT READY", then without the lamp; the chip's series colour, the record
+           and the step text carry it) */
+        if (body.length <= maxLines && fitsInl(lastT, false)) return body.slice(0, -1).concat([inl(lastT, false)]);
+        if (extras.length && pod.version && nameLines.length <= maxLines) {
+          var rest = extras.filter(function (x) { return x !== pod.version; });
+          var pre3 = [nameLast].concat(rest).join(' ');
+          if (fitsInl(pre3, true)) return nameLines.slice(0, -1).concat([inl(pre3, true)]);
+          if (fitsInl(pre3, false)) return nameLines.slice(0, -1).concat([inl(pre3, false)]);
         }
-        if (extras.length && fits(extras.join(' ') + ' ' + word, lampW)) return [inl(extras.join(' '))];
+        /* 4 · as before pool-04, where even the name and the word don't fit: beside the version alone */
+        if (extras.length && fits(extras.join(' ') + ' ' + word, lampW)) return [inl(extras.join(' '), true)];
       }
       if (status !== 'running') {
         if (stLines.length > maxLines) {
@@ -632,7 +711,10 @@
           rowsEl.appendChild(row);
         });
         if (dep && !depDrawn) drawDep();
-        rec.appendChild(rowsEl);
+        var svc = svcOf(state);
+        /* a record holding only a Service (rows: []) draws no empty rows block */
+        if (!svc || rowsEl.childNodes.length) rec.appendChild(rowsEl);
+        if (svc) rec.appendChild(drawService(svc, rowsEl.childNodes.length > 0));
         ground.appendChild(rec);
 
         /* loops: pills (an actor: c3, ↻) and the acting loop's lens line */
@@ -731,6 +813,52 @@
         }
         pod.appendChild(chip);
         return pod;
+      }
+
+      /* pool-04: the Service block, below the record's rows (or alone). `below`: rows sit above it. */
+      function drawService(svc, below) {
+        var SL = L.svcListW != null ? L : laneLayout(width, [state], opts.header, opts);
+        var narrow = g.narrow;
+        var box = el('div', 'wc-svc' + (below ? ' wc-svc--below' : '') + (SL.svcWrap ? ' wc-svc--wrap' : ''));
+        box.setAttribute('data-svc', svc.name);
+        var head = mark(el('div', 'wc-svc__head'), 'svc:' + svc.name);
+        var p1 = el('span', 'wc-svc__part');
+        p1.appendChild(el('span', 'wc-svc__kind', str('record.service')));
+        p1.appendChild(el('span', 'wc-rec__sep', ' · '));
+        p1.appendChild(el('span', 'wc-svc__name', svc.name));
+        var p2 = el('span', 'wc-svc__part');
+        if (!SL.svcWrap) p2.appendChild(el('span', 'wc-rec__sep', ' · '));
+        p2.appendChild(el('span', 'wc-svc__addr', svc.addr));
+        head.appendChild(p1);
+        head.appendChild(p2);
+        box.appendChild(head);
+
+        var list = mark(el('div', 'wc-svc__list' + (SL.svcLabelAbove ? ' wc-svc__list--above' : '')), 'svc:' + svc.name + ':list');
+        list.appendChild(el('span', 'wc-svc__label', str('record.list')));
+        var linesEl = el('div', 'wc-svc__lines');
+        var lh = narrow ? 15 : 17;
+        var n = Math.max(1, SL.svcLines || 1);
+        linesEl.style.minHeight = (n * lh + (n - 1) * 2) + 'px';
+        var entries = svcEntries(svc);
+        svcPack(entries, SL.svcListW, narrow).forEach(function (items) {
+          var ln = el('div', 'wc-svc__ln');
+          if (!items.length) ln.appendChild(el('span', 'wc-svc__none wc-tone--bad', str('record.none')));
+          items.forEach(function (e, i) {
+            if (i && !narrow) ln.appendChild(el('span', 'wc-rec__sep wc-svc__sep', ' · '));
+            var en = mark(el('span', 'wc-svc__e' + (e.leaving ? ' wc-svc__e--leaving' : '')), 'svc:' + svc.name + ':' + e.id);
+            en.setAttribute('data-e', e.id);
+            var sq = el('i', 'wc-svc__sq wc-svc__sq--' + e.series);
+            sq.setAttribute('aria-hidden', 'true');
+            en.appendChild(sq);
+            if (e.ver) { en.appendChild(el('b', 'wc-svc__ver', e.ver)); en.appendChild(document.createTextNode(' ')); }
+            en.appendChild(el('span', 'wc-svc__ip', e.addr));
+            ln.appendChild(en);
+          });
+          linesEl.appendChild(ln);
+        });
+        list.appendChild(linesEl);
+        box.appendChild(list);
+        return box;
       }
 
       /* WAITING: Pods no node has room for, in a strip above the nodes (warn header) */
