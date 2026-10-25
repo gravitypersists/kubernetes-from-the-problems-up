@@ -5,7 +5,7 @@
 // dist/index.html            course home: cover + the course map (Fig. 00)
 // dist/pool/                 explainers/_pool/, once (chapters' site/pool/ copies are not shipped)
 // dist/course/               explainers/_site/ chrome (course.css, course.js)
-// dist/ch-NN-slug/           each live chapter's site/, with pool/ → ../pool/ and the course chrome
+// dist/ch-NN-slug/           each live or under-review chapter's site/, with pool/ → ../pool/ and the course chrome
 //                            (masthead with the course map, end-of-chapter plate) injected as static HTML
 //
 // No dependencies and no client-side rendering: every link is in the HTML. Chapter folders are
@@ -21,15 +21,17 @@ const flag = (name) => { const i = argv.indexOf(name); return i < 0 ? null : (ar
 const OUT = path.resolve(ROOT, typeof flag('--out') === 'string' ? flag('--out') : 'dist');
 
 const course = loadCourse();
-const { config, parts, chapters, running, total, pad } = course;
+const { config, parts, chapters, running, review, published, total, pad } = course;
 
 const esc = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 const LEGAL = `<p class="cn-legal">${esc(config.license.holder)} · <a href="${esc(config.license.href)}" rel="license">${esc(config.license.name)}</a></p>`;
-const statusWord = { running: 'Running', pending: 'Pending', creating: 'Creating' };
+const statusWord = { running: 'Running', review: 'Under review', pending: 'Pending', creating: 'Creating' };
+const REVIEW_TAG = '<span class="cn-tag">Under review</span>';
 
 // ---- Fig. 00: the course map ------------------------------------------------------------------
 // Fig. 02's grammar: a spec box (the Deployment) connected to plates (nodes) holding tiles (Pods).
 // Here the course is the spec, parts are plates, chapters are tiles; unbuilt chapters are Pending.
+// Chapters waiting for the user's human review are linked like running ones, tagged Under review.
 
 function pod(ch, { here, base }) {
   const isHere = here === ch.n;
@@ -38,36 +40,38 @@ function pod(ch, { here, base }) {
   const body = `${top}<span class="cn-pod__title">${esc(ch.main)}</span>` +
     (ch.topic ? `<span class="cn-pod__topic">${esc(ch.topic)}</span>` : '') +
     `<span class="cn-pod__status"><i class="cn-lamp" aria-hidden="true"></i>${word}</span>`;
-  if (ch.status === 'running') {
-    return `<a class="cn-pod is-running${isHere ? ' is-here' : ''}" href="${base}${ch.slug}/"${isHere ? ' aria-current="page"' : ''}>${body}</a>`;
+  if (ch.open) {
+    return `<a class="cn-pod is-${ch.status}${isHere ? ' is-here' : ''}" href="${base}${ch.slug}/"${isHere ? ' aria-current="page"' : ''}>${body}</a>`;
   }
   return `<div class="cn-pod is-${ch.status}">${body}</div>`;
 }
 
-function meter(n, of) { return `<b>${'█'.repeat(n)}</b>${'░'.repeat(of - n)}`; }
+function meter(n, r, of) { return `<b>${'█'.repeat(n)}</b><i>${'▓'.repeat(r)}</i>${'░'.repeat(of - n - r)}`; }
 
 function courseMap({ id, here = null, base }) {
-  const live = running.length;
+  const live = running.length, rev = review.length;
   const spec = `<div class="cn-spec">
       <p class="cn-spec__kind">Course</p>
       <dl class="cn-spec__dl">
         <div><dt>chapters</dt><dd>${pad(total)}</dd></div>
         <div><dt>running</dt><dd>${pad(live)}</dd></div>
-        <div><dt>pending</dt><dd>${pad(total - live)}</dd></div>
+        ${rev ? `<div><dt>in review</dt><dd>${pad(rev)}</dd></div>` : ''}
+        <div><dt>pending</dt><dd>${pad(total - live - rev)}</dd></div>
       </dl>
-      <p class="cn-spec__meter" aria-hidden="true">${meter(live, total)}</p>
+      <p class="cn-spec__meter" aria-hidden="true">${meter(live, rev, total)}</p>
     </div>`;
   const plates = parts.map((p) => {
     const up = p.chapters.filter((c) => c.status === 'running').length;
+    const inRev = p.chapters.filter((c) => c.status === 'review').length;
     return `<li class="cn-part">
         <i class="cn-link" aria-hidden="true"></i>
-        <h3 class="cn-part__bar"><span class="cn-part__id">${esc(p.label)}</span><span class="cn-part__name">${esc(p.name)}</span><span class="cn-part__count">${pad(up)}/${pad(p.chapters.length)} running</span></h3>
+        <h3 class="cn-part__bar"><span class="cn-part__id">${esc(p.label)}</span><span class="cn-part__name">${esc(p.name)}</span><span class="cn-part__count">${pad(up)}/${pad(p.chapters.length)} running${inRev ? ` · ${pad(inRev)} in review` : ''}</span></h3>
         <ol class="cn-pods">${p.chapters.map((c) => `<li>${pod(c, { here, base })}</li>`).join('')}</ol>
       </li>`;
   }).join('\n      ');
   const caption = here
-    ? `The whole course: ${total} chapters in ${parts.length - 1} parts and a capstone. Raised tiles are running; dashed ones are Pending, planned but not written yet.`
-    : `The course as a cluster. ${total} chapters are wanted and ${live} are running; the rest are Pending, written down as wanted but not built yet.`;
+    ? `The whole course: ${total} chapters in ${parts.length - 1} parts and a capstone. Raised tiles are running${rev ? '; ones marked Under review are written and readable, still being checked' : ''}; dashed ones are Pending, planned but not written yet.`
+    : `The course as a cluster. ${total} chapters are wanted and ${live} are running${rev ? `; ${rev} more are written and Under review, readable while they’re checked` : ''}; the rest are Pending, written down as wanted but not built yet.`;
   return `<figure class="cn-map" id="${id}" aria-labelledby="${id}-cap">
   <div class="cn-map__plate">
     <div class="cn-map__bar" aria-hidden="true"><span>Fig. 00</span><span>Course → parts → chapters</span></div>
@@ -92,18 +96,19 @@ function step(ch, dir) {
   const label = `<span class="cn-bar__n">${ch.no}</span><span class="cn-bar__t">${esc(ch.main)}</span>`;
   const inner = dir === 'prev' ? `<span aria-hidden="true">←</span>${label}` : `${label}<span aria-hidden="true">→</span>`;
   const what = `${dir === 'prev' ? 'Previous' : 'Next'}: chapter ${ch.no}, ${ch.main}`;
-  if (ch.status !== 'running') return `<span class="cn-bar__${dir} is-off" title="${esc(what)} (pending)">${inner}<span class="cn-bar__pend">Pending</span></span>`;
-  return `<a class="cn-bar__${dir}" href="../${ch.slug}/" rel="${dir}" aria-label="${esc(what)}">${inner}</a>`;
+  if (!ch.open) return `<span class="cn-bar__${dir} is-off" title="${esc(what)} (pending)">${inner}<span class="cn-bar__pend">Pending</span></span>`;
+  const rv = ch.status === 'review';
+  return `<a class="cn-bar__${dir}" href="../${ch.slug}/" rel="${dir}" aria-label="${esc(what)}${rv ? ' (under review)' : ''}">${inner}${rv ? `<span class="cn-bar__pend">Under review</span>` : ''}</a>`;
 }
 
 function masthead(ch) {
   const home = `<a class="cn-bar__home" href="${ch ? '../' : './'}">${MARK}<span class="cn-bar__course">${esc(config.title)}</span><span class="cn-bar__short">${esc(config.short)}</span></a>`;
   if (!ch) {
-    return `<nav class="cn-bar" aria-label="Course"><div class="cn-bar__inner">${home}<span class="cn-bar__pos">${pad(running.length)}/${pad(total)} running</span></div></nav>`;
+    return `<nav class="cn-bar" aria-label="Course"><div class="cn-bar__inner">${home}<span class="cn-bar__pos">${pad(running.length)}/${pad(total)} running${review.length ? `<span> · ${pad(review.length)} in review</span>` : ''}</span></div></nav>`;
   }
   return `<nav class="cn-bar" aria-label="Course"><div class="cn-bar__inner">
   ${home}
-  <div class="cn-bar__step">${step(ch.prev, 'prev')}<span class="cn-bar__pos">Ch ${ch.no}<span>/${pad(total)}</span></span>${step(ch.next, 'next')}</div>
+  <div class="cn-bar__step">${step(ch.prev, 'prev')}<span class="cn-bar__pos">Ch ${ch.no}<span>/${pad(total)}</span>${ch.status === 'review' ? REVIEW_TAG : ''}</span>${step(ch.next, 'next')}</div>
   <details class="cn-bar__map"><summary><span class="cn-bar__maplong">Course map</span><span class="cn-bar__mapshort">Map</span></summary>
     <div class="cn-bar__panel">${courseMap({ id: 'cn-map-top', here: ch.n, base: '../' })}</div>
   </details>
@@ -118,10 +123,10 @@ function nextPlate(ch) {
   if (!nx) {
     head = 'That’s the course';
     lead = `<p class="cn-next__lead">You’ve reached the end. The map is below if you want to go back to a chapter.</p>`;
-  } else if (nx.status === 'running') {
+  } else if (nx.open) {
     head = `Next: ${esc(nx.main)}`;
     lead = `<a class="cn-next__card" href="../${nx.slug}/">
-      <span class="cn-next__no">Chapter ${nx.no}${nx.minutes ? ` · ${nx.minutes} min` : ''}</span>
+      <span class="cn-next__no">Chapter ${nx.no}${nx.minutes ? ` · ${nx.minutes} min` : ''}${nx.status === 'review' ? ' · Under review' : ''}</span>
       <span class="cn-next__title">${esc(nx.title)}</span>
       ${nx.description ? `<span class="cn-next__desc">${esc(nx.description.replace(/^Chapter \d+\.\s*/, ''))}</span>` : ''}
       <span class="cn-next__go">Start chapter ${nx.no} →</span>
@@ -181,9 +186,9 @@ function coverArt() {
 }
 
 function homePage() {
-  const first = running[0];
-  const minutes = running.reduce((s, c) => s + (c.minutes || 0), 0);
-  const data = JSON.stringify(running.map((c) => ({ no: c.no, href: `${c.slug}/`, main: c.main })));
+  const first = published[0];
+  const minutes = published.reduce((s, c) => s + (c.minutes || 0), 0);
+  const data = JSON.stringify(published.map((c) => ({ no: c.no, href: `${c.slug}/`, main: c.main })));
   return `<!doctype html>
 <html lang="en">
 <head>
@@ -207,6 +212,7 @@ ${masthead(null)}
       <dl class="cn-meta">
         <div><dt>Chapters</dt><dd>${pad(total)}</dd></div>
         <div><dt>Running</dt><dd>${pad(running.length)}</dd></div>
+        ${review.length ? `<div><dt>In review</dt><dd>${pad(review.length)}</dd></div>` : ''}
         <div><dt>Read so far</dt><dd>${minutes} MIN</dd></div>
         <div><dt>For</dt><dd>TECHNICAL MANAGERS</dd></div>
       </dl>
@@ -244,13 +250,13 @@ fs.mkdirSync(OUT, { recursive: true });
 fs.cpSync(POOL, path.join(OUT, 'pool'), { recursive: true, filter: (p) => shipped(path.relative(POOL, p)) });
 fs.mkdirSync(path.join(OUT, 'course'));
 for (const f of ['course.css', 'course.js']) fs.copyFileSync(path.join(SHELL, f), path.join(OUT, 'course', f));
-for (const ch of running) chapterPage(ch);
+for (const ch of published) chapterPage(ch);
 fs.writeFileSync(path.join(OUT, 'index.html'), homePage());
 fs.writeFileSync(path.join(OUT, '.nojekyll'), '');
 
 const size = (dir) => fs.readdirSync(dir, { withFileTypes: true }).reduce((s, e) => s + (e.isDirectory() ? size(path.join(dir, e.name)) : fs.statSync(path.join(dir, e.name)).size), 0);
-console.log(`built ${path.relative(ROOT, OUT)}/: home + ${running.length} chapters (${running.map((c) => c.no).join(', ')}), ` +
-  `${total - running.length} pending; ${(size(OUT) / 1024).toFixed(0)} KB`);
+console.log(`built ${path.relative(ROOT, OUT)}/: home + ${published.length} chapters (${published.map((c) => c.no + (c.status === 'review' ? ' in review' : '')).join(', ')}), ` +
+  `${total - published.length} pending; ${(size(OUT) / 1024).toFixed(0)} KB`);
 
 const serveAt = flag('--serve');
 if (serveAt) {

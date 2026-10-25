@@ -8,8 +8,10 @@ export const EXPLAINERS = path.join(ROOT, 'explainers');
 export const POOL = path.join(EXPLAINERS, '_pool');
 export const SHELL = path.join(EXPLAINERS, '_site');
 
-// A chapter is live once its run reaches these stages; an earlier stage shows as in progress.
+// A chapter is live once its run reaches these stages; one waiting for the user's human review is
+// published too, tagged Under review; an earlier stage shows as in progress.
 const LIVE_STAGES = new Set(['deliver', 'done']);
+const REVIEW_STAGES = new Set(['human-review']);
 
 const pad = (n) => String(n).padStart(2, '0');
 
@@ -60,7 +62,8 @@ export function loadCourse() {
       const n = Number(m[1]), dir = dirs.get(n) || null;
       const page = dir ? readPage(dir) : null;
       const title = (page && page.title) || smart(m[2].trim());
-      const status = config.status?.[n] || (!dir ? 'pending' : LIVE_STAGES.has(page.stage) ? 'running' : 'creating');
+      const status = config.status?.[n] || (!dir ? 'pending' : LIVE_STAGES.has(page.stage) ? 'running'
+        : REVIEW_STAGES.has(page.stage) ? 'review' : 'creating');
       const ch = { n, no: pad(n), dir, slug: dir, title, ...split(title), status,
         minutes: page?.minutes || null, description: page?.description || '', part: parts.at(-1) };
       parts.at(-1).chapters.push(ch);
@@ -68,6 +71,9 @@ export function loadCourse() {
     }
   }
   for (const [i, ch] of chapters.entries()) { ch.prev = chapters[i - 1] || null; ch.next = chapters[i + 1] || null; }
+  for (const ch of chapters) ch.open = ch.status === 'running' || ch.status === 'review';
   const running = chapters.filter((c) => c.status === 'running');
-  return { config, parts, chapters, running, total: chapters.length, pad };
+  const review = chapters.filter((c) => c.status === 'review');
+  const published = chapters.filter((c) => c.open);
+  return { config, parts, chapters, running, review, published, total: chapters.length, pad };
 }

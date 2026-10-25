@@ -561,7 +561,7 @@ _The central chapter of the course. Everything after it uses its model._
    - fill in the **Visuals** column of the term ledger;
    - note any change to Fennel's story (new events, numbers, names) in §3;
    - move anything the chapter cut that a later chapter should pick up into that chapter's entry.
-9. **Human review is a formal check (user decision, 2026-10-25).** A chapter ships only after the skill's Stage 4b: a site review session (`human_review.mjs --target site`), the user's confirmation that they're finished, and every `H-` finding closed on their word. Don't move a run to `deliver` or `done` on a deferred review. A chapter waiting for review stays at stage `human-review` and is left out of the course build (`dist/`). Ch 5, 6 and 7 shipped before this rule and were moved back to `human-review` (their d-09, d-08 and d-13). Curriculum updates already applied from those chapters stay unless their reviews change them.
+9. **Human review is a formal check (user decision, 2026-10-25).** A chapter ships only after the skill's Stage 4b: a site review session (`human_review.mjs --target site`), the user's confirmation that they're finished, and every `H-` finding closed on their word. Don't move a run to `deliver` or `done` on a deferred review. A chapter waiting for review stays at stage `human-review`. The course build still publishes it, linked from the masthead and the course map and tagged **Under review**. Ch 5, 6 and 7 shipped before this rule and were moved back to `human-review` (their d-09, d-08 and d-13). Curriculum updates already applied from those chapters stay unless their reviews change them.
 
 ---
 

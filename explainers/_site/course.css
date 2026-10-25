@@ -34,6 +34,9 @@
 .cn-bar__pend { display: none; font-weight: 400; color: var(--warn); }
 .cn-bar__pos { padding: 0 var(--sp-1); color: var(--ink); white-space: nowrap; font-variant-numeric: tabular-nums; }
 .cn-bar__pos span { color: var(--ink-3); }
+.cn-tag { margin-left: var(--sp-1); padding: 2px var(--sp-half); border: var(--stroke) solid currentColor; border-radius: var(--radius-1);
+  color: var(--warn); font-weight: 700; white-space: nowrap; }
+.cn-bar__pos .cn-tag { color: var(--warn); }
 
 .cn-bar__map > summary { list-style: none; cursor: pointer; display: inline-flex; align-items: center; gap: var(--sp-1);
   min-height: 36px; padding: 0 var(--sp-2); border: var(--stroke) solid var(--ink); border-radius: var(--radius-1);
@@ -54,6 +57,7 @@
 @media (max-width: 639px) {
   .cn-bar__inner { padding: 0 var(--sp-1) 0 var(--sp-2); gap: var(--sp-1); }
   .cn-bar__course { display: none; }
+  .cn-bar__pos .cn-tag { display: none; }
   .cn-bar__short { display: inline; }
   .cn-bar__maplong { display: none; }
   .cn-bar__mapshort { display: inline; }
@@ -89,6 +93,7 @@
 .cn-spec__dl dd { margin: 0; font-weight: 700; font-variant-numeric: tabular-nums; }
 .cn-spec__meter { margin: var(--sp-1) 0 0; color: var(--ink-4); letter-spacing: -0.5px; white-space: nowrap; overflow: hidden; }
 .cn-spec__meter b { font-weight: 400; color: var(--c2); }
+.cn-spec__meter i { font-style: normal; color: var(--warn); }
 
 /* part plates and the connectors between them */
 .cn-parts { position: relative; list-style: none; margin: 0; padding: 0 0 0 calc(var(--cn-trunk) + var(--sp-1)); display: grid; gap: var(--cn-gap); }
@@ -129,6 +134,8 @@ a.cn-pod:hover { box-shadow: var(--shadow-1), inset 0 0 0 var(--stroke) var(--in
 a.cn-pod:active { transform: translate(4px, 4px); box-shadow: inset 0 0 0 var(--stroke) var(--ink); }
 a.cn-pod:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
 .cn-pod.is-running .cn-pod__status { color: var(--good); }
+.cn-pod.is-review .cn-pod__status { color: var(--warn); }
+.cn-pod.is-review .cn-lamp { background: none; border: var(--stroke) solid currentColor; }
 .cn-pod.is-here { background: var(--c1-soft); border-color: var(--c1); box-shadow: inset 0 0 0 var(--stroke) var(--c1); }
 .cn-pod.is-here:active { transform: none; }
 .cn-pod.is-here .cn-pod__status { color: var(--ink); }
