@@ -1,0 +1,272 @@
+/* w-sizing-sandbox/index.css · W-02 "How many nodes?". Scoped under the mount; tokens only.
+   Revision 1 (H-23 to H-30): Reset in the header bar; controls left, outcome right (count heading,
+   nodes, room bar); Pod labels on a paper tab hung from the outline's top border, never on the soft
+   fill; what a Pod used drawn hatched c1, use above its reservation hatched warn.
+   The page's .ss frame reserves a load-time height; the widget's own reservation (index.js reserve())
+   keeps a setting change from moving the page from 600px up. The node drawing is the pool's (.wc). */
+
+[data-widget="w-sizing-sandbox"] .ssw,
+[data-widget="w-sizing-sandbox"] .ssw * { box-sizing: border-box; }
+
+[data-widget="w-sizing-sandbox"] .ssw {
+  background: var(--surface);
+  border: var(--stroke) solid var(--ink); border-radius: var(--radius-1);
+  box-shadow: var(--shadow-1);
+  color: var(--ink);
+  position: relative;
+}
+[data-widget="w-sizing-sandbox"] .ssw__bar {
+  display: flex; align-items: center; gap: var(--sp-1);
+  min-height: 32px; padding: var(--sp-half) var(--sp-2);
+  border-bottom: var(--stroke) solid var(--ink);
+  font: 700 var(--fs-caption)/var(--lh-caption) var(--font-mono); letter-spacing: .08em; text-transform: uppercase;
+}
+[data-widget="w-sizing-sandbox"] .ssw__title { flex: 1 1 auto; min-width: 0; }
+[data-widget="w-sizing-sandbox"] .ssw__bar { padding-right: var(--sp-half); }
+[data-widget="w-sizing-sandbox"] .ssw__bar::before {
+  content: ""; flex: none; width: var(--sp-1); height: var(--sp-1); background: var(--accent);
+}
+[data-widget="w-sizing-sandbox"] .ssw__body {
+  display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--sp-3);
+  padding: var(--sp-2);
+}
+[data-widget="w-sizing-sandbox"] .ssw--wide .ssw__body {
+  grid-template-columns: minmax(300px, 2fr) minmax(0, 3fr); align-items: start;
+  padding: var(--sp-3);
+}
+[data-widget="w-sizing-sandbox"] .ssw--narrow .ssw__body { padding: var(--sp-2) var(--sp-1); gap: var(--sp-2); }
+[data-widget="w-sizing-sandbox"] .ssw__side,
+[data-widget="w-sizing-sandbox"] .ssw__main { min-width: 0; display: flex; flex-direction: column; gap: var(--sp-2); }
+
+[data-widget="w-sizing-sandbox"] .ssw__head {
+  margin: 0 0 var(--sp-half);
+  font: 700 var(--fs-caption)/var(--lh-caption) var(--font-mono); letter-spacing: .06em; text-transform: uppercase;
+  color: var(--ink-3);
+}
+
+/* ---- the outcome heading: the count in words, large mono; one processor line under it ---- */
+[data-widget="w-sizing-sandbox"] .ssw__outhead { display: flex; flex-direction: column; gap: var(--sp-half); }
+[data-widget="w-sizing-sandbox"] .ssw__count {
+  margin: 0;
+  font: 700 22px/28px var(--font-mono); letter-spacing: .02em; text-transform: uppercase;
+  font-variant-numeric: tabular-nums; color: var(--ink);
+}
+[data-widget="w-sizing-sandbox"] .ssw--narrow .ssw__count { font-size: 18px; line-height: 24px; }
+[data-widget="w-sizing-sandbox"] .ssw__setby { margin: 0; font: 400 var(--fs-small)/var(--lh-small) var(--font-sans); color: var(--ink-2); }
+[data-widget="w-sizing-sandbox"] .ssw__setby[hidden] { display: none; }
+[data-widget="w-sizing-sandbox"] .ssw__outhead.is-changed { animation: ssw-changed var(--dur-3) var(--ease-out); }
+@keyframes ssw-changed { from { outline: 3px solid var(--accent); outline-offset: 2px; } to { outline: 3px solid transparent; outline-offset: 2px; } }
+[data-widget="w-sizing-sandbox"] .ssw__nodes { display: flex; flex-direction: column; gap: var(--sp-1); min-width: 0; }
+/* phones and one column: count, then the room bar, then the nodes */
+[data-widget="w-sizing-sandbox"] .ssw:not(.ssw--wide) .ssw__outhead { order: 1; }
+[data-widget="w-sizing-sandbox"] .ssw:not(.ssw--wide) .ssw__idle { order: 2; }
+[data-widget="w-sizing-sandbox"] .ssw:not(.ssw--wide) .ssw__nodes { order: 3; }
+
+/* ---- the idle bar: used / reserved, not used / not reserved ---- */
+[data-widget="w-sizing-sandbox"] .ssw__ibar {
+  display: flex; height: var(--sp-3); overflow: hidden;
+  border: var(--stroke) solid var(--ink); border-radius: var(--radius-1);
+  background: var(--surface);
+}
+[data-widget="w-sizing-sandbox"] .ssw__seg {
+  position: relative; display: block; flex: none; height: 100%;
+  transition: width var(--dur-2) var(--ease-out);
+}
+[data-widget="w-sizing-sandbox"] .ssw__seg--used { background: repeating-linear-gradient(-45deg, var(--c1) 0 3px, var(--c1-soft) 3px 5px); }
+[data-widget="w-sizing-sandbox"] .ssw__seg-over {
+  position: absolute; top: 0; right: 0; bottom: 0; display: flex; align-items: center; justify-content: center;
+  overflow: hidden;
+  background: repeating-linear-gradient(45deg, var(--warn) 0 2px, var(--surface) 2px 6px);
+  border-left: var(--stroke) solid var(--warn);
+}
+/* the hatch's tag (OVER, the chips' word for the same hatch), on a plate, where the hatch holds it */
+[data-widget="w-sizing-sandbox"] .ssw__seg-tag {
+  flex: none; padding: 0 var(--sp-half); background: var(--surface);
+  font: 700 var(--fs-caption)/16px var(--font-mono); font-style: normal; letter-spacing: .04em; text-transform: uppercase;
+  color: var(--warn); white-space: nowrap;
+}
+[data-widget="w-sizing-sandbox"] .ssw__seg--res { background: var(--c1-soft); border-left: var(--stroke) solid var(--c1); }
+[data-widget="w-sizing-sandbox"] .ssw__seg--free {
+  background: var(--surface);
+  outline: var(--stroke) dashed var(--c6); outline-offset: -4px;
+}
+/* the label row's height holds the tallest form (two name lines, GB and % on two more, under a tick),
+   so no setting moves the controls below it */
+[data-widget="w-sizing-sandbox"] .ssw__ilabels { position: relative; height: calc(4 * var(--lh-caption) + 6px); margin-top: var(--sp-half); }
+[data-widget="w-sizing-sandbox"] .ssw__il-tick {
+  position: absolute; top: 0; height: 2px; display: block; background: var(--ink-3);
+}
+[data-widget="w-sizing-sandbox"] .ssw__il {
+  position: absolute; top: 6px; display: flex; flex-direction: column;
+  font: 700 var(--fs-caption)/var(--lh-caption) var(--font-mono); letter-spacing: .04em; text-transform: uppercase;
+  white-space: nowrap; color: var(--ink);
+}
+[data-widget="w-sizing-sandbox"] .ssw__il-amt { font-weight: 400; color: var(--ink-2); text-transform: none; letter-spacing: 0; }
+[data-widget="w-sizing-sandbox"] .ssw__il-mark { display: none; }
+/* stacked form: one row per segment, in bar order, the segment's fill as its mark */
+[data-widget="w-sizing-sandbox"] .ssw__ilabels.is-stack { display: flex; flex-direction: column; gap: 2px; }
+[data-widget="w-sizing-sandbox"] .is-stack .ssw__il { position: static; flex-direction: row; align-items: center; gap: var(--sp-half); }
+[data-widget="w-sizing-sandbox"] .is-stack .ssw__il-amt { margin-left: var(--sp-1); }
+[data-widget="w-sizing-sandbox"] .is-stack .ssw__il-mark {
+  display: block; flex: none; width: var(--sp-2); height: 12px; border: var(--stroke) solid var(--ink);
+}
+[data-widget="w-sizing-sandbox"] .is-stack .ssw__il--used .ssw__il-mark { background: repeating-linear-gradient(-45deg, var(--c1) 0 3px, var(--c1-soft) 3px 5px); }
+[data-widget="w-sizing-sandbox"] .is-stack .ssw__il--res .ssw__il-mark { background: var(--c1-soft); border-color: var(--c1); }
+[data-widget="w-sizing-sandbox"] .is-stack .ssw__il--free .ssw__il-mark { background: var(--surface); border-style: dashed; border-color: var(--c6); }
+[data-widget="w-sizing-sandbox"] .ssw__inone {
+  display: none; margin: var(--sp-half) 0 0; height: calc(4 * var(--lh-caption) + 6px); padding: 0;
+  font: 400 var(--fs-caption)/var(--lh-caption) var(--font-sans); color: var(--ink-2);
+}
+[data-widget="w-sizing-sandbox"] .ssw__idle.is-none .ssw__ibar { border-style: dashed; border-color: var(--ink-3); }
+[data-widget="w-sizing-sandbox"] .ssw__idle.is-none .ssw__ilabels,
+[data-widget="w-sizing-sandbox"] .ssw__idle.is-none .ssw__seg { display: none; }
+[data-widget="w-sizing-sandbox"] .ssw__idle.is-none .ssw__inone { display: block; }
+
+/* ---- controls: four steppers and the switch (44px targets); Reset sits in the header bar ---- */
+[data-widget="w-sizing-sandbox"] .ssw__ctl { display: flex; flex-direction: column; gap: var(--sp-1); }
+[data-widget="w-sizing-sandbox"] .ssw__row {
+  display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: var(--sp-1);
+  padding: 0 0 0 var(--sp-1);
+  border-left: 3px solid var(--line);
+}
+[data-widget="w-sizing-sandbox"] .ssw__row.is-over { border-left-color: var(--warn); }
+[data-widget="w-sizing-sandbox"] .ssw__svc { display: flex; flex-direction: column; min-width: 0; }
+[data-widget="w-sizing-sandbox"] .ssw__name { font: 700 var(--fs-small)/var(--lh-small) var(--font-mono); }
+[data-widget="w-sizing-sandbox"] .ssw__copies { font-weight: 400; color: var(--ink-2); }
+[data-widget="w-sizing-sandbox"] .ssw__meta { font: 400 var(--fs-caption)/var(--lh-caption) var(--font-mono); color: var(--ink-2); }
+/* a request below what the service used: the value turns warn; the word travels in the warning line */
+[data-widget="w-sizing-sandbox"] .ssw__row.is-over .ssw__val { color: var(--warn); }
+[data-widget="w-sizing-sandbox"] .ssw__step { display: flex; align-items: center; }
+[data-widget="w-sizing-sandbox"] .ssw__btn {
+  width: var(--tap); height: var(--tap); padding: 0;
+  background: var(--surface); color: var(--ink);
+  border: var(--stroke) solid var(--ink); border-radius: var(--radius-1);
+  font: 700 22px/1 var(--font-mono); cursor: pointer;
+}
+[data-widget="w-sizing-sandbox"] .ssw__btn:hover { background: var(--surface-2); }
+[data-widget="w-sizing-sandbox"] .ssw__btn:active { background: var(--c1-soft); }
+[data-widget="w-sizing-sandbox"] .ssw__btn[aria-disabled="true"] { color: var(--ink-4); border-color: var(--ink-4); cursor: default; background: var(--surface); }
+[data-widget="w-sizing-sandbox"] .ssw__btn:focus-visible,
+[data-widget="w-sizing-sandbox"] .ssw__reset:focus-visible,
+[data-widget="w-sizing-sandbox"] .ssw__cb:focus-visible + .ssw__track { outline: 2px solid var(--focus); outline-offset: 2px; }
+[data-widget="w-sizing-sandbox"] .ssw__val {
+  min-width: 7.5ch; padding: 0 2px; text-align: center;
+  font: 700 var(--fs-small)/var(--tap) var(--font-mono); font-variant-numeric: tabular-nums; white-space: nowrap;
+}
+[data-widget="w-sizing-sandbox"] .ssw--narrow .ssw__val { min-width: 7ch; padding: 0 2px; }
+
+[data-widget="w-sizing-sandbox"] .ssw__switch {
+  position: relative; display: flex; align-items: center; gap: var(--sp-1);
+  min-height: var(--tap); padding: 0 var(--sp-1);
+  border: var(--stroke) solid var(--ink); border-radius: var(--radius-1);
+  font: 400 var(--fs-small)/var(--lh-small) var(--font-sans); cursor: pointer;
+}
+[data-widget="w-sizing-sandbox"] .ssw__cb { position: absolute; opacity: 0; width: 1px; height: 1px; margin: 0; }
+[data-widget="w-sizing-sandbox"] .ssw__track {
+  position: relative; flex: none; width: 40px; height: 22px;
+  border: var(--stroke) solid var(--ink); border-radius: var(--radius-3); background: var(--surface-2);
+}
+[data-widget="w-sizing-sandbox"] .ssw__track::after {
+  content: ""; position: absolute; top: 2px; left: 2px; width: 15px; height: 15px;
+  border-radius: var(--radius-3); background: var(--ink-3);
+  transition: transform var(--dur-1) var(--ease-out);
+}
+[data-widget="w-sizing-sandbox"] .ssw__switch.is-on .ssw__track { background: var(--c1-soft); border-color: var(--c1); }
+[data-widget="w-sizing-sandbox"] .ssw__switch.is-on .ssw__track::after { transform: translateX(18px); background: var(--c1); }
+[data-widget="w-sizing-sandbox"] .ssw__swl { flex: 1 1 auto; min-width: 0; }
+[data-widget="w-sizing-sandbox"] .ssw__sws {
+  flex: none; min-width: 3ch; text-align: right;
+  font: 700 var(--fs-caption)/var(--lh-caption) var(--font-mono); letter-spacing: .06em; text-transform: uppercase; color: var(--ink-3);
+}
+[data-widget="w-sizing-sandbox"] .ssw__switch.is-on .ssw__sws { color: var(--good); }
+[data-widget="w-sizing-sandbox"] .ssw__reset {
+  flex: none; min-height: var(--tap); min-width: var(--tap); padding: 0 var(--sp-2);
+  background: var(--surface); color: var(--ink);
+  border: var(--stroke) solid var(--ink); border-radius: var(--radius-1);
+  font: 700 var(--fs-caption)/var(--lh-caption) var(--font-mono); letter-spacing: .06em; text-transform: uppercase; cursor: pointer;
+}
+[data-widget="w-sizing-sandbox"] .ssw__reset:hover { background: var(--surface-2); }
+
+/* ---- warnings ---- */
+[data-widget="w-sizing-sandbox"] .ssw__wlist { margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: var(--sp-half); }
+[data-widget="w-sizing-sandbox"] .ssw__w {
+  margin: 0; padding-left: var(--sp-1); border-left: 3px solid var(--warn);
+  font: 400 var(--fs-caption)/var(--lh-caption) var(--font-sans); color: var(--ink);
+}
+[data-widget="w-sizing-sandbox"] .ssw__w--none { border-left-color: var(--good); color: var(--ink-2); }
+/* the key to the idle bar's hatch: the same hatch as its mark */
+[data-widget="w-sizing-sandbox"] .ssw__w--hatch { border-left-color: var(--c1); }
+[data-widget="w-sizing-sandbox"] .ssw__w-mark {
+  display: inline-block; width: var(--sp-2); height: 12px; margin-right: var(--sp-half); vertical-align: -1px;
+  background: repeating-linear-gradient(45deg, var(--warn) 0 2px, var(--surface) 2px 6px);
+  border: var(--stroke) solid var(--warn);
+}
+
+/* ---- never placeable: the request against a node's room, to one scale ---- */
+[data-widget="w-sizing-sandbox"] .ssw__never[hidden] { display: none; }
+[data-widget="w-sizing-sandbox"] .ssw__never { padding: var(--sp-1); border: var(--stroke) solid var(--warn); border-radius: var(--radius-1); }
+[data-widget="w-sizing-sandbox"] .ssw__never-k {
+  margin: 0 0 var(--sp-half);
+  font: 700 var(--fs-caption)/var(--lh-caption) var(--font-mono); letter-spacing: .06em; text-transform: uppercase; color: var(--warn);
+}
+[data-widget="w-sizing-sandbox"] .ssw__nv { display: flex; flex-direction: column; gap: 2px; }
+[data-widget="w-sizing-sandbox"] .ssw__nv > i {
+  display: block; min-height: 20px; padding: 0 var(--sp-half); overflow: hidden;
+  font: 700 var(--fs-caption)/18px var(--font-mono); font-style: normal; white-space: nowrap;
+}
+[data-widget="w-sizing-sandbox"] .ssw__nv-pod { background: var(--c1-soft); border: var(--stroke) dashed var(--c1); color: var(--ink); }
+[data-widget="w-sizing-sandbox"] .ssw__nv > .ssw__nv-room { border: var(--stroke) solid var(--ink); color: var(--ink-2); font-weight: 400; }
+
+/* ---- the node drawing (pool .wc): Pods too short for a label keep 1px edges ---- */
+[data-widget="w-sizing-sandbox"] .ssw__draw { min-width: 0; }
+[data-widget="w-sizing-sandbox"] .wc .wc-p.ssw-tiny { padding: 0; border-width: 1px; }
+[data-widget="w-sizing-sandbox"] .wc .wc-p.ssw-tiny .wc-c { padding: 0; border-width: 0; }
+/* a Pod's hatched use above its reservation rises over the chip above; that chip's name stays on top
+   (its c1-soft plate covers the hatch), so the name is never crossed (P-15) */
+[data-widget="w-sizing-sandbox"] .wc .wc-c--use .wc-c__ln { z-index: 3; }
+/* #29: reserved vs. used. The outline is the request; the soft fill is reserved room the Pod didn't
+   use; what it used is hatched c1 from the bottom (a drawn mark, not a darker colour). The name sits
+   on a paper tab hung from the outline's top border, never on the soft fill. Use above the request
+   rises above the outline, hatched warn. Lane F has no use fills and is untouched. */
+[data-widget="w-sizing-sandbox"] .wc .wc-c--use { padding-top: 0; }
+[data-widget="w-sizing-sandbox"] .wc .wc-c--use .wc-c__ln {
+  background: var(--surface); color: var(--ink);
+  padding: 0 3px; margin-left: -1px;
+  border: 1px solid var(--c1); border-top: 0;
+}
+[data-widget="w-sizing-sandbox"] .wc .wc-c--use .wc-c__ln + .wc-c__ln { border-top: 0; }
+[data-widget="w-sizing-sandbox"] .wc .wc-use {
+  background: repeating-linear-gradient(-45deg, var(--c1) 0 3px, var(--c1-soft) 3px 5px);
+  border-top: 1px solid var(--c1);
+}
+[data-widget="w-sizing-sandbox"] .wc .wc-over {
+  background: repeating-linear-gradient(45deg, var(--warn) 0 2px, transparent 2px 6px);
+}
+
+[data-widget="w-sizing-sandbox"] .ssw__short {
+  margin: calc(-1 * var(--sp-1)) 0 0; min-height: var(--lh-caption);
+  font: 400 var(--fs-caption)/var(--lh-caption) var(--font-mono); color: var(--ink-2);
+}
+
+/* the polite live sentence: read out, not shown (the heading, bar and drawing show the same facts) */
+[data-widget="w-sizing-sandbox"] .ssw__live {
+  position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0; overflow: hidden;
+  clip: rect(0 0 0 0); white-space: nowrap; border: 0;
+}
+
+/* load-time reservation (the page's .ss), set to the measured heights (Revision 1 layout) so the page
+   doesn't jump when the widget draws. Phones: the default state (1185px at 360, about 1156 at 390–599;
+   states then take their own height, d-07). From 600px: the tallest state, which index.js reserve()
+   then holds (about 1660px at 600–751, one column; 1166–1317 at 752–899 and 1269–1317 from 900, two
+   columns from a 720px-wide mount). */
+[data-widget="w-sizing-sandbox"].ss { min-height: 1155px; }
+@media (max-width: 389px) { [data-widget="w-sizing-sandbox"].ss { min-height: 1185px; } }
+@media (min-width: 600px) and (max-width: 751px) { [data-widget="w-sizing-sandbox"].ss { min-height: 1655px; } }
+@media (min-width: 752px) and (max-width: 899px) { [data-widget="w-sizing-sandbox"].ss { min-height: 1165px; } }
+@media (min-width: 900px) { [data-widget="w-sizing-sandbox"].ss { min-height: 1265px; } }
+
+@media (prefers-reduced-motion: reduce) {
+  [data-widget="w-sizing-sandbox"] .ssw__seg,
+  [data-widget="w-sizing-sandbox"] .ssw__track::after { transition: none; }
+  [data-widget="w-sizing-sandbox"] .ssw__outhead.is-changed { animation: none; }
+}

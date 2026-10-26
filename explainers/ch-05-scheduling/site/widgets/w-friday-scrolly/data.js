@@ -157,7 +157,7 @@
           },
           text: [
             'At 17:45 the dispatch team changes `dispatch`’s manifest from three copies to six and applies it, so the cluster’s record now wants six `dispatch` Pods while only three exist.',
-            'Within seconds the ReplicaSet loop notices the gap and writes three new Pod records, as it did on moving day. None of the three has a node yet, so nothing new is running.'
+            'Within seconds the ReplicaSet loop notices the difference and writes three new Pod records. Nothing new is running yet.'
           ],
           ariaLabel: '17:45. The ReplicaSet loop is acting. Seeing dispatch with 6 Pods wanted and 3 existing, it writes 3 new Pod records, which have no node yet; the dispatch line reads 3 running. Node 01 runs payments, storefront, dispatch and notifications: 10 of 13 GB reserved, 3 GB free, processor 2 of 3.9 cores reserved. Node 02 runs two dispatch Pods, storefront and notifications: 10 GB reserved, 3 GB free, processor 2.75 of 3.9. Node 04 runs payments, storefront and orders: 12 GB reserved, 1 GB free, processor 1.75 of 3.9.',
           highlight: ['row:dispatch', 'loop:rs', 'lens']

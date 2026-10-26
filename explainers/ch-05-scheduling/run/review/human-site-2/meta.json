@@ -1,0 +1,11 @@
+{
+  "target": "site",
+  "round": 2,
+  "started": "2026-10-26T07:28:33-04:00",
+  "build": "sha256:5ae1115408876632a1705f560a61caa9589a58b2b74a6424b1469c6022853630",
+  "snapshotted": "2026-10-26T07:28:33-04:00",
+  "ended": "2026-10-26T07:50:30-04:00",
+  "how": "window closed",
+  "submitted": false,
+  "count": 0
+}

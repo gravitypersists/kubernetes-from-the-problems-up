@@ -4,11 +4,11 @@ segments:
   s-03   Friday, 17:45: a Pod with nowhere to go
   s-04   What Morgan pays for
   s-05   Room on purpose
-  s-06   Machines of different kinds: node pools
   s-07   Tuesday: when a Pod uses too much
   s-08   Using more than you reserved
   s-09   The conversation
-objectives: 3 · segments: 9 · reader's time: 20 min
+objectives: 3 · segments: 8 · reader's time: 26 min
 widgets: w-friday-scrolly (high), w-sizing-sandbox (high)
-checks: 9 · acceptance criteria: 19
+checks: 8 · acceptance criteria: 20
+info  claims not used by any segment: c-24, c-25 (should appear in cut-list.md)
 RESULT: PASS

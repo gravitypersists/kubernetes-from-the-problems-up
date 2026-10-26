@@ -98,45 +98,39 @@
 </head>
 <body>
 <div class="bar">
-  <b>MOCKUP · REV 0</b><span>Ch 5 · Who runs where</span><span class="sp"></span>
+  <b>MOCKUP · REV 1</b><span>Ch 5 · Who runs where</span><span class="sp"></span>
   <button type="button" id="vw-desk" aria-pressed="true">desktop</button>
   <button type="button" id="vw-mob" aria-pressed="false">mobile 360</button>
 </div>
 <main>
   <section id="overview">
     <h1>Who runs where: scheduling, resources and cost</h1>
-    <p class="meta">For a somewhat technical manager (novice for infrastructure) · about 26 minutes planned against a 20-minute budget (a split is proposed below) · narrative article with one scrollytelling lane, one hands-on sandbox, seven figures, four term cards, nine checks · Chapter 5 of 15</p>
+    <p class="meta">For a somewhat technical manager (novice for infrastructure) · <b>Revision 1</b>, after your site review (42 comments) · about 22.5 minutes planned (the reviewed page read at about 26) · narrative article with one scrollytelling lane, one hands-on sandbox, six figures, four term cards, eight checks · Chapter 5 of 15</p>
 
     <div class="panel">
-      <p><b>Three questions for you before the build</b></p>
+      <p><b>What your review changed in the plan</b> (rewording comments go straight to the builder and aren't shown here)</p>
       <ol class="qs">
-        <li><b>Q1 · Chapter 4's moving day.</b> The research found that, with default settings, the scheduler would not have put two <code>storefront</code> Pods on node 01 while node 04 had more room: it prefers the emptiest node and spreads copies of one service. Options:
-          <ul>
-            <li><b>(b) Recommended:</b> edit Ch 4 so moving day follows the defaults (<code>storefront</code> on 01, 04, 02; at 03:04 <code>orders</code> still goes to 04, now “one of two nodes with room”; the lost <code>dispatch</code> copy goes to 01). Then Ch 5 uses moving day as its clean example. Cost: a Ch 4 data and text edit and re-gate, before Ch 5's lane is built.</li>
-            <li><b>(a)</b> Leave Ch 4; Ch 5 says in the main text that Ch 4's drawing kept Sam's old layout, and what the scheduler would really have done. Cost: a visible correction of the earlier chapter.</li>
-            <li><b>(c)</b> Leave Ch 4; Ch 5 teaches scoring on a fresh example and answers the moving-day question in a collapsed note. Cost: lowest, but an attentive reader can see the contradiction.</li>
-          </ul>
-        </li>
-        <li><b>Q2 · Split?</b> The plan sizes honestly at about <b>26 minutes</b> (likely 26–28 built). <b>Recommended:</b> split at “before a Pod runs” / “while it runs”:
-          <ul>
-            <li><b>Ch 5, “Who runs where: requests, placement and the bill”</b> (§01–§05 below, plus a short conversation: “Let's cut back to three nodes.”) ≈ <b>18.5 min</b>;</li>
-            <li><b>Ch 5b, “Using too much: limits, memory kills and eviction”</b> (§06–§09 below, plus an opener; room for a Tuesday lane) ≈ <b>11.5–13.5 min</b>.</li>
-          </ul>
-          Numbering it “5b” keeps every forward reference in Ch 1–4 correct. Or keep one chapter and cut from the list at the bottom if it builds long.</li>
-        <li><b>Q3 · Story facts.</b> The numbers every figure and both widgets use: nodes are 16 GB, 4-core machines with about 13 GB and 3.9 cores for Pods; requests per copy (memory · processor): storefront 4 GB · 0.5, orders 6 GB · 1 (limit 7 GB), payments 2 · 0.25, dispatch 2 · 1, notifications 2 · 0.25 with 2 copies; Friday 17:45 dispatch 3 → 6, a Pod pending, nodes 05 and 06 added at about 18:40; Tuesday's three OOM-kills; five nodes on the bill against four machines before the move (this needs “Year 2's spares were given back before the move”).</li>
+        <li><b>Node pools are gone</b> (d-12, #37). §06, Fig. 03 and its check move to Chapter 8. When one Pod outgrows every node, §04 now says it plainly: the Pod is never placed, and it needs a bigger node, which Ari's team would rent.</li>
+        <li><b>The loop lens</b> (d-11, #6, #10): “which loop is it, what does it want (the desired state), what does it see (the real state), and what does it do when the two differ?”, everywhere, including Fig. 06's columns.</li>
+        <li><b>Who adds nodes</b> (#20): §04 now opens by saying Ari's team rents and adds nodes by hand; the requests decide how many Fennel <i>needs</i>.</li>
+        <li><b>Room on purpose</b> (#35, #36): rebuilt around losing a node, in your words, in one short paragraph.</li>
+        <li><b>Pods can use more than they reserve</b> (#41): said once in §02, so §06 (Tuesday) builds on it; limits introduced in a plain sentence (#38, #39, #40).</li>
+        <li><b>Repetition</b> (#17, #31–#34): each explanation has one owner; the repeats after the lane and after the sandbox are cut; Morgan's answer is cut to its point; per-Pod billing to two sentences.</li>
+        <li><b>Split attention</b> (#2, #9, #11, #13, #16, #35, #40): a rule for the builder: name earlier events by what happened (“when node 03 died”), the next widget as “the following widget”, never by a time, nickname or ID.</li>
+        <li><b>The sandbox</b> (#23–#30): controls left, outcome right, <code>payments</code> added, Reset in the header, the stats block removed, labels moved off the request fill, overflow hatched. <b>One accuracy note on #28:</b> the widget doesn't simulate the scheduler: it places Pods by their requests, as the scheduler does, but packs them as tightly as possible to count the fewest nodes, while the real scheduler spreads them out. The new introduction keeps your wording's shape and says that (see §04 below).</li>
       </ol>
     </div>
 
     <div class="panel">
-      <p><b>Shape:</b> Fennel's week (Friday's waiting Pod, Tuesday's restarts, Morgan's bill) traced back to two numbers per service: what a Pod <i>reserves</i> (requests) and what it may <i>use</i> (limits). The scheduler failing to place a Pod is a process, so it's a <b>scrollytelling lane</b> on Chapter 4's drawing. How requests turn into a node count and a bill is a system with real dynamics (steps, a processor floor, a Pod too big for any node), so it's a <b>hands-on sandbox</b> with three steppers and a switch, no target, opening on Fennel's actual five nodes. The sandbox earns its place against your “no busywork” bar because the reader discovers things a figure can't show, and the chapter's conversation needs it (“What does it do to our node count?”).</p>
-      <p><b>Minutes:</b> §01 2.5 · §02 4.0 · §03 lane 4.0 · §04 sandbox 5.0 · §05 1.0 · §06 1.75 · §07 3.0 · §08 2.0 · §09 2.5 · <b>total ≈ 25.75</b> (checks ≈ 4.5, lane ≈ 1.75, sandbox ≈ 2.5). Disclosures are optional, about 0.25 min each if opened. Tags below: <span class="tag p1">Part 1</span> / <span class="tag p2">Part 2</span> under the split.</p>
+      <p><b>Shape:</b> Fennel's week (Friday's waiting Pod, Tuesday's restarts, Morgan's bill) traced back to two numbers per service: what a Pod <i>reserves</i> (requests) and what it may <i>use</i> (limits). The scheduler failing to place a Pod is a process, so it's a <b>scrollytelling lane</b> on Chapter 4's drawing. How requests turn into a node count is a system with real dynamics (steps, a processor floor, a request that costs nothing until it costs a node, a Pod too big for any node), so it's a <b>hands-on sandbox</b> with four steppers and a switch, no target.</p>
+      <p><b>Minutes (Rev 0 → Rev 1):</b> §01 2.5 · §02 4.0 · §03 lane 4.0 → 3.75 · §04 sandbox 5.0 → 4.5 · §05 1.0 → 0.5 · node pools 1.75 → cut · §06 Tuesday 3.0 → 2.75 · §07 eviction 2.0 · §08 conversation 2.5 · <b>total 25.75 → about 22.5</b>; expect it to read at about 23–24. Disclosures are optional, about 0.25 min each if opened. Segment IDs (s-07…s-09) keep their numbers; page sections shift down by one after §05.</p>
       <p><b>Objectives:</b></p>
       <ul>
-        <li><b>o-1</b> Explain that the scheduler places each Pod by what it <i>reserves</i> (requests, memory and processor counted separately), not what it uses, and so that requests packed onto nodes decide how many machines Fennel pays for; including why free room split across nodes can't hold one Pod, and what node pools add. <span class="meta">checks: k-01–k-06</span></li>
+        <li><b>o-1</b> Explain that the scheduler places each Pod by what it <i>reserves</i> (requests, memory and processor counted separately), not what it uses, and so that requests packed onto nodes decide how many machines Fennel pays for; including why free room split across nodes can't hold one Pod, and that a Pod bigger than any node is never placed. <span class="meta">checks: k-01–k-05</span></li>
         <li><b>o-2</b> Predict the effect of over-requesting (more nodes, idle reserved room, Pods waiting) and of under-requesting or low limits (slowed processor, memory kills, evictions), and say why some unused room is deliberate. <span class="meta">checks: k-04, k-07, k-08</span></li>
         <li><b>o-3</b> Interpret “pending”, “OOM-killed” and an eviction as symptoms, name the loop involved, and ask the questions they raise. <span class="meta">checks: k-03, k-07, k-08, k-09</span></li>
       </ul>
-      <p class="meta">check_plan: PASS, no warnings. Misconceptions confronted: m-07, m-08, m-26, plus three proposed for the catalog (the scheduler fills the least busy node; going over any limit kills; pending means failed, or harmless).</p>
+      <p class="meta">check_plan: PASS. Misconceptions confronted: m-07, m-08, m-26, m-29, m-30, m-31.</p>
     </div>
   </section>
 
@@ -146,15 +140,15 @@
 
     <!-- s-01 -->
     <article class="seg" id="s-01">
-      <header><span class="id">s-01 · § 01</span><h3>Year 3: the first bill since the move</h3><span class="tag">cast → retrieval → story</span><span class="tag">o-1 o-3</span><span class="tag p1">Part 1</span><span class="tag">~2.5 min</span></header>
+      <header><span class="id">s-01 · § 01</span><h3>Year 3: the first bill since the move</h3><span class="tag">cast → retrieval → story</span><span class="tag">o-1 o-3</span><span class="tag">~2.5 min</span></header>
       <div>
         <p class="intent">Re-establish the cast, retrieve the scheduler's lens from Ch 4's 03:04, then show the week a manager sees and Ari's one-line diagnosis.</p>
         <div class="prose">
           <p><b>Cast strip:</b> <b>Morgan</b>, co-founder; runs Fennel's money and reads the cloud bill · <b>Jordan</b>, co-founder, now managing the engineers: that's you, in this story · <b>Ari</b>, platform lead; led Fennel's move onto Kubernetes.</p>
-          <p class="more">▸ <b>D1 · I didn't read the last chapter. What happened?</b> (collapsed) In Chapter 4, Fennel moved onto managed Kubernetes. It writes down what it wants running in manifests; Kubernetes keeps those goals in the cluster's record, and small loops each compare one part of it with what's running and close any gap: the ReplicaSet loop writes a record for each Pod, the scheduler gives each new Pod a node, and the node agent starts it. When node 03 died at 03:04, its Pods were replaced elsewhere within about six or seven minutes, with default settings, and nobody woke up. Since then the cluster has run on three nodes. The loop lens: which loop is it, what does it want, what does it see, and what does it do about a gap?</p>
+          <p class="more">▸ <b>D1 · I didn't read the last chapter. What happened?</b> (collapsed) In Chapter 4, Fennel moved onto managed Kubernetes. It writes down what it wants running in manifests; Kubernetes keeps those goals in the cluster's record, and small loops each compare one part of it with what's running and act when it differs from what's wanted: the ReplicaSet loop writes a record for each Pod, the scheduler gives each new Pod a node, and the node agent starts it. When node 03 died one Saturday night, its Pods were replaced elsewhere within about six or seven minutes, with default settings, and nobody woke up. Since then the cluster has run on three nodes. The loop lens: which loop is it, what does it want (the desired state), what does it see (the real state), and what does it do when the two differ?</p>
         </div>
         <div class="check">
-          <div class="kind">RETRIEVE · Check 01 / 09 · k-01</div>
+          <div class="kind">RETRIEVE · Check 01 / 08 · k-01</div>
           At 03:04 in Chapter 4, a new <code>orders</code> Pod appeared in the cluster's record with no node yet, and soon it was running on node 04. Which loop gave it node 04, and what did that loop see?
           <ol>
             <li>The ReplicaSet loop: it saw that <code>orders</code> was one Pod short, so it moved the old Pod over to node 04.</li>
@@ -164,7 +158,7 @@
           <div class="fb">A: the ReplicaSet loop wrote the record but doesn't pick nodes, and never moves Pods. · B: agents start only Pods already assigned to them. · C: “Right… What ‘room’ means, and who decided how much each Pod needs, is where Morgan's bill comes from.”</div>
         </div>
         <div class="prose">
-          <p>Since 03:04 Fennel's cluster has run on three nodes. On Friday evening, as the dinner rush began, the dispatch team asked for twice as many <code>dispatch</code> copies, and one of the new Pods didn't start: Ari's dashboard listed it as <code>Pending</code> for most of an hour, until Ari's team rented two more machines and added them as nodes 05 and 06.</p>
+          <p>Since node 03 died, Fennel's cluster has run on three nodes. On Friday evening, as the dinner rush began, the dispatch team asked for twice as many <code>dispatch</code> copies, and one of the new Pods didn't start: Ari's dashboard listed it as <code>Pending</code> for most of an hour, until Ari's team rented two more machines and added them as nodes 05 and 06.</p>
           <p>On Tuesday, the <code>orders</code> Pod restarted three times between lunch and the end of the dinner rush, and each time customers saw errors for a moment. The dashboard gave the reason as <code>OOMKilled</code>.</p>
           <p>At the end of the month, Morgan opened the first full cloud bill since the move, and it was higher than the last one before it.</p>
         </div>
@@ -177,22 +171,22 @@
 
     <!-- s-02 -->
     <article class="seg" id="s-02">
-      <header><span class="id">s-02 · § 02</span><h3>What the scheduler counts</h3><span class="tag">artefact → term → rule → predict → analogy</span><span class="tag">o-1</span><span class="tag p1">Part 1</span><span class="tag">~4 min</span></header>
+      <header><span class="id">s-02 · § 02</span><h3>What the scheduler counts</h3><span class="tag">artefact → term → rule → predict → analogy</span><span class="tag">o-1</span><span class="tag">~4 min</span></header>
       <div>
         <p class="intent">Ch 4's sizes were requests the teams wrote down; memory and processor are counted separately; the scheduler rules out nodes, then picks the emptiest; it counts reservations, never use.</p>
         <div class="prose">
-          <p>In Chapter 4's drawings every Pod had a size, and the scheduler looked for “a node with room”. Kubernetes didn't measure those sizes. Each team wrote them into its manifest when Fennel moved: how much memory and how much processor each copy should have set aside. Engineers call these numbers the Pod's <b>requests</b>. One unit of room in Chapter 4 was 2 GB of memory request.</p>
+          <p>In Chapter 4's drawings every Pod had a size, and the scheduler looked for “a node with room”. Kubernetes didn't measure those sizes. Each team wrote them into its manifest when Fennel moved, declaring how much memory and how much processor each copy should have set aside. Engineers call these numbers the Pod's <b>requests</b>. <code>storefront</code>'s two units of room appear here as its real memory request: 4 GB.</p>
         </div>
         <div class="term pay"><div class="k">NEW TERM · 01 / 04 (payoff)</div><div class="t">requests</div>The memory and processor a Pod reserves on its node, written in its manifest. The scheduler places Pods by their requests, never by what they use.<div class="back">memory and processor, counted separately · Chapter 4's “room”, written down</div></div>
         <div class="prose">
           <p>Fennel's nodes are 16 GB, 4-core machines; Pods can reserve about 13 GB and 3.9 cores of each, because part is kept back for the system. A Pod fits on a node only if <i>both</i> its requests fit in what that node has left unreserved (Fig. 02).</p>
           <p class="more">▸ <b>D2 · Why can Pods reserve only about 13 GB of a 16 GB node?</b> (collapsed) The operating system and Kubernetes' own programs need some; on one provider a 16 GB node keeps back about 2.7 GB.</p>
           <p>The <b>scheduler</b> chooses in two steps: first it rules out every node without room for the Pod's requests; then it scores the rest and picks the best, at random between ties. With default settings, the best is the node with the most room left unreserved, and it prefers to spread a service's copies across nodes, as a preference only.</p>
-          <p><b>Moving day, explained</b> (under Q1(b)): that's why <code>storefront</code>'s three Pods went to three different nodes: 01 and 04 had the most room, so one Pod each; the third to 02, which had no <code>storefront</code> copy yet. Notice what the scheduler wasn't trying to do: fit Fennel onto as few nodes as possible.</p>
+          <p>That's why, when Ari applied <code>storefront</code>'s manifest to the new cluster in Chapter 4, its three Pods went to three different nodes: 01 and 04 had the most room, so one Pod each; the third to 02, which had no <code>storefront</code> copy yet. Notice what the scheduler wasn't trying to do: fit Fennel onto as few nodes as possible.</p>
           <p>One sentence: teams can add placement rules (keep copies apart, send Pods to particular machines, keep ordinary work off special ones); your engineers will tune these.</p>
         </div>
         <div class="check">
-          <div class="kind">PREDICT · Check 02 / 09 · k-02</div>
+          <div class="kind">PREDICT · Check 02 / 08 · k-02</div>
           On a quiet Tuesday morning, Ari's dashboard shows node 02 at 15% busy. The Pods already on it have reserved all but 1 GB of its memory. A new Pod requests 2 GB. Will the scheduler put it on node 02?
           <ol>
             <li>Yes: at 15% busy node 02 has lots of memory going unused, and the scheduler fills the quietest nodes first.</li>
@@ -201,10 +195,10 @@
           </ol>
           <div class="fb">A and C: the scheduler never reads how busy a node is. B: “Right… it keeps that room for when the Pods' use rises, at the lunchtime peak.”</div>
         </div>
-        <div class="prose"><p>Reveal paragraph: the documentation says the scheduler refuses a node whose reservations are full “although actual memory or CPU resource usage on nodes is very low”, to protect the room for “a daily peak”.</p></div>
+        <div class="prose"><p>Reveal paragraph: the documentation says the scheduler refuses a node whose reservations are full “although actual memory or CPU resource usage on nodes is very low”, to protect the room for “a daily peak”. <b>New (#41):</b> a request is a reservation, not a cap: a Pod can use less than it reserved, or more, as long as its node has room to spare. What stops it comes later.</p></div>
         <div class="aside"><span class="k">ANALOGY</span> Think of each node as a department's budget, each request as the budget a project reserves, and the scheduler as finance, which approves a new project only where reservations leave room. Whether the projects have spent their money doesn't come into it.
           <div class="brk"><span class="k">WHERE THIS ANALOGY BREAKS</span> A finance team would move unspent money to where it's needed. The scheduler never does: reserved room a Pod isn't using stays reserved, at 3 a.m. as at the rush, and no other Pod can be placed in it.</div></div>
-        <div class="prose"><p><b>The loop lens:</b> the scheduler is one implementation of Chapter 4's pattern. It <i>wants</i> every Pod on a node with room for its requests; it <i>sees</i> Pods with no node and each node's unreserved memory and processor; it <i>does</i> rule out the too-full nodes, pick the emptiest, and write it in. And when no node passes the first step?</p></div>
+        <div class="prose"><p><b>The loop lens:</b> the scheduler is one implementation of Chapter 4's pattern. It <i>wants</i> every Pod on a node with room for its requests (the desired state); it <i>sees</i> Pods with no node and each node's unreserved memory and processor (the real state); when the two differ, it rules out the too-full nodes, picks the emptiest, and writes it in. And when no node passes the first step?</p></div>
       </div>
       <div>
         <div class="fig"><span class="kind">Fig. 01 · A manifest · storefront</span>
@@ -222,11 +216,11 @@
 
     <!-- s-03 -->
     <article class="seg" id="s-03">
-      <header><span class="id">s-03 · § 03</span><h3>Friday, 17:45: a Pod with nowhere to go</h3><span class="tag">scrollytelling B1 · gated</span><span class="tag">o-1 o-3</span><span class="tag p1">Part 1</span><span class="tag">~4 min</span></header>
+      <header><span class="id">s-03 · § 03</span><h3>Friday, 17:45: a Pod with nowhere to go</h3><span class="tag">scrollytelling B1 · gated</span><span class="tag">o-1 o-3</span><span class="tag">~4 min</span></header>
       <div class="wide">
         <p class="intent">The scheduler failing on Fennel's three nodes, step by step: per-node verdicts, a Pod left waiting with a recorded reason, retries that change nothing, nodes added by hand.</p>
         <div class="prose">
-          <p><b>Scene set-up (before the lane):</b> Since 03:04, Fennel's cluster has run on three nodes: 01, 02 and 04. Friday's dinner rush is when <code>dispatch</code>, which assigns drivers to orders, is busiest, and at 17:45 the dispatch team decides it wants six copies tonight instead of three. <b>Reading the drawing:</b> it's Chapter 4's, now counting in real units. Each node's column is the 13 GB its Pods can reserve, each Pod's height is its memory request, and the line under each node counts processor: so many of its 3.9 cores.</p>
+          <p><b>Scene set-up (before the lane):</b> Since node 03 died, Fennel's cluster has run on three nodes: 01, 02 and 04. Friday's dinner rush is when <code>dispatch</code>, which assigns drivers to orders, is busiest, and at 17:45 the dispatch team decides it wants six copies tonight instead of three. <b>Reading the drawing:</b> the following widget follows the next hour step by step. It's drawn as in Chapter 4, with one change: it counts in real units. Each node's column is the 13 GB its Pods can reserve, each Pod's height is its memory request, and the line under each node counts processor: so many of its 3.9 cores.</p>
         </div>
         <div class="lane">
           <div class="canvas"><div class="fig" style="min-height:300px"><span class="kind">Widget · w-friday-scrolly · W-01 · The cluster · Friday, 17:45 · complexity high</span>
@@ -236,7 +230,7 @@
             <div class="step"><b class="sid">F2 · seconds later</b> The scheduler takes the new Pods one at a time, first ruling out every node without room for 2 GB and a whole core. The first could go to 01 or 02 and goes to 01, which has fewer <code>dispatch</code> copies; the second fits only on 02.<div class="cv">01 FITS · 02 FITS · 04 NO MEMORY → dispatch → 01
 01 NO MEMORY · 02 FITS · 04 NO MEMORY → dispatch → 02</div>
               <div class="check">
-                <div class="kind">PREDICT · Check 03 / 09 · k-03 · gates F3–F5</div>
+                <div class="kind">PREDICT · Check 03 / 08 · k-03 · gates F3–F5</div>
                 The third new <code>dispatch</code> Pod needs 2 GB of memory and one processor core. Between them, the three nodes still have 3 GB of memory and about 3 cores free. What happens to it?
                 <ol>
                   <li class="ans">It waits, unplaced: no single node has both 2 GB and a whole core free, so it fits nowhere.</li>
@@ -246,19 +240,19 @@
                 <div class="fb">B: free room on different nodes doesn't add up; each node has only 1 GB free. · C: nothing has failed; nobody needs to apply anything again.</div>
               </div>
             </div>
-            <div class="step locked"><b class="sid">F3 (locked until k-03)</b> The third Pod fits nowhere. The nodes have 3 GB free between them, more than it needs, but in 1 GB pieces, and a Pod has to fit whole on one node. The scheduler leaves it without a node and writes down why.<div class="cv">01 NO MEMORY · 02 NO MEMORY · NO PROCESSOR · 04 NO MEMORY
+            <div class="step locked"><b class="sid">F3 (locked until k-03)</b> The third Pod fits nowhere. The nodes have 3 GB free between them, more than it needs, but in 1 GB pieces, and a Pod has to fit whole on one node. The scheduler leaves it without a node and writes down why.<div class="cv">01 NO MEMORY · NO PROCESSOR · 02 NO MEMORY · NO PROCESSOR · 04 NO MEMORY
 WAITING · NO ROOM: dispatch · row: 5 RUNNING · 1 WAITING
-SCHEDULER · 0/3 nodes are available: 1 Insufficient cpu, 3 Insufficient memory.</div></div>
+SCHEDULER · 0/3 nodes are available: 2 Insufficient cpu, 3 Insufficient memory.</div></div>
             <div class="step locked"><b class="sid">F4 · 18:00–18:40</b> Nothing has failed: the scheduler keeps trying, and nobody has to resubmit anything. But nothing changes either, because in Fennel's cluster no loop adds room. For the busiest part of the evening, <code>dispatch</code> runs one copy short.<div class="cv">DISPATCH · 5 of 6 copies running at the rush
 ↻ scheduler · DOES tries again whenever the cluster changes</div></div>
             <div class="step locked"><b class="sid">F5 · ~18:40</b> Ari's team adds two nodes, 05 and 06. The scheduler notices and places the waiting Pod on 05 within seconds. Fennel now pays for five nodes. The scheduler places only new Pods and never moves running ones, so node 06 stays empty.<div class="cv">NODE 05 NEW · NODE 06 NEW · dispatch → 05 · 6 RUNNING · node 06: 13 GB FREE</div></div>
           </div>
         </div>
-        <p class="meta">Under Q1 (a) or (c), the starting layout follows Ch 4 as shipped: one Pod is placed (on 04) and two wait, the reason reads “1 Insufficient cpu, 2 Insufficient memory”, and k-03 says “5 GB and over 4 cores free”. Caption under the lane: <i>Fennel's requests and nodes are fiction. The scheduler's reason is in the format engineers see; its exact wording varies between Kubernetes versions.</i></p>
+        <p class="meta">Caption under the lane: <i>Fennel's requests and nodes are fiction. The scheduler's reason is in the format engineers see; its exact wording varies between Kubernetes versions.</i></p>
         <div class="term"><div class="k">NEW TERM · 02 / 04</div><div class="t">pending</div>A Pod the scheduler hasn't been able to place yet. It waits, and the scheduler keeps trying and records why.<div class="back">Not failed, and not fixed by waiting alone.</div></div>
         <div class="prose">
           <p><b>Reading the reason:</b> “0/3 nodes are available” means none of the three passed the first step; the rest says what was short, node by node. It answers the first question to ask.</p>
-          <p><b>Enough in total, not on one node:</b> free room on different nodes never adds up, and both numbers must fit on the same node. Chapter 3 kept its drawings clear of this on purpose; on a real cluster it's common. Those leftover pieces are room Fennel pays for and no Pod this size can use.</p>
+          <p><b>Two sentences at most (#16, #17):</b> free room stranded in pieces like this is common on real clusters, and the leftover pieces on 01, 02 and 04 are room Fennel pays for that no Pod this size can use. (The lane and the check already explained why.)</p>
           <p><b>Two wrong readings:</b> pending isn't a failure (the scheduler keeps trying) and it isn't harmless (in Fennel's cluster nothing makes room by itself; Chapter 8 introduces a loop that can add nodes). The questions: <i>What's short, and on how many nodes? Is it short because demand grew, or because what we reserved is more than we use?</i></p>
           <p class="more">▸ <b>D4 · Is “pending” always about room?</b> (collapsed) No: it also covers a placed Pod downloading its image. The recorded reason tells them apart.</p>
         </div>
@@ -267,37 +261,44 @@ SCHEDULER · 0/3 nodes are available: 1 Insufficient cpu, 3 Insufficient memory.
 
     <!-- s-04 -->
     <article class="seg" id="s-04">
-      <header><span class="id">s-04 · § 04</span><h3>What Morgan pays for</h3><span class="tag">predict → sandbox B2 → transfer</span><span class="tag">o-1 o-2</span><span class="tag p1">Part 1</span><span class="tag">~5 min</span></header>
+      <header><span class="id">s-04 · § 04</span><h3>What Morgan pays for</h3><span class="tag">who rents → predict → sandbox B2 → transfer</span><span class="tag">o-1 o-2</span><span class="tag">~4.5 min</span></header>
       <div class="wide">
-        <p class="intent">Requests become nodes, and nodes are the bill: predict the cost of padding, explore it, test it, name it, and answer Morgan.</p>
-        <div class="prose"><p>In the provider's standard mode, which is Fennel's, the bill counts machines: each node is paid for as long as it exists, whether its room is reserved, used or empty. So Morgan's five nodes are the bill, and they're five because three couldn't hold what the teams had reserved.</p></div>
+        <p class="intent">Who decides how many nodes there are (Ari's team, by hand) and what decides how many Fennel needs (the requests); predict the cost of padding, explore it, test it, name it, and answer Morgan briefly.</p>
+        <div class="prose"><p>In its standard mode, which is Fennel's, the provider (the cloud company Fennel rents its machines from) bills for machines: each node is paid for as long as it exists, whether its room is reserved, used or empty. Nothing in Fennel's cluster rents nodes by itself: Ari's team decides how many machines to rent and adds them by hand (Chapter 8 introduces a loop that can). What the requests decide is how many nodes Fennel <i>needs</i>: on Friday the reservations didn't fit on three, so a Pod waited until Ari's team added two more.</p></div>
         <div class="check">
-          <div class="kind">PREDICT · Check 04 / 09 · k-04</div>
-          After Friday, the payments team doubles its memory request “to be safe”. What <code>payments</code> actually uses doesn't change. What does change for Fennel?
+          <div class="kind">PREDICT · Check 04 / 08 · k-04</div>
+          After Friday, the payments team doubles its memory request “to be safe”. Its Pods use no more memory than before. What does change for Fennel?
           <ol>
             <li>Very little: the nodes are no busier than before, so the only cost is some room that goes unused.</li>
             <li>Payments is better protected: with twice the memory set aside, it can no longer be killed for running out.</li>
-            <li class="ans">Each <code>payments</code> Pod blocks twice the room on its node, so nodes fill sooner: more nodes, or Pods left waiting.</li>
+            <li class="ans">Each <code>payments</code> Pod blocks twice the room on its node, so nodes fill sooner: potentially more nodes, or Pods left waiting.</li>
           </ol>
-          <div class="fb">A: reserved room is room no other Pod can use; on Friday it filled three nodes. · B: being killed for running out is the second number's job (§07). · C: “Right… W-02, below, shows how far it goes.”</div>
+          <div class="fb">A: reserved room is room no other Pod can use; on Friday it filled three nodes. · B: being killed for running out is the other number's job (§06). · C: “Right… Whether it costs a whole node depends on how much room the nodes have left; the following widget lets you try it.”</div>
         </div>
-        <div class="prose"><p><b>W-02 is Ari's sizing sheet.</b> It opens on Fennel's requests as the teams set them, and counts the nodes those requests need if packed as tightly as they'll go, plus one spare node. Things to notice: <i>Set each request to what that service used at the rush. How many nodes now, and what sets that number?</i> · <i>Switch off the spare node. What does insurance cost?</i> · <i>Push <code>orders</code> past 13 GB.</i></p></div>
+        <div class="prose"><p>The following widget works out how many nodes Fennel needs for a given set of memory requests. Like the scheduler, it places every Pod by its requests, with both of its numbers on one node; unlike the scheduler, it packs the Pods as tightly as they will go, so it counts the fewest nodes Fennel could rent. It starts with the memory requests Fennel's teams have been using in this chapter, and keeps room for one more node so that Fennel can lose one. Each Pod's outline is what it reserves; the fill inside is what it used at last Friday's rush. There is no target. Some things to try:</p>
+          <ul><li><i>Set each request to what that service used at the rush. How many nodes does Fennel need now? Look at the processor line under each node: what stops the count going lower?</i></li>
+          <li><i>Double <code>payments</code>' request, as in the question above. Does the count change? How far can it go before it costs a node?</i> (2 → 4 GB: no change; at 7.5 GB: one more node.)</li>
+          <li><i>Push <code>orders</code> past 13 GB. What happens?</i></li></ul></div>
+        <div class="fig" style="min-height:40px"><span class="kind">Widget header</span><code>W-02 · HOW MANY NODES?</code> · at the right end: <b>[ Reset ]</b></div>
         <div class="sbx">
           <div class="ctl">
-            <div><b>NODES 05</b> · what Fennel rents, and pays for in standard mode</div>
-            <div>SET BY · MEMORY</div>
-            <div>RESERVED 38 OF 65 GB · USED AT THE RUSH 19.5 GB</div>
-            <div>[ used 19.5 | reserved, not used 18.5 | not reserved 27 ] (idle bar)</div>
-            <div>storefront · 3 copies · REQUEST [−] 4 GB [+] · used 2 GB</div>
-            <div>orders · 1 copy · REQUEST [−] 6 GB [+] · used 5.5 GB</div>
-            <div>dispatch · 6 copies · REQUEST [−] 2 GB [+] · used 1 GB</div>
-            <div>[x] Keep room to lose a node · [Reset to Fennel's requests]</div>
+            <div><b>MEMORY REQUESTS, PER COPY</b> (controls, top left)</div>
+            <div>storefront ×3 · used 2 GB at rush · [−] 4 GB [+]</div>
+            <div>orders ×1 · used 5.5 GB at rush · [−] 6 GB [+]</div>
+            <div>payments ×2 · used 0.5 GB at rush · [−] 2 GB [+]</div>
+            <div>dispatch ×6 · used 1 GB at rush · [−] 2 GB [+]</div>
+            <div>[x] Keep room to lose a node · ON</div>
+            <div><span class="warn">Warnings</span>, only when they apply: “storefront requests 1.5 GB and used 2 GB at the rush: first in line if a node runs short (§07).” · “orders requests 14 GB, more than the 13 GB a node has for Pods: no node can ever take it.”</div>
           </div>
-          <div class="fig" style="min-height:260px"><span class="kind">Widget · w-sizing-sandbox · W-02 · Ari's sizing sheet · complexity high · B2</span>
-            Nodes drawn with the pooled renderer (nodes only): each Pod's outline = its request, dark fill = its use at last Friday's rush; <code>N GB FREE</code>; CPU footers; a dashed empty <code>SPARE</code> node when the switch is on. The node count is computed exactly (fewest nodes, packed tightly; raising a request never lowers it). What the reader can discover: defaults → 5 (4 without the spare); requests near use (storefront 2.5, dispatch 1.5) → 3, then <b>SET BY · PROCESSOR</b> once memory goes lower (processor requests stay as set); a request below use shows <span class="warn">“uses more than it reserves: first in line if a node runs short”</span>; orders at 13.5 GB+ → <code>NODES · —</code>, “orders can never be placed on these machines”. No money anywhere. Mobile: readouts and controls first (44px steppers), nodes below in rows of four. Caption: <i>The sandbox packs tightly to count the fewest nodes; the default scheduler spreads Pods out, so a real cluster needs at least this many. Each change places every Pod afresh; a real cluster never moves running Pods.</i></div>
+          <div class="fig" style="min-height:300px"><span class="kind">Widget · w-sizing-sandbox · W-02 · How many nodes? · complexity high · B2 · the outcome (right column)</span>
+            <b>Heading, large mono:</b> <code>4 NODES FOR THE PODS + 1 SPARE</code> (switch off: <code>4 NODES FOR THE PODS</code>; a Pod too big: <code>NO COUNT: A POD FITS ON NO NODE</code>). Only when processor sets the count, one line under it: “Processor, not memory, sets this count: memory alone would need 2.” <b>No stats block</b> (removed, #26).<br>
+            <b>The nodes</b> (pooled renderer, nodes only): node frames <code>NODE · 1 … 4</code> and a dashed empty <code>SPARE</code>; each Pod's outline = its request, soft fill = reserved but unused, solid fill from the bottom = its use at the rush; the service name sits <i>on the outline's top border</i> (or above a short chip), never on the soft fill; use above the request rises above the outline, <i>hatched</i>. <code>N GB FREE</code>; <code>CPU n / 3.9</code> footers.<br>
+            <b>Under the nodes:</b> <code>ROOM FOR PODS ON THE RENTED NODES</code> [ used at the rush 19.5 GB · 30% | reserved, not used 18.5 GB · 28% | not reserved 27 GB · 42% ].<br>
+            Exact count (fewest nodes, packed tightly; raising a request never lowers it). Defaults 4 + 1; requests near use (storefront 2.5, dispatch 1.5) → 3 + 1; storefront 2 and dispatch 1 (their use) → 3, with the processor line; payments 7.5 → 5 + 1; orders 13.5+ → no count, orders never placeable. No money anywhere. <b>Mobile:</b> header with Reset, controls (44px), then the heading and the room bar, then the nodes in rows of four. <b>Caption:</b> <i>The widget packs tightly to count the fewest nodes; the default scheduler spreads Pods out, so a real cluster needs at least this many. Each change places every Pod afresh; a real cluster never moves running Pods.</i></div>
         </div>
+        <div class="prose"><p><b>A Pod bigger than any node</b> (one or two sentences): its request is bigger than the room any node has, so it is never placed; it stays pending for good. It needs a bigger node, a machine with more memory, which Ari's team would have to rent.</p></div>
         <div class="check">
-          <div class="kind">PREDICT · Check 05 / 09 · k-05</div>
+          <div class="kind">PREDICT · Check 05 / 08 · k-05</div>
           A month on, nodes 05 and 06 are still nearly empty. With default settings, what does Kubernetes do about them?
           <ol>
             <li>Moves their Pods onto the fuller nodes and hands 05 and 06 back, since fewer nodes cost less.</li>
@@ -307,70 +308,46 @@ SCHEDULER · 0/3 nodes are available: 1 Insufficient cpu, 3 Insufficient memory.
           <div class="fb">A: nothing in Fennel's cluster packs Pods or gives nodes back. · B: “Right… Chapter 8 introduces a loop that can do it.” · C: the scheduler never moves running Pods.</div>
         </div>
         <div class="prose">
-          <p><b>Bin packing</b> is fitting reservations onto as few nodes as possible; W-02 does it to count. The default scheduler doesn't: it spreads Pods out, which is safer but not cheapest. Packing is a setting engineers can switch on, and some fully managed modes pack for you.</p>
-          <p><b>Two kinds of idle:</b> room no Pod reserved, and room reserved but unused. Morgan's “less than a third busy” is both together.</p>
-          <p><b>If you're billed per Pod:</b> in most setups you pay for the machines; a few per-Pod options bill for what each Pod <i>requests</i>, not what it uses, so padding costs money there too. Some fully managed modes still bill per machine.</p>
-          <p><b>Morgan's answer:</b> two extra nodes, rented because padded requests filled three on paper; a node's worth of spare room, which is a choice; and on every node, room kept back for the system. (A small fee per cluster also appears; Chapter 14.) Requests closer to what services use would mean fewer nodes, but not as few as possible.</p>
+          <p><b>Bin packing</b> is fitting reservations onto as few nodes as possible; the widget above does it to count. The default scheduler doesn't: it spreads Pods out, which is safer but not cheapest. Packing is a setting engineers can switch on, and some fully managed modes pack for you. Either way, running Pods are never moved.</p>
+          <p><b>One sentence, then D5:</b> the bar under the nodes splits the room nobody uses into room no Pod reserved and room reserved but not used, and Morgan's “less than a third busy” counts both.</p>
           <p class="more">▸ <b>D5 · How common is this?</b> (collapsed) One vendor's dataset (Datadog 2024, its own AWS customers, all containers on EC2): 83% of container spend on idle room, 54 points unreserved, 29 points over-requested. One community survey (CNCF 2023, about 100 self-selected respondents): 49% saw spend rise; over-provisioning the top cause at 70%. Single surveys, not industry averages.</p>
-          <p class="more">▸ <b>D6 · What does a per-Pod mode charge for, exactly?</b> (collapsed) What each running Pod requests, per second on one provider; waiting Pods unbilled there, crash-looping ones billed; one provider rounds 1 core and 8 GB (plus 256 MB) up to 2 cores and 9 GB.</p>
+          <p><b>Two sentences:</b> some setups bill per Pod instead of per machine, and they charge for what each Pod requests, not what it uses. So the lesson is the same: padding costs money.</p>
+          <p class="more">▸ <b>D6 · What does a per-Pod mode charge for, exactly?</b> (collapsed) What each running Pod requests, per second on one provider; waiting Pods unbilled there, crash-looping ones billed; one provider rounds 1 core and 8 GB (plus 256 MB) up to 2 cores and 9 GB; not every fully managed mode bills per Pod.</p>
+          <p><b>Morgan's answer</b> (two or three sentences): Fennel rents five nodes because the padded requests filled three nodes on paper while the services used far less, so Ari's team rented two more; one has sat nearly empty since, a node's worth of spare room, and whether Fennel wants that is a choice, which the next section explains. Requests closer to what each service uses at its busiest would let Fennel rent fewer nodes, but not as few as possible. <span class="meta">(No room-kept-back-for-the-system, no control-plane fee: #34.)</span></p>
         </div>
       </div>
     </article>
 
     <!-- s-05 -->
     <article class="seg" id="s-05">
-      <header><span class="id">s-05 · § 05</span><h3>Room on purpose</h3><span class="tag">explanation → question</span><span class="tag">o-2</span><span class="tag p1">Part 1</span><span class="tag">~1 min</span></header>
+      <header><span class="id">s-05 · § 05</span><h3>Room on purpose</h3><span class="tag">explanation → question</span><span class="tag">o-2</span><span class="tag">~0.5 min</span></header>
       <div>
-        <p class="intent">Some idle room is insurance, and how much is a decision. Keeps Ch 4's promise about the room after 03:04.</p>
+        <p class="intent">Spare nodes are insurance against losing a node. Short. (Rebuilt from your #36.)</p>
         <div class="prose">
-          <p>A cluster with no spare room handles an ordinary Friday by leaving Pods waiting. Since 03:04 Fennel had run on three nodes with almost nothing spare. If a node had died during the rush, its Pods would have been replaced as at 03:04, and the replacements would have waited, like the <code>dispatch</code> Pod.</p>
-          <p>Some unused room is insurance: a spare node's worth to place a lost node's Pods, and requests sized for each service's busiest hour, which leave room unused the rest of the week. Chapter 3 called it insurance and left “how much?” to this chapter. It's a decision, for engineers and finance together, and W-02's spare-node switch shows what it costs.</p>
+          <p>Nodes go down, as node 03 did in Chapter 4. When one does, its Pods are replaced, and the scheduler has to place the replacements on the nodes that are left; if those are full, the replacements wait for room, like the <code>dispatch</code> Pod at the dinner rush. Spare nodes are insurance against that. They cost a node each, as the “Keep room to lose a node” switch in the widget above shows, and how much to keep is a decision for engineers and finance together.</p>
         </div>
         <div class="quote">“If we lose a node during the dinner rush, where do its Pods go?”<cite>the question to ask</cite></div>
       </div>
       <div class="fig"><span class="kind">No figure; no check</span>A check here would be a judgment call (“how much spare room is right?”) with no right answer.</div>
     </article>
 
-    <!-- s-06 -->
-    <article class="seg" id="s-06">
-      <header><span class="id">s-06 · § 06</span><h3>Machines of different kinds: node pools</h3><span class="tag">problem → name → figure → apply</span><span class="tag">o-1</span><span class="tag p2">Part 2</span><span class="tag">~1.75 min</span></header>
-      <div>
-        <p class="intent">When a Pod outgrows a node, or some work can run on cheaper machines that can be taken back.</p>
-        <div class="prose">
-          <p>If <code>orders</code> keeps growing, its request may one day be bigger than any node has room for, and the documentation is blunt: such a Pod will never be placed. The answer is a bigger machine type. A <b>node pool</b> is a group of identical nodes within a cluster, and a cluster can have several, such as large-memory machines for the Pods that need them. Placement rules send Pods to the right pool.</p>
-          <p>Spot machines are cheaper, but the provider can take one back at short notice; teams give them their own pool and send there only work that tolerates interruption.</p>
-        </div>
-        <div class="check">
-          <div class="kind">APPLY · Check 06 / 09 · k-06</div>
-          Ari proposes a second node pool of spot machines: cheaper, but the provider can take one back at short notice. Which of Fennel's services should stay off it?
-          <ol>
-            <li class="ans"><code>orders</code>: it runs as one copy, so customers can't order while it's being replaced.</li>
-            <li><code>notifications</code>: texts and emails would arrive late while its Pods were replaced.</li>
-            <li>Neither: Kubernetes replaces Pods when a machine goes, so either can run there.</li>
-          </ol>
-          <div class="fb">B: late texts are tolerable; <code>notifications</code> can lag. · C: replacement takes time, and <code>orders</code> has one copy.</div>
-        </div>
-      </div>
-      <div class="fig"><span class="kind">Fig. 03 · Fennel's cluster as node pools</span>A cluster frame with <code>NODE POOL · GENERAL · 16 GB, 4-CORE MACHINES</code> (nodes 01 02 04 05 06), <code>NODE POOL · SPOT · CHEAPER, CAN BE TAKEN BACK</code> (two smaller nodes, “for work that can be interrupted”), and a dashed <code>NODE POOL · LARGE MEMORY · 64 GB</code> “if orders outgrows the general nodes”. Stacks on mobile. Caption: <i>Every node in a pool is the same machine type. Placement rules decide which Pods may use which pool.</i></div>
-    </article>
-
     <!-- s-07 -->
     <article class="seg" id="s-07">
-      <header><span class="id">s-07 · § 07</span><h3>Tuesday: when a Pod uses too much</h3><span class="tag">artefact → chart → terms → predict → analogy</span><span class="tag">o-2 o-3</span><span class="tag p2">Part 2</span><span class="tag">~3 min</span></header>
+      <header><span class="id">s-07 · § 06</span><h3>Tuesday: when a Pod uses too much</h3><span class="tag">artefact → chart → terms → predict → analogy</span><span class="tag">o-2 o-3</span><span class="tag">~3 min</span></header>
       <div>
-        <p class="intent">Limits are the second number: a cap, not a reservation. Memory over it is killed and restarted in place; processor over it is slowed.</p>
+        <p class="intent">Building on §02 (a Pod can use more than it reserves), limits are the cap: not a reservation. Memory over it is killed and restarted in place; processor over it is slowed.</p>
         <div class="prose">
           <p>On Tuesday, Ari's dashboard shows <code>orders-q2rw</code> with a restart count of 3 and last state <code>Terminated · Reason: OOMKilled · Exit code: 137</code>. Engineers will recognise 137; what matters is the word before it.</p>
-          <p>Fig. 04 is <code>orders</code>' manifest section with both numbers: what each copy reserves (<code>requests</code>, 6 GB) and the most it may use (<code>limits</code>, 7 GB). A request isn't a cap: a container may use more than it requested while its node has room to spare; only a limit stops it.</p>
+          <p>A Pod can use more than it reserves, but not without end. A manifest can also set <b>limits</b>: the most memory and processor each copy may use on its node. Here is <code>orders</code>' manifest with both: it reserves 6 GB and may use up to 7 GB.</p>
         </div>
-        <div class="term"><div class="k">NEW TERM · 03 / 04</div><div class="t">limits</div>The most memory and processor a Pod's container may use. They cap use; they reserve nothing.<div class="back">The second number in Fig. 04.</div></div>
+        <div class="term"><div class="k">NEW TERM · 03 / 04</div><div class="t">limits</div>The most memory and processor a Pod's container may use. They cap use; they reserve nothing.<div class="back">Over the memory limit: killed. Over the processor limit: slowed.</div></div>
         <div class="prose">
-          <p>Each time <code>orders</code>' memory reached 7 GB, the operating system on the node stopped the container: it was “OOM-killed”, from “out of memory”. The node agent then restarted it, in the same Pod on the same node, not a replacement as at 03:04. Each restart was a short gap for customers; if it keeps happening, the waits between restarts grow, as with Chapter 4's crash-looping <code>notifications</code>.</p>
+          <p>Each time <code>orders</code>' memory reached 7 GB, the operating system on the node stopped the container: it was “OOM-killed”, from “out of memory”. The node agent then restarted it, in the same Pod on the same node, not a replacement like the ones when node 03 died. Each restart was a short gap for customers; if it keeps happening, the waits between restarts grow, as with crash-looping, like we saw in Chapter 4.</p>
         </div>
         <div class="term"><div class="k">NEW TERM · 04 / 04</div><div class="t">OOM-killed</div>Stopped by the node's operating system for going over its memory limit (“out of memory”), then restarted in place.<div class="back">Engineers see OOMKilled, and exit code 137.</div></div>
         <div class="prose"><p>Processor is different: at its processor limit a container is slowed down (engineers say throttled), never killed, because processor time can be handed out in slices and memory a program holds can't be taken back. “It got slow” and “it restarted” point at different numbers.</p></div>
         <div class="check">
-          <div class="kind">PREDICT · Check 07 / 09 · k-07</div>
+          <div class="kind">PREDICT · Check 06 / 08 · k-07</div>
           At the next sale, <code>storefront</code> needs more processor than its limit allows, and <code>orders</code> needs more memory than its limit allows. What do customers notice?
           <ol>
             <li>Neither: the scheduler moves each one to a node with more room to spare.</li>
@@ -380,7 +357,7 @@ SCHEDULER · 0/3 nodes are available: 1 Insufficient cpu, 3 Insufficient memory.
           <div class="fb">A: the scheduler never moves running Pods; a limit caps the container wherever it runs. · B: only memory works that way.</div>
         </div>
         <div class="aside"><span class="k">ANALOGY</span> Back to budgets: if a request is the budget a project reserves, a limit is the spending cap on its card. A project may spend beyond its reservation, up to its cap, while the department has money to spare.
-          <div class="brk"><span class="k">WHERE THIS ANALOGY BREAKS</span> Real caps work one way; Kubernetes has two. The processor card never declines, it slows the spending down; the memory card cuts the project off and starts it again from nothing. And spending above your reservation isn't safe just because it's allowed: when money runs short, the projects over their reservation are cut first (§08).</div></div>
+          <div class="brk"><span class="k">WHERE THIS ANALOGY BREAKS</span> Real caps work one way; Kubernetes has two. The processor card never declines, it slows the spending down; the memory card cuts the project off and starts it again from nothing. And spending above your reservation isn't safe just because it's allowed: when money runs short, the projects over their reservation are cut first (§07).</div></div>
         <p class="more">▸ <b>D7 · What if a team sets no memory limit at all?</b> (collapsed) Then nothing caps it: it can use all its node's memory, and in a node-wide shortage a container without limits is more likely to be the one killed.</p>
       </div>
       <div>
@@ -392,45 +369,45 @@ SCHEDULER · 0/3 nodes are available: 1 Insufficient cpu, 3 Insufficient memory.
   limits:
     memory: 7Gi
     cpu: "1"</pre>
-          Annotations: requests → “set aside for each copy (what the scheduler counts)”; limits → “the most each copy may use” (accent); memory under limits → “over this, the container is killed”; cpu under limits → “at this, the container is slowed”.</div>
-        <div class="fig"><span class="kind">Fig. 05 · orders · memory, Tuesday</span>A line chart, 08:00–22:00, 0–8 GB. <b>Used</b> (orange line) climbs to 7 GB at ~12:40 (✕ OOMKilled · restart 1), drops to ~1.5 GB, climbs again; ✕ restart 2 at ~18:50, ✕ restart 3 at ~20:10. <b>Reserved</b>: dashed line at 6 GB, labelled “RESERVED · REQUEST 6 GB”. <b>Cap</b>: solid ink line at 7 GB, “CAP · LIMIT 7 GB”. The band between 6 and 7 lightly shaded: “above its reservation: allowed, but first in line if the node runs short (§08)”. No legend. Caption: <i>Three numbers about one Pod: what it reserves, what it may use, and what it used. A single day can't tell you why the line keeps climbing.</i></div>
+          Caption: <i>Requests are what each copy reserves; limits are the most it may use on its node.</i> Annotations: requests → “set aside for each copy (what the scheduler counts)”; limits → “the most each copy may use” (accent); memory under limits → “over this, the container is killed”; cpu under limits → “at this, the container is slowed”.</div>
+        <div class="fig"><span class="kind">Fig. 05 · orders · memory, Tuesday</span>A line chart, 08:00–22:00, 0–8 GB. <b>Used</b> (orange line) climbs to 7 GB at ~12:40 (✕ OOMKilled · restart 1), drops to ~1.5 GB, climbs again; ✕ restart 2 at ~18:50, ✕ restart 3 at ~20:10. <b>Reserved</b>: dashed line at 6 GB, labelled “RESERVED · REQUEST 6 GB”. <b>Cap</b>: solid ink line at 7 GB, “CAP · LIMIT 7 GB”. The band between 6 and 7 lightly shaded: “above its reservation: allowed, but first in line if the node runs short (§07)”. No legend. Caption: <i>Three numbers about one Pod: what it reserves, what it may use, and what it used. A single day can't tell you why the line keeps climbing.</i></div>
       </div>
     </article>
 
     <!-- s-08 -->
     <article class="seg" id="s-08">
-      <header><span class="id">s-08 · § 08</span><h3>Using more than you reserved</h3><span class="tag">explanation → apply → lens table</span><span class="tag">o-2 o-3</span><span class="tag p2">Part 2</span><span class="tag">~2 min</span></header>
+      <header><span class="id">s-08 · § 07</span><h3>Using more than you reserved</h3><span class="tag">explanation → apply → lens table</span><span class="tag">o-2 o-3</span><span class="tag">~2 min</span></header>
       <div>
         <p class="intent">Under-requesting's cost: when a node runs short of memory, its agent evicts the Pods furthest over their requests; their replacements may wait.</p>
         <div class="prose">
           <p>Besides starting and restarting containers, each node's agent watches how much memory its node has left. Ordinarily, Pods using more than they reserved is fine: there's room to spare.</p>
-          <p>If the node's free memory falls too low, its agent removes Pods to protect the node: an <b>eviction</b>. It goes first for the Pods using the most memory beyond what they reserved; Pods within their requests go last. Unlike §07's kill, an eviction removes the Pod; the ReplicaSet loop writes a new one, which the scheduler must place, and on a full cluster it waits, as on Friday. A request set below what a service uses doesn't save it room; it puts it first in line.</p>
+          <p>If the node's free memory falls too low, its agent removes Pods to protect the node: an <b>eviction</b>. It goes first for the Pods using the most memory beyond what they reserved; Pods within their requests go last. Unlike the kill on Tuesday, an eviction removes the Pod; the ReplicaSet loop writes a new one, which the scheduler must place, and on a full cluster it waits, like the <code>dispatch</code> Pod at the dinner rush. A request set below what a service uses doesn't save it room; it puts it first in line.</p>
         </div>
         <div class="check">
-          <div class="kind">APPLY · Check 08 / 09 · k-08</div>
+          <div class="kind">APPLY · Check 07 / 08 · k-08</div>
           To cut the bill, Morgan suggests halving every service's memory request. What would you expect at the next Friday rush?
           <ol>
             <li class="ans">Fewer nodes, but Pods that use more than they reserve get evicted when a node runs short.</li>
             <li>Fewer nodes and no other change, since each Pod still gets the memory it uses.</li>
             <li>No change at all, because the scheduler places Pods by the memory they actually use.</li>
           </ol>
-          <div class="fb">A: “Right… Cheaper, and less reliable. (W-02's warnings show which services.)” · B: using more than reserved works only while the node has room. · C: the scheduler never looks at use.</div>
+          <div class="fb">A: “Right… Cheaper, and less reliable. (The sizing widget's warnings show which services.)” · B: using more than reserved works only while the node has room. · C: the scheduler never looks at use.</div>
         </div>
       </div>
-      <div class="fig"><span class="kind">Fig. 06 · Which loop: wants, sees, does (CH05_LOOPS)</span>Ch 4's loop lens table, copied and extended; changed cells tagged <code>NEW IN CH 5</code>. Rows: node loop (unchanged) · ReplicaSet loop (“…including for Pods that were evicted”) · <b>scheduler</b> (wants every Pod on a node with room for its requests; sees Pods with no node and each node's unreserved memory and processor, never how busy; does rules out, picks the emptiest, spreads; if none fits, leaves it pending, records why, retries) · <b>node agent</b> (also watches its node's free memory; restarts OOM-killed containers; evicts the Pods furthest over their requests when short) · dashed: another loop, Chapter 7 · dashed: a loop that adds nodes, Chapter 8. Footer: “The memory kill itself is the operating system's; the node agent restarts the container.” Stacked cards on mobile.</div>
+      <div class="fig"><span class="kind">Fig. 06 · Which loop: wants, sees, does when they differ (CH05_LOOPS)</span>Columns: wants (desired state) · sees (real state) · does when they differ. Ch 4's loop lens table, copied and extended; changed cells tagged <code>NEW IN CH 5</code>. Rows: node loop (unchanged) · ReplicaSet loop (“…including for Pods that were evicted”) · <b>scheduler</b> (wants every Pod on a node with room for its requests; sees Pods with no node and each node's unreserved memory and processor, never how busy; does rules out, picks the emptiest, spreads; if none fits, leaves it pending, records why, retries) · <b>node agent</b> (also watches its node's free memory; restarts OOM-killed containers; evicts the Pods furthest over their requests when short) · dashed: another loop, Chapter 7 · dashed: a loop that adds nodes, Chapter 8. Footer: “The memory kill itself is the operating system's; the node agent restarts the container.” Stacked cards on mobile.</div>
     </article>
 
     <!-- s-09 -->
     <article class="seg" id="s-09">
-      <header><span class="id">s-09 · § 09</span><h3>The conversation</h3><span class="tag">think-then-reveal → contrasting cases → recap</span><span class="tag">o-3 o-2</span><span class="tag p2">Part 2</span><span class="tag">~2.5 min</span></header>
+      <header><span class="id">s-09 · § 08</span><h3>The conversation</h3><span class="tag">think-then-reveal → contrasting cases → recap</span><span class="tag">o-3 o-2</span><span class="tag">~2.5 min</span></header>
       <div>
         <p class="intent">Rehearse the discussion move on Ari's proposal, then recap and turn to the next chapter.</p>
         <div class="quote">“We need to bump memory limits on <code>orders</code>.”<cite>Ari</cite></div>
         <div class="check">
-          <div class="kind">APPLY · Check 09 / 09 · k-09 · think, then reveal</div>
+          <div class="kind">APPLY · Check 08 / 08 · k-09 · think, then reveal</div>
           Ari messages Jordan: “We need to bump memory limits on <code>orders</code>.” What would you ask? Think of one or two questions, then show the answer.
           <p class="ans">ANSWER: “Is that a leak or real growth? And what does it do to our node count?”</p>
-          <p class="fb">If it's a leak, a higher limit only delays the next kill, and a higher request rents room for a bug. If it's growth, a higher limit may be right; the documentation's advice is to check for a leak first, then raise the limit “and possibly” the request. Raising only the limit doesn't change where Pods go; raising the request reserves more room per copy, and on full nodes that can mean another node (try <code>orders</code> at 8 and then 12 GB in W-02). Then Fig. 07. Last line: “If your question was ‘how much more memory?’, that's the engineers' number. The two questions above decide whether more memory is the right fix, and what it costs.”</p>
+          <p class="fb">If it's a leak, a higher limit only delays the next kill, and a higher request rents room for a bug. If it's growth, a higher limit may be right; the documentation's advice is to check for a leak first, then raise the limit “and possibly” the request. Raising only the limit doesn't change where Pods go; raising the request reserves more room per copy, and on full nodes that can mean another node (in the sizing widget, from Fennel's requests, try <code>orders</code> at 5 GB and then 5.5 GB: 4 nodes, then 5). Then Fig. 07. Last line: “If your question was ‘how much more memory?’, that's the engineers' number. The two questions above decide whether more memory is the right fix, and what it costs.”</p>
         </div>
         <div class="panel" style="font-size:14px">
           <p><b>In short</b> (five lines): two numbers per service, requests and limits · the scheduler places by requests, both counts on one node, never by use · no room means pending, and nothing makes room by itself · requests decide the node count; padding buys nodes, cutting below use buys evictions; some spare room is insurance · at the memory limit, killed and restarted; at the processor limit, slowed; before raising a limit, ask leak or growth, and the node count.</p>
@@ -446,32 +423,35 @@ SCHEDULER · 0/3 nodes are available: 1 Insufficient cpu, 3 Insufficient memory.
     <table>
       <thead><tr><th>What</th><th>Why it's out</th><th>Cost to add back</th></tr></thead>
       <tbody>
+        <tr><td><b>Rev 1.</b> Node pools: the section, Fig. 03 (Fennel's cluster as node pools), its check (which service stays off a spot pool), the term</td><td>d-12, your #37: the reader hasn't seen how nodes get added, so pools answer a question they can't ask yet</td><td>Moved to Chapter 8, which can reuse the section, figure and check (plan R13)</td></tr>
+        <tr><td><b>Rev 1.</b> Room kept back for the system, repeated in Morgan's answer; the control-plane fee</td><td>#34: repetition and details that don't matter here; §02 owns the first, Chapter 14 the second</td><td>A clause</td></tr>
+        <tr><td><b>Rev 1.</b> The two-kinds-of-idle paragraph, per-Pod billing beyond two sentences, the stranded-room paragraph after the lane</td><td>#17, #31, #32: they re-explain what a widget just showed</td><td>—</td></tr>
+        <tr><td><b>Rev 1.</b> The sandbox's stats block, “· Over” row tags, and the “switch off the spare node” prompt</td><td>#26, #27; the spare node belongs to §05 now</td><td>A readout strip</td></tr>
         <tr><td>Restaurant-bookings analogy</td><td>One analogy is enough; the curriculum's budgeting one is used in two halves</td><td>An aside in §02, ~0.5 min</td></tr>
-        <tr><td>A Tuesday lane (memory climbs, killed at the cap, restarts, backs off)</td><td>Time; Fig. 05 shows the day</td><td>A 4–5 step lane, ~2 min; planned for Ch 5b under the split</td></tr>
-        <tr><td>An eviction lane</td><td>Time; prose plus k-08</td><td>A 4-step lane, ~2 min; candidate for Ch 5b</td></tr>
-        <tr><td>Processor steppers, and payments / notifications steppers in W-02</td><td>Keeps the reader's hands on one resource and three services</td><td>More rows; busier on phones</td></tr>
+        <tr><td>A Tuesday lane (memory climbs, killed at the cap, restarts, backs off)</td><td>Time; Fig. 05 shows the day</td><td>A 4–5 step lane, ~2 min</td></tr>
+        <tr><td>An eviction lane</td><td>Time; prose plus k-08</td><td>A 4-step lane, ~2 min</td></tr>
+        <tr><td>Processor steppers, and a notifications stepper</td><td>Keeps the reader's hands on one resource; four services show every behaviour</td><td>More rows; busier on phones</td></tr>
         <tr><td>Scoring details, plugin names; switching to packing</td><td>Engineer territory; one clause says packing is a setting</td><td>A disclosure</td></tr>
         <tr><td>Priority and preemption; QoS classes; namespace defaults and quotas</td><td>Ch 11 / Ch 12</td><td>Those chapters</td></tr>
         <tr><td>Request recommenders, vertical autoscaling, the cluster autoscaler by name</td><td>Ch 8</td><td>Ch 8</td></tr>
-        <tr><td>Fine points: reactive memory enforcement, processor weighting, limit copied to request, eviction thresholds, spot shutdown, zone spreading</td><td>Engineer territory or later chapters</td><td>Disclosures or Ch 10 / 12 / 14</td></tr>
-        <tr><td>Pricing: control-plane fee amounts, per-Pod prices, the 2021 survey</td><td>Ch 14</td><td>Ch 14</td></tr>
+        <tr><td>Fine points: reactive memory enforcement, processor weighting, limit copied to request, eviction thresholds, zone spreading</td><td>Engineer territory or later chapters</td><td>Disclosures or Ch 10 / 12 / 14</td></tr>
+        <tr><td>Pricing: per-Pod prices, the 2021 survey</td><td>Ch 14</td><td>Ch 14</td></tr>
         <tr><td>What Ari's team found (leak or growth)</td><td>Left open on purpose; the conversation rehearses the questions</td><td>Ch 12 postmortem</td></tr>
-        <tr><td>A money readout in W-02</td><td>A made-up price would read as real; the node count is the bill in standard mode</td><td>—</td></tr>
+        <tr><td>A money readout in the sandbox</td><td>A made-up price would read as real; the node count is the bill in standard mode</td><td>—</td></tr>
       </tbody>
     </table>
 
     <h2>If it runs long (in the plan now; cut in this order)</h2>
-    <p class="meta">The prose is written at whatever length clarity needs. If the built page runs long, you pick cuts from here. Together about 5 minutes (26 → 21), no objective dropped.</p>
+    <p class="meta">The old item 2 (trim node pools) is gone with the section; renumbered. Together about 4 minutes (22.5 → 18.5), no objective dropped.</p>
     <table>
       <thead><tr><th>#</th><th>Cut</th><th>What the reader loses</th></tr></thead>
       <tbody>
         <tr><td>1</td><td>k-05 (nodes 05 and 06 a month later), kept as one sentence</td><td>The committed prediction against “Kubernetes saves money automatically”</td></tr>
-        <tr><td>2</td><td>§06 to one paragraph: drop Fig. 03 and k-06</td><td>The node-pool check and the <code>orders</code>-vs-<code>notifications</code> apply moment</td></tr>
-        <tr><td>3</td><td>Fig. 07 to words in k-09's reveal</td><td>The picture behind “leak or real growth?”</td></tr>
-        <tr><td>4</td><td>The spending-cap aside to one line (its breaks stay in the paragraph)</td><td>The analogy's second half as its own aside</td></tr>
-        <tr><td>5</td><td>§05 folded into the end of §04</td><td>Headroom's own section (the promise is still kept, in fewer words)</td></tr>
-        <tr><td>6</td><td>§08 eviction to a disclosure, keeping k-08 and Fig. 06</td><td>Eviction in the main text (becomes disclosure-level)</td></tr>
-        <tr><td>7</td><td>W-02 replaced by a static two-panel figure</td><td>The hands-on discovery: steps, the processor floor, the never-placeable Pod. Only if you judge the sandbox busywork</td></tr>
+        <tr><td>2</td><td>Fig. 07 to words in k-09's reveal</td><td>The picture behind “leak or real growth?”</td></tr>
+        <tr><td>3</td><td>The spending-cap aside to one line (its breaks stay in the paragraph)</td><td>The analogy's second half as its own aside</td></tr>
+        <tr><td>4</td><td>§05 folded into the end of §04</td><td>Headroom's own section (the promise is still kept)</td></tr>
+        <tr><td>5</td><td>Eviction (§07) to a disclosure, keeping its check and Fig. 06</td><td>Eviction in the main text (becomes disclosure-level)</td></tr>
+        <tr><td>6</td><td>The sandbox replaced by a static two-panel figure</td><td>The hands-on discovery: steps, the processor floor, doubling payments, the never-placeable Pod. Last, since your review reorganised it rather than cutting it</td></tr>
       </tbody>
     </table>
   </section>

@@ -1,4 +1,4 @@
-/* w-sizing-sandbox/data.js · window.SizingData: W-02 "Ari's sizing sheet" (Ch 05 §04).
+/* w-sizing-sandbox/data.js · window.SizingData: W-02 "How many nodes?" (Ch 05 §04).
    Fennel's services as the sheet counts them (story facts, plan R2; d-03) and every reader-visible
    string. It is ALSO the data object for the pooled cluster drawing (pool/cluster/cluster.js:
    ClusterCanvas.create(data)), separate from lane F's window.ClusterData, so the two renderers on the
@@ -12,7 +12,7 @@
    with room for one line, so no chip shows a lone "store-".
    Fields the sheet adds: SERVICES[s].copies, .pods (Pod ids), .use (memory used at last Friday's rush,
    GB per copy), .useCpu (processor used, cores; shown nowhere, kept for later chapters), .adjustable
-   ({ min, max, step } for the three steppers); ORDER (stepper order); SHEET (the sheet's own strings;
+   ({ min, max, step } for the four steppers); ORDER (stepper order); SHEET (the sheet's own strings;
    {name} placeholders are filled by index.js). */
 (function () {
   'use strict';
@@ -23,8 +23,9 @@
     orders:        { size: 6, cpu: 1,    use: 5.5, useCpu: 0.5, copies: 1, label: 'orders',        breaks: ['orders'],
                      adjustable: { min: 0.5, max: 16, step: 0.5 } },
     dispatch:      { size: 2, cpu: 1,    use: 1,   useCpu: 0.6, copies: 6, label: 'dispatch',      breaks: ['dispatch'],
-                     adjustable: { min: 0.5, max: 6, step: 0.5 } },
-    payments:      { size: 2, cpu: 0.25, use: 0.5, useCpu: 0.1, copies: 2, label: 'payments',      breaks: ['payments'] },
+                     adjustable: { min: 0.5, max: 5, step: 0.5 } },   /* 5, not 6 (d-17): every setting then fits two rows of four nodes */
+    payments:      { size: 2, cpu: 0.25, use: 0.5, useCpu: 0.1, copies: 2, label: 'payments',      breaks: ['payments'],
+                     adjustable: { min: 0.5, max: 8, step: 0.5 } },
     notifications: { size: 2, cpu: 0.25, use: 0.5, useCpu: 0.1, copies: 2, label: 'notifications', breaks: ['notifications'] }
   };
   var PREFIX = { storefront: 'sf', orders: 'or', dispatch: 'di', payments: 'pa', notifications: 'no' };
@@ -44,13 +45,13 @@
     UNIT: 'GB',
     ROOM_UNIT: 2,                          /* one drawn unit = 2 GB, Ch 04's one-unit chip */
     SERVICES: SERVICES,
-    ORDER: ['storefront', 'orders', 'dispatch'],
+    ORDER: ['storefront', 'orders', 'payments', 'dispatch'],
     LOOPS: {},
     PODS: PODS,
 
     /* the pool drawing's strings (nodes only: no record, loops or header are drawn) */
     STRINGS: {
-      widget: 'W-02 · Ari’s sizing sheet', widgetShort: 'W-02', step: 'Step', node: 'Node', free: 'free', down: 'Down',
+      widget: 'W-02 · How many nodes?', widgetShort: 'W-02', step: 'Step', node: 'Node', free: 'free', down: 'Down',
       status: { running: 'Running', notstarted: 'Not started', starting: 'Starting', lost: 'Lost', crashed: 'Crashed', waiting: 'Waiting' },
       statusBreaks: { notstarted: ['Not', 'started'] },
       nodeStatus: { unknown: 'Unknown' },
@@ -62,25 +63,21 @@
       use: { over: 'Uses more than it reserves', overBreaks: ['Uses more', 'than it', 'reserves'], overShort: 'Over' }
     },
 
-    /* the sheet's own strings */
+    /* the sheet's own strings (Revision 1: controls left, outcome right; no stats block) */
     SHEET: {
-      title: 'W-02 · Ari’s sizing sheet',
-      titleShort: 'W-02 · Sizing sheet',
-      nodes: 'Nodes',
-      nodesSub: 'what Fennel rents, and pays for in standard mode',
-      nodesNone: '—',
-      nodesSpare: '{n} for the Pods + 1 spare',
-      nodesNoSpare: 'all {n} for the Pods, no spare',
-      nodesNoneSub: 'no count while a Pod fits on no node',
-      setBy: 'Set by',
-      setByWord: { memory: 'Memory', processor: 'Processor', both: 'Both', none: '—' },
-      setBySub: 'for the Pods, memory alone needs {mem}, processor alone {cpu}',
-      setBySubNone: 'no answer while a Pod fits on no node',
-      reserved: 'Reserved',
-      reservedOf: '{reserved} of {rented} GB',
-      reservedNone: '{reserved} GB',
-      used: 'Used at the rush',
-      usedVal: '{used} GB',
+      title: 'W-02 · How many nodes?',
+      titleShort: 'W-02',
+      reset: 'Reset',
+      resetLabel: 'Reset to Fennel’s requests',
+      /* the outcome heading: the count in words */
+      count: '{n} {nodes} for the Pods',
+      countSpare: '{n} {nodes} for the Pods + 1 spare',
+      countNone: 'No count: a Pod fits on no node',
+      node: { one: 'node', many: 'nodes' },
+      /* one plain line, only when processor matters */
+      setByProcessor: 'Processor, not memory, sets this count: memory alone would need {mem}.',
+      setByBothEach: 'Memory and processor each need this many nodes on their own.',
+      setByBothTogether: 'Memory and processor together set this count: either alone would need fewer.',
       idle: {
         head: 'Room for Pods on the rented nodes',
         used: ['Used at', 'the rush'],
@@ -95,20 +92,17 @@
       controlsHead: 'Memory requests, per copy',
       copies: { one: '{n} copy', many: '{n} copies' },
       copiesShort: ' ×{n}',
-      rowOver: ' · Over',
-      request: 'Request',
-      usedAt: 'used {use} GB',
+      usedAt: 'used {use} GB at rush',
       gb: '{v} GB',
       lower: 'Lower the {svc} memory request',
       raise: 'Raise the {svc} memory request',
       spare: 'Keep room to lose a node',
       spareOn: 'On',
       spareOff: 'Off',
-      reset: 'Reset to Fennel’s requests',
       warnHead: 'Warnings',
-      warnHatch: 'Hatched on the bar: {gb} GB used above the requests, in room no Pod had reserved.',
+      warnHatch: 'Hatched above a Pod and on the bar: {gb} GB used above the requests, in room no Pod had reserved.',
       warnNone: 'None: every Pod reserves at least what it used',
-      warnOver: '{svc} requests {req} GB and used {use} GB at the rush: first in line if a node runs short (§08).',
+      warnOver: '{svc} requests {req} GB and used {use} GB at the rush: first in line if a node runs short (§07).',
       warnNever: '{svc} requests {req} GB, more than the {room} GB a node has for Pods: no node can ever take it.',
       drawHead: 'The nodes, packed as tightly as they go',
       drawHeadNone: 'The other Pods, packed as tightly as they go',
@@ -116,7 +110,9 @@
       neverBody: '{svc} · {req} GB',
       neverRoom: 'a node’s room for Pods · {room} GB',
       /* the polite live sentence (one per change) */
-      live: '{change}{nodes} nodes, set by {setBy}. {reserved} of {rented} GB reserved; {used} GB used at the rush. {warn}',
+      live: '{change}{count}. {reserved} of {rented} GB reserved; {used} GB used at the rush. {warn}',
+      liveCount: '{n} {nodes} for the Pods',
+      liveCountSpare: '{n} {nodes} for the Pods, plus 1 spare',
       liveNone: '{change}No node count: {never}. {warn}',
       liveChange: '{svc} request {v} GB. ',
       liveSpare: 'Spare node {state}. ',

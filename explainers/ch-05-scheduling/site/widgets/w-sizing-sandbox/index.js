@@ -1,5 +1,9 @@
-/* w-sizing-sandbox/index.js · W-02 "Ari's sizing sheet" (Ch 05 §04, blueprint B2, a goal-free explorer).
-   The controls, readouts and live sentence, and the node drawing through the pooled renderer
+/* w-sizing-sandbox/index.js · W-02 "How many nodes?" (Ch 05 §04, blueprint B2, a goal-free explorer).
+   Revision 1 (the user's site review, H-23 to H-30): Reset in the header bar; the controls (four
+   steppers incl. payments, the switch, warnings) in the left column; the outcome on the right: the
+   count heading (and one processor line when processor matters), the nodes, then the room bar under
+   them. No stats block. Under 600px one column: controls, count, room bar, nodes.
+   The controls, outcome and live sentence, and the node drawing through the pooled renderer
    (pool/cluster/cluster.js, nodes-only). The model is window.SizingModel (model.js); data and every
    reader-visible string are window.SizingData (data.js). Nothing here decides a count: it asks the
    model and draws the answer. */
@@ -42,6 +46,10 @@ Didactician.widget('w-sizing-sandbox', function (el, ctx) {
   var bar = mk('div', 'ssw__bar');
   var title = mk('span', 'ssw__title', T.title);
   bar.appendChild(title);
+  var reset = mk('button', 'ssw__reset', T.reset);
+  reset.type = 'button';
+  reset.setAttribute('aria-label', T.resetLabel);
+  bar.appendChild(reset);
   root.appendChild(bar);
   var body = mk('div', 'ssw__body');
   root.appendChild(body);
@@ -50,30 +58,9 @@ Didactician.widget('w-sizing-sandbox', function (el, ctx) {
   body.appendChild(side);
   body.appendChild(main);
 
-  /* readouts */
-  var ro = mk('div', 'ssw__ro');
-  side.appendChild(ro);
-  function readout(label, cls, into) {
-    var box = mk('div', 'ssw__r ' + (cls || ''));
-    var head = mk('div', 'ssw__rh');
-    head.appendChild(mk('span', 'ssw__k', label));
-    var val = mk('span', 'ssw__v');
-    head.appendChild(val);
-    box.appendChild(head);
-    var sub = mk('span', 'ssw__sub');
-    box.appendChild(sub);
-    (into || ro).appendChild(box);
-    return { box: box, val: val, sub: sub };
-  }
-  var rNodes = readout(T.nodes, 'ssw__r--nodes');
-  var sub2 = mk('span', 'ssw__sub ssw__sub--2');
-  rNodes.box.appendChild(sub2);
-  var rSet = readout(T.setBy, 'ssw__r--set');
-  var pair = mk('div', 'ssw__pair');
-  ro.appendChild(pair);
-  var rRes = readout(T.reserved, 'ssw__r--res', pair);
-  var rUsed = readout(T.used, 'ssw__r--used', pair);
-
+  /* the outcome heading: the count in words, and one line when processor matters */
+  var count = mk('p', 'ssw__count');
+  var setLine = mk('p', 'ssw__setby');
   /* idle bar */
   var idle = mk('div', 'ssw__idle');
   idle.appendChild(mk('p', 'ssw__head', T.idle.head));
@@ -91,7 +78,6 @@ Didactician.widget('w-sizing-sandbox', function (el, ctx) {
   idle.appendChild(ilabels);
   var inone = mk('p', 'ssw__inone', T.idle.none);
   idle.appendChild(inone);
-  side.appendChild(idle);
 
   /* controls */
   var ctl = mk('div', 'ssw__ctl');
@@ -108,9 +94,8 @@ Didactician.widget('w-sizing-sandbox', function (el, ctx) {
     nm.appendChild(cp);
     info.appendChild(nm);
     row.setAttribute('aria-label', svc.label + ', ' + copiesText(svc.copies) + ', ' + fill(T.usedAt, { use: gb(svc.use) }));
-    var meta = mk('span', 'ssw__meta', fill(T.usedAt, { use: gb(svc.use) }).replace(/ /g, '\u00a0'));
-    var tag = mk('span', 'ssw__over', T.rowOver);
-    meta.appendChild(tag);
+    /* "used 5.5 GB" and "at rush" each kept whole, so a narrow row breaks between them */
+    var meta = mk('span', 'ssw__meta', fill(T.usedAt, { use: gb(svc.use) }).replace(/ /g, '\u00a0').replace('GB\u00a0at', 'GB at'));
     info.appendChild(meta);
     row.appendChild(info);
     var st = mk('div', 'ssw__step');
@@ -137,7 +122,7 @@ Didactician.widget('w-sizing-sandbox', function (el, ctx) {
     }
     minus.addEventListener('click', function () { stepBy(-1); });
     plus.addEventListener('click', function () { stepBy(1); });
-    rows[s] = { row: row, out: out, minus: minus, plus: plus, tag: tag };
+    rows[s] = { row: row, out: out, minus: minus, plus: plus };
   });
   var sw = mk('label', 'ssw__switch');
   var cb = mk('input', 'ssw__cb');
@@ -152,15 +137,12 @@ Didactician.widget('w-sizing-sandbox', function (el, ctx) {
   sw.appendChild(swState);
   cb.addEventListener('change', function () { spare = cb.checked; lastChange = { spare: true }; update(); });
   ctl.appendChild(sw);
-  var reset = mk('button', 'ssw__reset', T.reset);
-  reset.type = 'button';
   reset.addEventListener('click', function () {
     D.ORDER.forEach(function (s) { req[s] = DEFAULT[s]; });
     spare = true; cb.checked = true;
     lastChange = { reset: true };
     update();
   });
-  ctl.appendChild(reset);
   side.appendChild(ctl);
 
   /* warnings */
@@ -170,15 +152,23 @@ Didactician.widget('w-sizing-sandbox', function (el, ctx) {
   warn.appendChild(wlist);
   side.appendChild(warn);
 
-  /* the drawing */
+  /* the outcome: count heading, the nodes, then the room bar under them (#30); on phones the bar
+     comes before the nodes (CSS order), so a change's main effect is one short scroll away */
+  var head = mk('div', 'ssw__outhead');
+  head.appendChild(count);
+  head.appendChild(setLine);
+  main.appendChild(head);
+  var nodesBox = mk('div', 'ssw__nodes');
   var dhead = mk('p', 'ssw__head ssw__dhead', T.drawHead);
-  main.appendChild(dhead);
+  nodesBox.appendChild(dhead);
   var never = mk('div', 'ssw__never');
-  main.appendChild(never);
+  nodesBox.appendChild(never);
   var draw = mk('div', 'ssw__draw');
-  main.appendChild(draw);
+  nodesBox.appendChild(draw);
   var tooShort = mk('p', 'ssw__short');
-  main.appendChild(tooShort);
+  nodesBox.appendChild(tooShort);
+  main.appendChild(nodesBox);
+  main.appendChild(idle);
 
   var live = mk('p', 'ssw__live');
   live.setAttribute('aria-live', 'polite');
@@ -345,8 +335,11 @@ Didactician.widget('w-sizing-sandbox', function (el, ctx) {
     var w = draw.clientWidth || 320;
     var narrow = w < 440;
     var unit = narrow ? 22 : 28;
-    var colW = (w - 12) / 4;
-    var opts = { width: w, nodesOnly: true, columns: 4, unit: unit, labels: colW >= 80, highlight: highlight || [], lit: false };
+    /* four columns: five would cut every service name ("dispat…") at desktop widths; the most nodes any
+       setting needs (8, spare included; d-17) then take two rows, which reserve() holds from 600px */
+    var cols = 4;
+    var colW = (w - 12) / cols;
+    var opts = { width: w, nodesOnly: true, columns: cols, unit: unit, labels: colW >= 80, highlight: highlight || [], lit: false };
     Object.keys(D.SERVICES).forEach(function (s) { RD.SERVICES[s].breaks = D.SERVICES[s].breaks; });
     var snap = snapshot(ev);
     var rootEl = R.renderCluster(draw, snap, opts);
@@ -387,6 +380,18 @@ Didactician.widget('w-sizing-sandbox', function (el, ctx) {
     return rootEl;
   }
 
+  function nodesWord(n) { return n === 1 ? T.node.one : T.node.many; }
+  function countText(ev) {
+    if (!ev.feasible) return T.countNone;
+    return fill(ev.spare ? T.countSpare : T.count, { n: ev.base, nodes: nodesWord(ev.base) });
+  }
+  /* one plain line, only when processor matters (the model's "set by") */
+  function setByText(ev) {
+    if (!ev.feasible || ev.setBy === 'memory') return '';
+    if (ev.setBy === 'processor') return fill(T.setByProcessor, { mem: ev.memOnly });
+    return ev.memOnly === ev.base && ev.cpuOnly === ev.base ? T.setByBothEach : T.setByBothTogether;
+  }
+
   function list(items) {
     if (items.length < 2) return items.join('');
     return items.slice(0, -1).join(T.comma) + T.and + items[items.length - 1];
@@ -401,8 +406,10 @@ Didactician.widget('w-sizing-sandbox', function (el, ctx) {
       var nv = list(ev.never.map(function (n) { return fill(T.liveNever, { svc: D.SERVICES[n.service].label, req: gb(n.request) }); }));
       return fill(T.liveNone, { change: change, never: nv, warn: w });
     }
+    var c = fill(ev.spare ? T.liveCountSpare : T.liveCount, { n: ev.base, nodes: nodesWord(ev.base) });
+    var by = setByText(ev);
     return fill(T.live, {
-      change: change, nodes: ev.nodes, setBy: T.setByWord[ev.setBy].toLowerCase(),
+      change: change, count: c + (by ? '. ' + by.replace(/\.$/, '') : ''),
       reserved: gb(ev.reserved), rented: gb(ev.rented), used: gb(ev.used), warn: w
     });
   }
@@ -414,21 +421,14 @@ Didactician.widget('w-sizing-sandbox', function (el, ctx) {
     var ev = M.evaluate(D, req, spare);
     current = ev;
 
-    /* readouts */
-    rNodes.val.textContent = ev.feasible ? pad2(ev.nodes) : T.nodesNone;
-    rNodes.sub.textContent = T.nodesSub;
-    sub2.textContent = !ev.feasible ? T.nodesNoneSub : fill(spare ? T.nodesSpare : T.nodesNoSpare, { n: ev.base });
-    rSet.val.textContent = ev.feasible ? T.setByWord[ev.setBy] : T.setByWord.none;
-    rSet.sub.textContent = ev.feasible ? fill(T.setBySub, { mem: ev.memOnly, cpu: ev.cpuOnly }) : T.setBySubNone;
-    rRes.val.textContent = ev.feasible ? fill(T.reservedOf, { reserved: gb(ev.reserved), rented: gb(ev.rented) }) : fill(T.reservedNone, { reserved: gb(ev.reserved) });
-    rUsed.val.textContent = fill(T.usedVal, { used: gb(ev.used) });
-    if (lastChange) {
-      /* the count's box marks a change of count for a moment (word and number change too) */
-      if (rNodes.prev != null && rNodes.prev !== rNodes.val.textContent) {
-        rNodes.box.classList.remove('is-changed'); void rNodes.box.offsetWidth; rNodes.box.classList.add('is-changed');
-      }
+    /* the outcome heading */
+    count.textContent = countText(ev);
+    setLine.textContent = setByText(ev);
+    setLine.hidden = !setLine.textContent;
+    if (lastChange && count.prev != null && count.prev !== count.textContent) {
+      head.classList.remove('is-changed'); void head.offsetWidth; head.classList.add('is-changed');
     }
-    rNodes.prev = rNodes.val.textContent;
+    count.prev = count.textContent;
 
     D.ORDER.forEach(function (s) { setRow(s, ev); });
     swState.textContent = spare ? T.spareOn : T.spareOff;
@@ -449,7 +449,7 @@ Didactician.widget('w-sizing-sandbox', function (el, ctx) {
 
   /* ---------- layout and the height rule ----------
      From 600px (CURRICULUM §8 step 6) the sheet reserves its tallest state: the warnings list at its
-     longest and the drawing at two rows of nodes plus the never-placeable bar, so no setting change
+     longest and the drawing at its tallest (two rows of nodes; d-17), so no setting change
      moves the page. Below 600px nothing is reserved; the controls sit above everything that changes
      height, so they never move under the reader's finger. */
   function reserve() {
@@ -472,24 +472,34 @@ Didactician.widget('w-sizing-sandbox', function (el, ctx) {
     });
     req = save;
     warn.style.minHeight = wMax + 'px';
-    /* the drawing: the most nodes any setting needs (every request at its maximum, spare on), and the
-       never-placeable bar above it */
+    /* the drawing: the taller of its two tallest states (d-17: two rows of four in both). (a) every
+       request at its maximum with orders at a node's room, spare on: the most nodes any setting needs,
+       with the longest processor line; (b) orders past a node's room: the never-placeable bar above the
+       other Pods' nodes. */
+    function measure(r, neverOn) {
+      var ev = M.evaluate(D, r, true);
+      D.ORDER.forEach(function (s) { RD.SERVICES[s].size = r[s]; });
+      R.reset();
+      render(ev, []);
+      drawNever(neverOn ? ev : { never: [] });
+      dhead.textContent = neverOn ? T.drawHeadNone : T.drawHead;
+      count.textContent = neverOn ? T.countNone : countText(ev);
+      setLine.textContent = neverOn ? '' : T.setByBothTogether;
+      setLine.hidden = neverOn;
+      return main.offsetHeight;
+    }
     var bigReq = {};
     D.ORDER.forEach(function (s) { bigReq[s] = D.SERVICES[s].adjustable.max; });
+    var neverH = measure(bigReq, true);
     bigReq.orders = D.CAPACITY.memory;
-    var big = M.evaluate(D, bigReq, true);
-    D.ORDER.forEach(function (s) { RD.SERVICES[s].size = bigReq[s]; });
-    R.reset();
-    render(big, []);
-    drawNever({ never: [{ service: 'orders', request: D.SERVICES.orders.adjustable.max }] });
-    dhead.textContent = T.drawHeadNone;
-    main.style.minHeight = main.offsetHeight + 'px';
+    var fullH = measure(bigReq, false);
+    main.style.minHeight = Math.max(neverH, fullH) + 'px';
   }
 
   function layout(width) {
     root.classList.toggle('ssw--wide', width >= 720);
     root.classList.toggle('ssw--narrow', width < 400);
-    title.textContent = width < 360 ? T.titleShort : T.title;
+    title.textContent = width < 300 ? T.titleShort : T.title;
     var keep = lastChange;
     lastChange = null;
     reserve();

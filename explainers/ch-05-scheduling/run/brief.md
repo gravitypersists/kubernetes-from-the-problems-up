@@ -63,7 +63,7 @@ deployment: none
 
 ## Objectives
 
-- o-1: after reading, the reader can explain that the scheduler places each Pod by the room it *reserves* (its requests, counted separately for memory and processor), not by what it actually uses, and therefore that requests, packed onto nodes, decide how many machines Fennel pays for in the provider's standard mode (and what it pays for in per-Pod-billed modes); including why free room split across nodes can't hold one large Pod (m-26), and what node pools add.
+- o-1: after reading, the reader can explain that the scheduler places each Pod by the room it *reserves* (its requests, counted separately for memory and processor), not by what it actually uses, and therefore that requests, packed onto nodes, decide how many machines Fennel pays for in the provider's standard mode (and what it pays for in per-Pod-billed modes); including why free room split across nodes can't hold one large Pod (m-26). (Node pools moved to Ch 8, d-12.)
 - o-2: after reading, the reader can predict the effect of over-requesting (more nodes, idle reserved room, Pods left waiting: m-07, m-08) and of under-requesting or setting limits too low (crowded nodes, a slowed processor, memory kills, evictions) on cost and reliability, and say why some unused room is deliberate headroom (insurance for a node failure like 03:04, with the cluster now on three nodes).
 - o-3: after reading, the reader can interpret "pending" and "OOM-killed" (and an eviction) as symptoms, name which loop is involved using the loop lens, and ask the questions they raise ("Is that a leak or real growth? What does it do to our node count?").
 

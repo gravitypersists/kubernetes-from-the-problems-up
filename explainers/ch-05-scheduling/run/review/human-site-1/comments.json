@@ -1,0 +1,2007 @@
+{
+  "annotate": "1.5.3",
+  "schema": 2,
+  "kind": "annotate-export",
+  "exportedAt": "2026-10-26T03:04:17.040Z",
+  "page": "site",
+  "url": "http://127.0.0.1:61029/__didactician/site/index.html#room-on-purpose",
+  "project": "didactician",
+  "exportedViewport": {
+    "vw": 1653,
+    "vh": 903,
+    "dpr": 2
+  },
+  "comments": [
+    {
+      "schema": 2,
+      "id": "c1j991rq873u601s4os66",
+      "page": "didactician:site",
+      "url": "http://127.0.0.1:57751/__didactician/site/index.html",
+      "type": "highlight",
+      "author": "m",
+      "authorId": null,
+      "text": "this sentence is a little unclear",
+      "color": "#f59e0b",
+      "anchor": {
+        "exact": "This chapter traces three problems, a bill that went up, a Pod that wouldn’t start and a service that kept restarting, back to two numbers each team wrote down for its services",
+        "prefix": "es is higher than the last one before the move. ",
+        "suffix": ", and shows how Kubernetes uses them to decide w"
+      },
+      "geom": null,
+      "visibility": "shared",
+      "status": "open",
+      "resolved": false,
+      "resolvedBy": null,
+      "resolvedAt": null,
+      "assignee": null,
+      "assignedAt": null,
+      "replies": [],
+      "createdAt": "2026-10-25T23:00:21.632Z",
+      "updatedAt": "2026-10-25T23:00:21.632Z",
+      "editedAt": null
+    },
+    {
+      "schema": 2,
+      "id": "c1s5eryf1hh9p0517vitgq",
+      "page": "didactician:site",
+      "url": "http://127.0.0.1:57751/__didactician/site/index.html",
+      "type": "highlight",
+      "author": "m",
+      "authorId": null,
+      "text": "we're splitting attention here, extraneous load, the reader doesn't need to remember 3:04, they need to remember specifically when node 3 died, \"Since 3:04, when node 3 died,\"",
+      "color": "#f59e0b",
+      "anchor": {
+        "exact": "Since 03:04,",
+        "prefix": "s where Morgan’s bill comes from.\n      \n\n      ",
+        "suffix": " Fennel’s cluster has run on three nodes: 01, 02"
+      },
+      "geom": null,
+      "visibility": "shared",
+      "status": "open",
+      "resolved": false,
+      "resolvedBy": null,
+      "resolvedAt": null,
+      "assignee": null,
+      "assignedAt": null,
+      "replies": [],
+      "createdAt": "2026-10-25T23:03:50.411Z",
+      "updatedAt": "2026-10-25T23:18:59.816Z",
+      "editedAt": "2026-10-25T23:18:59.816Z"
+    },
+    {
+      "schema": 2,
+      "id": "c7ktomw1vv3wlu1s98dhn",
+      "page": "didactician:site",
+      "url": "http://127.0.0.1:57751/__didactician/site/index.html",
+      "type": "highlight",
+      "author": "m",
+      "authorId": null,
+      "text": "manifest don't speak. How about \"declaring\"",
+      "color": "#f59e0b",
+      "anchor": {
+        "exact": "saying",
+        "prefix": " into its service’s manifest when Fennel moved, ",
+        "suffix": " how much memory and how much processor each cop"
+      },
+      "geom": null,
+      "visibility": "shared",
+      "status": "open",
+      "resolved": false,
+      "resolvedBy": null,
+      "resolvedAt": null,
+      "assignee": null,
+      "assignedAt": null,
+      "replies": [],
+      "createdAt": "2026-10-25T23:08:46.130Z",
+      "updatedAt": "2026-10-25T23:08:46.130Z",
+      "editedAt": null
+    },
+    {
+      "schema": 2,
+      "id": "c2d2xyakqyjenv4yh8o",
+      "page": "didactician:site",
+      "url": "http://127.0.0.1:57751/__didactician/site/index.html",
+      "type": "highlight",
+      "author": "m",
+      "authorId": null,
+      "text": "This is too much mental math and juggling of numbers. Maybe \"Storefront’s two units of room appear as its real memory request: 4 GB.\"",
+      "color": "#f59e0b",
+      "anchor": {
+        "exact": "One unit of room in Chapter 4 stood for 2 GB of memory request, so storefront’s two units are the 4 GB in Fig. 01. A node’s six units made 12 GB. The real figure, given just below, is about 13 GB, but none of Chapter 4’s sizes needed that last 1 GB.",
+        "prefix": "ngineers call these numbers the Pod’s requests. ",
+        "suffix": "\n\n      \n      \n        \n          Fig. 01A mani"
+      },
+      "geom": null,
+      "visibility": "shared",
+      "status": "open",
+      "resolved": false,
+      "resolvedBy": null,
+      "resolvedAt": null,
+      "assignee": null,
+      "assignedAt": null,
+      "replies": [],
+      "createdAt": "2026-10-25T23:13:14.692Z",
+      "updatedAt": "2026-10-25T23:13:14.692Z",
+      "editedAt": null
+    },
+    {
+      "schema": 2,
+      "id": "cj7omgo1ist21d16hmr6r",
+      "page": "didactician:site",
+      "url": "http://127.0.0.1:57751/__didactician/site/index.html",
+      "type": "highlight",
+      "author": "m",
+      "authorId": null,
+      "text": "\"Kubernetes put its three pods on three different nodes.\"",
+      "color": "#f59e0b",
+      "anchor": {
+        "exact": "its three Pods went to three different nodes",
+        "prefix": "04: Ari applied storefront’s manifest last, and ",
+        "suffix": ".\n            Many small loops each compare one "
+      },
+      "geom": null,
+      "visibility": "shared",
+      "status": "open",
+      "resolved": false,
+      "resolvedBy": null,
+      "resolvedAt": null,
+      "assignee": null,
+      "assignedAt": null,
+      "replies": [],
+      "createdAt": "2026-10-25T23:16:23.300Z",
+      "updatedAt": "2026-10-25T23:16:23.300Z",
+      "editedAt": null
+    },
+    {
+      "schema": 2,
+      "id": "ctf1jgq1hu6okd59oapc",
+      "page": "didactician:site",
+      "url": "http://127.0.0.1:57751/__didactician/site/index.html",
+      "type": "highlight",
+      "author": "m",
+      "authorId": null,
+      "text": "this is still confusing me - can we make it clearer that this is comparing desired state against realized state?",
+      "color": "#f59e0b",
+      "anchor": {
+        "exact": "which loop is it, what does it want, what does it see, and what does it do about a gap",
+        "prefix": "       To understand any loop, ask four things: ",
+        "suffix": "?\n          \n        \n      \n\n      \n        RET"
+      },
+      "geom": null,
+      "visibility": "shared",
+      "status": "open",
+      "resolved": false,
+      "resolvedBy": null,
+      "resolvedAt": null,
+      "assignee": null,
+      "assignedAt": null,
+      "replies": [],
+      "createdAt": "2026-10-25T23:18:06.016Z",
+      "updatedAt": "2026-10-25T23:18:06.016Z",
+      "editedAt": null
+    },
+    {
+      "schema": 2,
+      "id": "cgdf0sziahtgs1t72jbe",
+      "page": "didactician:site",
+      "url": "http://127.0.0.1:57751/__didactician/site/index.html",
+      "type": "highlight",
+      "author": "m",
+      "authorId": null,
+      "text": "\"and the scheduler operates only on the rest\"",
+      "color": "#f59e0b",
+      "anchor": {
+        "exact": "and the scheduler counts only the rest",
+        "prefix": "oo. So part of each node is kept back for them, ",
+        "suffix": ", which engineers call the node’s allocatable ro"
+      },
+      "geom": null,
+      "visibility": "shared",
+      "status": "open",
+      "resolved": false,
+      "resolvedBy": null,
+      "resolvedAt": null,
+      "assignee": null,
+      "assignedAt": null,
+      "replies": [],
+      "createdAt": "2026-10-25T23:21:29.982Z",
+      "updatedAt": "2026-10-25T23:21:29.982Z",
+      "editedAt": null
+    },
+    {
+      "schema": 2,
+      "id": "cssuuzv1ao4sunbnpskg",
+      "page": "didactician:site",
+      "url": "http://127.0.0.1:57751/__didactician/site/index.html",
+      "type": "highlight",
+      "author": "m",
+      "authorId": null,
+      "text": "this is kind of dangling information, let's just delete this line",
+      "color": "#f59e0b",
+      "anchor": {
+        "exact": "Other providers publish their own numbers.",
+        "prefix": " node keeps back about a quarter of its memory. ",
+        "suffix": "\n      \n\n      Memory and processor are counted "
+      },
+      "geom": null,
+      "visibility": "shared",
+      "status": "open",
+      "resolved": false,
+      "resolvedBy": null,
+      "resolvedAt": null,
+      "assignee": null,
+      "assignedAt": null,
+      "replies": [],
+      "createdAt": "2026-10-25T23:22:54.832Z",
+      "updatedAt": "2026-10-25T23:22:54.832Z",
+      "editedAt": null
+    },
+    {
+      "schema": 2,
+      "id": "cu4o3mp4vdc3oy5p6fg",
+      "page": "didactician:site",
+      "url": "http://127.0.0.1:57751/__didactician/site/index.html",
+      "type": "highlight",
+      "author": "m",
+      "authorId": null,
+      "text": "remove \"on moving day\"",
+      "color": "#f59e0b",
+      "anchor": {
+        "exact": "on moving day",
+        "prefix": " them, it places them anyway.\n      That’s why, ",
+        "suffix": " in Chapter 4, when Ari applied storefront’s man"
+      },
+      "geom": null,
+      "visibility": "shared",
+      "status": "open",
+      "resolved": false,
+      "resolvedBy": null,
+      "resolvedAt": null,
+      "assignee": null,
+      "assignedAt": null,
+      "replies": [],
+      "createdAt": "2026-10-26T01:48:41.542Z",
+      "updatedAt": "2026-10-26T01:48:41.542Z",
+      "editedAt": null
+    },
+    {
+      "schema": 2,
+      "id": "c1ntp4my4r229r1o9l3st",
+      "page": "didactician:site",
+      "url": "http://127.0.0.1:57751/__didactician/site/index.html",
+      "type": "highlight",
+      "author": "m",
+      "authorId": null,
+      "text": "something more like a discrepancy between the desired and real state. \"a gap\" is too vague",
+      "color": "#f59e0b",
+      "anchor": {
+        "exact": "about a gap",
+        "prefix": "sor each node has left unreserved. What it does ",
+        "suffix": " is rule out the nodes that are too full, pick t"
+      },
+      "geom": null,
+      "visibility": "shared",
+      "status": "open",
+      "resolved": false,
+      "resolvedBy": null,
+      "resolvedAt": null,
+      "assignee": null,
+      "assignedAt": null,
+      "replies": [],
+      "createdAt": "2026-10-26T01:53:28.333Z",
+      "updatedAt": "2026-10-26T01:53:28.333Z",
+      "editedAt": null
+    },
+    {
+      "schema": 2,
+      "id": "cighvjw1cs3bxr1c7a83e",
+      "page": "didactician:site",
+      "url": "http://127.0.0.1:57751/__didactician/site/index.html",
+      "type": "highlight",
+      "author": "m",
+      "authorId": null,
+      "text": "Instead of W-01, let's say \"The following widget\"",
+      "color": "#f59e0b",
+      "anchor": {
+        "exact": "W-01",
+        "prefix": "hanges the number in dispatch’s manifest.\n      ",
+        "suffix": " follows the next hour step by step as you scrol"
+      },
+      "geom": null,
+      "visibility": "shared",
+      "status": "open",
+      "resolved": false,
+      "resolvedBy": null,
+      "resolvedAt": null,
+      "assignee": null,
+      "assignedAt": null,
+      "replies": [],
+      "createdAt": "2026-10-26T01:54:25.744Z",
+      "updatedAt": "2026-10-26T01:54:25.744Z",
+      "editedAt": null
+    },
+    {
+      "schema": 2,
+      "id": "cn09rxm14g8e9w1ax85wz",
+      "page": "didactician:site",
+      "url": "http://127.0.0.1:57751/__didactician/site/index.html",
+      "type": "highlight",
+      "author": "m",
+      "authorId": null,
+      "text": "\"It's drawn similar to how it was in Chapter 4's, with one...\"",
+      "color": "#f59e0b",
+      "anchor": {
+        "exact": "Its drawing is Chapter 4’s, with one change: it now counts in real units.",
+        "prefix": "llows the next hour step by step as you scroll. ",
+        "suffix": " Each node’s column stands for the 13 GB of memo"
+      },
+      "geom": null,
+      "visibility": "shared",
+      "status": "open",
+      "resolved": false,
+      "resolvedBy": null,
+      "resolvedAt": null,
+      "assignee": null,
+      "assignedAt": null,
+      "replies": [],
+      "createdAt": "2026-10-26T01:55:23.740Z",
+      "updatedAt": "2026-10-26T01:55:23.740Z",
+      "editedAt": null
+    },
+    {
+      "schema": 2,
+      "id": "c1kc5v9l8s9hvt1oqcoke",
+      "page": "didactician:site",
+      "url": "http://127.0.0.1:57751/__didactician/site/index.html",
+      "type": "highlight",
+      "author": "m",
+      "authorId": null,
+      "text": "delete this",
+      "color": "#f59e0b",
+      "anchor": {
+        "exact": ", as it did on moving day.",
+        "prefix": "notices the gap and writes three new Pod records",
+        "suffix": " None of the three has a node yet, so nothing ne"
+      },
+      "geom": null,
+      "visibility": "shared",
+      "status": "open",
+      "resolved": false,
+      "resolvedBy": null,
+      "resolvedAt": null,
+      "assignee": null,
+      "assignedAt": null,
+      "replies": [],
+      "createdAt": "2026-10-26T01:57:40.003Z",
+      "updatedAt": "2026-10-26T01:57:40.003Z",
+      "editedAt": null
+    },
+    {
+      "schema": 2,
+      "id": "c65v4xj1ip87r01hfpsmm",
+      "page": "didactician:site",
+      "url": "http://127.0.0.1:57751/__didactician/site/index.html",
+      "type": "highlight",
+      "author": "m",
+      "authorId": null,
+      "text": "\"Nothing new is running yet.\"",
+      "color": "#f59e0b",
+      "anchor": {
+        "exact": "None of the three has a node yet, so nothing new is running.",
+        "prefix": "three new Pod records, as it did on moving day. ",
+        "suffix": "\n              \n              \n                W"
+      },
+      "geom": null,
+      "visibility": "shared",
+      "status": "open",
+      "resolved": false,
+      "resolvedBy": null,
+      "resolvedAt": null,
+      "assignee": null,
+      "assignedAt": null,
+      "replies": [],
+      "createdAt": "2026-10-26T01:58:24.555Z",
+      "updatedAt": "2026-10-26T01:58:24.555Z",
+      "editedAt": null
+    },
+    {
+      "schema": 2,
+      "id": "cpi690egjdh7mmi99t7",
+      "page": "didactician:site",
+      "url": "http://127.0.0.1:61029/__didactician/site/index.html",
+      "type": "highlight",
+      "author": "m",
+      "authorId": null,
+      "text": "more than the Pod's request of 2GB",
+      "color": "#f59e0b",
+      "anchor": {
+        "exact": "more than the Pod’s 2 GB",
+        "prefix": " them, the three nodes had 3 GB of memory free, ",
+        "suffix": ", and about 3 cores. But the memory came in piec"
+      },
+      "geom": null,
+      "visibility": "shared",
+      "status": "open",
+      "resolved": false,
+      "resolvedBy": null,
+      "resolvedAt": null,
+      "assignee": null,
+      "assignedAt": null,
+      "replies": [],
+      "createdAt": "2026-10-26T02:06:18.861Z",
+      "updatedAt": "2026-10-26T02:06:18.861Z",
+      "editedAt": null
+    },
+    {
+      "schema": 2,
+      "id": "c1cy0e08wmctkt1yycadh",
+      "page": "didactician:site",
+      "url": "http://127.0.0.1:61029/__didactician/site/index.html",
+      "type": "highlight",
+      "author": "m",
+      "authorId": null,
+      "text": "not sure what reflecting back to chapter 3 gets us here, let's nix it. Noting that this is common is worthwhile though.",
+      "color": "#f59e0b",
+      "anchor": {
+        "exact": "Chapter 3 kept its drawings clear of this case on purpose, but on a real cluster it’s common.",
+        "prefix": "th of its numbers have to fit on the same node. ",
+        "suffix": " It matters to Morgan, too, because those leftov"
+      },
+      "geom": null,
+      "visibility": "shared",
+      "status": "open",
+      "resolved": false,
+      "resolvedBy": null,
+      "resolvedAt": null,
+      "assignee": null,
+      "assignedAt": null,
+      "replies": [],
+      "createdAt": "2026-10-26T02:08:05.071Z",
+      "updatedAt": "2026-10-26T02:08:05.071Z",
+      "editedAt": null
+    },
+    {
+      "schema": 2,
+      "id": "c1xutcls1iy0kv212iwv4q",
+      "page": "didactician:site",
+      "url": "http://127.0.0.1:61029/__didactician/site/index.html",
+      "type": "highlight",
+      "author": "m",
+      "authorId": null,
+      "text": "At this point I feel like we're repeating this over and over, consider whether this is getting repetitive please. I don't want to hammer the reader over the head, they'll understand quickly from the widget above.",
+      "color": "#f59e0b",
+      "anchor": {
+        "exact": "But the memory came in pieces of 1 GB, one on each node, and a Pod runs on one node, so the pieces never add up: both of its numbers have to fit on the same node.",
+        "prefix": "e, more than the Pod’s 2 GB, and about 3 cores. ",
+        "suffix": " Chapter 3 kept its drawings clear of this case "
+      },
+      "geom": null,
+      "visibility": "shared",
+      "status": "open",
+      "resolved": false,
+      "resolvedBy": null,
+      "resolvedAt": null,
+      "assignee": null,
+      "assignedAt": null,
+      "replies": [],
+      "createdAt": "2026-10-26T02:09:00.642Z",
+      "updatedAt": "2026-10-26T02:09:00.642Z",
+      "editedAt": null
+    },
+    {
+      "schema": 2,
+      "id": "c1bspmcjcnijob1p2546k",
+      "page": "didactician:site",
+      "url": "http://127.0.0.1:61029/__didactician/site/index.html",
+      "type": "highlight",
+      "author": "m",
+      "authorId": null,
+      "text": "what provider means here might seem a bit confusing.",
+      "color": "#f59e0b",
+      "anchor": {
+        "exact": "In the provider’s standard mode",
+        "prefix": "    \n    \n      § 04 What Morgan pays for\n      ",
+        "suffix": ", which is the one Fennel uses, the bill counts "
+      },
+      "geom": null,
+      "visibility": "shared",
+      "status": "open",
+      "resolved": false,
+      "resolvedBy": null,
+      "resolvedAt": null,
+      "assignee": null,
+      "assignedAt": null,
+      "replies": [],
+      "createdAt": "2026-10-26T02:09:51.880Z",
+      "updatedAt": "2026-10-26T02:09:51.880Z",
+      "editedAt": null
+    },
+    {
+      "schema": 2,
+      "id": "c2qx2s7tnywltj68ko3",
+      "page": "didactician:site",
+      "url": "http://127.0.0.1:61029/__didactician/site/index.html",
+      "type": "highlight",
+      "author": "m",
+      "authorId": null,
+      "text": "constitute the bill",
+      "color": "#f59e0b",
+      "anchor": {
+        "exact": "are the bill",
+        "prefix": "reserved, used or empty. So Morgan’s five nodes ",
+        "suffix": ", and there are five because of the requests: on"
+      },
+      "geom": null,
+      "visibility": "shared",
+      "status": "open",
+      "resolved": false,
+      "resolvedBy": null,
+      "resolvedAt": null,
+      "assignee": null,
+      "assignedAt": null,
+      "replies": [],
+      "createdAt": "2026-10-26T02:10:14.150Z",
+      "updatedAt": "2026-10-26T02:10:14.150Z",
+      "editedAt": null
+    },
+    {
+      "schema": 2,
+      "id": "cmgu6wc15p63631k0pggo",
+      "page": "didactician:site",
+      "url": "http://127.0.0.1:61029/__didactician/site/index.html",
+      "type": "highlight",
+      "author": "m",
+      "authorId": null,
+      "text": "this is confusing me, are the requests provisioning nodes? We haven't learned about that yet, we are right now talking about pods.",
+      "color": "#f59e0b",
+      "anchor": {
+        "exact": "and there are five because of the requests",
+        "prefix": " or empty. So Morgan’s five nodes are the bill, ",
+        "suffix": ": on Friday, three nodes couldn’t hold everythin"
+      },
+      "geom": null,
+      "visibility": "shared",
+      "status": "open",
+      "resolved": false,
+      "resolvedBy": null,
+      "resolvedAt": null,
+      "assignee": null,
+      "assignedAt": null,
+      "replies": [],
+      "createdAt": "2026-10-26T02:11:16.750Z",
+      "updatedAt": "2026-10-26T02:11:16.750Z",
+      "editedAt": null
+    },
+    {
+      "schema": 2,
+      "id": "c1br2jew17lr07s17uulqm",
+      "page": "didactician:site",
+      "url": "http://127.0.0.1:61029/__didactician/site/index.html",
+      "type": "highlight",
+      "author": "m",
+      "authorId": null,
+      "text": "This is confusing. \"uses\" here could be construed as using memory, as I think it's intended, but also uses as in using the space afforded to it by the request. Let's pick better wording.",
+      "color": "#f59e0b",
+      "anchor": {
+        "exact": "What payments actually uses doesn’t change.",
+        "prefix": "s team doubles its memory request “to be safe”. ",
+        "suffix": " What does change for Fennel?\n        \n         "
+      },
+      "geom": null,
+      "visibility": "shared",
+      "status": "open",
+      "resolved": false,
+      "resolvedBy": null,
+      "resolvedAt": null,
+      "assignee": null,
+      "assignedAt": null,
+      "replies": [],
+      "createdAt": "2026-10-26T02:13:04.050Z",
+      "updatedAt": "2026-10-26T02:13:04.050Z",
+      "editedAt": null
+    },
+    {
+      "schema": 2,
+      "id": "c1jbk3ke1b5pxuh6e863y",
+      "page": "didactician:site",
+      "url": "http://127.0.0.1:61029/__didactician/site/index.html",
+      "type": "block",
+      "author": "m",
+      "authorId": null,
+      "text": "\"potentially more nodes, or Pods left waiting.\"",
+      "color": "#f59e0b",
+      "anchor": null,
+      "geom": {
+        "kind": "block",
+        "selector": "#s-04 > div:nth-of-type(1) > ul:nth-of-type(1) > li:nth-of-type(3)"
+      },
+      "visibility": "shared",
+      "status": "open",
+      "resolved": false,
+      "resolvedBy": null,
+      "resolvedAt": null,
+      "assignee": null,
+      "assignedAt": null,
+      "replies": [],
+      "createdAt": "2026-10-26T02:13:45.659Z",
+      "updatedAt": "2026-10-26T02:13:45.659Z",
+      "editedAt": null
+    },
+    {
+      "schema": 2,
+      "id": "c13t1ung1i1hqs343pht5",
+      "page": "didactician:site",
+      "url": "http://127.0.0.1:61029/__didactician/site/index.html",
+      "type": "pen",
+      "author": "m",
+      "authorId": null,
+      "text": "let's move the reset button up here. Just make it say \"reset\"",
+      "color": "#f59e0b",
+      "anchor": null,
+      "geom": {
+        "kind": "pen",
+        "selector": "#s-04",
+        "points": [
+          [
+            0.23601630946697463,
+            0.4878686867026174
+          ],
+          [
+            0.23830660249545166,
+            0.48793033999736946
+          ],
+          [
+            0.24619037173713887,
+            0.48793033999736946
+          ],
+          [
+            0.2636998232280874,
+            0.48793033999736946
+          ],
+          [
+            0.2767706223145508,
+            0.48786046626331714
+          ],
+          [
+            0.29343492342034294,
+            0.4875563100092069
+          ],
+          [
+            0.31940233029251236,
+            0.4867774233855057
+          ],
+          [
+            0.3522341647204552,
+            0.4855721014731027
+          ],
+          [
+            0.3838079508651501,
+            0.4841345521504669
+          ],
+          [
+            0.4202268357827641,
+            0.48243189366039724
+          ],
+          [
+            0.460600508380537,
+            0.48046823622254375
+          ],
+          [
+            0.49027109327621576,
+            0.4790563757727213
+          ],
+          [
+            0.5173610663088218,
+            0.4777328850453768
+          ],
+          [
+            0.6002825769990064,
+            0.4735414885571485
+          ],
+          [
+            0.6178565437865318,
+            0.4726783424306195
+          ],
+          [
+            0.6439336266628818,
+            0.4714052018939892
+          ],
+          [
+            0.6644623940336254,
+            0.4704588238195449
+          ],
+          [
+            0.6825524831937653,
+            0.46954018972773903
+          ],
+          [
+            0.7026167404291558,
+            0.4685681227804814
+          ],
+          [
+            0.7159391491722688,
+            0.46794131428383534
+          ],
+          [
+            0.7258938594340718,
+            0.46739362751545444
+          ],
+          [
+            0.7357905059289558,
+            0.4668130589898724
+          ],
+          [
+            0.7430226706752171,
+            0.4662890059844798
+          ],
+          [
+            0.7484871162952736,
+            0.46586257069577797
+          ],
+          [
+            0.7518677178358989,
+            0.4654967611469157
+          ],
+          [
+            0.7548483245377479,
+            0.46502203077732474
+          ],
+          [
+            0.7565966890749797,
+            0.4646192292516112
+          ],
+          [
+            0.7585256964426266,
+            0.46400475141391556
+          ],
+          [
+            0.7635836956942491,
+            0.46286827568065236
+          ],
+          [
+            0.7693900723861627,
+            0.4615119031961068
+          ],
+          [
+            0.7756545076837719,
+            0.4597403985268973
+          ],
+          [
+            0.7813963690791087,
+            0.4579915000657635
+          ],
+          [
+            0.7892930413801112,
+            0.4554750180849665
+          ],
+          [
+            0.8021961006954749,
+            0.4509907684466658
+          ],
+          [
+            0.8179249300009032,
+            0.4452590671445482
+          ],
+          [
+            0.8349247106488948,
+            0.43889952979087204
+          ],
+          [
+            0.8523631953136088,
+            0.4319707270156517
+          ],
+          [
+            0.8688274990000129,
+            0.4250902193213205
+          ],
+          [
+            0.8839950452252229,
+            0.4184789310140734
+          ],
+          [
+            0.8985496961329531,
+            0.4117628321057477
+          ],
+          [
+            0.9082850543863951,
+            0.40681310009206895
+          ],
+          [
+            0.9129043496212952,
+            0.40414351242930424
+          ],
+          [
+            0.9158914078528019,
+            0.40247579080626067
+          ],
+          [
+            0.9192913639824002,
+            0.4005861173221097
+          ],
+          [
+            0.9227558354085754,
+            0.39852997994212813
+          ],
+          [
+            0.9240783989884002,
+            0.3976616960410364
+          ],
+          [
+            0.9247300034838261,
+            0.397157166578982
+          ],
+          [
+            0.9268009445039419,
+            0.39621900894383794
+          ],
+          [
+            0.9304912194681358,
+            0.394881132447718
+          ],
+          [
+            0.9354008335376318,
+            0.393066470472182
+          ],
+          [
+            0.9406007664417233,
+            0.3910843170459029
+          ],
+          [
+            0.9477297067134618,
+            0.3881311242272787
+          ],
+          [
+            0.9576908685049225,
+            0.38400754636327766
+          ],
+          [
+            0.9758003122540354,
+            0.37644782487176115
+          ],
+          [
+            0.9817034618908144,
+            0.37362410397211626
+          ],
+          [
+            0.990671088114992,
+            0.3693381724319348
+          ],
+          [
+            0.9999935484703423,
+            0.365046075562278
+          ],
+          [
+            1.0068644275557734,
+            0.36182880113113247
+          ],
+          [
+            1.0120127482226036,
+            0.3591992881099566
+          ],
+          [
+            1.0178126733848596,
+            0.3563426854531106
+          ],
+          [
+            1.024457748932272,
+            0.3530534821780876
+          ],
+          [
+            1.0290318834595682,
+            0.35048253978692623
+          ],
+          [
+            1.029928646081986,
+            0.34971598382217545
+          ],
+          [
+            1.030354447039393,
+            0.34924228100749705
+          ],
+          [
+            1.0339414975290642,
+            0.34751907141917665
+          ],
+          [
+            1.0364704971548755,
+            0.34671244081283703
+          ],
+          [
+            1.0392123972593903,
+            0.3457372912008418
+          ],
+          [
+            1.0416446239403363,
+            0.34474570071024596
+          ],
+          [
+            1.0456703784467296,
+            0.34333281270551097
+          ],
+          [
+            1.051018696532948,
+            0.34138867881099566
+          ],
+          [
+            1.0561734687294357,
+            0.33935823030382745
+          ],
+          [
+            1.0607798609050205,
+            0.33741923418387476
+          ],
+          [
+            1.0651152888349829,
+            0.335654922399053
+          ],
+          [
+            1.0692120101676108,
+            0.3340622122846245
+          ],
+          [
+            1.0726635785344705,
+            0.3326164425226884
+          ],
+          [
+            1.0753087056941202,
+            0.331562171182428
+          ],
+          [
+            1.0775022257777318,
+            0.33061784821780876
+          ],
+          [
+            1.0798634856324434,
+            0.3295748799815862
+          ],
+          [
+            1.0821860363092088,
+            0.3285802068262528
+          ],
+          [
+            1.083947303905756,
+            0.32773658424306196
+          ],
+          [
+            1.085592443968465,
+            0.32698030382743654
+          ],
+          [
+            1.087437581450562,
+            0.3261428465737209
+          ],
+          [
+            1.0889924000980633,
+            0.3253084719847429
+          ],
+          [
+            1.0909085044063949,
+            0.32439394811258715
+          ],
+          [
+            1.0927988025960955,
+            0.32348353446008155
+          ],
+          [
+            1.094592327840931,
+            0.3227251989346311
+          ],
+          [
+            1.0961665010774055,
+            0.32225149611995263
+          ],
+          [
+            1.097353582534419,
+            0.3218065648428252
+          ],
+          [
+            1.0985729216397209,
+            0.32131333848480864
+          ],
+          [
+            1.1012954671552626,
+            0.3206372073523609
+          ],
+          [
+            1.102159972129392,
+            0.3203916217282652
+          ],
+          [
+            1.1031664107559902,
+            0.3201635045376825
+          ],
+          [
+            1.1041793009122463,
+            0.3199466904511377
+          ],
+          [
+            1.1052244487167908,
+            0.319731931474418
+          ],
+          [
+            1.106030889924001,
+            0.3195603298040247
+          ],
+          [
+            1.106798621953265,
+            0.3193969485729317
+          ],
+          [
+            1.1075469993935563,
+            0.31923665000657636
+          ],
+          [
+            1.1085405349608393,
+            0.3189962021570433
+          ],
+          [
+            1.1094308460535993,
+            0.3188132973826121
+          ],
+          [
+            1.1103598663243055,
+            0.31868279790872023
+          ],
+          [
+            1.1110050192900738,
+            0.3184968104695515
+          ],
+          [
+            1.111914684971807,
+            0.3182388941865053
+          ],
+          [
+            1.1124114527554483,
+            0.31808373339471263
+          ],
+          [
+            1.1129146720687475,
+            0.3179234348283572
+          ],
+          [
+            1.1134178913820467,
+            0.31776313626200187
+          ],
+          [
+            1.1141533657630225,
+            0.3176018101407339
+          ],
+          [
+            1.114908194732971,
+            0.31739424404840194
+          ],
+          [
+            1.115437220164901,
+            0.31714352064974355
+          ],
+          [
+            1.1179081560237933,
+            0.3164530037485203
+          ],
+          [
+            1.1185145998116153,
+            0.3162557132053137
+          ],
+          [
+            1.119250074192591,
+            0.31600704491648035
+          ],
+          [
+            1.1198242603321247,
+            0.3157563215178219
+          ],
+          [
+            1.1203919949420007,
+            0.3154973776798632
+          ],
+          [
+            1.1211984361492109,
+            0.3151911663159279
+          ],
+          [
+            1.1220242319453944,
+            0.31487776206760487
+          ],
+          [
+            1.122617772673901,
+            0.31460648757069576
+          ],
+          [
+            1.123185507283777,
+            0.3143403508483493
+          ],
+          [
+            1.12373388730468,
+            0.314078324345653
+          ],
+          [
+            1.1242822673255828,
+            0.3138162978429567
+          ],
+          [
+            1.124811292757513,
+            0.31356043666973565
+          ],
+          [
+            1.1253467697191004,
+            0.3132562804156254
+          ],
+          [
+            1.125882246680688,
+            0.3129521241615152
+          ],
+          [
+            1.1263015961084373,
+            0.31272195186110746
+          ],
+          [
+            1.126714494006529,
+            0.3124876693410496
+          ],
+          [
+            1.1272177133198282,
+            0.312230780612916
+          ],
+          [
+            1.1277467387517581,
+            0.3119697816651322
+          ],
+          [
+            1.1282693126540302,
+            0.3117447471392871
+          ],
+          [
+            1.1287725319673294,
+            0.3115649250295936
+          ],
+          [
+            1.1292757512806286,
+            0.3113943509141128
+          ],
+          [
+            1.1297789705939278,
+            0.31122994212810734
+          ],
+          [
+            1.1302757383775692,
+            0.3110686160068394
+          ],
+          [
+            1.1312047586482754,
+            0.3108692703538077
+          ],
+          [
+            1.1323015186900813,
+            0.3105969683019861
+          ],
+          [
+            1.1330757022490032,
+            0.3104500279494936
+          ],
+          [
+            1.1341273015832054,
+            0.31031644581086415
+          ],
+          [
+            1.1351853524470652,
+            0.3101982769959227
+          ],
+          [
+            1.1359466329466716,
+            0.31005544686308034
+          ],
+          [
+            1.1346950361930814,
+            0.3099403607128765
+          ],
+          [
+            1.1331273144862648,
+            0.3099383056030514
+          ],
+          [
+            1.1319144269106205,
+            0.3099372780481389
+          ],
+          [
+            1.1303467052038039,
+            0.3099362504932264
+          ],
+          [
+            1.1286951136114374,
+            0.3099352229383138
+          ],
+          [
+            1.1266822363582405,
+            0.3099794077995528
+          ],
+          [
+            1.1243919433297636,
+            0.31002359266079177
+          ],
+          [
+            1.122133907949575,
+            0.3100677775220308
+          ],
+          [
+            1.1187791125275803,
+            0.31019416677627254
+          ],
+          [
+            1.1172500999987096,
+            0.31022499342364857
+          ],
+          [
+            1.1155727022877124,
+            0.31029281204787584
+          ],
+          [
+            1.1141856234113108,
+            0.31036679600157835
+          ],
+          [
+            1.1128178991238822,
+            0.310446945284756
+          ],
+          [
+            1.111482432484742,
+            0.3104972954754702
+          ],
+          [
+            1.1106372820995858,
+            0.3105383976719716
+          ],
+          [
+            1.1093663307570225,
+            0.3106421807181376
+          ],
+          [
+            1.1081921523593243,
+            0.310714109562015
+          ],
+          [
+            1.1079469942323326,
+            0.31087440812837036
+          ],
+          [
+            1.1089598843885886,
+            0.310908317440484
+          ],
+          [
+            1.1099469684262138,
+            0.310908317440484
+          ],
+          [
+            1.1119404910904376,
+            0.31088571123240827
+          ],
+          [
+            1.1129211235984051,
+            0.3107911761804551
+          ],
+          [
+            1.1141340111740494,
+            0.3106760900302512
+          ],
+          [
+            1.1154114140462703,
+            0.3105866927528607
+          ],
+          [
+            1.1167081715074645,
+            0.3104983230303827
+          ],
+          [
+            1.1177597708416667,
+            0.31041611863738
+          ],
+          [
+            1.119779099624521,
+            0.3102558200710246
+          ],
+          [
+            1.1212629514457877,
+            0.3101397063659082
+          ],
+          [
+            1.1223984206655397,
+            0.3100677775220308
+          ],
+          [
+            1.123250022580354,
+            0.3100677775220308
+          ],
+          [
+            1.1244371040373673,
+            0.3100030415625411
+          ],
+          [
+            1.1252822544225236,
+            0.310000986452716
+          ],
+          [
+            1.126372562934672,
+            0.310000986452716
+          ],
+          [
+            1.1274241622688739,
+            0.310000986452716
+          ],
+          [
+            1.128804789615618,
+            0.310000986452716
+          ],
+          [
+            1.1302370291996233,
+            0.310000986452716
+          ],
+          [
+            1.1314305621862943,
+            0.310000986452716
+          ],
+          [
+            1.1323273248087122,
+            0.310000986452716
+          ],
+          [
+            1.132940220126192,
+            0.3101602574641589
+          ],
+          [
+            1.1335208577953833,
+            0.3103483000131527
+          ],
+          [
+            1.133953110282448,
+            0.31048701992634486
+          ],
+          [
+            1.134378911239855,
+            0.31062368472971197
+          ],
+          [
+            1.1345918117185585,
+            0.3107983690648428
+          ],
+          [
+            1.1347660030193158,
+            0.3109576400762857
+          ],
+          [
+            1.134966000438704,
+            0.31112410397211626
+          ],
+          [
+            1.1350111611463078,
+            0.31128440253847167
+          ],
+          [
+            1.135230513154669,
+            0.311442645995002
+          ],
+          [
+            1.1354498651630303,
+            0.31159986189661976
+          ],
+          [
+            1.1355079289299492,
+            0.3118413373010654
+          ],
+          [
+            1.1355079289299492,
+            0.31203246251479677
+          ],
+          [
+            1.1359272783576986,
+            0.31217426509272655
+          ],
+          [
+            1.1361595334253751,
+            0.3123510045376825
+          ],
+          [
+            1.1365595282641514,
+            0.31252568887281335
+          ],
+          [
+            1.1369595231029277,
+            0.3126972905432066
+          ],
+          [
+            1.1374175817086232,
+            0.3128503962251743
+          ],
+          [
+            1.1376756428949304,
+            0.3129942539129291
+          ],
+          [
+            1.1376949974839035,
+            0.313140166710509
+          ],
+          [
+            1.1381207984413104,
+            0.31328196928843877
+          ],
+          [
+            1.1386691784622134,
+            0.3134710393923451
+          ],
+          [
+            1.1395207803770273,
+            0.31369299125345257
+          ],
+          [
+            1.1398175507412807,
+            0.3138789786926213
+          ],
+          [
+            1.14023690016903,
+            0.3140259190451138
+          ],
+          [
+            1.1406756041857524,
+            0.31416874917795606
+          ],
+          [
+            1.1416368821047471,
+            0.3143280201893989
+          ]
+        ],
+        "vw": 1760,
+        "vh": 903
+      },
+      "visibility": "shared",
+      "status": "open",
+      "resolved": false,
+      "resolvedBy": null,
+      "resolvedAt": null,
+      "assignee": null,
+      "assignedAt": null,
+      "replies": [],
+      "createdAt": "2026-10-26T02:18:47.509Z",
+      "updatedAt": "2026-10-26T02:18:47.509Z",
+      "editedAt": null
+    },
+    {
+      "schema": 2,
+      "id": "c1lwb0x916r8ue21fme6em",
+      "page": "didactician:site",
+      "url": "http://127.0.0.1:61029/__didactician/site/index.html",
+      "type": "block",
+      "author": "m",
+      "authorId": null,
+      "text": "Let's move these controls to the top left of the widget, that way it's immediately clear these are the knobs for the widget.",
+      "color": "#f59e0b",
+      "anchor": null,
+      "geom": {
+        "kind": "block",
+        "selector": "#s-04 > div:nth-of-type(2) > div:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(1) > div:nth-of-type(3) > p:nth-of-type(1)"
+      },
+      "visibility": "shared",
+      "status": "open",
+      "resolved": false,
+      "resolvedBy": null,
+      "resolvedAt": null,
+      "assignee": null,
+      "assignedAt": null,
+      "replies": [],
+      "createdAt": "2026-10-26T02:21:09.293Z",
+      "updatedAt": "2026-10-26T02:21:09.293Z",
+      "editedAt": null
+    },
+    {
+      "schema": 2,
+      "id": "c1r1umf31bsw0q4bcy83w",
+      "page": "didactician:site",
+      "url": "http://127.0.0.1:61029/__didactician/site/index.html",
+      "type": "block",
+      "author": "m",
+      "authorId": null,
+      "text": "It's confusing that payments isn't on this widget. Let's add it.",
+      "color": "#f59e0b",
+      "anchor": null,
+      "geom": {
+        "kind": "block",
+        "selector": "#s-04 > div:nth-of-type(2) > div:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(1) > div:nth-of-type(3) > p:nth-of-type(1)"
+      },
+      "visibility": "shared",
+      "status": "open",
+      "resolved": false,
+      "resolvedBy": null,
+      "resolvedAt": null,
+      "assignee": null,
+      "assignedAt": null,
+      "replies": [],
+      "createdAt": "2026-10-26T02:22:56.767Z",
+      "updatedAt": "2026-10-26T02:22:56.767Z",
+      "editedAt": null
+    },
+    {
+      "schema": 2,
+      "id": "c1q02qx81ftkvuy1fth3n5",
+      "page": "didactician:site",
+      "url": "http://127.0.0.1:61029/__didactician/site/index.html",
+      "type": "highlight",
+      "author": "m",
+      "authorId": null,
+      "text": "All this information is extraneous and noisy, let's delete it. It's captured in the visualization below.",
+      "color": "#f59e0b",
+      "anchor": {
+        "exact": "Nodes04what Fennel rents, and pays for in standard mode3 for the Pods + 1 spareSet byProcessorfor the Pods, memory alone needs 2, processor alone 3Reserved25.5 of 52 GBUsed at the rush19.5 GB",
+        "prefix": "?\n      \n\n      \n      W-02 · Ari’s sizing sheet",
+        "suffix": "Room for Pods on the rented nodesOverUsed atthe "
+      },
+      "geom": null,
+      "visibility": "shared",
+      "status": "open",
+      "resolved": false,
+      "resolvedBy": null,
+      "resolvedAt": null,
+      "assignee": null,
+      "assignedAt": null,
+      "replies": [],
+      "createdAt": "2026-10-26T02:23:30.792Z",
+      "updatedAt": "2026-10-26T02:23:30.792Z",
+      "editedAt": null
+    },
+    {
+      "schema": 2,
+      "id": "cn92nim1qne3ffxv4j4t",
+      "page": "didactician:site",
+      "url": "http://127.0.0.1:61029/__didactician/site/index.html",
+      "type": "highlight",
+      "author": "m",
+      "authorId": null,
+      "text": "\"used 2 GB at rush\" (we may need to indicate over elsewhere so it fits).",
+      "color": "#f59e0b",
+      "anchor": {
+        "exact": "used 2 GB · Over",
+        "prefix": "on no nodeMemory requests, per copystorefront ×3",
+        "suffix": "−1 GB+orders ×1used 5.5 GB · Over−1 GB+dispatch "
+      },
+      "geom": null,
+      "visibility": "shared",
+      "status": "open",
+      "resolved": false,
+      "resolvedBy": null,
+      "resolvedAt": null,
+      "assignee": null,
+      "assignedAt": null,
+      "replies": [],
+      "createdAt": "2026-10-26T02:25:28.626Z",
+      "updatedAt": "2026-10-26T02:25:28.626Z",
+      "editedAt": null
+    },
+    {
+      "schema": 2,
+      "id": "c1td59kv1u1aegl1dskx3h",
+      "page": "didactician:site",
+      "url": "http://127.0.0.1:61029/__didactician/site/index.html",
+      "type": "block",
+      "author": "m",
+      "authorId": null,
+      "text": "Let's rewrite this. Don't reference Ari's sizing sheet. Let's do something along the lines of:\n\nThe following widget simulates how the scheduler operates. We begin by setting the memory requests to those Fennel has been using in this lesson.\n\nThen we follow up on the questions, guiding exploration.",
+      "color": "#f59e0b",
+      "anchor": null,
+      "geom": {
+        "kind": "block",
+        "selector": "#s-04 > p:nth-of-type(2)"
+      },
+      "visibility": "shared",
+      "status": "open",
+      "resolved": false,
+      "resolvedBy": null,
+      "resolvedAt": null,
+      "assignee": null,
+      "assignedAt": null,
+      "replies": [],
+      "createdAt": "2026-10-26T02:28:31.651Z",
+      "updatedAt": "2026-10-26T02:28:31.651Z",
+      "editedAt": null
+    },
+    {
+      "schema": 2,
+      "id": "c1m724pj3x0oj618frzjl",
+      "page": "didactician:site",
+      "url": "http://127.0.0.1:61029/__didactician/site/index.html",
+      "type": "block",
+      "author": "m",
+      "authorId": null,
+      "text": "It took me a bit too long to realize the boxes here indicated two colors, one for peak usage, and one for request size. I think the label with the same background color as unused is very confusing. You think maybe we can make the label sit above the box? Or perhaps on the top or bottom border of the box somehow? We should also maybe make the darker red use a hatch mark to make it clearer it's a visualization element.",
+      "color": "#f59e0b",
+      "anchor": null,
+      "geom": {
+        "kind": "block",
+        "selector": "#s-04 > div:nth-of-type(2) > div:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(2) > p:nth-of-type(1)"
+      },
+      "visibility": "shared",
+      "status": "open",
+      "resolved": false,
+      "resolvedBy": null,
+      "resolvedAt": null,
+      "assignee": null,
+      "assignedAt": null,
+      "replies": [],
+      "createdAt": "2026-10-26T02:33:30.768Z",
+      "updatedAt": "2026-10-26T02:33:30.768Z",
+      "editedAt": null
+    },
+    {
+      "schema": 2,
+      "id": "c5xptny10c84gf1vx57yd",
+      "page": "didactician:site",
+      "url": "http://127.0.0.1:61029/__didactician/site/index.html",
+      "type": "block",
+      "author": "m",
+      "authorId": null,
+      "text": "Let's move this \"room for pods\" visual bar over to the right, so it sits under the right column, that makes the left column the controls and the right column the outcome. Easier design!",
+      "color": "#f59e0b",
+      "anchor": null,
+      "geom": {
+        "kind": "block",
+        "selector": "#s-04 > div:nth-of-type(2) > div:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(1) > div:nth-of-type(2) > p:nth-of-type(1)"
+      },
+      "visibility": "shared",
+      "status": "open",
+      "resolved": false,
+      "resolvedBy": null,
+      "resolvedAt": null,
+      "assignee": null,
+      "assignedAt": null,
+      "replies": [],
+      "createdAt": "2026-10-26T02:34:33.529Z",
+      "updatedAt": "2026-10-26T02:34:33.529Z",
+      "editedAt": null
+    },
+    {
+      "schema": 2,
+      "id": "cn2e5s08zv0ze1k155wx",
+      "page": "didactician:site",
+      "url": "http://127.0.0.1:61029/__didactician/site/index.html",
+      "type": "block",
+      "author": "m",
+      "authorId": null,
+      "text": "This paragraph is too wordy and just rehashes what the widget above explained, let's avoid a redundancy here. I don't want to delete, it because the \"how common is this\" below this is really good to have, and it needs to be attached to this somehow, so consider reducing this paragraph. a bunch.",
+      "color": "#f59e0b",
+      "anchor": null,
+      "geom": {
+        "kind": "block",
+        "selector": "#s-04 > p:nth-of-type(5)"
+      },
+      "visibility": "shared",
+      "status": "open",
+      "resolved": false,
+      "resolvedBy": null,
+      "resolvedAt": null,
+      "assignee": null,
+      "assignedAt": null,
+      "replies": [],
+      "createdAt": "2026-10-26T02:36:57.563Z",
+      "updatedAt": "2026-10-26T02:36:57.563Z",
+      "editedAt": null
+    },
+    {
+      "schema": 2,
+      "id": "c1e8gtyv1qdgbru1rmxamf",
+      "page": "didactician:site",
+      "url": "http://127.0.0.1:61029/__didactician/site/index.html",
+      "type": "block",
+      "author": "m",
+      "authorId": null,
+      "text": "This paragraph seems a bit garbled. We can indicate that billing per pod is an option but the lessons stay the same. I'm having trouble identifying the value this paragraph is adding.",
+      "color": "#f59e0b",
+      "anchor": null,
+      "geom": {
+        "kind": "block",
+        "selector": "#s-04 > p:nth-of-type(6)"
+      },
+      "visibility": "shared",
+      "status": "open",
+      "resolved": false,
+      "resolvedBy": null,
+      "resolvedAt": null,
+      "assignee": null,
+      "assignedAt": null,
+      "replies": [],
+      "createdAt": "2026-10-26T02:38:09.251Z",
+      "updatedAt": "2026-10-26T02:38:09.251Z",
+      "editedAt": null
+    },
+    {
+      "schema": 2,
+      "id": "c89zai1i6ww211h8njc6",
+      "page": "didactician:site",
+      "url": "http://127.0.0.1:61029/__didactician/site/index.html",
+      "type": "highlight",
+      "author": "m",
+      "authorId": null,
+      "text": "why Fennel might want to do that.",
+      "color": "#f59e0b",
+      "anchor": {
+        "exact": "why it might.",
+        "prefix": "pare is a choice, and the next section explains ",
+        "suffix": " On top of that, on every node about 3 GB of the"
+      },
+      "geom": null,
+      "visibility": "shared",
+      "status": "open",
+      "resolved": false,
+      "resolvedBy": null,
+      "resolvedAt": null,
+      "assignee": null,
+      "assignedAt": null,
+      "replies": [],
+      "createdAt": "2026-10-26T02:40:08.914Z",
+      "updatedAt": "2026-10-26T02:40:08.914Z",
+      "editedAt": null
+    },
+    {
+      "schema": 2,
+      "id": "c14t5ofo1bl8qow1dq4s3m",
+      "page": "didactician:site",
+      "url": "http://127.0.0.1:61029/__didactician/site/index.html",
+      "type": "highlight",
+      "author": "m",
+      "authorId": null,
+      "text": "We're repeating ourselves too much here. This whole paragraph is overly wordy. We made our point, we taught the reader what the scheduler does, so if we're trying to \"bring it home\" let's hit on the key point, not some arbitrary arithmetic and details that don't matter right now.",
+      "color": "#f59e0b",
+      "anchor": {
+        "exact": "On top of that, on every node about 3 GB of the 16 GB machine is kept back for the system, where no Pod can reserve it, and Fennel pays for it anyway. The bill also has a small fee per cluster for the control plane, which Chapter 14 covers. Requests closer to what each service uses at its busiest would let Fennel rent fewer nodes, but not as few as possible, and §05 and §08 explain why.\n    \n\n    \n    \n      ",
+        "prefix": "ce, and the next section explains why it might. ",
+        "suffix": "§ 05 Room on purpose\n      Friday showed what a "
+      },
+      "geom": null,
+      "visibility": "shared",
+      "status": "open",
+      "resolved": false,
+      "resolvedBy": null,
+      "resolvedAt": null,
+      "assignee": null,
+      "assignedAt": null,
+      "replies": [],
+      "createdAt": "2026-10-26T02:41:36.868Z",
+      "updatedAt": "2026-10-26T02:41:36.868Z",
+      "editedAt": null
+    },
+    {
+      "schema": 2,
+      "id": "cdj5son4n68g31c5reov",
+      "page": "didactician:site",
+      "url": "http://127.0.0.1:61029/__didactician/site/index.html#room-on-purpose",
+      "type": "highlight",
+      "author": "m",
+      "authorId": null,
+      "text": "Friday is a day, it can't show anything. This is splitting attention again.",
+      "color": "#f59e0b",
+      "anchor": {
+        "exact": "Friday showed what a cluster with ",
+        "prefix": "   \n\n    \n    \n      § 05 Room on purpose\n      ",
+        "suffix": "no spare room does on an ordinary busy evening: "
+      },
+      "geom": null,
+      "visibility": "shared",
+      "status": "open",
+      "resolved": false,
+      "resolvedBy": null,
+      "resolvedAt": null,
+      "assignee": null,
+      "assignedAt": null,
+      "replies": [],
+      "createdAt": "2026-10-26T02:42:43.818Z",
+      "updatedAt": "2026-10-26T02:42:43.818Z",
+      "editedAt": null
+    },
+    {
+      "schema": 2,
+      "id": "c1pqzmwbnh7lg6li7l6",
+      "page": "didactician:site",
+      "url": "http://127.0.0.1:61029/__didactician/site/index.html#room-on-purpose",
+      "type": "block",
+      "author": "m",
+      "authorId": null,
+      "text": "This section is overly wordy. My take on it, we need extra nodes in case one node goes down. The scheduler, when shifting the pods to other nodes, can run out of room on those nodes. The spare nodes are insurance for this reason. \n\nThis paragraph isn't even mentioning nodes going down. It's blaming things on Friday. Come on.",
+      "color": "#f59e0b",
+      "anchor": null,
+      "geom": {
+        "kind": "block",
+        "selector": "#room-on-purpose"
+      },
+      "visibility": "shared",
+      "status": "open",
+      "resolved": false,
+      "resolvedBy": null,
+      "resolvedAt": null,
+      "assignee": null,
+      "assignedAt": null,
+      "replies": [],
+      "createdAt": "2026-10-26T02:45:39.781Z",
+      "updatedAt": "2026-10-26T02:45:39.781Z",
+      "editedAt": null
+    },
+    {
+      "schema": 2,
+      "id": "calxbyi61y4ge1hjuun7",
+      "page": "didactician:site",
+      "url": "http://127.0.0.1:61029/__didactician/site/index.html#room-on-purpose",
+      "type": "block",
+      "author": "m",
+      "authorId": null,
+      "text": "Hm, I think this section is somewhat well written but I'm a bit confused by them here. They are presented a bit like the solution to \"what if orders grows beyond 13gb\" but I would assume the answer is \"bigger node\" - is a node pool necessary to introduce nodes bigger than 13gbs or something? Also, we learned about replicaset manifests setting the requests for memory allocation but we haven't learned anything at all yet about how k8s provisions nodes (and the writing here is pretty inviting to the idea that it doesn't, conveying in several challenges that it's your job to provision nodes) so why are we learning about node pools? Consider maybe this chapter is extraneous, or at least needs some better introduction.",
+      "color": "#f59e0b",
+      "anchor": null,
+      "geom": {
+        "kind": "block",
+        "selector": "#node-pools"
+      },
+      "visibility": "shared",
+      "status": "open",
+      "resolved": false,
+      "resolvedBy": null,
+      "resolvedAt": null,
+      "assignee": null,
+      "assignedAt": null,
+      "replies": [],
+      "createdAt": "2026-10-26T02:55:10.531Z",
+      "updatedAt": "2026-10-26T02:55:10.531Z",
+      "editedAt": null
+    },
+    {
+      "schema": 2,
+      "id": "c1aun2an17d82f86ipdlv",
+      "page": "didactician:site",
+      "url": "http://127.0.0.1:61029/__didactician/site/index.html#room-on-purpose",
+      "type": "highlight",
+      "author": "m",
+      "authorId": null,
+      "text": "This is an extremely tedious way of introducing the word \"limits\"",
+      "color": "#f59e0b",
+      "anchor": {
+        "exact": "A manifest can hold a second number for each resource, and orders’ manifest does. Fig. 04 shows the section that sets both: what each copy reserves, its requests of 6 GB of memory, and the most it may use, its limits of 7 GB. ",
+        "prefix": "at matters for you is the word before it.\n      ",
+        "suffix": "A request isn’t a cap. A container may use more "
+      },
+      "geom": null,
+      "visibility": "shared",
+      "status": "open",
+      "resolved": false,
+      "resolvedBy": null,
+      "resolvedAt": null,
+      "assignee": null,
+      "assignedAt": null,
+      "replies": [],
+      "createdAt": "2026-10-26T02:57:15.006Z",
+      "updatedAt": "2026-10-26T02:57:15.006Z",
+      "editedAt": null
+    },
+    {
+      "schema": 2,
+      "id": "c1hv1jj41v5k0un5v12o",
+      "page": "didactician:site",
+      "url": "http://127.0.0.1:61029/__didactician/site/index.html#room-on-purpose",
+      "type": "highlight",
+      "author": "m",
+      "authorId": null,
+      "text": "requests are a what the copy reserves, and limits are the maximum it may use on the node.",
+      "color": "#f59e0b",
+      "anchor": {
+        "exact": "what a copy reserves, and the most it may use.",
+        "prefix": "      \n        Fig. 04Two numbers per resource: ",
+        "suffix": "\n      \n\n      \n        New term · 03 / 04\n     "
+      },
+      "geom": null,
+      "visibility": "shared",
+      "status": "open",
+      "resolved": false,
+      "resolvedBy": null,
+      "resolvedAt": null,
+      "assignee": null,
+      "assignedAt": null,
+      "replies": [],
+      "createdAt": "2026-10-26T02:58:19.844Z",
+      "updatedAt": "2026-10-26T02:58:19.844Z",
+      "editedAt": null
+    },
+    {
+      "schema": 2,
+      "id": "csfwf8w1nn9sp44041e4",
+      "page": "didactician:site",
+      "url": "http://127.0.0.1:61029/__didactician/site/index.html#room-on-purpose",
+      "type": "highlight",
+      "author": "m",
+      "authorId": null,
+      "text": "Split attention, and highly irrelevant",
+      "color": "#f59e0b",
+      "anchor": {
+        "exact": "The second number in Fig. 04.\n      \n\n      ",
+        "prefix": "e; reserving room is the request’s job.\n        ",
+        "suffix": "Fig. 05 shows orders’ memory through Tuesday, ag"
+      },
+      "geom": null,
+      "visibility": "shared",
+      "status": "open",
+      "resolved": false,
+      "resolvedBy": null,
+      "resolvedAt": null,
+      "assignee": null,
+      "assignedAt": null,
+      "replies": [],
+      "createdAt": "2026-10-26T02:59:09.860Z",
+      "updatedAt": "2026-10-26T02:59:09.860Z",
+      "editedAt": null
+    },
+    {
+      "schema": 2,
+      "id": "cmp9i0rpjspjny20ft",
+      "page": "didactician:site",
+      "url": "http://127.0.0.1:61029/__didactician/site/index.html#room-on-purpose",
+      "type": "block",
+      "author": "m",
+      "authorId": null,
+      "text": "This section is actually the first time we learn that pods can go over their requests. This came as a bit of a surprise to me. Let's maybe acknowledge that up front in the section here.",
+      "color": "#f59e0b",
+      "anchor": null,
+      "geom": {
+        "kind": "block",
+        "selector": "#tuesday"
+      },
+      "visibility": "shared",
+      "status": "open",
+      "resolved": false,
+      "resolvedBy": null,
+      "resolvedAt": null,
+      "assignee": null,
+      "assignedAt": null,
+      "replies": [],
+      "createdAt": "2026-10-26T03:01:32.110Z",
+      "updatedAt": "2026-10-26T03:01:32.110Z",
+      "editedAt": null
+    },
+    {
+      "schema": 2,
+      "id": "c1cqhxb2b7whhp13jp98j",
+      "page": "didactician:site",
+      "url": "http://127.0.0.1:61029/__didactician/site/index.html#room-on-purpose",
+      "type": "highlight",
+      "author": "m",
+      "authorId": null,
+      "text": "just as it does with crash-looping, like we saw in Chapter 4.",
+      "color": "#f59e0b",
+      "anchor": {
+        "exact": "just as it did with Chapter 4’s crash-looping notifications.",
+        "prefix": "agent waits longer and longer between restarts, ",
+        "suffix": "\n\n      \n        New term · 04 / 04\n        OOM-"
+      },
+      "geom": null,
+      "visibility": "shared",
+      "status": "open",
+      "resolved": false,
+      "resolvedBy": null,
+      "resolvedAt": null,
+      "assignee": null,
+      "assignedAt": null,
+      "replies": [],
+      "createdAt": "2026-10-26T03:02:31.439Z",
+      "updatedAt": "2026-10-26T03:02:31.439Z",
+      "editedAt": null
+    }
+  ],
+  "didactician": {
+    "targets": {
+      "c1jbk3ke1b5pxuh6e863y": "C Each payments Pod blocks twice the room, so nodes fill sooner: more nodes, or Pods left waiting. CORRECT",
+      "c13t1ung1i1hqs343pht5": "§ 04 What Morgan pays for In the provider’s standard mode, which is the one Fennel uses, the bill counts machines. Fennel pays for each node for as long as it e…",
+      "c1lwb0x916r8ue21fme6em": "MEMORY REQUESTS, PER COPY",
+      "c1r1umf31bsw0q4bcy83w": "MEMORY REQUESTS, PER COPY",
+      "c1td59kv1u1aegl1dskx3h": "W-02 is Ari’s sizing sheet. It opens on Fennel’s requests as the teams set them, and counts the nodes those requests need if the Pods are packed as tightly as they will go, plus one spare node so that Fennel can lose a node, as it did at 03:04. Each Pod’s outline is what it reserves, and the solid fill inside it is what it used at last Friday’s rush. There is no target to reach; here are three things to notice:",
+      "c1m724pj3x0oj618frzjl": "THE NODES, PACKED AS TIGHTLY AS THEY GO",
+      "c5xptny10c84gf1vx57yd": "ROOM FOR PODS ON THE RENTED NODES",
+      "cn2e5s08zv0ze1k155wx": "W-02’s bar headed “Room for Pods on the rented nodes” shows what the Pods used, and splits the room they don’t use into two kinds. The first is room that no Pod has reserved, either because there are more nodes than the reservations need or because the room is stranded in pieces too small for any Pod. The second is room that Pods have reserved and don’t use, because their requests are bigger than the service needs. The “less than a third busy” on Ari’s dashboard counts both kinds together.",
+      "c1e8gtyv1qdgbru1rmxamf": "If you’re billed per Pod, the picture shifts, but the lesson stays the same. In most setups you pay for the machines; a few per-Pod options bill for what each Pod requests while it runs, not for what it uses. So padding costs money there too, Pod by Pod. And not every fully managed mode bills per Pod: some still bill per machine.",
+      "c1pqzmwbnh7lg6li7l6": "§ 05 Room on purpose",
+      "calxbyi61y4ge1hjuun7": "§ 06 Machines of different kinds: node pools",
+      "cmp9i0rpjspjny20ft": "§ 07 Tuesday: when a Pod uses too much"
+    },
+    "shots": {
+      "c13t1ung1i1hqs343pht5": "shots/c13t1ung1i1hqs343pht5.png"
+    }
+  }
+}

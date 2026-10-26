@@ -250,3 +250,154 @@ Gate (page) round 13: **PASS**. Reading ~26.7 min (brief: ~26 min; reported, not
 
 ### 2026-10-25T18:48:58-04:00 · orchestrator · stage
 Stage: done → **human-review**
+
+### 2026-10-25T21:59:24-04:00 · user · human-review
+Human review of site (round 1): 14 comment(s), timed out after 180 min.
+- [review/human-site-1/comments.md](review/human-site-1/comments.md)
+- [review/human-site-1/comments.json](review/human-site-1/comments.json)
+
+### 2026-10-25T23:04:18-04:00 · user · human-review
+Human review of site (round 1): 42 comment(s), submitted.
+- [review/human-site-1/comments.md](review/human-site-1/comments.md)
+- [review/human-site-1/comments.json](review/human-site-1/comments.json)
+
+### 2026-10-25T23:05:38-04:00 · orchestrator · findings
+Human review site-1 ingested on d-10: 42 new H- finding(s) (H-01–H-42), 0 updated, 0 closed by the user.
+- [review/human-site-1/findings.md](review/human-site-1/findings.md)
+
+### 2026-10-25T23:06:59-04:00 · orchestrator · extend
+Caps extended per d-13: +120 agent-min.
+- [decisions.md](decisions.md)
+
+### 2026-10-25T23:07:36-04:00 · orchestrator · dispatch
+Dispatch 11 → **instructional-designer** (human-review-replan), loop checkpoint round 2/4. May write: `run/plan`. Usage: 11/25 dispatches, 127/240 agent-min.
+- [handoffs/11-instructional-designer.prompt.md](handoffs/11-instructional-designer.prompt.md)
+- [history/11-instructional-designer](history/11-instructional-designer)
+
+### 2026-10-25T23:18:41-04:00 · orchestrator · receive
+Received 11 ← **instructional-designer**: `done_with_concerns`. 8 file(s) changed.
+- [handoffs/11-instructional-designer.report.md](handoffs/11-instructional-designer.report.md)
+
+### 2026-10-25T23:18:55-04:00 · orchestrator · dispatch
+Dispatch 12 → **page-builder** (human-site-1-fixes), loop gate:page round 3/6. May write: `site` except `site/pool/*`. Usage: 12/25 dispatches, 138/240 agent-min.
+- [handoffs/12-page-builder.prompt.md](handoffs/12-page-builder.prompt.md)
+- [history/12-page-builder](history/12-page-builder)
+
+### 2026-10-25T23:27:13-04:00 · verify · gate
+Gate (page) round 14: **PASS**. Reading ~24.6 min (brief: ~26 min; reported, not gated); 388 KB, 23 requests.
+- [gate/page-round-14.json](gate/page-round-14.json)
+- [screenshots/page-round-14](screenshots/page-round-14)
+
+### 2026-10-25T23:27:51-04:00 · verify · gate
+Gate (w-sizing-sandbox) round 4: **PASS**. Reading ~24.6 min (brief: ~26 min; reported, not gated); 485 KB, 23 requests.
+- [gate/w-sizing-sandbox-round-4.json](gate/w-sizing-sandbox-round-4.json)
+- [screenshots/w-sizing-sandbox-round-4](screenshots/w-sizing-sandbox-round-4)
+
+### 2026-10-25T23:28:24-04:00 · verify · gate
+Gate (w-friday-scrolly) round 3: **PASS**. Reading ~24.6 min (brief: ~26 min; reported, not gated); 315 KB, 23 requests.
+- [gate/w-friday-scrolly-round-3.json](gate/w-friday-scrolly-round-3.json)
+- [screenshots/w-friday-scrolly-round-3](screenshots/w-friday-scrolly-round-3)
+
+### 2026-10-25T23:30:12-04:00 · verify · gate
+Gate (page) round 15: **PASS**. Reading ~24.6 min (brief: ~26 min; reported, not gated); 401 KB, 23 requests.
+- [gate/page-round-15.json](gate/page-round-15.json)
+- [screenshots/page-round-15](screenshots/page-round-15)
+
+### 2026-10-25T23:30:46-04:00 · verify · gate
+Gate (w-sizing-sandbox) round 5: **PASS**. Reading ~24.6 min (brief: ~26 min; reported, not gated); 386 KB, 23 requests.
+- [gate/w-sizing-sandbox-round-5.json](gate/w-sizing-sandbox-round-5.json)
+- [screenshots/w-sizing-sandbox-round-5](screenshots/w-sizing-sandbox-round-5)
+
+### 2026-10-25T23:31:19-04:00 · verify · gate
+Gate (w-friday-scrolly) round 4: **PASS**. Reading ~24.6 min (brief: ~26 min; reported, not gated); 398 KB, 23 requests.
+- [gate/w-friday-scrolly-round-4.json](gate/w-friday-scrolly-round-4.json)
+- [screenshots/w-friday-scrolly-round-4](screenshots/w-friday-scrolly-round-4)
+
+### 2026-10-25T23:32:24-04:00 · orchestrator · receive
+Received 12 ← **page-builder**: `done_with_concerns`. 47 file(s) changed.
+- [handoffs/12-page-builder.report.md](handoffs/12-page-builder.report.md)
+
+### 2026-10-25T23:32:59-04:00 · verify · gate
+Gate (page) round 16: **PASS**. Reading ~24.6 min (brief: ~26 min; reported, not gated); 407 KB, 23 requests.
+- [gate/page-round-16.json](gate/page-round-16.json)
+- [screenshots/page-round-16](screenshots/page-round-16)
+
+### 2026-10-25T23:33:33-04:00 · verify · gate
+Gate (page) round 17: **PASS**. Reading ~24.6 min (brief: ~26 min; reported, not gated); 400 KB, 23 requests.
+- [gate/page-round-17.json](gate/page-round-17.json)
+- [screenshots/page-round-17](screenshots/page-round-17)
+
+### 2026-10-25T23:34:08-04:00 · verify · gate
+Gate (page) round 18: **PASS**. Reading ~24.6 min (brief: ~26 min; reported, not gated); 398 KB, 23 requests.
+- [gate/page-round-18.json](gate/page-round-18.json)
+- [screenshots/page-round-18](screenshots/page-round-18)
+
+### 2026-10-26T07:50:30-04:00 · user · human-review
+Human review of site (round 2): 0 comment(s), window closed.
+- [review/human-site-2/comments.md](review/human-site-2/comments.md)
+- [review/human-site-2/comments.json](review/human-site-2/comments.json)
+
+### 2026-10-26T07:51:21-04:00 · orchestrator · findings
+Closed on the user's word (d-15): H-01, H-02, H-03, H-04, H-05, H-06, H-07, H-08, H-09, H-10, H-11, H-12, H-13, H-14, H-15, H-16, H-17, H-18, H-19, H-20, H-21, H-22, H-23, H-24, H-25, H-26, H-27, H-28, H-29, H-30, H-31, H-32, H-33, H-34, H-35, H-36, H-37, H-38, H-39, H-40, H-41, H-42.
+- [decisions.md](decisions.md)
+
+### 2026-10-26T07:51:21-04:00 · orchestrator · extend
+Caps extended per d-16: loop review=2.
+- [decisions.md](decisions.md)
+
+### 2026-10-26T07:51:28-04:00 · orchestrator · dispatch
+Dispatch 13 → **accuracy-reviewer** (accuracy-r2-closure), loop review:accuracy round 2/2. May write: `run/review/round-2/accuracy.md`, `run/screenshots/probe`. Usage: 13/25 dispatches, 152/240 agent-min.
+- [handoffs/13-accuracy-reviewer.prompt.md](handoffs/13-accuracy-reviewer.prompt.md)
+- [history/13-accuracy-reviewer](history/13-accuracy-reviewer)
+
+### 2026-10-26T07:51:28-04:00 · orchestrator · dispatch
+Dispatch 14 → **pedagogy-ux-reviewer** (pedagogy-ux-r2-closure), loop review:pedagogy-ux round 2/2. May write: `run/review/round-2/pedagogy-ux.md`, `run/screenshots/probe`. Usage: 14/25 dispatches, 152/240 agent-min.
+- [handoffs/14-pedagogy-ux-reviewer.prompt.md](handoffs/14-pedagogy-ux-reviewer.prompt.md)
+- [history/14-pedagogy-ux-reviewer](history/14-pedagogy-ux-reviewer)
+
+### 2026-10-26T07:59:59-04:00 · orchestrator · receive
+Received 14 ← **pedagogy-ux-reviewer**: `done`. 38 file(s) changed.
+- [handoffs/14-pedagogy-ux-reviewer.report.md](handoffs/14-pedagogy-ux-reviewer.report.md)
+
+### 2026-10-26T08:02:26-04:00 · orchestrator · receive
+Received 13 ← **accuracy-reviewer**: `done_with_concerns`. 41 file(s) changed.
+- [handoffs/13-accuracy-reviewer.report.md](handoffs/13-accuracy-reviewer.report.md)
+
+### 2026-10-26T08:02:26-04:00 · orchestrator · findings
+Round 2 ingested: 28 finding(s) touched; open: 0 blocking, 0 should, 3 nit.
+- [review/round-2/findings.md](review/round-2/findings.md)
+
+### 2026-10-26T08:02:50-04:00 · orchestrator · dispatch
+Dispatch 15 → **page-builder** (r2-sizing-fixes), loop gate:page round 4/6. May write: `site` except `site/pool/*`. Usage: 15/25 dispatches, 163/240 agent-min.
+- [handoffs/15-page-builder.prompt.md](handoffs/15-page-builder.prompt.md)
+- [history/15-page-builder](history/15-page-builder)
+
+### 2026-10-26T08:08:41-04:00 · verify · gate
+Gate (page) round 19: **PASS**. Reading ~24.6 min (brief: ~26 min; reported, not gated); 279 KB, 23 requests.
+- [gate/page-round-19.json](gate/page-round-19.json)
+- [screenshots/page-round-19](screenshots/page-round-19)
+
+### 2026-10-26T08:09:16-04:00 · verify · gate
+Gate (w-sizing-sandbox) round 6: **PASS**. Reading ~24.6 min (brief: ~26 min; reported, not gated); 281 KB, 23 requests.
+- [gate/w-sizing-sandbox-round-6.json](gate/w-sizing-sandbox-round-6.json)
+- [screenshots/w-sizing-sandbox-round-6](screenshots/w-sizing-sandbox-round-6)
+
+### 2026-10-26T08:10:16-04:00 · orchestrator · receive
+Received 15 ← **page-builder**: `done_with_concerns`. 26 file(s) changed.
+- [handoffs/15-page-builder.report.md](handoffs/15-page-builder.report.md)
+
+### 2026-10-26T08:10:50-04:00 · verify · gate
+Gate (page) round 20: **PASS**. Reading ~24.6 min (brief: ~26 min; reported, not gated); 338 KB, 23 requests.
+- [gate/page-round-20.json](gate/page-round-20.json)
+- [screenshots/page-round-20](screenshots/page-round-20)
+
+### 2026-10-26T08:13:52-04:00 · orchestrator · stage
+Stage: human-review → **deliver**
+
+### 2026-10-26T08:13:52-04:00 · orchestrator · stage
+Stage: deliver → **done**
+
+### 2026-10-26T08:14:05-04:00 · orchestrator · curriculum
+Applied plan Revision 1 R13–R19 to CURRICULUM.md (Ch 8 node pools reuse, Ch 5 entry, §3 facts, Ch 14 fee, §2.13 reference rule, §2.3 loop lens header, m-30 note); d-11 and d-12 were applied earlier. Delivered after human review rounds 1–2 and closure round 2; P-09, P-11, P-13 nits left open (P-09 fixed in handoff 15, not re-reviewed; P-11, P-13 are pool follow-ups).
+- [../../CURRICULUM.md](../../CURRICULUM.md)
+- **decision:** d-18

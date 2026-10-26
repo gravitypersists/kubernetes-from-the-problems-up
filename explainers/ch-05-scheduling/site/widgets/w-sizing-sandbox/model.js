@@ -18,7 +18,7 @@
      SizingModel.pack(items, room, opts)        → { count, bins: [[id…]…], steps } or { count: null, never: [id…] }
      SizingModel.evaluate(data, requests, spare) → everything the sheet shows (see evaluate below)
      SizingModel.selfTest(data)                 → { ok, results: [{ name, ok, got, want }], maxSteps }
-   `requests` = { storefront: 4, orders: 6, dispatch: 2 } (memory GB per copy; services left out keep
+   `requests` = { storefront: 4, orders: 6, payments: 2, dispatch: 2 } (memory GB per copy; services left out keep
    their data request). Results are memoised per setting. */
 (function (root) {
   'use strict';
@@ -181,7 +181,7 @@
   }
 
   /* The plan's expected values (ac-08), and the rule that raising a request never lowers the count,
-     checked over every setting of the three steppers. Run in a browser console
+     checked over every setting of the four steppers. Run in a browser console
      (SizingModel.selfTest(SizingData)) or with node selftest.mjs. */
   function selfTest(data) {
     var results = [];
@@ -211,6 +211,24 @@
     check('orders 13.5: orders never placeable', big.never.map(function (x) { return x.service; }).join(), 'orders');
     check('orders 13.5: reserved still counts every request', big.reserved, 45.5);
     check('orders 13.5: used still 19.5', big.used, 19.5);
+    /* payments, adjustable since Revision 1 (k-04's case): doubling it costs nothing, 7.5 GB a node */
+    check('payments 4 (doubled), spare on: nodes', evaluate(data, { storefront: 4, orders: 6, payments: 4, dispatch: 2 }, true).nodes, 5);
+    check('payments 4: reserved GB', evaluate(data, { storefront: 4, orders: 6, payments: 4, dispatch: 2 }, true).reserved, 42);
+    check('payments 7, spare on: nodes', evaluate(data, { storefront: 4, orders: 6, payments: 7, dispatch: 2 }, true).nodes, 5);
+    check('payments 7.5, spare on: nodes', evaluate(data, { storefront: 4, orders: 6, payments: 7.5, dispatch: 2 }, true).nodes, 6);
+    check('at use incl. payments (2, 6, 0.5, 1), spare off: nodes', evaluate(data, { storefront: 2, orders: 6, payments: 0.5, dispatch: 1 }, false).nodes, 3);
+    check('at use incl. payments: set by', evaluate(data, { storefront: 2, orders: 6, payments: 0.5, dispatch: 1 }, false).setBy, 'processor');
+    check('orders 5, spare on: nodes (k-09)', evaluate(data, { storefront: 4, orders: 5, dispatch: 2 }, true).nodes, 4);
+    check('orders 5.5, spare on: nodes (k-09)', evaluate(data, { storefront: 4, orders: 5.5, dispatch: 2 }, true).nodes, 5);
+    check('halved (2, 3, 1, 1): over', evaluate(data, { storefront: 2, orders: 3, payments: 1, dispatch: 1 }, true).over.join(), 'orders');
+    /* d-17: the drawing reserves two rows of four nodes, so no setting may need more than 8 (spare
+       included), nor more than 7 beside a never-placeable Pod */
+    var mx = {};
+    Object.keys(data.SERVICES).forEach(function (s) { if (data.SERVICES[s].adjustable) mx[s] = data.SERVICES[s].adjustable.max; });
+    var mx13 = {}; for (var mk in mx) mx13[mk] = mx[mk];
+    mx13.orders = data.CAPACITY.memory;
+    check('every request at its maximum, orders 13, spare on: nodes (two rows of four)', evaluate(data, mx13, true).nodes, 8);
+    check('every request at its maximum, spare on: nodes beside the never-placeable Pod', evaluate(data, mx, true).restNodes, 7);
     check('storefront 1.5: over its reservation', evaluate(data, { storefront: 1.5, orders: 6, dispatch: 2 }, true).over.join(), 'storefront');
 
     /* monotone: raising any one request by a step never lowers the count (with and without spare),

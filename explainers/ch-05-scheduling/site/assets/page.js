@@ -116,7 +116,7 @@
      per       optional: a short qualifier under the name ("one per node", "Chapter 7")
      wants     what it works towards (the loop lens: which loop · wants · sees · does)
      sees      what it observes, in the record or the cluster
-     does      what it does about a gap between the two
+     does      what it does when the two differ
      job       the job of Sam's (Ch 03's words) that it took over
      chapter   optional: the chapter that covers this loop; a row with it is drawn dashed (met later)
      added     optional, this chapter only: the fields that are new or changed in this chapter, tagged
@@ -216,7 +216,7 @@ var CH05_CHARTS = {
     kills: [12.67, 18.83, 20.17],
     labels: {
       used: 'Used', request: 'Reserved · request 6 GB', limit: 'Cap · limit 7 GB',
-      band: ['above its reservation:', 'allowed, but first in line', 'if the node runs short (§08)'],
+      band: ['above its reservation:', 'allowed, but first in line', 'if the node runs short (§07)'],
       kill: ['OOMKilled · restart 1', 'Restart 2', 'Restart 3'], killShort: ['1', '2', '3'], gb: 'GB'
     }
   },

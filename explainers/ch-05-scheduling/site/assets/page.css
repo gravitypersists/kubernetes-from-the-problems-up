@@ -5,7 +5,7 @@
    loop lens table, the scrollytelling scaffold (.cs-*) and the check card look and behave as in Ch 04.
    Control Plane treatments (design/control-plane/components/bundle.css) fitted to the kit skeleton
    (pool/components.css). Every value is a token; no raw colours.
-   New in Ch 05 (plan ## Visual grammar): f-02 (one node, two counts), f-03 (node pools), the charts
+   New in Ch 05 (plan ## Visual grammar): f-02 (one node, two counts), the charts
    f-05 and f-07, the NEW IN CH 5 tag in f-06, lane F's reserved heights and the W-02 frame. */
 
 /* ---------- base ---------- */
@@ -536,34 +536,6 @@ body.d-body { -webkit-font-smoothing: antialiased; }
 }
 .cp-fig .tc__result { margin: 0; padding-top: var(--sp-half); border-top: var(--stroke) solid var(--ink); width: 100%; }
 @media (max-width: 599px) { .tc { padding: var(--sp-2) var(--sp-1); } .tc__body { height: 192px; } }
-
-/* ---------- f-03: node pools ----------
-   Ch 03's cluster frame (3px ink) around pool frames (thin ink-3 outline, mono header). A pool not yet
-   rented is dashed c6. Node outlines carry no Pods: the figure is about machine types. */
-.np { padding: var(--sp-3); }
-.np__cluster { background: var(--surface); border: 3px solid var(--ink); border-radius: var(--radius-1); }
-.cp-fig .np__clusterbar { margin: 0; padding: var(--sp-half) var(--sp-1); border-bottom: var(--stroke) solid var(--ink); font: 700 var(--fs-caption)/var(--lh-caption) var(--font-mono); letter-spacing: .08em; text-transform: uppercase; color: var(--ink); }
-.np__pools { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--sp-2); padding: var(--sp-2); }
-@media (min-width: 600px) { .np__pools { grid-template-columns: minmax(0, 5fr) minmax(0, 3fr) minmax(0, 3fr); align-items: stretch; } }
-.np__pool { min-width: 0; display: grid; grid-template-rows: auto 1fr auto; border: var(--stroke) solid var(--ink-3); border-radius: var(--radius-1); }
-.np__pool--later { border-style: dashed; border-color: var(--c6); }
-.cp-fig .np__head {
-  margin: 0; padding: var(--sp-half) var(--sp-1); border-bottom: var(--stroke) solid var(--ink-3);
-  font: 700 var(--fs-caption)/var(--lh-caption) var(--font-mono); letter-spacing: .06em; text-transform: uppercase; color: var(--ink);
-}
-.np__pool--later .np__head { border-bottom-style: dashed; border-bottom-color: var(--c6); color: var(--ink-2); }
-.np__nodes { display: flex; flex-wrap: wrap; gap: var(--sp-1); align-items: flex-end; padding: var(--sp-2) var(--sp-1); }
-.np__node { display: grid; grid-template-rows: auto 1fr; width: 48px; height: 64px; background: var(--surface); border: var(--stroke) solid var(--ink); border-radius: var(--radius-1); }
-.np__node--small { width: 40px; height: 48px; }
-.np__node--big { width: 96px; height: 96px; border-style: dashed; border-color: var(--c6); background: none; }
-.np__nodebar { padding: 1px 0; border-bottom: var(--stroke) solid var(--ink); text-align: center; font: 700 var(--fs-caption)/var(--lh-caption) var(--font-mono); color: var(--ink); }
-.np__node--small .np__nodebar { min-height: 10px; }
-.np__node--later { border-style: dashed; border-color: var(--c6); background: none; }
-.np__node--later .np__nodebar { border-bottom-style: dashed; border-bottom-color: var(--c6); }
-.np__node--big .np__nodebar { border-bottom-style: dashed; border-bottom-color: var(--c6); color: var(--ink-3); }
-.cp-fig .np__say { margin: 0; padding: 0 var(--sp-1) var(--sp-1); font: italic 400 var(--fs-caption)/var(--lh-caption) var(--font-sans); color: var(--ink-2); }
-.np__say code { font: 700 0.95em var(--font-mono); background: none; padding: 0; }
-@media (max-width: 599px) { .np { padding: var(--sp-2) var(--sp-1); } .np__pools { padding: var(--sp-1); } }
 
 /* ---------- f-05 and f-07: charts ----------
    Drawn by assets/page.js into an <svg> at the plate's measured width (so text stays 13px), redrawn on
