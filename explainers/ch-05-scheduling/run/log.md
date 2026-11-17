@@ -401,3 +401,12 @@ Stage: deliver → **done**
 Applied plan Revision 1 R13–R19 to CURRICULUM.md (Ch 8 node pools reuse, Ch 5 entry, §3 facts, Ch 14 fee, §2.13 reference rule, §2.3 loop lens header, m-30 note); d-11 and d-12 were applied earlier. Delivered after human review rounds 1–2 and closure round 2; P-09, P-11, P-13 nits left open (P-09 fixed in handoff 15, not re-reviewed; P-11, P-13 are pool follow-ups).
 - [../../CURRICULUM.md](../../CURRICULUM.md)
 - **decision:** d-18
+
+### 2026-11-16T22:11:44-05:00 · verify · gate
+Gate (page) round 21: **PASS**. Reading ~24.6 min (brief: ~26 min; reported, not gated); 281 KB, 23 requests.
+- [gate/page-round-21.json](gate/page-round-21.json)
+- [screenshots/page-round-21](screenshots/page-round-21)
+
+### 2026-11-16T22:11:50-05:00 · orchestrator · editorial-pass
+Editorial pass at the user's request, after shipping (stage stays **done**). 9 prose edits in site/index.html (§02 requests sentence order, D2, §03 lane lead-in and stranded-room paragraph, §04 three sentences, §05, §06). No check, fact, widget string or figure layout changed; §2.13's "the following widget" wording kept. Gate round 21 PASS.
+- [gate/page-round-21.json](gate/page-round-21.json)

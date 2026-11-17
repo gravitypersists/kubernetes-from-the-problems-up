@@ -84,7 +84,7 @@
          the budget aside with its breaks line, the scheduler's loop lens -->
     <section id="s-02" data-segment="s-02">
       <h2 id="what-the-scheduler-counts"><span class="cp-sec">§ 02 </span>What the scheduler counts</h2>
-      <p>In Chapter 4’s drawings, every Pod had a size, every node had room for six units, and the scheduler looked for “a node with room”. Kubernetes didn’t measure those sizes, though. Each team wrote them into its service’s manifest when Fennel moved, declaring how much memory and how much processor each copy of the service should have set aside for it. The figure below shows the part of <code>storefront</code>’s manifest that does this. Engineers call these numbers the Pod’s <dfn id="dfn-requests" aria-describedby="term-01">requests</dfn>. In it, <code>storefront</code>’s two units of room appear as its real memory request: 4 GB.</p>
+      <p>In Chapter 4’s drawings, every Pod had a size, every node had room for six units, and the scheduler looked for “a node with room”. Kubernetes didn’t measure those sizes, though. Each team wrote them into its service’s manifest when Fennel moved, declaring how much memory and how much processor each copy of the service should have set aside for it. The figure below shows the part of <code>storefront</code>’s manifest that does this, where <code>storefront</code>’s two units of room appear as its real memory request: 4 GB. Engineers call these numbers the Pod’s <dfn id="dfn-requests" aria-describedby="term-01">requests</dfn>.</p>
 
       <!-- f-01: static HTML, Ch 04's manifest plate (code on the record ground, c4 on c4-soft). Annotations
            beside each line from 600px, under it below 600px; the one accent mark is requests:. Lines ≤ 28
@@ -122,7 +122,7 @@
       <!-- D2 (c-05, x-01): the only place "allocatable" appears -->
       <details class="d-more cp-more">
         <summary>Why can Pods reserve only about 13 GB of a 16 GB node?</summary>
-        <div class="cp-more__body"><p>Every machine runs its own operating system and Kubernetes’ own programs, such as the node agent, and they need memory and processor too. So part of each node is kept back for them, and the scheduler operates only on the rest, which engineers call the node’s allocatable room. On one provider, for example, a 16 GB node keeps back up to about 2.7 GB of memory, depending on the version it was set up with, but less than a tenth of a core, which is roughly where Fennel’s 13 GB and 3.9 cores come from. Small machines lose a bigger share: on the same provider, a 4 GB node keeps back about a quarter of its memory.</p></div>
+        <div class="cp-more__body"><p>Every machine runs its own operating system and Kubernetes’ own programs, such as the node agent, and they need memory and processor too. So part of each node is kept back for them, and the scheduler works only with the rest, which engineers call the node’s allocatable room. On one provider, for example, a 16 GB node keeps back up to about 2.7 GB of memory, depending on the version it was set up with, but less than a tenth of a core, which is roughly where Fennel’s 13 GB and 3.9 cores come from. Small machines lose a bigger share: on the same provider, a 4 GB node keeps back about a quarter of its memory.</p></div>
       </details>
 
       <p>Memory and processor are counted separately, and a Pod fits on a node only if both of its requests fit into what that node still has unreserved. The figure below shows why that matters: a node can have plenty of memory left while its processor is nearly all reserved, and then a new <code>dispatch</code> Pod doesn’t fit there, however much memory is free.</p>
@@ -206,7 +206,7 @@
     <section id="s-03" data-segment="s-03">
       <h2 id="friday-1745"><span class="cp-sec">§ 03 </span>Friday, 17:45: a Pod with nowhere to go</h2>
       <p>Since node 03 died, Fennel’s cluster has run on three nodes, 01, 02 and 04, and the Pods on them have reserved most of their room. Friday’s dinner rush is when <code>dispatch</code>, the service that assigns drivers to orders, is busiest. At 17:45 the dispatch team decides it wants six copies running tonight instead of three, and changes the number in <code>dispatch</code>’s manifest.</p>
-      <p>The following widget follows the next hour step by step as you scroll. It’s drawn similarly to how it was in Chapter 4, with one change: it now counts in real units. Each node’s column stands for the 13 GB of memory its Pods can reserve, each Pod’s height is its memory request, and memory that no Pod has reserved is drawn as dashed space. Processor is reserved separately, so it gets its own line at the foot of each node, counting the cores its Pods have reserved out of the 3.9 they can. During the scheduler’s steps, each node also shows its verdict for the Pod being placed: it fits, or the node is short of memory, of processor, or of both. The record and the loops work as they did in Chapter 4.</p>
+      <p>The following widget follows the next hour step by step as you scroll. It’s drawn as it was in Chapter 4, with one change: it now counts in real units. Each node’s column stands for the 13 GB of memory its Pods can reserve, each Pod’s height is its memory request, and memory that no Pod has reserved is drawn as dashed space. Processor is reserved separately, so it gets its own line at the foot of each node, counting the cores its Pods have reserved out of the 3.9 they can. During the scheduler’s steps, each node also shows its verdict for the Pod being placed: it fits, or the node is short of memory, of processor, or of both. The record and the loops work as they did in Chapter 4.</p>
       <noscript><p class="cs-noscript">The drawing and step text in §03, and the sizing widget in §04, need JavaScript. The rest of the page reads without it.</p></noscript>
 
       <!--
@@ -332,7 +332,7 @@
       </div>
 
       <p>Each time the scheduler fails to place a Pod, it records why. On Friday the line read <code>0/3 nodes are available: 2 Insufficient cpu, 3 Insufficient memory.</code>, which is in the format engineers see. Read it from left to right. “0/3 nodes are available” means that none of the three nodes passed the first step. The rest counts what each node was short of: all three lacked 2 GB of free memory, and two of them, 01 and 02, also lacked a whole free core. So the line already answers the first question to ask about a pending Pod: what is short, and where?</p>
-      <p>Notice what the line doesn’t say, which is that the cluster was full. Between them, the three nodes had 3 GB of memory free, more than the Pod’s request of 2 GB, but only in pieces too small for it; free room stranded like this is common on real clusters, and it matters to Morgan, because those leftover pieces on 01, 02 and 04 are room Fennel pays for that no Pod of this size can use.</p>
+      <p>Notice what the line doesn’t say, which is that the cluster was full. Between them, the three nodes had 3 GB of memory free, more than the Pod’s request of 2 GB, but only in pieces too small for it. Free room stranded like this is common on real clusters, and it matters to Morgan, because those leftover pieces on 01, 02 and 04 are room Fennel pays for that no Pod of this size can use.</p>
       <p>There are two wrong ways to read <code>Pending</code>. It isn’t a failure: nobody has to resubmit anything, because the scheduler keeps trying and places the Pod as soon as a node has room for it. But it isn’t harmless either, because in Fennel’s cluster no loop makes room by itself. Someone has to add a node or free some room, as Ari’s team did at about 18:40. (Chapter 8 introduces a loop that can add nodes.) When a Pod is pending, these are the questions to ask:</p>
       <ul class="cp-qs">
         <li>“What’s short, and on how many nodes?”</li>
@@ -354,7 +354,7 @@
          D5 (survey figures, only here), D6 -->
     <section id="s-04" data-segment="s-04">
       <h2 id="what-morgan-pays-for"><span class="cp-sec">§ 04 </span>What Morgan pays for</h2>
-      <p>Fennel rents its machines from a provider, the cloud company that owns them. In the provider’s standard mode, which is the one Fennel uses, the bill counts machines: Fennel pays for each node for as long as it exists, whether the room on it is reserved, used or empty. So Morgan’s five nodes constitute the bill. Nothing in Fennel’s cluster rents or adds nodes by itself. Ari’s team decides how many machines to rent and adds them by hand (Chapter 8 introduces a loop that can). What the requests decide is how many nodes Fennel needs: on Friday, the Pods’ reservations didn’t fit on three nodes, so a Pod waited until Ari’s team added two.</p>
+      <p>Fennel rents its machines from a provider, the cloud company that owns them. In the provider’s standard mode, which is the one Fennel uses, the bill counts machines: Fennel pays for each node for as long as it exists, whether the room on it is reserved, used or empty. So Morgan’s five nodes are the bill. Nothing in Fennel’s cluster rents or adds nodes by itself. Ari’s team decides how many machines to rent and adds them by hand (Chapter 8 introduces a loop that can). What the requests decide is how many nodes Fennel needs: on Friday, the Pods’ reservations didn’t fit on three nodes, so a Pod waited until Ari’s team added two.</p>
 
       <div class="cp-check" role="group" aria-labelledby="k-04-q" data-check="k-04">
         <div class="cp-check__head"><span class="cp-chip">PREDICT</span><span class="cp-label">Check 04 / 08</span></div>
@@ -432,7 +432,7 @@
       </div>
 
       <p>Fitting Pods’ reservations onto as few nodes as possible is called <dfn id="dfn-bin-packing">bin packing</dfn>, and the widget above does it to count the fewest nodes Fennel could manage with. The scheduler, by default, doesn’t. It prefers the emptiest node and spreads copies out, which is safer for Pods but isn’t the cheapest arrangement. Packing tightly is a setting engineers can switch on, and some fully managed modes pack for you. Either way, the scheduler only places new Pods. It never moves running ones to empty a node, because Pods are replaced, not moved.</p>
-      <p>The widget’s “Room for Pods on the rented nodes” bar splits the room nobody uses into two kinds, room no Pod reserved (spare nodes, or pieces stranded too small for any Pod) and room reserved but not used, and the “less than a third busy” on Ari’s dashboard counts both.</p>
+      <p>The widget’s “Room for Pods on the rented nodes” bar splits the room nobody uses into two kinds: room no Pod reserved (spare nodes, or pieces stranded too small for any Pod) and room reserved but not used. The “less than a third busy” on Ari’s dashboard counts both.</p>
 
       <!-- D5 (c-13, c-14, c-15): the only place survey figures appear -->
       <details class="d-more cp-more">
@@ -452,14 +452,14 @@
         <div class="cp-more__body"><p>On one provider, the per-Pod mode charges, per second, for the processor, memory and temporary disk space that each running Pod requests, not for what it uses. Pods that are waiting to be placed aren’t billed there, but Pods that keep crash-looping are. Another provider’s per-Pod option adds 256 MB to each Pod for Kubernetes’ own parts and rounds up to the next size it offers, so a Pod that requests 1 core and 8 GB is given, and billed for, 2 cores and 9 GB. Not every fully managed mode bills per Pod: some still bill per machine. Prices are the subject of Chapter 14.</p></div>
       </details>
 
-      <p>Here is the answer to Morgan’s question: Fennel rents five nodes because the teams’ padded requests filled three nodes on paper while the services used far less, so Ari’s team rented two more. One of those, node 06, has sat nearly empty since, a node’s worth of spare room; whether to keep it is a choice, and the next section explains why Fennel might want to do that. Requests closer to what each service uses at its busiest would let Fennel rent fewer nodes, but not as few as possible.</p>
+      <p>Here is the answer to Morgan’s question: Fennel rents five nodes because the teams’ padded requests filled three nodes on paper while the services used far less, so Ari’s team rented two more. One of those, node 06, has sat nearly empty since, a node’s worth of spare room. Whether to keep it is a choice, and the next section explains why Fennel might want to. Requests closer to what each service uses at its busiest would let Fennel rent fewer nodes, but not as few as possible.</p>
     </section>
 
     <!-- s-05 · Room on purpose · o-2 · claims c-03, c-09, c-21 · keeps Ch 4's D4 promise · refers to W-02's spare-
          node switch by name · no figure, no check (a check would be a judgment call) -->
     <section id="s-05" data-segment="s-05">
       <h2 id="room-on-purpose"><span class="cp-sec">§ 05 </span>Room on purpose</h2>
-      <p>Nodes go down, as node 03 did in Chapter 4. When one does, its Pods are replaced, and the scheduler has to place the replacements on the nodes that are left; if those nodes are full, the replacements wait for room, like the <code>dispatch</code> Pod at the dinner rush. Spare nodes are insurance against that: room kept free so that a lost node’s Pods have somewhere to go. The insurance is paid for a node at a time, and the “Keep room to lose a node” switch in the widget above shows what it costs; how much to keep is a decision for engineers and finance together.</p>
+      <p>Nodes go down, as node 03 did in Chapter 4. When one does, its Pods are replaced, and the scheduler has to place the replacements on the nodes that are left; if those nodes are full, the replacements wait for room, like the <code>dispatch</code> Pod at the dinner rush. Spare nodes are insurance against that: room kept free so that a lost node’s Pods have somewhere to go. The insurance is paid for a node at a time, and the “Keep room to lose a node” switch in the widget above shows what it costs. How much to keep is a decision for engineers and finance together.</p>
       <blockquote class="cp-quote"><p>“If we lose a node during the dinner rush, where do its Pods go?”</p><cite>The question to ask</cite></blockquote>
     </section>
 
@@ -520,7 +520,7 @@
         <figcaption id="f-05-cap"><span class="cp-label">Fig. 04</span><span>Three numbers about one Pod: what it reserves, what it may use, and what it used. A single day can’t tell you why the line keeps climbing.</span></figcaption>
       </figure>
 
-      <p>Each time <code>orders</code>’ memory reached 7 GB, the operating system on the node stopped the container. Engineers say it was <dfn id="dfn-oom-killed" aria-describedby="term-04">OOM-killed</dfn>, from “out of memory”. The node agent then restarted the container, in the same Pod on the same node, so this was not a replacement like the ones after node 03 died, and the restart count went up by one. Each restart left a short gap in which customers couldn’t place orders. If the kills keep coming, the node agent waits longer and longer between restarts, just as it does with any crash-looping container, as we saw in Chapter 4.</p>
+      <p>Each time <code>orders</code>’ memory reached 7 GB, the operating system on the node stopped the container. Engineers say it was <dfn id="dfn-oom-killed" aria-describedby="term-04">OOM-killed</dfn>, from “out of memory”. The node agent then restarted the container, in the same Pod on the same node, so this was not a replacement like the ones after node 03 died, and the restart count went up by one. Each restart left a short gap in which customers couldn’t place orders. If the kills keep coming, the node agent waits longer and longer between restarts, just as it does with any crash-looping container, as Chapter 4 showed.</p>
 
       <div class="cp-term" id="term-04" role="note" aria-label="New term 4 of 4">
         <p class="cp-term__kicker">New term · 04 / 04</p>
