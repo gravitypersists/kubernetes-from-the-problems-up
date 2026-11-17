@@ -287,3 +287,11 @@ Gate (page) round 13: **PASS**. Reading ~14.2 min (brief: ~18 min; reported, not
 Gate (page) round 14: **PASS**. Reading ~14.2 min (brief: ~18 min; reported, not gated); 383 KB, 17 requests.
 - [gate/page-round-14.json](gate/page-round-14.json)
 - [screenshots/page-round-14](screenshots/page-round-14)
+
+### 2026-11-16T22:17:45-05:00 · verify · gate
+Gate (page) round 15: **PASS**. Reading ~14.2 min (brief: ~18 min; reported, not gated); 427 KB, 17 requests.
+- [gate/page-round-15.json](gate/page-round-15.json)
+- [screenshots/page-round-15](screenshots/page-round-15)
+
+### 2026-11-16T22:17:45-05:00 · orchestrator · editorial-pass
+Editorial pass at the user's request, after shipping (stage stays **done**). 3 prose edits in site/index.html: §05 comma splice ("isn’t missing; it’s just thinner"), the apartment analogy's "flat" → "apartment", §06 "We’ll name it in the next chapter" → "the next chapter introduces it". Nothing else changed. Gate PASS.

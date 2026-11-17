@@ -391,10 +391,10 @@
 
       <p>Leaving out the kernel is what makes a container small and quick to start. A VM has to carry a whole operating system and boot it, the way a computer starts up. A container skips both: starting one just starts a process on a kernel that’s already running. An image often does include an operating system’s basic files and tools (engineers will say an image is “based on Debian”, for example), but never its kernel, and nothing boots. So a container is <a href="https://cloud.google.com/discover/containers-vs-vms">typically</a> tens to hundreds of megabytes and starts in seconds, while a VM is typically gigabytes and takes tens of seconds to minutes to boot. Those are rough orders of magnitude, not measurements; the real numbers depend on the app and the setup.</p>
       <p>Without a whole operating system and kernel for every app, the same machine has room for many more apps. How many more depends on the apps themselves.</p>
-      <p>The price is a thinner wall. Every container on a machine shares one kernel, so a flaw in that kernel is shared by all of them, while each VM has its own kernel. That’s why cloud providers that run many different customers’ containers on the same machines put each customer’s containers inside a <a href="https://www.usenix.org/conference/nsdi20/presentation/agache">lightweight VM of its own</a>; AWS does this for some of its services. Containers are still walled off from each other, though. The wall between containers isn’t missing, it’s just thinner. For a company running only its own code, that trade-off is usually fine.</p>
+      <p>The price is a thinner wall. Every container on a machine shares one kernel, so a flaw in that kernel is shared by all of them, while each VM has its own kernel. That’s why cloud providers that run many different customers’ containers on the same machines put each customer’s containers inside a <a href="https://www.usenix.org/conference/nsdi20/presentation/agache">lightweight VM of its own</a>; AWS does this for some of its services. Containers are still walled off from each other, though. The wall between containers isn’t missing; it’s just thinner. For a company running only its own code, that trade-off is usually fine.</p>
       <p>You also don’t have to choose one or the other. When Fennel rents a machine from a cloud provider, that machine is usually a VM, and Fennel’s containers run inside it. In the cloud, you usually get both: containers, running inside a VM.</p>
       <div class="cp-aside">
-        <p><b>ANALOGY</b>A VM is a house: its own foundation, plumbing and wiring. A container is an apartment: its own locked door, sharing the building’s foundation and plumbing. Apartments are cheaper and pack more people into the same land, and a burst main pipe reaches every flat.</p>
+        <p><b>ANALOGY</b>A VM is a house: its own foundation, plumbing and wiring. A container is an apartment: its own locked door, sharing the building’s foundation and plumbing. Apartments are cheaper and pack more people into the same land, and a burst main pipe reaches every apartment.</p>
         <p class="cp-breaks"><b>WHERE THIS ANALOGY BREAKS</b>The analogy makes house and apartment a choice, but in the cloud you usually get both: Fennel’s containers run inside a VM, like apartments carved out of one house. And buildings don’t start up, so it can’t show the other difference: a container starts in seconds because, unlike a VM, it has no operating system to boot.</p>
       </div>
     </section>
@@ -434,7 +434,7 @@
         <li>What happens to anything written only on that machine?</li>
         <li>Once there are many machines, who decides what runs where?</li>
       </ul>
-      <p>Those jobs have a name. We’ll name it in the next chapter.</p>
+      <p>Those jobs have a name, and the next chapter introduces it.</p>
 
       <div class="cp-recap">
         <p class="cp-label">In short</p>
