@@ -253,3 +253,11 @@ Gate (page) round 13: **PASS**. Reading ~20.7 min (brief: ~23 min; reported, not
 Gate (page) round 14: **PASS**. Reading ~20.7 min (brief: ~23 min; reported, not gated); 361 KB, 20 requests.
 - [gate/page-round-14.json](gate/page-round-14.json)
 - [screenshots/page-round-14](screenshots/page-round-14)
+
+### 2026-11-16T22:14:25-05:00 · verify · gate
+Gate (page) round 15: **PASS**. Reading ~20.7 min (brief: ~23 min; reported, not gated); 403 KB, 20 requests.
+- [gate/page-round-15.json](gate/page-round-15.json)
+- [screenshots/page-round-15](screenshots/page-round-15)
+
+### 2026-11-16T22:14:25-05:00 · orchestrator · editorial-pass
+Editorial pass at the user's request, after shipping (stage stays **done**). 3 prose edits in site/index.html: "lane A", an internal label the reader never sees, became "the following widget" / "the widget above" (§04, CURRICULUM §2.13). Nothing else changed. Gate PASS.
