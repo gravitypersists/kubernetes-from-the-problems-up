@@ -1,0 +1,17 @@
+# Parking lot
+
+- Ch 13: KEDA scales on events such as queue length and can scale a workload to zero; it creates and drives an HPA (https://keda.sh/docs/latest/concepts/)
+- Ch 13 / Ch 12: HPA metrics beyond processor use: memory, custom and external metrics; with several metrics the HPA takes the largest answer (https://kubernetes.io/docs/concepts/workloads/autoscaling/horizontal-pod-autoscale/)
+- Ch 12: the Metrics Server that feeds the HPA is a separate add-on "launched separately" and collects every 15 seconds; metrics pipelines in general (https://github.com/kubernetes-sigs/metrics-server)
+- Ch 12 / engineer territory: the HPA's `behavior` policies (default scale-up adds at most 4 Pods or 100 percent per 15 s; tolerance is configurable) (https://kubernetes.io/docs/concepts/workloads/autoscaling/horizontal-pod-autoscale/)
+- Ch 9 / Ch 14: once an HPA owns the number of copies, remove `spec.replicas` from the manifest or re-applying it resets the copies (https://kubernetes.io/docs/concepts/workloads/autoscaling/horizontal-pod-autoscale/)
+- Ch 11: placeholder Pods work through Pod priority and preemption; the autoscaler ignores Pods with priority below -10 on AKS (https://learn.microsoft.com/en-us/azure/aks/cluster-autoscaler-overview)
+- Ch 14: PodDisruptionBudgets and the `safe-to-evict` annotation are what most often block node scale-down (https://github.com/kubernetes/autoscaler/blob/master/cluster-autoscaler/FAQ.md)
+- Ch 14: provider autoscaling profiles trade speed for cost (GKE "balanced" vs. "optimize-utilization"; AKS "cluster autoscaler profile") (https://docs.cloud.google.com/kubernetes-engine/docs/concepts/cluster-autoscaler)
+- Ch 14: EKS Auto Mode replaces its nodes at most every 21 days and handles Spot interruption notices itself (https://docs.aws.amazon.com/eks/latest/userguide/automode.html)
+- Ch 14: AKS Automatic's pod-readiness SLA ("99.9% of qualifying pod readiness operations complete within 5 minutes") as a provider promise on startup time (https://learn.microsoft.com/en-us/azure/aks/node-auto-provisioning)
+- Ch 14: Karpenter consolidation can also replace a node with a cheaper one, not only remove it (https://karpenter.sh/docs/concepts/)
+- Ch 14: spot pool specifics: AWS two-minute interruption notice, GKE 30-second graceful termination; one provider's "up to 90%" is a ceiling, not typical (https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/using-spot-instances.html)
+- Ch 10: scale-down is blocked by Pods with local storage unless marked, and database connection poolers (PgBouncer and similar) are the usual fix for the connection limit (https://github.com/kubernetes/autoscaler/blob/master/cluster-autoscaler/FAQ.md)
+- Ch 5 / Ch 12 (right-sizing): the vertical autoscaler adjusts requests to match actual use and is an add-on, not built in (https://kubernetes.io/docs/concepts/workloads/autoscaling/vertical-pod-autoscale/)
+- Ch 14: the cluster autoscaler waits up to 15 minutes for a requested node to register, then tries another group (`--max-node-provision-time`) (https://github.com/kubernetes/autoscaler/blob/master/cluster-autoscaler/FAQ.md)

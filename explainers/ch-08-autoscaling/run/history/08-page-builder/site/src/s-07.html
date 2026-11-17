@@ -1,0 +1,90 @@
+    <!-- s-07 · When more Pods don't help · o-3 · claims c-01, c-02, c-12 · the fair part first (more copies did
+         fix dispatch), then catalog's Sunday · k-07 (m-11, "fixes any slowness") · gated on k-07: Fig. 08, what
+         the loop could see (owner of that explanation), what nine copies would have done (illustrative
+         arithmetic; 100 is PostgreSQL's typical default), the rule and the question, two more cases (ac-12) -->
+    <section id="s-07" data-segment="s-07">
+      <h2 id="when-more-pods-dont-help"><span class="cp-sec">§ 07 </span>When more Pods don’t help</h2>
+      <p>When a service is slow because it has too few copies for its work, more copies fix it. That was <code>dispatch</code> on the Friday of the push, and once the copies arrived the slowness was gone. The <code>catalog</code> team drew the natural conclusion and gave <code>catalog</code>, the service behind Fennel’s product listings and prices, an HPA of its own, with the same 60% target and a minimum of three copies.</p>
+      <p>It was tested on the Sunday evening of the holiday sale. For about a quarter of an hour, <code>catalog</code>’s pages took whole seconds to load. The cause was not in <code>catalog</code>’s own code: each request was waiting for an answer from the database that <code>catalog</code> reads its prices from. That database is not one of the cluster’s Pods in this story; where a database should run is a question for Chapter 10.</p>
+
+      <div class="cp-check" role="group" aria-labelledby="k-07-q" data-check="k-07">
+        <div class="cp-check__head"><span class="cp-chip">PREDICT</span><span class="cp-label">Check 07 / 08</span></div>
+        <p class="cp-check__q" id="k-07-q"><code>catalog</code> has an autoscaler like <code>dispatch</code>’s: a target of 60% of the processor each Pod reserves. One Sunday evening <code>catalog</code>’s pages take seconds to load, because every request is waiting for the database to answer. What does <code>catalog</code>’s autoscaler do?</p>
+        <ul class="cp-options">
+          <li><button type="button" class="cp-option" data-fb="It can’t see that `catalog` is slow. It sees one reading, the Pods’ processor use, and Pods waiting on a database use very little: the reading was 25%, under the target. The figure below also shows what more copies would have done."><span class="cp-option__key">A</span><span>Adds copies, as it did for <code>dispatch</code>, because a service that is slow needs more Pods.</span><span class="cp-option__tag"></span></button></li>
+          <li><button type="button" class="cp-option" data-ok data-fb="Right. The reading was 25%, well under the target, so the autoscaler saw nothing to do while customers waited. The figure below also shows what more copies would have done."><span class="cp-option__key">B</span><span>Nothing: Pods that are waiting use little processor, so the reading stays low.</span><span class="cp-option__tag"></span></button></li>
+          <li><button type="button" class="cp-option" data-fb="An HPA changes one number, the copies of one Deployment. The database isn’t a Deployment it manages, and isn’t a Pod at all in this story. The reading it does see was 25%, so it did nothing."><span class="cp-option__key">C</span><span>Adds capacity to the database, since that is where the requests are waiting.</span><span class="cp-option__tag"></span></button></li>
+        </ul>
+        <div class="cp-feedback" role="status" hidden></div>
+      </div>
+
+      <div class="cp-gate" data-gate="k-07">
+        <p class="cp-gate__lock">Answer the question above to see what the autoscaler saw</p>
+
+        <!-- f-08: static HTML, two panels. Pods in the Pod grammar with the gauge; the database is a solid ink box
+             on surface-2 (not a Pod), ten cells of ten connections each. The right panel is tagged illustrative. -->
+        <figure class="cp-fig d-wide" id="f-08" aria-labelledby="f-08-cap">
+          <div class="cp-fig__plate">
+            <div class="cp-fig__bar"><span class="cp-label">Fig. 08</span><span class="cp-label">catalog, Sunday evening</span></div>
+            <div class="cp-blueprint db">
+              <div class="db__grid">
+                <div class="db__panel" role="img" aria-label="What happened. Three catalog Pods are ready, and each is using 25% of the processor it reserves, against a target of 60%, because each is waiting on the database. The HPA sees 25% against a target of 60% and does nothing. The database, which is not a Pod, accepts 100 connections; 90 are in use, 30 by each copy. Customers: pages take seconds.">
+                  <p class="db__head">What happened</p>
+                  <p class="db__loop"><span class="cp-loop"><span class="cp-loop__mark">↻</span>HPA</span><span>sees 25%, target 60% · does nothing</span></p>
+                  <div class="db__rows">
+                    <div class="db__row">
+                      <div class="pod"><span class="pod__chip">catalog<span class="st st--good">Ready</span></span></div>
+                      <div class="gg" style="--v: 25; --t: 60"><span class="gg__target"><span class="fg-set">Target 60%</span></span><div class="gg__track"><span class="gg__res"></span><span class="gg__use"></span><span class="gg__tick"></span></div><span class="gg__now">NOW 25%</span></div>
+                      <p class="db__wait">Waiting on the database</p>
+                    </div>
+                    <div class="db__row">
+                      <div class="pod"><span class="pod__chip">catalog<span class="st st--good">Ready</span></span></div>
+                      <div class="gg" style="--v: 25; --t: 60"><span class="gg__target"><span class="fg-set">Target 60%</span></span><div class="gg__track"><span class="gg__res"></span><span class="gg__use"></span><span class="gg__tick"></span></div><span class="gg__now">NOW 25%</span></div>
+                      <p class="db__wait">Waiting on the database</p>
+                    </div>
+                    <div class="db__row">
+                      <div class="pod"><span class="pod__chip">catalog<span class="st st--good">Ready</span></span></div>
+                      <div class="gg" style="--v: 25; --t: 60"><span class="gg__target"><span class="fg-set">Target 60%</span></span><div class="gg__track"><span class="gg__res"></span><span class="gg__use"></span><span class="gg__tick"></span></div><span class="gg__now">NOW 25%</span></div>
+                      <p class="db__wait">Waiting on the database</p>
+                    </div>
+                  </div>
+                  <div class="db__box">
+                    <p class="db__name">Database · not a Pod</p>
+                    <div class="db__cells"><i class="is-on"></i><i class="is-on"></i><i class="is-on"></i><i class="is-on"></i><i class="is-on"></i><i class="is-on"></i><i class="is-on"></i><i class="is-on"></i><i class="is-on"></i><i></i></div>
+                    <p class="db__count"><span>90 in use · 30 per copy</span><span>Accepts 100</span></p>
+                  </div>
+                  <p class="db__cust"><b>Customers</b><span class="st st--bad">pages take seconds</span></p>
+                </div>
+                <div class="db__panel" role="img" aria-label="Illustrative: if catalog had gone to 9 copies. Nine copies at 30 connections each would want 270 connections, and the database accepts 100. The first three copies keep their 30 each and stay ready. A fourth gets the last 10 of its 30. The other five can’t connect and are not ready. Every one of the database’s 100 connections is in use.">
+                  <p class="db__head"><span>If catalog had gone to 9 copies</span><span class="fg-tag">Illustrative</span></p>
+                  <div class="db__nine">
+                    <div class="pod"><span class="pod__chip">catalog<span class="st st--good">Ready</span></span></div>
+                    <div class="pod"><span class="pod__chip">catalog<span class="st st--good">Ready</span></span></div>
+                    <div class="pod"><span class="pod__chip">catalog<span class="st st--good">Ready</span></span></div>
+                    <div class="pod"><span class="pod__chip">catalog<span class="st st--warn">10 of its 30</span></span></div>
+                    <div class="pod pod--off"><span class="pod__chip">catalog<span class="st st--warn">Not ready · can’t connect</span></span></div>
+                    <div class="pod pod--off"><span class="pod__chip">catalog<span class="st st--warn">Not ready · can’t connect</span></span></div>
+                    <div class="pod pod--off"><span class="pod__chip">catalog<span class="st st--warn">Not ready · can’t connect</span></span></div>
+                    <div class="pod pod--off"><span class="pod__chip">catalog<span class="st st--warn">Not ready · can’t connect</span></span></div>
+                    <div class="pod pod--off"><span class="pod__chip">catalog<span class="st st--warn">Not ready · can’t connect</span></span></div>
+                  </div>
+                  <p class="db__sum">9 × 30 = 270 wanted · 100 accepted</p>
+                  <div class="db__box">
+                    <p class="db__name">Database · not a Pod</p>
+                    <div class="db__cells"><i class="is-on"></i><i class="is-on"></i><i class="is-on"></i><i class="is-on"></i><i class="is-on"></i><i class="is-on"></i><i class="is-on"></i><i class="is-on"></i><i class="is-on"></i><i class="is-on"></i></div>
+                    <p class="db__count"><span>100 in use</span><span>Accepts 100</span></p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <figcaption id="f-08-cap"><span class="cp-label">Fig. 08</span><span>The loop reads the Pods’ processors, and waiting uses little. More copies would have asked the database for connections it doesn’t have. The numbers are illustrative.</span></figcaption>
+        </figure>
+
+        <p>An HPA knows one measurement and one target, and nothing else. It doesn’t know how many customers are waiting, or how long, or what they are waiting for. A Pod that is waiting on a database is barely using its processor, so on that Sunday the one number the loop could see said that all was well. Autoscaling doesn’t fix slowness in general. It fixes the kind of slowness that shows up in the measurement it was given.</p>
+        <p>Riley’s first thought that evening was to do by hand what the loop had not, and raise <code>catalog</code> to nine copies. The right-hand panel of the figure shows why that would have gone badly. The database accepts 100 connections at a time, which is PostgreSQL’s typical default, and each <code>catalog</code> copy holds up to 30 of them, so three copies already hold 90. Nine copies would ask for 270. Most of the new copies couldn’t connect at all, so they would fail the readiness check that asks whether they can reach the database, the one from Chapter 6, and would never appear on the list of <code>catalog</code>’s Service; meanwhile they would be competing for connections with the three copies that were working. These numbers are an illustration, but the arithmetic is the general one: copies, times connections per copy, against a limit that doesn’t move. The fix was on the database’s side, which is Chapter 10’s subject.</p>
+        <p>The rule is short. Adding Pods helps only when Pods are what’s short. So the question to ask of any plan to autoscale a service is this one:</p>
+        <blockquote class="cp-quote"><p>“What is the bottleneck after the app?”</p><cite>The question to ask</cite></blockquote>
+        <p>A database is one answer, and there are two more worth knowing. <code>payments</code> calls a payment provider that accepts only so many calls a second from Fennel, a ceiling known as a rate limit, and more <code>payments</code> Pods just means more callers under the same ceiling. And the work has to reach the new Pods in the first place. A Service picks a Pod when a connection opens, as Chapter 7 showed, so callers that keep their connections open for a long time stay with the old Pods, and new copies can stand nearly idle until those connections are reopened.</p>
+      </div>
+    </section>

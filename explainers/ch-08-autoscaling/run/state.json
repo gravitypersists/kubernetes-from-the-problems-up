@@ -1,0 +1,183 @@
+{
+  "version": 1,
+  "slug": "ch-08-autoscaling",
+  "created": "2026-11-16T20:45:50-05:00",
+  "depth": "light",
+  "minutes": 22,
+  "stage": "human-review",
+  "caps": {
+    "spawns": 24,
+    "agent_minutes": 105,
+    "loops": {
+      "research": 2,
+      "checkpoint": 4,
+      "gate": 6,
+      "review": 2
+    }
+  },
+  "seq": 8,
+  "dispatches": [
+    {
+      "nn": 1,
+      "role": "researcher",
+      "loop": "research",
+      "label": "light-research",
+      "writes": [
+        "run/research"
+      ],
+      "exclude": [],
+      "opened": "2026-11-16T20:47:30-05:00",
+      "closed": "2026-11-16T20:55:02-05:00",
+      "status": "done_with_concerns",
+      "ns_ok": true,
+      "pivot": false,
+      "reason": null,
+      "changed": 9
+    },
+    {
+      "nn": 2,
+      "role": "instructional-designer",
+      "loop": "checkpoint",
+      "label": "plan-and-mockup",
+      "writes": [
+        "run/plan"
+      ],
+      "exclude": [],
+      "opened": "2026-11-16T20:55:06-05:00",
+      "closed": "2026-11-16T21:19:18-05:00",
+      "status": "done_with_concerns",
+      "ns_ok": true,
+      "pivot": false,
+      "reason": null,
+      "changed": 9
+    },
+    {
+      "nn": 3,
+      "role": "page-builder",
+      "loop": "gate:page",
+      "label": "page-build",
+      "writes": [
+        "site"
+      ],
+      "exclude": [
+        "site/widgets/*/*"
+      ],
+      "opened": "2026-11-16T21:26:00-05:00",
+      "closed": "2026-11-16T21:26:10-05:00",
+      "status": "abandoned",
+      "ns_ok": true,
+      "pivot": false
+    },
+    {
+      "nn": 4,
+      "role": "page-builder",
+      "loop": "gate:page",
+      "label": "page-build",
+      "writes": [
+        "site"
+      ],
+      "exclude": [
+        "site/pool/*"
+      ],
+      "opened": "2026-11-16T21:26:10-05:00",
+      "closed": "2026-11-16T21:46:42-05:00",
+      "status": "abandoned",
+      "ns_ok": true,
+      "pivot": false
+    },
+    {
+      "nn": 5,
+      "role": "page-builder",
+      "loop": "gate:page",
+      "label": "page-build-resume",
+      "writes": [
+        "site"
+      ],
+      "exclude": [
+        "site/pool/*"
+      ],
+      "opened": "2026-11-16T21:46:42-05:00",
+      "closed": "2026-11-16T22:01:11-05:00",
+      "status": "done_with_concerns",
+      "ns_ok": true,
+      "pivot": false,
+      "reason": null,
+      "changed": 26
+    },
+    {
+      "nn": 6,
+      "role": "accuracy-reviewer",
+      "loop": "review:accuracy",
+      "label": "accuracy-r1",
+      "writes": [
+        "run/review/round-1",
+        "run/screenshots/probe"
+      ],
+      "exclude": [],
+      "opened": "2026-11-16T22:01:57-05:00",
+      "closed": "2026-11-16T22:08:33-05:00",
+      "status": "done",
+      "ns_ok": true,
+      "pivot": false,
+      "reason": null,
+      "changed": 93
+    },
+    {
+      "nn": 7,
+      "role": "pedagogy-ux-reviewer",
+      "loop": "review:pedagogy-ux",
+      "label": "pedagogy-ux-r1",
+      "writes": [
+        "run/review/round-1",
+        "run/screenshots/probe"
+      ],
+      "exclude": [],
+      "opened": "2026-11-16T22:01:57-05:00",
+      "closed": "2026-11-16T22:14:55-05:00",
+      "status": "done",
+      "ns_ok": true,
+      "pivot": false,
+      "reason": null,
+      "changed": 116
+    },
+    {
+      "nn": 8,
+      "role": "page-builder",
+      "loop": "gate:page",
+      "label": "fix-round-1",
+      "writes": [
+        "site"
+      ],
+      "exclude": [
+        "site/pool/*"
+      ],
+      "opened": "2026-11-16T22:15:39-05:00",
+      "closed": "2026-11-16T22:31:39-05:00",
+      "status": "done_with_concerns",
+      "ns_ok": true,
+      "pivot": false,
+      "reason": null,
+      "changed": 26
+    }
+  ],
+  "loops": {
+    "research": 1,
+    "checkpoint": 1,
+    "gate:page": 4,
+    "review:accuracy": 1,
+    "review:pedagogy-ux": 1
+  },
+  "gate_history": {
+    "gate:page": [
+      [],
+      [],
+      [],
+      [],
+      [],
+      [],
+      [],
+      []
+    ]
+  },
+  "noprogress": {}
+}

@@ -1,0 +1,79 @@
+    <!-- s-06 · Scaling down, and Morgan's bill · o-4 · claims c-05, c-09, c-10 · the two waits on the way down,
+         each "by default" · k-06 · gated on k-06: Fig. 06 (pooled renderer, FIGURES.after) and its paragraph,
+         Morgan and Ari, Fig. 07, why a fifth and what sets the floor (local-02), D5 (ac-11). The plan gates
+         Fig. 06 and one paragraph; the rest of the section is inside the gate too, because Fig. 07's node
+         band shows which node went back. -->
+    <section id="s-06" data-segment="s-06">
+      <h2 id="scaling-down"><span class="cp-sec">§ 06 </span>Scaling down, and Morgan’s bill</h2>
+      <p>The way down is slower than the way up, and it is slower on purpose. On the Friday of the push, orders began to ease at about seven. The HPA saw the reading fall straight away, but by default it lowers the number of copies only as far as the highest number it wanted at any moment in the last five minutes, so that a brief dip in orders doesn’t remove copies the next minute will need. <code>dispatch</code> started to come down at about 19:05 and was back at three copies by about 19:20.</p>
+      <p>Nodes come down more slowly still, because removing Pods doesn’t remove a node. The cluster autoscaler gives a node back only when three things hold, by default: the Pods on it reserve less than half of its room, every one of those Pods would fit on some other node, and both have stayed true for about ten minutes.</p>
+
+      <div class="cp-check" role="group" aria-labelledby="k-06-q" data-check="k-06">
+        <div class="cp-check__head"><span class="cp-chip">PREDICT</span><span class="cp-label">Check 06 / 08</span></div>
+        <p class="cp-check__q" id="k-06-q">By 19:20 the rush is over and <code>dispatch</code> is back at 3 copies. Node 07 is empty. Node 06 holds one small <code>catalog</code> Pod, which reserves 2 GB of the node’s 13 GB. Nodes 01, 02 and 04 each have 1 GB free. Which nodes does the cluster autoscaler give back?</p>
+        <ul class="cp-options">
+          <li><button type="button" class="cp-option" data-fb="Node 06 is nearly empty, but to give it back the loop needs somewhere to put its Pod. Node 07 doesn’t count, because it is being given back itself, and on the nodes that are staying, 3 GB free in three pieces of 1 GB can’t hold a Pod that reserves 2 GB (Chapter 5). Node 06 stays."><span class="cp-option__key">A</span><span>Both: node 07 is empty and node 06 nearly so, and neither is worth its rent.</span><span class="cp-option__tag"></span></button></li>
+          <li><button type="button" class="cp-option" data-fb="By default it doesn’t hold nodes for later: one it can do without goes back after about ten minutes. Keeping spare room for the next rush is a choice people make, and pay for. Here node 07 goes and node 06 stays."><span class="cp-option__key">B</span><span>Neither: the loop keeps the nodes it has in case the next rush needs them.</span><span class="cp-option__tag"></span></button></li>
+          <li><button type="button" class="cp-option" data-ok data-fb="Right. A node goes back only when every Pod on it fits somewhere else. Node 07 has none, so it goes after about ten minutes, by default. Node 06’s one Pod reserves 2 GB. No node that is staying has more than 1 GB free, and node 07 is being given back itself, so it can’t take the Pod."><span class="cp-option__key">C</span><span>Only node 07: the Pod on node 06 has no other node to go to.</span><span class="cp-option__tag"></span></button></li>
+        </ul>
+        <div class="cp-feedback" role="status" hidden></div>
+      </div>
+
+      <div class="cp-gate" data-gate="k-06">
+        <p class="cp-gate__lock">Answer the question above to see the nodes at 19:20</p>
+
+        <!-- f-06: one snapshot drawn by assets/page.js with the pooled renderCluster from
+             widgets/w-rush-scrolly/data.js (ClusterData.FIGURES.after), nodes only. The verdicts on nodes 01, 02
+             and 04 are for the catalog Pod on node 06. The data file's ariaLabel replaces this one when drawn. -->
+        <figure class="cp-fig d-wide" id="f-06" aria-labelledby="f-06-cap">
+          <div class="cp-fig__plate">
+            <div class="cp-fig__bar"><span class="cp-label">Fig. 06</span><span class="cp-label">Friday, about 19:20</span></div>
+            <div class="cp-blueprint cf">
+              <div class="cf__draw" data-cluster-figure="after" role="img" aria-label="Friday at about 19:20, five nodes. Nodes 01, 02 and 04 each have 1 GB free, too little for the catalog Pod on node 06, which reserves 2 GB. Node 07 is empty and is given back after about 10 minutes, so it can’t take that Pod. Node 06 holds only that Pod, which fits on no node that is staying, and stays."></div>
+            </div>
+          </div>
+          <figcaption id="f-06-cap"><span class="cp-label">Fig. 06</span><span>A node goes back only when every Pod on it has somewhere else to go, and a node that is going back itself doesn’t count. Node 06 is nearly empty and stays.</span></figcaption>
+        </figure>
+
+        <p>Node 07 went back to the provider at about 19:30, after two hours on the bill. Node 06 stayed, for the same reason it stayed in the week the loops were switched on: its one Pod reserves 2 GB, and no node that was staying had more than 1 GB free. Node 07 had the room, but it was on its way back to the provider, and the loop doesn’t count a node it is giving back as somewhere to put a Pod. Had there been room elsewhere, the loop would have emptied node 06 in the way Kubernetes always removes a Pod from a node, by deleting it and letting a replacement be placed on another node, as in Chapter 4. The test counts reservations again, not use, just as the loop did when it added a node.</p>
+        <p>Morgan, reading the bill, has a question.</p>
+        <blockquote class="cp-dialog">
+          <p><b>Morgan</b><span>“Orders drop by two-thirds on a Tuesday. Why doesn’t the bill?”</span></p>
+          <p><b>Ari</b><span>“Because we pay for nodes, and a node goes back only when everything on it fits somewhere else.”</span></p>
+        </blockquote>
+        <p>The figure below puts the week from the start of this chapter above the week of the push, on the same axis and the same scale.</p>
+
+        <!-- f-07: Fig. 01's chart twice, drawn by assets/page.js (data-week="before" and "after"), one time axis
+             and scale. After: copies at 3, and 9 on the push evening; four node rows and node 07 for two hours. -->
+        <figure class="cp-fig d-wide" id="f-07" aria-labelledby="f-07-cap">
+          <div class="cp-fig__plate">
+            <div class="cp-fig__bar"><span class="cp-label">Fig. 07</span><span class="cp-label">One week, before and after</span></div>
+            <div class="cp-blueprint">
+              <div class="wk__panel">
+                <div class="wk" data-week="before" role="img" aria-label="Before: one week of dispatch, Monday to Sunday. The work needs about 2 copies on most evenings and 6 at the Friday rush. Copies are a flat line at 6 all week. Five nodes are rented all week.">
+                  <p class="wk__head" aria-hidden="true">Before</p>
+                  <svg class="wk__svg" aria-hidden="true" focusable="false"></svg>
+                </div>
+              </div>
+              <div class="wk__panel">
+                <div class="wk" data-week="after" role="img" aria-label="After, the week of the push, on the same axis and scale. The work is the same through the week, about 2 copies on most evenings, and reaches 9 on the Friday evening of the push. Copies now follow the work: 3 all week, the minimum, and 9 for about two hours on the push evening. Four nodes are rented all week, and a fifth, node 07, for about two hours on Friday evening. Nodes went from 5 to 4, about a fifth less. On quiet evenings the work is a third of an ordinary Friday’s, and the nodes are the same 4.">
+                  <p class="wk__head" aria-hidden="true">After · the week of the push</p>
+                  <svg class="wk__svg" aria-hidden="true" focusable="false"></svg>
+                  <p class="wk__note" aria-hidden="true">Nodes: 5 → 4, about a fifth less</p>
+                  <p class="wk__note" aria-hidden="true">Quiet evenings: work is a third of Friday’s · nodes are the same 4</p>
+                </div>
+              </div>
+            </div>
+          </div>
+          <figcaption id="f-07-cap"><span class="cp-label">Fig. 07</span><span>The copies follow the work. The bill follows the nodes, which move in whole machines and only when one can be emptied.</span></figcaption>
+        </figure>
+
+        <p>Fennel went from five nodes to four, which is about a fifth fewer node-hours in a week, against work that falls by two-thirds on a quiet day. The copies do follow the work closely, but Fennel doesn’t pay for copies. It pays for nodes, and nodes come and go as whole machines. Underneath them sits a floor that no amount of quiet will lower: the minimums that people chose, the services that have no autoscaler at all, and every request, because a node full of padded reservations never looks empty to this loop. That is Chapter 5’s lesson about padding, with a second cost attached. A cluster with many more nodes than Fennel’s typically moves in finer steps, but its floor is made of the same things.</p>
+
+        <!-- D5 (c-10 note) -->
+        <details class="d-more cp-more">
+          <summary>What else stops a node being given back?</summary>
+          <div class="cp-more__body"><p>Several things, with default settings. A Pod that no loop would replace keeps its node, since removing it would lose it for good. So can a Pod that stores files on the node’s own disk, and so can a team’s rule limiting how many copies of a service may be down at once (these are called disruption budgets, and Chapter 14 comes back to them). Timing matters too: by default, no node is given back within about ten minutes of one being added.</p></div>
+        </details>
+      </div>
+    </section>

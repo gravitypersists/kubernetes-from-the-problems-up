@@ -1,0 +1,64 @@
+    <!-- s-01 · Year 3: six copies, all week · o-1 · claim c-04 · cast strip + D1 (CURRICULUM §2.11) before
+         k-01 (retrieval: what ended Chapter 5's hour-long wait: people) · then the scene: six copies and five
+         nodes all week for two hours of rush (Fig. 01), two decisions made by hand, Jordan and Ari (ac-01) -->
+    <section id="s-01" data-segment="s-01">
+      <h2 id="six-copies-all-week"><span class="cp-sec">§ 01 </span>Year 3: six copies, all week</h2>
+
+      <div class="cp-cast">
+        <p class="cp-label" id="cast-label">Cast</p>
+        <dl aria-labelledby="cast-label">
+        <dt>Jordan</dt><dd>Co-founder, managing the engineers: that’s you, in this story.</dd>
+        <dt>Ari</dt><dd>Platform lead. Runs Fennel’s cluster.</dd>
+        <dt>Morgan</dt><dd>Co-founder. Runs Fennel’s money.</dd>
+        <dt>Riley</dt><dd>An engineer on the <code>catalog</code> team.</dd>
+        <dt>Sam</dt><dd>The founding engineer.</dd>
+        </dl>
+      </div>
+
+      <!-- D1 -->
+      <details class="d-more cp-more">
+        <summary>I didn’t read the last chapter. What happened?</summary>
+        <div class="cp-more__body">
+          <ul>
+            <li>Fennel, a grocery-delivery company, runs its services on managed Kubernetes. Kubernetes keeps a record of what Fennel wants running, such as “3 copies of <code>dispatch</code>”, and many small loops each compare one part of that record with what is really running, and act when the two differ. To understand any loop, ask four things: which loop is it, what does it want (the desired state), what does it see (the real state), and what does it do when the two differ?</li>
+            <li>Chapter 5: each copy of a service runs in a Pod, and each Pod reserves memory and processor on a node, one of the rented machines in the cluster. Those reservations are its requests. The scheduler, the loop that gives each new Pod a node, places it by what it reserves, never by what it uses. A Pod with no room waits, and Fennel pays for every node it rents, busy or not.</li>
+            <li>Chapter 6: a Pod takes work only once it is ready, which means it has started and passed its readiness check.</li>
+            <li>Chapter 7: each service has a Service, a stable name and address in front of its Pods, whose list holds the Pods that are ready.</li>
+          </ul>
+        </div>
+      </details>
+
+      <div class="cp-check" role="group" aria-labelledby="k-01-q" data-check="k-01">
+        <div class="cp-check__head"><span class="cp-chip">RETRIEVE</span><span class="cp-label">Check 01 / 08</span></div>
+        <p class="cp-check__q" id="k-01-q">On a Friday in Chapter 5, the dispatch team raised <code>dispatch</code> from 3 copies to 6, and one of the new Pods waited, <code>Pending</code>, for about an hour because no node had room for it. What ended the wait?</p>
+        <ul class="cp-options">
+          <li><button type="button" class="cp-option" data-fb="The scheduler did keep trying, but it can’t make room, and it counts what Pods reserve, not how idle a node looks. The wait ended when Ari’s team rented nodes 05 and 06, about an hour in."><span class="cp-option__key">A</span><span>The scheduler, which kept retrying until the Pod fitted on a node that looked idle.</span><span class="cp-option__tag"></span></button></li>
+          <li><button type="button" class="cp-option" data-fb="None of the loops you’ve met so far can rent a node. That evening it took people: Ari’s team added nodes 05 and 06 about an hour in. This chapter adds the loop that was missing."><span class="cp-option__key">B</span><span>A loop in the control plane, which saw that the nodes were full and rented another.</span><span class="cp-option__tag"></span></button></li>
+          <li><button type="button" class="cp-option" data-ok data-fb="Right. Nothing in the cluster could add a node, so the Pod waited until Ari’s team rented nodes 05 and 06. Both have been on the bill ever since."><span class="cp-option__key">C</span><span>People on Ari’s team, who rented two more nodes by hand.</span><span class="cp-option__tag"></span></button></li>
+        </ul>
+        <div class="cp-feedback" role="status" hidden></div>
+      </div>
+
+      <p>That Friday left its mark on the cluster. <code>dispatch</code>, the service that assigns drivers to orders, has run six copies ever since, every hour of every day, although it needs six for only about two hours a week: between five and seven on a Friday evening, when Fennel’s orders triple. On an ordinary evening the work would keep about two copies busy. Nodes 05 and 06, rented in a hurry that evening, are still in the cluster too, which is how Morgan came to ask in Chapter 5 why Fennel pays for five nodes that are less than a third busy.</p>
+
+      <!-- f-01: a chart drawn by assets/page.js (CH08_WEEK, data-week="before") at the plate's width. Work = c1
+           line and soft area, in copies needed at the target; copies = stepped ink line, flat at 6; nodes = a
+           band of five rows. Labels at the line ends, no legend. -->
+      <figure class="cp-fig" id="f-01" aria-labelledby="f-01-cap">
+        <div class="cp-fig__plate">
+          <div class="cp-fig__bar"><span class="cp-label">Fig. 01</span><span class="cp-label">dispatch, one week</span></div>
+          <div class="cp-blueprint wk" data-week="before" role="img" aria-label="A chart of one week of dispatch, Monday to Sunday, before autoscaling. The work, measured in the copies it needs, stays low: about 2 copies on most evenings and less overnight, rising to 6 only at the Friday rush between five and seven. The number of copies running is a flat line at 6 all week, so most of the week the gap between the two is copies running but not needed. Under the chart, a band shows five nodes rented all week.">
+            <svg class="wk__svg" aria-hidden="true" focusable="false"></svg>
+            <noscript><p class="cs-noscript">This chart is drawn by JavaScript.</p></noscript>
+          </div>
+        </div>
+        <figcaption id="f-01-cap"><span class="cp-label">Fig. 01</span><span>Six copies and five nodes all week, for two hours of rush. The shape of the week is illustrative.</span></figcaption>
+      </figure>
+
+      <p>Nobody chose this waste on purpose. Two decisions sit behind it, and people make both of them by hand. How many copies of <code>dispatch</code> to run is the dispatch team’s decision, written as a number in <code>dispatch</code>’s Deployment. How many nodes to rent is a decision for Ari’s team. Each was made once, for the busiest hour of the week, and then left alone, because changing either one means somebody remembering to do it twice every Friday.</p>
+      <blockquote class="cp-dialog">
+        <p><b>Jordan</b><span>“Can’t the cluster add copies when it’s busy, and take them away when it isn’t?”</span></p>
+        <p><b>Ari</b><span>“It can. Two loops do it between them. Neither is as quick as you’d hope.”</span></p>
+      </blockquote>
+      <p>Each of those two decisions can be handed to a loop of its own. This chapter takes them one at a time, and then watches them work together on the worst evening they have had so far.</p>
+    </section>

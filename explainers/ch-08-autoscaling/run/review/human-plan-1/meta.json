@@ -1,0 +1,11 @@
+{
+  "target": "plan",
+  "round": 1,
+  "started": "2026-11-16T21:19:22-05:00",
+  "build": "sha256:58cec8fa641f663323f9eee3588489ceec2c09f178dd819596409600611f4812",
+  "snapshotted": "2026-11-16T21:19:22-05:00",
+  "ended": "2026-11-16T21:24:47-05:00",
+  "how": "submitted",
+  "submitted": true,
+  "count": 5
+}

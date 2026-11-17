@@ -1,0 +1,14 @@
+segments:
+  s-01   Year 3: six copies, all week
+  s-02   A loop that changes a number
+  s-03   A loop that rents machines
+  s-04   The Friday it took seven minutes
+  s-05   Buying back the minutes
+  s-06   Scaling down, and Morgan's bill
+  s-07   When more Pods don't help
+  s-08   The loops so far
+  s-09   The conversation
+objectives: 4 · segments: 9 · reader's time: 22 min
+widgets: w-rush-scrolly (low)
+checks: 8 · acceptance criteria: 16
+RESULT: PASS

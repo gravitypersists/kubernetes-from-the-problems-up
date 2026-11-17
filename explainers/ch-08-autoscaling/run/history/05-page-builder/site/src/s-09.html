@@ -1,0 +1,35 @@
+    <!-- s-09 · The conversation · o-2, o-3, o-4 · claims c-03, c-05, c-06, c-12 · the scene, k-08 (think, then
+         reveal; states its own question; the model answer interleaves the wait, the bottleneck, the limits and
+         the bill, and names m-11 once) · recap (ideas, not the story) · bridge to Chapter 9 -->
+    <section id="s-09" data-segment="s-09">
+      <h2 id="the-conversation"><span class="cp-sec">§ 09 </span>The conversation</h2>
+      <p>A few weeks later Fennel holds its holiday planning meeting. <code>dispatch</code> and <code>catalog</code> have autoscalers by now, but <code>storefront</code>, <code>payments</code> and <code>orders</code> do not, and Sam has a plan for that.</p>
+      <blockquote class="cp-quote"><p>“We’ll turn on autoscaling, so we’re ready for the holidays.”</p><cite>Sam</cite></blockquote>
+
+      <div class="cp-check" role="group" aria-labelledby="k-08-q" data-check="k-08" data-reveal>
+        <div class="cp-check__head"><span class="cp-chip cp-chip--apply">APPLY</span><span class="cp-label">Check 08 / 08 · think, then reveal</span></div>
+        <p class="cp-check__q" id="k-08-q">At the holiday planning meeting, Sam says: “We’ll turn on autoscaling, so we’re ready for the holidays.” <code>storefront</code>, <code>payments</code> and <code>orders</code> have no autoscaler yet. What would you ask, and why? Think of your questions, then show the answer.</p>
+        <button type="button" class="cp-reveal" aria-expanded="false" aria-controls="k-08-a">Show the answer</button>
+        <div class="cp-feedback" id="k-08-a" role="status" hidden>
+          <p><b>ANSWER</b>Two questions matter most.</p>
+          <p>“How fast do we scale, compared with how fast the traffic rises?” Fennel has measured its own answer: about a minute or two for copies that fit on room it already rents, and about seven when a node has to be added. A rush that builds over an hour is fine; one that arrives in two minutes, like the push, is not, so for the days Fennel can see coming, ask what the minimums and the spare room will be beforehand and who will raise them.</p>
+          <p>“What is the bottleneck after the app: the database, the payment provider?” More <code>payments</code> Pods don’t raise the number of calls the payment provider accepts, and more <code>storefront</code> or <code>orders</code> Pods lean on databases that have limits of their own, as <code>catalog</code> showed; <code>orders</code> running in more than one copy is a question in itself (Chapter 10).</p>
+          <p>Then the settings: “What are the target, the minimum and the maximum for each service, and the node pool’s maximum? Who chose them, and what happens when we reach one?” At a maximum the loops stop and Pods wait; the maximum is also the cap on what a bad day can cost.</p>
+          <p>Last, for Morgan: “What will the holidays cost, and what does it fall back to afterwards?” The bill follows nodes, and it comes down only as far as nodes can be emptied.</p>
+          <p>Sam’s sentence rests on a common belief, that autoscaling is instant and fixes any slowness. What you have seen instead is two loops that take minutes and act on one measurement each, so being ready is still something people plan.</p>
+        </div>
+      </div>
+
+      <div class="cp-recap">
+        <p class="cp-label">In short</p>
+        <ul>
+          <li>The HPA reads one measurement of a service’s Pods and rewrites the number of copies wanted, between a minimum and a maximum that people chose.</li>
+          <li>The cluster autoscaler adds a node when a Pod is waiting for room, never because nodes are busy, and a node pool sets which kind of machine it adds and how many at most.</li>
+          <li>Chained together, the two take minutes, and most of those minutes go on starting machines and Pods.</li>
+          <li>Every way of shortening that wait costs money or effort.</li>
+          <li>On the way down, a node goes back only when it can be emptied, so the bill follows nodes and has a floor.</li>
+          <li>More Pods help only when Pods are what’s short.</li>
+        </ul>
+        <p>A year on, Fennel has six teams and thirty services, and <code>payments</code> has to run in staging and in production with different settings and different keys. Where those settings and keys live, and who can read them, is Chapter 9.</p>
+      </div>
+    </section>

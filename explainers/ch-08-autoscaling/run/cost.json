@@ -1,0 +1,1098 @@
+{
+  "v": 1,
+  "generated": "2026-11-16T22:31:40-05:00",
+  "slug": "ch-08-autoscaling",
+  "stage": "review",
+  "weights": {
+    "input": 1,
+    "cache_write_5m": 1.25,
+    "cache_write_1h": 2,
+    "cache_read": 0.1,
+    "output": 5
+  },
+  "total_ieq": 10766852,
+  "by_stage": {
+    "Research": 780542,
+    "Plan": 1994600,
+    "Fixes (gate)": 3165571,
+    "Review": 2516234,
+    "Fixes (review)": 1052566,
+    "Orchestrator": 1257340
+  },
+  "causes": [
+    {
+      "key": "whole_reads",
+      "ieq": 1057897,
+      "count": 22,
+      "files": [
+        {
+          "path": "run/plan/learning-plan.md",
+          "count": 3,
+          "bytes": 97384,
+          "agents": 3
+        },
+        {
+          "path": "run/brief.md",
+          "count": 5,
+          "bytes": 24929,
+          "agents": 5
+        },
+        {
+          "path": "~/workspace/k8s-course/CURRICULUM.md",
+          "count": 1,
+          "bytes": 98202,
+          "agents": 1
+        }
+      ]
+    },
+    {
+      "key": "carried_history",
+      "ieq": 590136,
+      "continuations": 1,
+      "cold": 1,
+      "median_ctx": 232610,
+      "agents": [
+        "05 page-builder"
+      ]
+    },
+    {
+      "key": "images",
+      "ieq": 292499,
+      "count": 89,
+      "top": [
+        [
+          "07 pedagogy-ux-reviewer",
+          40
+        ],
+        [
+          "05 page-builder",
+          37
+        ]
+      ]
+    }
+  ],
+  "segments": [
+    {
+      "dispatch": null,
+      "role": "orchestrator",
+      "agent": "7404f825-b182-413d-baf2-38048fc65924",
+      "kind": "orchestrator",
+      "seq": 0,
+      "label": "orchestrator (main session)",
+      "stage": "Orchestrator",
+      "turns": 29,
+      "ts": "2026-11-17T01:45:50.490Z",
+      "ctx": {
+        "first": 108393,
+        "peak": 190503,
+        "last": 190503
+      },
+      "cold_start": false,
+      "tokens": {
+        "input": 72,
+        "cache_write_5m": 0,
+        "cache_write_1h": 89892,
+        "cache_read": 4356530,
+        "output": 38290
+      },
+      "ieq": 806959,
+      "images": 0,
+      "whole_reads": []
+    },
+    {
+      "dispatch": 1,
+      "role": "researcher",
+      "agent": "ad364d94372960f2a",
+      "kind": "spawn",
+      "seq": 0,
+      "label": "01 researcher",
+      "stage": "Research",
+      "turns": 35,
+      "ts": "2026-11-17T01:47:58.179Z",
+      "ctx": {
+        "first": 35009,
+        "peak": 163381,
+        "last": 163381
+      },
+      "cold_start": false,
+      "tokens": {
+        "input": 72,
+        "cache_write_5m": 163379,
+        "cache_write_1h": 0,
+        "cache_read": 3580417,
+        "output": 43641
+      },
+      "ieq": 780542,
+      "images": 0,
+      "whole_reads": [
+        {
+          "path": "run/brief.md",
+          "count": 1,
+          "bytes": 24929
+        },
+        {
+          "path": "run/handoffs/01-researcher.prompt.md",
+          "count": 1,
+          "bytes": 8208
+        },
+        {
+          "path": "~/workspace/k8s-course/.claude/skills/didactician/agents/researcher.md",
+          "count": 1,
+          "bytes": 4629
+        },
+        {
+          "path": "~/workspace/k8s-course/.claude/skills/didactician/templates/report.md",
+          "count": 1,
+          "bytes": 2327
+        },
+        {
+          "path": "~/workspace/k8s-course/.claude/skills/didactician/templates/research-formats.md",
+          "count": 1,
+          "bytes": 2966
+        }
+      ]
+    },
+    {
+      "dispatch": 2,
+      "role": "instructional-designer",
+      "agent": "a0239fc0979bac9ad",
+      "kind": "spawn",
+      "seq": 0,
+      "label": "02 instructional-designer",
+      "stage": "Plan",
+      "turns": 26,
+      "ts": "2026-11-17T01:55:40.248Z",
+      "ctx": {
+        "first": 35568,
+        "peak": 360994,
+        "last": 360994
+      },
+      "cold_start": false,
+      "tokens": {
+        "input": 54,
+        "cache_write_5m": 582985,
+        "cache_write_1h": 0,
+        "cache_read": 5660647,
+        "output": 139950
+      },
+      "ieq": 1994600,
+      "images": 0,
+      "whole_reads": [
+        {
+          "path": "run/brief.md",
+          "count": 1,
+          "bytes": 24929
+        },
+        {
+          "path": "run/handoffs/02-instructional-designer.prompt.md",
+          "count": 1,
+          "bytes": 9072
+        },
+        {
+          "path": "run/research/examples.md",
+          "count": 1,
+          "bytes": 7937
+        },
+        {
+          "path": "run/research/facts.md",
+          "count": 1,
+          "bytes": 20756
+        },
+        {
+          "path": "run/research/misconceptions.md",
+          "count": 1,
+          "bytes": 4410
+        },
+        {
+          "path": "run/research/parking-lot.md",
+          "count": 1,
+          "bytes": 3162
+        },
+        {
+          "path": "~/workspace/k8s-course/.claude/skills/didactician/agents/instructional-designer.md",
+          "count": 1,
+          "bytes": 8400
+        },
+        {
+          "path": "~/workspace/k8s-course/.claude/skills/didactician/references/cognitive-design-patterns.md",
+          "count": 1,
+          "bytes": 8495
+        },
+        {
+          "path": "~/workspace/k8s-course/.claude/skills/didactician/references/learning-science-patterns.md",
+          "count": 1,
+          "bytes": 13008
+        },
+        {
+          "path": "~/workspace/k8s-course/.claude/skills/didactician/references/ux-ui.md",
+          "count": 1,
+          "bytes": 10350
+        },
+        {
+          "path": "~/workspace/k8s-course/.claude/skills/didactician/scripts/check_plan.py",
+          "count": 1,
+          "bytes": 6887
+        },
+        {
+          "path": "~/workspace/k8s-course/.claude/skills/didactician/templates/learning-plan.md",
+          "count": 1,
+          "bytes": 3818
+        },
+        {
+          "path": "~/workspace/k8s-course/.claude/skills/didactician/templates/mockup.html",
+          "count": 1,
+          "bytes": 8599
+        },
+        {
+          "path": "~/workspace/k8s-course/.claude/skills/didactician/templates/report.md",
+          "count": 1,
+          "bytes": 2327
+        },
+        {
+          "path": "~/workspace/k8s-course/CURRICULUM.md",
+          "count": 1,
+          "bytes": 98202
+        },
+        {
+          "path": "~/workspace/k8s-course/explainers/_pool/README.md",
+          "count": 1,
+          "bytes": 26980
+        },
+        {
+          "path": "~/workspace/k8s-course/explainers/ch-05-scheduling/run/review/human-site-1/comments.md",
+          "count": 1,
+          "bytes": 18959
+        },
+        {
+          "path": "~/workspace/k8s-course/explainers/ch-05-scheduling/run/review/human-site-2/comments.md",
+          "count": 1,
+          "bytes": 271
+        }
+      ]
+    },
+    {
+      "dispatch": 4,
+      "role": "page-builder",
+      "agent": "a3e4809bf8b91206b",
+      "kind": "spawn",
+      "seq": 0,
+      "label": "04 page-builder",
+      "stage": "Fixes (gate)",
+      "turns": 36,
+      "ts": "2026-11-17T02:26:44.673Z",
+      "ctx": {
+        "first": 35564,
+        "peak": 405984,
+        "last": 405984
+      },
+      "cold_start": false,
+      "tokens": {
+        "input": 74,
+        "cache_write_5m": 405982,
+        "cache_write_1h": 0,
+        "cache_read": 10103643,
+        "output": 115469
+      },
+      "ieq": 2095261,
+      "images": 12,
+      "whole_reads": [
+        {
+          "path": "(a large tool output Claude Code saved to a file)",
+          "count": 1,
+          "bytes": 35254
+        },
+        {
+          "path": "run/brief.md",
+          "count": 1,
+          "bytes": 24929
+        },
+        {
+          "path": "run/handoffs/04-page-builder.prompt.md",
+          "count": 1,
+          "bytes": 9271
+        },
+        {
+          "path": "run/plan/learning-plan.md",
+          "count": 1,
+          "bytes": 97384
+        },
+        {
+          "path": "run/plan/mockup.html",
+          "count": 1,
+          "bytes": 48313
+        },
+        {
+          "path": "run/research/facts.md",
+          "count": 1,
+          "bytes": 20756
+        },
+        {
+          "path": "run/screenshots/probe/w1280-f02.png",
+          "count": 1,
+          "bytes": 0
+        },
+        {
+          "path": "run/screenshots/probe/w1280-f03.png",
+          "count": 1,
+          "bytes": 0
+        },
+        {
+          "path": "run/screenshots/probe/w1280-f04.png",
+          "count": 1,
+          "bytes": 0
+        },
+        {
+          "path": "run/screenshots/probe/w1280-f06.png",
+          "count": 1,
+          "bytes": 0
+        },
+        {
+          "path": "run/screenshots/probe/w1280-f07.png",
+          "count": 1,
+          "bytes": 0
+        },
+        {
+          "path": "run/screenshots/probe/w1280-f08.png",
+          "count": 1,
+          "bytes": 0
+        },
+        {
+          "path": "run/screenshots/probe/w1280-laneA4.png",
+          "count": 1,
+          "bytes": 0
+        },
+        {
+          "path": "run/screenshots/probe/w1280-laneA5.png",
+          "count": 1,
+          "bytes": 0
+        },
+        {
+          "path": "run/screenshots/probe/w360-f02.png",
+          "count": 1,
+          "bytes": 0
+        },
+        {
+          "path": "run/screenshots/probe/w360-f04.png",
+          "count": 1,
+          "bytes": 0
+        },
+        {
+          "path": "run/screenshots/probe/w360-f07.png",
+          "count": 1,
+          "bytes": 0
+        },
+        {
+          "path": "run/screenshots/probe/w360-laneA4.png",
+          "count": 1,
+          "bytes": 0
+        },
+        {
+          "path": "~/workspace/k8s-course/.claude/skills/didactician/agents/page-builder.md",
+          "count": 1,
+          "bytes": 9359
+        },
+        {
+          "path": "~/workspace/k8s-course/design/control-plane/README.md",
+          "count": 1,
+          "bytes": 5976
+        },
+        {
+          "path": "~/workspace/k8s-course/explainers/_pool/README.md",
+          "count": 1,
+          "bytes": 26980
+        },
+        {
+          "path": "~/workspace/k8s-course/explainers/_pool/cluster/lanes.js",
+          "count": 1,
+          "bytes": 15306
+        },
+        {
+          "path": "~/workspace/k8s-course/explainers/ch-05-scheduling/site/assets/page.css",
+          "count": 1,
+          "bytes": 40552
+        },
+        {
+          "path": "~/workspace/k8s-course/explainers/ch-05-scheduling/site/assets/page.js",
+          "count": 1,
+          "bytes": 25004
+        },
+        {
+          "path": "~/workspace/k8s-course/explainers/ch-05-scheduling/site/index.html",
+          "count": 1,
+          "bytes": 83011
+        }
+      ]
+    },
+    {
+      "dispatch": null,
+      "role": "orchestrator",
+      "agent": "cef23e4d-0247-4e4a-a7c4-2eb189d4a196",
+      "kind": "orchestrator",
+      "seq": 0,
+      "label": "orchestrator (main session)",
+      "stage": "Orchestrator",
+      "turns": 21,
+      "ts": "2026-11-17T02:46:25.638Z",
+      "ctx": {
+        "first": 56396,
+        "peak": 123429,
+        "last": 123429
+      },
+      "cold_start": false,
+      "tokens": {
+        "input": 52,
+        "cache_write_5m": 0,
+        "cache_write_1h": 76194,
+        "cache_read": 1808760,
+        "output": 23413
+      },
+      "ieq": 450381,
+      "images": 0,
+      "whole_reads": []
+    },
+    {
+      "dispatch": 5,
+      "role": "page-builder",
+      "agent": "a8cd43f00401e803f",
+      "kind": "spawn",
+      "seq": 0,
+      "label": "05 page-builder",
+      "stage": "Fixes (gate)",
+      "turns": 36,
+      "ts": "2026-11-17T02:47:01.496Z",
+      "ctx": {
+        "first": 32564,
+        "peak": 229967,
+        "last": 229967
+      },
+      "cold_start": false,
+      "tokens": {
+        "input": 72,
+        "cache_write_5m": 229965,
+        "cache_write_1h": 0,
+        "cache_read": 6058366,
+        "output": 35389
+      },
+      "ieq": 1070310,
+      "images": 25,
+      "whole_reads": [
+        {
+          "path": "/private/tmp/claude-501/-Users-m-workspace-k8s-course/cef23e4d-0247-4e4a-a7c4-2eb189d4a196/scratchpad/shots/1280-dark-f-07.png",
+          "count": 1,
+          "bytes": 0
+        },
+        {
+          "path": "/private/tmp/claude-501/-Users-m-workspace-k8s-course/cef23e4d-0247-4e4a-a7c4-2eb189d4a196/scratchpad/shots/1280-dark-f-09.png",
+          "count": 1,
+          "bytes": 0
+        },
+        {
+          "path": "/private/tmp/claude-501/-Users-m-workspace-k8s-course/cef23e4d-0247-4e4a-a7c4-2eb189d4a196/scratchpad/shots/1280-dark-laneA4.png",
+          "count": 1,
+          "bytes": 0
+        },
+        {
+          "path": "/private/tmp/claude-501/-Users-m-workspace-k8s-course/cef23e4d-0247-4e4a-a7c4-2eb189d4a196/scratchpad/shots/1280-light-f-01.png",
+          "count": 1,
+          "bytes": 0
+        },
+        {
+          "path": "/private/tmp/claude-501/-Users-m-workspace-k8s-course/cef23e4d-0247-4e4a-a7c4-2eb189d4a196/scratchpad/shots/1280-light-f-02.png",
+          "count": 1,
+          "bytes": 0
+        },
+        {
+          "path": "/private/tmp/claude-501/-Users-m-workspace-k8s-course/cef23e4d-0247-4e4a-a7c4-2eb189d4a196/scratchpad/shots/1280-light-f-03.png",
+          "count": 1,
+          "bytes": 0
+        },
+        {
+          "path": "/private/tmp/claude-501/-Users-m-workspace-k8s-course/cef23e4d-0247-4e4a-a7c4-2eb189d4a196/scratchpad/shots/1280-light-f-04.png",
+          "count": 1,
+          "bytes": 0
+        },
+        {
+          "path": "/private/tmp/claude-501/-Users-m-workspace-k8s-course/cef23e4d-0247-4e4a-a7c4-2eb189d4a196/scratchpad/shots/1280-light-f-05.png",
+          "count": 1,
+          "bytes": 0
+        },
+        {
+          "path": "/private/tmp/claude-501/-Users-m-workspace-k8s-course/cef23e4d-0247-4e4a-a7c4-2eb189d4a196/scratchpad/shots/1280-light-f-06.png",
+          "count": 1,
+          "bytes": 0
+        },
+        {
+          "path": "/private/tmp/claude-501/-Users-m-workspace-k8s-course/cef23e4d-0247-4e4a-a7c4-2eb189d4a196/scratchpad/shots/1280-light-f-07.png",
+          "count": 1,
+          "bytes": 0
+        },
+        {
+          "path": "/private/tmp/claude-501/-Users-m-workspace-k8s-course/cef23e4d-0247-4e4a-a7c4-2eb189d4a196/scratchpad/shots/1280-light-f-08.png",
+          "count": 1,
+          "bytes": 0
+        },
+        {
+          "path": "/private/tmp/claude-501/-Users-m-workspace-k8s-course/cef23e4d-0247-4e4a-a7c4-2eb189d4a196/scratchpad/shots/1280-light-laneA3.png",
+          "count": 1,
+          "bytes": 0
+        },
+        {
+          "path": "/private/tmp/claude-501/-Users-m-workspace-k8s-course/cef23e4d-0247-4e4a-a7c4-2eb189d4a196/scratchpad/shots/1280-light-laneA4.png",
+          "count": 1,
+          "bytes": 0
+        },
+        {
+          "path": "/private/tmp/claude-501/-Users-m-workspace-k8s-course/cef23e4d-0247-4e4a-a7c4-2eb189d4a196/scratchpad/shots/1280-light-laneA5.png",
+          "count": 1,
+          "bytes": 0
+        },
+        {
+          "path": "/private/tmp/claude-501/-Users-m-workspace-k8s-course/cef23e4d-0247-4e4a-a7c4-2eb189d4a196/scratchpad/shots/360-dark-f-08.png",
+          "count": 1,
+          "bytes": 0
+        },
+        {
+          "path": "/private/tmp/claude-501/-Users-m-workspace-k8s-course/cef23e4d-0247-4e4a-a7c4-2eb189d4a196/scratchpad/shots/360-dark-hero.png",
+          "count": 1,
+          "bytes": 0
+        },
+        {
+          "path": "/private/tmp/claude-501/-Users-m-workspace-k8s-course/cef23e4d-0247-4e4a-a7c4-2eb189d4a196/scratchpad/shots/360-light-f-02.png",
+          "count": 1,
+          "bytes": 0
+        },
+        {
+          "path": "/private/tmp/claude-501/-Users-m-workspace-k8s-course/cef23e4d-0247-4e4a-a7c4-2eb189d4a196/scratchpad/shots/360-light-f-03.png",
+          "count": 1,
+          "bytes": 0
+        },
+        {
+          "path": "/private/tmp/claude-501/-Users-m-workspace-k8s-course/cef23e4d-0247-4e4a-a7c4-2eb189d4a196/scratchpad/shots/360-light-f-04.png",
+          "count": 1,
+          "bytes": 0
+        },
+        {
+          "path": "/private/tmp/claude-501/-Users-m-workspace-k8s-course/cef23e4d-0247-4e4a-a7c4-2eb189d4a196/scratchpad/shots/360-light-f-05.png",
+          "count": 1,
+          "bytes": 0
+        },
+        {
+          "path": "/private/tmp/claude-501/-Users-m-workspace-k8s-course/cef23e4d-0247-4e4a-a7c4-2eb189d4a196/scratchpad/shots/360-light-f-06.png",
+          "count": 1,
+          "bytes": 0
+        },
+        {
+          "path": "/private/tmp/claude-501/-Users-m-workspace-k8s-course/cef23e4d-0247-4e4a-a7c4-2eb189d4a196/scratchpad/shots/360-light-f-07.png",
+          "count": 1,
+          "bytes": 0
+        },
+        {
+          "path": "/private/tmp/claude-501/-Users-m-workspace-k8s-course/cef23e4d-0247-4e4a-a7c4-2eb189d4a196/scratchpad/shots/360-light-laneA4-locked.png",
+          "count": 1,
+          "bytes": 91
+        },
+        {
+          "path": "/private/tmp/claude-501/-Users-m-workspace-k8s-course/cef23e4d-0247-4e4a-a7c4-2eb189d4a196/scratchpad/shots/360-light-laneA4.png",
+          "count": 1,
+          "bytes": 0
+        },
+        {
+          "path": "/private/tmp/claude-501/-Users-m-workspace-k8s-course/cef23e4d-0247-4e4a-a7c4-2eb189d4a196/scratchpad/shots/v2-1280-A4.png",
+          "count": 1,
+          "bytes": 0
+        },
+        {
+          "path": "/private/tmp/claude-501/-Users-m-workspace-k8s-course/cef23e4d-0247-4e4a-a7c4-2eb189d4a196/scratchpad/shots/v2-360-A4.png",
+          "count": 1,
+          "bytes": 0
+        },
+        {
+          "path": "run/handoffs/05-page-builder.prompt.md",
+          "count": 1,
+          "bytes": 11856
+        },
+        {
+          "path": "run/plan/learning-plan.md",
+          "count": 1,
+          "bytes": 97384
+        },
+        {
+          "path": "run/research/facts.md",
+          "count": 1,
+          "bytes": 20756
+        },
+        {
+          "path": "site/assets/page.js",
+          "count": 1,
+          "bytes": 25631
+        },
+        {
+          "path": "site/src/PROGRESS.md",
+          "count": 1,
+          "bytes": 8538
+        },
+        {
+          "path": "site/src/s-01.html",
+          "count": 1,
+          "bytes": 7439
+        },
+        {
+          "path": "site/src/s-02.html",
+          "count": 1,
+          "bytes": 13941
+        },
+        {
+          "path": "site/src/s-03.html",
+          "count": 1,
+          "bytes": 11817
+        },
+        {
+          "path": "site/src/s-04.html",
+          "count": 1,
+          "bytes": 17604
+        },
+        {
+          "path": "site/src/s-05.html",
+          "count": 1,
+          "bytes": 7231
+        },
+        {
+          "path": "site/src/s-06.html",
+          "count": 1,
+          "bytes": 9901
+        },
+        {
+          "path": "site/src/s-07.html",
+          "count": 1,
+          "bytes": 12535
+        },
+        {
+          "path": "site/src/s-08.html",
+          "count": 1,
+          "bytes": 1802
+        },
+        {
+          "path": "site/src/s-09.html",
+          "count": 1,
+          "bytes": 4544
+        },
+        {
+          "path": "site/src/shell.html",
+          "count": 1,
+          "bytes": 6808
+        },
+        {
+          "path": "site/widgets/w-rush-scrolly/data.js",
+          "count": 1,
+          "bytes": 18896
+        },
+        {
+          "path": "~/workspace/k8s-course/.claude/skills/didactician/agents/page-builder.md",
+          "count": 1,
+          "bytes": 9359
+        }
+      ]
+    },
+    {
+      "dispatch": 6,
+      "role": "accuracy-reviewer",
+      "agent": "a8833b3f4c05a6abe",
+      "kind": "spawn",
+      "seq": 0,
+      "label": "06 accuracy-reviewer",
+      "stage": "Review",
+      "turns": 21,
+      "ts": "2026-11-17T03:02:50.569Z",
+      "ctx": {
+        "first": 32602,
+        "peak": 181401,
+        "last": 181401
+      },
+      "cold_start": false,
+      "tokens": {
+        "input": 44,
+        "cache_write_5m": 181399,
+        "cache_write_1h": 0,
+        "cache_read": 2289768,
+        "output": 41548
+      },
+      "ieq": 663510,
+      "images": 0,
+      "whole_reads": [
+        {
+          "path": "run/brief.md",
+          "count": 1,
+          "bytes": 24929
+        },
+        {
+          "path": "run/handoffs/06-accuracy-reviewer.prompt.md",
+          "count": 1,
+          "bytes": 8583
+        },
+        {
+          "path": "run/research/facts.md",
+          "count": 1,
+          "bytes": 20756
+        },
+        {
+          "path": "~/workspace/k8s-course/.claude/skills/didactician/agents/accuracy-reviewer.md",
+          "count": 1,
+          "bytes": 4625
+        },
+        {
+          "path": "~/workspace/k8s-course/.claude/skills/didactician/templates/review.md",
+          "count": 1,
+          "bytes": 1520
+        }
+      ]
+    },
+    {
+      "dispatch": 7,
+      "role": "pedagogy-ux-reviewer",
+      "agent": "aaa9cc3dc1a01f6a3",
+      "kind": "spawn",
+      "seq": 0,
+      "label": "07 pedagogy-ux-reviewer",
+      "stage": "Review",
+      "turns": 64,
+      "ts": "2026-11-17T03:02:50.573Z",
+      "ctx": {
+        "first": 32610,
+        "peak": 274180,
+        "last": 274180
+      },
+      "cold_start": false,
+      "tokens": {
+        "input": 128,
+        "cache_write_5m": 274178,
+        "cache_write_1h": 0,
+        "cache_read": 11508037,
+        "output": 71814
+      },
+      "ieq": 1852724,
+      "images": 40,
+      "whole_reads": [
+        {
+          "path": "/private/tmp/claude-501/-Users-m-workspace-k8s-course/cef23e4d-0247-4e4a-a7c4-2eb189d4a196/scratchpad/f09-bot.png",
+          "count": 1,
+          "bytes": 0
+        },
+        {
+          "path": "run/brief.md",
+          "count": 1,
+          "bytes": 24929
+        },
+        {
+          "path": "run/handoffs/07-pedagogy-ux-reviewer.prompt.md",
+          "count": 1,
+          "bytes": 8536
+        },
+        {
+          "path": "run/plan/learning-plan.md",
+          "count": 1,
+          "bytes": 47103
+        },
+        {
+          "path": "run/screenshots/probe/ped-r1-dark-w1280-f-02.png",
+          "count": 1,
+          "bytes": 0
+        },
+        {
+          "path": "run/screenshots/probe/ped-r1-dark-w1280-f-04.png",
+          "count": 1,
+          "bytes": 0
+        },
+        {
+          "path": "run/screenshots/probe/ped-r1-dark-w1280-f-07.png",
+          "count": 1,
+          "bytes": 0
+        },
+        {
+          "path": "run/screenshots/probe/ped-r1-dark-w1280-laneA4.png",
+          "count": 1,
+          "bytes": 0
+        },
+        {
+          "path": "run/screenshots/probe/ped-r1-focus-option.png",
+          "count": 1,
+          "bytes": 0
+        },
+        {
+          "path": "run/screenshots/probe/ped-r1-lane-w1280-A1-pre.png",
+          "count": 1,
+          "bytes": 0
+        },
+        {
+          "path": "run/screenshots/probe/ped-r1-lane-w1280-A3-check.png",
+          "count": 1,
+          "bytes": 0
+        },
+        {
+          "path": "run/screenshots/probe/ped-r1-lane-w1280-A3-pre.png",
+          "count": 1,
+          "bytes": 0
+        },
+        {
+          "path": "run/screenshots/probe/ped-r1-lane-w1280-A4-pre.png",
+          "count": 1,
+          "bytes": 0
+        },
+        {
+          "path": "run/screenshots/probe/ped-r1-lane-w1280-A5-pre.png",
+          "count": 1,
+          "bytes": 0
+        },
+        {
+          "path": "run/screenshots/probe/ped-r1-lane-w1280-A6-pre.png",
+          "count": 1,
+          "bytes": 0
+        },
+        {
+          "path": "run/screenshots/probe/ped-r1-lane-w1280-start.png",
+          "count": 1,
+          "bytes": 0
+        },
+        {
+          "path": "run/screenshots/probe/ped-r1-lane-w360h640-A2-pre.png",
+          "count": 1,
+          "bytes": 0
+        },
+        {
+          "path": "run/screenshots/probe/ped-r1-lane-w360h640-A4-pre.png",
+          "count": 1,
+          "bytes": 0
+        },
+        {
+          "path": "run/screenshots/probe/ped-r1-lane-w768-A2-pre.png",
+          "count": 1,
+          "bytes": 0
+        },
+        {
+          "path": "run/screenshots/probe/ped-r1-lane-w768-A4-locked.png",
+          "count": 1,
+          "bytes": 0
+        },
+        {
+          "path": "run/screenshots/probe/ped-r1-lane-w768-A5-pre.png",
+          "count": 1,
+          "bytes": 0
+        },
+        {
+          "path": "run/screenshots/probe/ped-r1-w1280-f-04.png",
+          "count": 1,
+          "bytes": 0
+        },
+        {
+          "path": "run/screenshots/probe/ped-r1-w1280-f01.png",
+          "count": 1,
+          "bytes": 0
+        },
+        {
+          "path": "run/screenshots/probe/ped-r1-w1280-f02.png",
+          "count": 1,
+          "bytes": 0
+        },
+        {
+          "path": "run/screenshots/probe/ped-r1-w1280-f03.png",
+          "count": 1,
+          "bytes": 0
+        },
+        {
+          "path": "run/screenshots/probe/ped-r1-w1280-f05.png",
+          "count": 1,
+          "bytes": 0
+        },
+        {
+          "path": "run/screenshots/probe/ped-r1-w1280-f06.png",
+          "count": 1,
+          "bytes": 0
+        },
+        {
+          "path": "run/screenshots/probe/ped-r1-w1280-f07.png",
+          "count": 1,
+          "bytes": 0
+        },
+        {
+          "path": "run/screenshots/probe/ped-r1-w1280-f08.png",
+          "count": 1,
+          "bytes": 0
+        },
+        {
+          "path": "run/screenshots/probe/ped-r1-w1280-f09.png",
+          "count": 1,
+          "bytes": 0
+        },
+        {
+          "path": "run/screenshots/probe/ped-r1-w1280-k01-wrong.png",
+          "count": 1,
+          "bytes": 0
+        },
+        {
+          "path": "run/screenshots/probe/ped-r1-w1280-s03-locked.png",
+          "count": 1,
+          "bytes": 0
+        },
+        {
+          "path": "run/screenshots/probe/ped-r1-w1280-s06-locked.png",
+          "count": 1,
+          "bytes": 0
+        },
+        {
+          "path": "run/screenshots/probe/ped-r1-w1280-s09-after.png",
+          "count": 1,
+          "bytes": 0
+        },
+        {
+          "path": "run/screenshots/probe/ped-r1-w1280-top.png",
+          "count": 1,
+          "bytes": 0
+        },
+        {
+          "path": "run/screenshots/probe/ped-r1-w360-f-01.png",
+          "count": 1,
+          "bytes": 0
+        },
+        {
+          "path": "run/screenshots/probe/ped-r1-w360-f-04.png",
+          "count": 1,
+          "bytes": 0
+        },
+        {
+          "path": "run/screenshots/probe/ped-r1-w360-f-06.png",
+          "count": 1,
+          "bytes": 0
+        },
+        {
+          "path": "run/screenshots/probe/ped-r1-w360-f-07.png",
+          "count": 1,
+          "bytes": 0
+        },
+        {
+          "path": "run/screenshots/probe/ped-r1-w360-f-08.png",
+          "count": 1,
+          "bytes": 0
+        },
+        {
+          "path": "run/screenshots/probe/ped-r1-w360-step-A3.png",
+          "count": 1,
+          "bytes": 0
+        },
+        {
+          "path": "run/screenshots/probe/ped-r1-w360-step-A4.png",
+          "count": 1,
+          "bytes": 0
+        },
+        {
+          "path": "run/screenshots/probe/ped-r1-w360-toc-open.png",
+          "count": 1,
+          "bytes": 0
+        },
+        {
+          "path": "~/workspace/k8s-course/.claude/skills/didactician/agents/pedagogy-ux-reviewer.md",
+          "count": 1,
+          "bytes": 5890
+        }
+      ]
+    },
+    {
+      "dispatch": 8,
+      "role": "page-builder",
+      "agent": "a8cd43f00401e803f",
+      "kind": "continue",
+      "seq": 1,
+      "label": "08 page-builder",
+      "stage": "Fixes (review)",
+      "turns": 18,
+      "ts": "2026-11-17T03:15:44.443Z",
+      "ctx": {
+        "first": 232610,
+        "peak": 310519,
+        "last": 310519
+      },
+      "cold_start": true,
+      "tokens": {
+        "input": 40,
+        "cache_write_5m": 310515,
+        "cache_write_1h": 0,
+        "cache_read": 4737668,
+        "output": 38123
+      },
+      "ieq": 1052566,
+      "images": 12,
+      "whole_reads": [
+        {
+          "path": "/private/tmp/claude-501/-Users-m-workspace-k8s-course/cef23e4d-0247-4e4a-a7c4-2eb189d4a196/scratchpad/shots/1280-dark-f-02.png",
+          "count": 1,
+          "bytes": 0
+        },
+        {
+          "path": "/private/tmp/claude-501/-Users-m-workspace-k8s-course/cef23e4d-0247-4e4a-a7c4-2eb189d4a196/scratchpad/shots/1280-light-f-04.png",
+          "count": 1,
+          "bytes": 0
+        },
+        {
+          "path": "/private/tmp/claude-501/-Users-m-workspace-k8s-course/cef23e4d-0247-4e4a-a7c4-2eb189d4a196/scratchpad/shots/1280-light-f-06.png",
+          "count": 1,
+          "bytes": 0
+        },
+        {
+          "path": "/private/tmp/claude-501/-Users-m-workspace-k8s-course/cef23e4d-0247-4e4a-a7c4-2eb189d4a196/scratchpad/shots/1280-light-f-07.png",
+          "count": 1,
+          "bytes": 0
+        },
+        {
+          "path": "/private/tmp/claude-501/-Users-m-workspace-k8s-course/cef23e4d-0247-4e4a-a7c4-2eb189d4a196/scratchpad/shots/1280-light-laneA4.png",
+          "count": 1,
+          "bytes": 0
+        },
+        {
+          "path": "/private/tmp/claude-501/-Users-m-workspace-k8s-course/cef23e4d-0247-4e4a-a7c4-2eb189d4a196/scratchpad/shots/360-dark-f-04.png",
+          "count": 1,
+          "bytes": 0
+        },
+        {
+          "path": "/private/tmp/claude-501/-Users-m-workspace-k8s-course/cef23e4d-0247-4e4a-a7c4-2eb189d4a196/scratchpad/shots/360-dark-f-07.png",
+          "count": 1,
+          "bytes": 0
+        },
+        {
+          "path": "/private/tmp/claude-501/-Users-m-workspace-k8s-course/cef23e4d-0247-4e4a-a7c4-2eb189d4a196/scratchpad/shots/360-light-f-04.png",
+          "count": 1,
+          "bytes": 0
+        },
+        {
+          "path": "/private/tmp/claude-501/-Users-m-workspace-k8s-course/cef23e4d-0247-4e4a-a7c4-2eb189d4a196/scratchpad/shots/360-light-f-06.png",
+          "count": 1,
+          "bytes": 0
+        },
+        {
+          "path": "/private/tmp/claude-501/-Users-m-workspace-k8s-course/cef23e4d-0247-4e4a-a7c4-2eb189d4a196/scratchpad/shots/360-light-f-09.png",
+          "count": 1,
+          "bytes": 0
+        },
+        {
+          "path": "/private/tmp/claude-501/-Users-m-workspace-k8s-course/cef23e4d-0247-4e4a-a7c4-2eb189d4a196/scratchpad/shots/360-light-laneA4.png",
+          "count": 1,
+          "bytes": 0
+        },
+        {
+          "path": "/private/tmp/claude-501/-Users-m-workspace-k8s-course/cef23e4d-0247-4e4a-a7c4-2eb189d4a196/scratchpad/shots/768-light-laneA4.png",
+          "count": 1,
+          "bytes": 0
+        },
+        {
+          "path": "run/handoffs/08-page-builder.prompt.md",
+          "count": 1,
+          "bytes": 8648
+        },
+        {
+          "path": "run/review/round-1/findings.md",
+          "count": 1,
+          "bytes": 26191
+        }
+      ]
+    }
+  ],
+  "missing_dispatches": [],
+  "notes": []
+}

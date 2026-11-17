@@ -1,0 +1,66 @@
+    <!-- s-05 · Buying back the wait · o-2 · claims c-01, c-03, c-07, c-11 · one lead-in sentence, Fig. 05 (each
+         remedy with the wait it shortens, marked as in Fig. 04, and what it costs), k-05, what Fennel changed,
+         the staffing-rule aside with its breaks line (ac-10, ac-15). The plan's title, "Buying back the
+         minutes", is reworded because the rail shows it before k-04 is answered. -->
+    <section id="s-05" data-segment="s-05">
+      <h2 id="buying-back-the-wait"><span class="cp-sec">§ 05 </span>Buying back the wait</h2>
+      <p>None of those waits can be removed, but each of them can be paid down, and the table below shows that every payment is made in a different currency.</p>
+
+      <!-- f-05: a static table (cards under 600px). The middle column names the wait with Fig. 04's mark. -->
+      <figure class="cp-fig d-wide" id="f-05" aria-labelledby="f-05-cap">
+        <div class="cp-fig__plate">
+          <div class="cp-fig__bar"><span class="cp-label">Fig. 05</span><span class="cp-label">What teams do about the wait</span></div>
+          <div class="cp-blueprint rm">
+            <table>
+              <thead><tr><th scope="col">What</th><th scope="col">Which wait it shortens</th><th scope="col">What it costs</th></tr></thead>
+              <tbody>
+                <tr>
+                  <th scope="row">Raise the minimum before a rush you know about<span>by hand, or with a scheduled job</span></th>
+                  <td data-label="Which wait it shortens"><span class="rm__w"><span class="wm wm--read"></span><span class="wm wm--pod"></span><span class="wm wm--node"></span>All of them</span>The copies, and the nodes under them, are there before the work arrives.</td>
+                  <td data-label="What it costs">You pay for those copies and nodes for those hours, and someone has to know the rush is coming.</td>
+                </tr>
+                <tr>
+                  <th scope="row">Keep spare room ready<span>with placeholder Pods that real Pods can push out</span></th>
+                  <td data-label="Which wait it shortens"><span class="rm__w"><span class="wm wm--node"></span>Node starts</span>New Pods take the placeholders’ room at once, with no wait for a machine.</td>
+                  <td data-label="What it costs">A node’s rent all week, for room that is usually empty.</td>
+                </tr>
+                <tr>
+                  <th scope="row">Lower the target<span>say, from 60% to 45%</span></th>
+                  <td data-label="Which wait it shortens"><span class="rm__w"><span class="wm wm--read"></span>Reading climbs</span>The reading reaches the target sooner, and every copy has more slack while the others start.</td>
+                  <td data-label="What it costs">More copies, and so more nodes, at every hour of the week.</td>
+                </tr>
+                <tr>
+                  <th scope="row">Make Pods start faster<span>a smaller image, a quicker start</span></th>
+                  <td data-label="Which wait it shortens"><span class="rm__w"><span class="wm wm--pod"></span>Pod starts</span>On old nodes and new ones alike.</td>
+                  <td data-label="What it costs">Engineering time, not rent.</td>
+                </tr>
+                <tr>
+                  <th scope="row">Use a faster way of adding nodes</th>
+                  <td data-label="Which wait it shortens"><span class="rm__w"><span class="wm wm--node"></span>Node starts</span>One provider, AWS, says nodes in its newer mode are typically ready in under 25 seconds (its own figure, June 2026).</td>
+                  <td data-label="What it costs">A migration, and a different tool to run.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+        <figcaption id="f-05-cap"><span class="cp-label">Fig. 05</span><span>Each remedy shortens a different wait and is paid for differently. None of them makes the wait disappear for nothing.</span></figcaption>
+      </figure>
+
+      <div class="cp-check" role="group" aria-labelledby="k-05-q" data-check="k-05">
+        <div class="cp-check__head"><span class="cp-chip cp-chip--apply">APPLY</span><span class="cp-label">Check 05 / 08</span></div>
+        <p class="cp-check__q" id="k-05-q">Fennel plans a TV advert for next Friday at 19:00, and expects a rush like the push’s within a minute or two. Which change gets <code>dispatch</code> ready for 19:00 at the lowest cost?</p>
+        <ul class="cp-options">
+          <li><button type="button" class="cp-option" data-fb="The maximum wasn’t what held `dispatch` back: it needed 9 and was allowed 10. A higher maximum changes how far the autoscaler may go, not how soon the copies are ready."><span class="cp-option__key">A</span><span>Raise the maximum from 10 copies to 20, so the autoscaler has room to go higher.</span><span class="cp-option__tag"></span></button></li>
+          <li><button type="button" class="cp-option" data-ok data-fb="Right. The nine copies, and the node under three of them, are ready before the advert runs, and Fennel pays for them for an evening instead of all week. It works only because someone knows the advert is coming."><span class="cp-option__key">B</span><span>Raise the minimum to 9 at 18:45 for that evening, then put it back.</span><span class="cp-option__tag"></span></button></li>
+          <li><button type="button" class="cp-option" data-fb="It would help: more copies at every moment means less of a jump. But Fennel would pay for those copies, and the nodes under them, every hour of every week to cover one evening."><span class="cp-option__key">C</span><span>Lower the target from 60% to 30% from now on, so <code>dispatch</code> always has copies to spare.</span><span class="cp-option__tag"></span></button></li>
+        </ul>
+        <div class="cp-feedback" role="status" hidden></div>
+      </div>
+
+      <p>Fennel chose the first row. Marketing now gives Ari’s team a day’s notice of any push, and <code>dispatch</code>’s minimum is raised for the hour around it and lowered again afterwards. Of everything in the table, the cheapest fix turned out to be a conversation between two teams.</p>
+
+      <div class="cp-aside">
+        <p><b>ANALOGY</b>A staffing rule, and where it breaks. Think of the HPA as a standing rule for a support team: keep everyone about 60% busy, with never fewer than three people on shift and never more than ten. Each person called in needs a desk, as each new Pod needs room on a node. When the office is full, someone has to rent more space, which takes far longer than calling a person in, and that slower job is the cluster autoscaler’s.</p>
+        <p class="cp-breaks"><b>WHERE THIS ANALOGY BREAKS</b>A manager would have known the push was coming, and would notice if the team were slow because everyone was waiting on the same broken tool. The loop knows one number and has no judgment. And Pods are identical and disposable, which people are not.</p>
+      </div>
+    </section>

@@ -1,0 +1,41 @@
+{
+  "shell": "src/shell.html",
+  "segments": [
+    {
+      "id": "s-01",
+      "file": "src/s-01.html"
+    },
+    {
+      "id": "s-02",
+      "file": "src/s-02.html"
+    },
+    {
+      "id": "s-03",
+      "file": "src/s-03.html"
+    },
+    {
+      "id": "s-04",
+      "file": "src/s-04.html"
+    },
+    {
+      "id": "s-05",
+      "file": "src/s-05.html"
+    },
+    {
+      "id": "s-06",
+      "file": "src/s-06.html"
+    },
+    {
+      "id": "s-07",
+      "file": "src/s-07.html"
+    },
+    {
+      "id": "s-08",
+      "file": "src/s-08.html"
+    },
+    {
+      "id": "s-09",
+      "file": "src/s-09.html"
+    }
+  ]
+}

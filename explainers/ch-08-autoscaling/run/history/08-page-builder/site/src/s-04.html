@@ -1,0 +1,149 @@
+    <!-- s-04 · The Friday of the push · o-1, o-2 · claims c-01, c-04, c-06, c-07, c-08 · the set-up (why four
+         nodes, an ordinary Friday, what is new on the drawing, what happened at 17:30) BEFORE the lane (ac-06) ·
+         lane A (w-rush-scrolly, data only, pooled renderer) · k-04 in A3's step column gates A4–A6 AND the
+         block after the lane (Fig. 04, Jordan and Ari, the debrief, D4), so no duration is readable before the
+         commit (ac-09). The plan's title, "The Friday it took seven minutes", would give k-04's answer away
+         here and in the rail, so the h2 names the evening instead (reported as a concern). -->
+    <section id="s-04" data-segment="s-04">
+      <h2 id="the-friday-of-the-push"><span class="cp-sec">§ 04 </span>The Friday of the push</h2>
+      <p>The cluster looks different now that both loops are running. Within an hour of their being switched on, the HPA had taken <code>dispatch</code> from six copies down to three, the cluster autoscaler had emptied node 05 and given it back, and Fennel was renting four nodes instead of five; how the loops decide to shrink things is the subject of a later section. On an ordinary Friday the rush builds over about an hour from five o’clock. <code>dispatch</code> climbs from three copies to six as it does, the three extra Pods all fit on node 06, which is nearly empty, and nobody at Fennel notices any of it.</p>
+      <p>The following widget steps through a Friday that was not ordinary. Its drawing is the cluster from earlier chapters, with a few additions. The record shows only the line the HPA writes, <code>dispatch</code>’s number of copies, with one mark for each Pod, filled once that Pod is ready. Under the nodes, a line gives what the HPA measures, next to its target, and another says what customers are seeing. Both new loops have a pill beside the ones you know, and the one that is acting is lit. A Pod with no room waits in a strip above the nodes, as in Chapter 5, and a node that has been asked for but isn’t ready yet is drawn as a dashed frame.</p>
+      <p>It was the Friday before a holiday weekend. At 17:30, half an hour into the rush, Fennel’s marketing team sent every customer a notification offering free delivery, and told nobody on Ari’s team that it was coming.</p>
+      <noscript><p class="cs-noscript">The drawing and step text below, and the charts and the node drawing in §06, need JavaScript. The rest of the page reads without it.</p></noscript>
+
+      <!--
+        ===== MOUNT CONTRACT · w-rush-scrolly (lane A) =====
+        Ch 04's lane contract (explainers/_pool/README.md, "Cluster lanes"), one lane, steps A1–A6. The page
+        owns this markup, the caption under the lane and the layout CSS (assets/page.css, ".cs-*"). The lane is
+        data only: widgets/w-rush-scrolly/data.js defines window.ClusterData (CLUSTER_LANES.A and every
+        reader-visible string of the canvas and the steps), and assets/page.js calls
+        ClusterCanvas.lanes('w-rush-scrolly', window.ClusterData). No widget code, no pool change.
+        Slots   .cs-canvas[data-canvas] (the sticky drawing; role="img", aria-label = the active step's),
+                [data-step-snap] (the step's own snapshot, shown where the canvas can't fit),
+                [data-step-text] (the step's text and clock kicker).
+        Gates   data-gate="k-04" on A4, A5 and A6; k-04's card sits in A3. Locked steps collapse to their
+                lock line (assets/page.css). Unlock on 'didactician:check-commit'; never re-lock.
+        No JS   Slots stay empty, nothing is locked, and the <noscript> line above explains.
+      -->
+      <div data-widget="w-rush-scrolly" data-lanes="A" class="d-wide cs">
+        <div class="cs-lane" data-lane="A" aria-labelledby="the-friday-of-the-push">
+          <div class="cs-lane__grid">
+            <div class="cs-canvas" data-canvas></div>
+            <ol class="cs-steps">
+              <li class="cs-step" data-step="A1">
+                <div class="cs-step__snap" data-step-snap></div>
+                <div class="cs-step__text" data-step-text></div>
+              </li>
+              <li class="cs-step" data-step="A2">
+                <div class="cs-step__snap" data-step-snap></div>
+                <div class="cs-step__text" data-step-text></div>
+              </li>
+              <li class="cs-step" data-step="A3">
+                <div class="cs-step__snap" data-step-snap></div>
+                <div class="cs-step__text" data-step-text></div>
+                <div class="cp-check" role="group" aria-labelledby="k-04-q" data-check="k-04">
+                  <div class="cp-check__head"><span class="cp-chip">PREDICT</span><span class="cp-label">Check 04 / 08</span></div>
+                  <p class="cp-check__q" id="k-04-q">Three <code>dispatch</code> Pods are waiting for room, and this time Fennel’s cluster has a loop that can rent a node. About how long until those three Pods are taking work?</p>
+                  <ul class="cp-options">
+                    <li><button type="button" class="cp-option" data-fb="Deciding to add a node is automatic and takes seconds. The node is still a rented machine that has to start and join the cluster, which typically takes minutes, and only then can the Pods start on it. Scroll on."><span class="cp-option__key">A</span><span>A few seconds: adding a node is automatic now, and the Pods start on it at once.</span><span class="cp-option__tag"></span></button></li>
+                    <li><button type="button" class="cp-option" data-ok data-fb="Right. Asking for the node takes seconds; the machine starting takes minutes; then the Pods have to start and pass their readiness check. Scroll on to see how many."><span class="cp-option__key">B</span><span>A few minutes: the machine has to start, and then the Pods on it.</span><span class="cp-option__tag"></span></button></li>
+                    <li><button type="button" class="cp-option" data-fb="Nobody has to approve it: the loop asks the provider itself, within seconds, as long as the pool is under its maximum. What takes time is the machine starting, and that is minutes, not an hour. Scroll on."><span class="cp-option__key">C</span><span>About an hour, as in Chapter 5, because someone on Ari’s team still has to approve the new node.</span><span class="cp-option__tag"></span></button></li>
+                  </ul>
+                  <div class="cp-feedback" role="status" hidden></div>
+                </div>
+              </li>
+              <li class="cs-step" data-step="A4" data-gate="k-04">
+                <p class="cs-step__lock" data-step-lock>Answer the question above to see what happens</p>
+                <div class="cs-step__snap" data-step-snap></div>
+                <div class="cs-step__text" data-step-text></div>
+              </li>
+              <li class="cs-step" data-step="A5" data-gate="k-04">
+                <p class="cs-step__lock" data-step-lock>Answer the question above to see what happens</p>
+                <div class="cs-step__snap" data-step-snap></div>
+                <div class="cs-step__text" data-step-text></div>
+              </li>
+              <li class="cs-step" data-step="A6" data-gate="k-04">
+                <p class="cs-step__lock" data-step-lock>Answer the question above to see what happens</p>
+                <div class="cs-step__snap" data-step-snap></div>
+                <div class="cs-step__text" data-step-text></div>
+              </li>
+            </ol>
+          </div>
+        </div>
+      </div>
+      <p class="cp-wcap"><span class="cp-label">W-01</span><span>Fennel’s nodes, numbers and timings are fiction, built on Kubernetes’ default settings.</span></p>
+
+      <div class="cp-gate" data-gate="k-04">
+        <p class="cp-gate__lock">Answer the question in the steps above to see where the time went</p>
+
+        <p>On Monday, Jordan had one question about that evening.</p>
+        <blockquote class="cp-dialog">
+          <p><b>Jordan</b><span>“We have autoscaling. Why were we slow?”</span></p>
+          <p><b>Ari</b><span>“Autoscaling worked. It took seven minutes.”</span></p>
+        </blockquote>
+        <p>Ari’s answer is easier to see with the evening laid out along a clock. The figure below gives each wait its true length and names whoever owns it.</p>
+
+        <!-- f-04: static HTML, two layouts of the same waits. Wide (from a 700px plate): a 22-column grid, one
+             column per half minute, so each segment's width is its duration. Narrower: a vertical list with the
+             copies-ready band down the left edge (Ch 06's incident timeline). One image to assistive tech. -->
+        <figure class="cp-fig d-wide" id="f-04" aria-labelledby="f-04-cap">
+          <div class="cp-fig__plate">
+            <div class="cp-fig__bar"><span class="cp-label">Fig. 04</span><span class="cp-label">The push Friday, 17:30–17:40</span></div>
+            <div class="cp-blueprint wt" role="img" aria-label="A timeline of the push Friday from 17:30 to 17:41. At 17:30 the push is sent, and dispatch has 3 of 3 copies ready. From 17:30 to about 17:34 the reading climbs as orders arrive. At about 17:34 the HPA decides, in under a minute, to ask for 9 copies, and within seconds the scheduler places three new Pods on node 06 and leaves three waiting. From then, dispatch has 3 of 9 copies ready. The three Pods that fitted on node 06 take about a minute and a half to start, which is the node agent’s work: image, app, readiness check. They are ready at about 17:36, making 6 of 9. The three Pods that needed a node wait while node 07 is rented and starting, which is the provider’s work and takes about 4 minutes, until about 17:38:30. They then take about a minute and a half to start, and are ready at about 17:40, making 9 of 9.">
+              <div class="wt__wide" aria-hidden="true">
+                <div class="wt__axis"><span>17:30</span><span>:31</span><span>:32</span><span>:33</span><span>:34</span><span>:35</span><span>:36</span><span>:37</span><span>:38</span><span>:39</span><span>:40</span></div>
+                <p class="wt__push">Push sent</p>
+                <p class="wt__lab">First, for all six new Pods</p>
+                <div class="wt__row">
+                  <div class="wt__seg is-read" style="--a: 1; --b: 9"><b>Reading climbs</b>orders arrive</div>
+                  <div class="wt__seg is-hpa" style="--a: 9; --b: 10"></div>
+                  <div class="wt__seg is-note" style="--a: 10; --b: 23"><b>← HPA decides</b><em>HPA · under a minute</em><b>then placed, or left waiting</b><em>scheduler · seconds</em></div>
+                </div>
+                <p class="wt__lab">3 Pods that fitted on node 06</p>
+                <div class="wt__row">
+                  <div class="wt__seg is-pod" style="--a: 10; --b: 13"><b>Pod starts</b>image, app, readiness check<em>node agent · about 1.5 min</em></div>
+                  <div class="wt__seg is-ready" style="--a: 13; --b: 23"><b>Ready</b>from ~17:36</div>
+                </div>
+                <p class="wt__lab">3 Pods that needed a node</p>
+                <div class="wt__row">
+                  <div class="wt__seg is-node" style="--a: 10; --b: 18"><b>Waiting · no room</b><b>Node 07 rented and starting</b><em>provider · about 4 min</em></div>
+                  <div class="wt__seg is-pod" style="--a: 18; --b: 21"><b>Pod starts</b><em>node agent · about 1.5 min</em></div>
+                  <div class="wt__seg is-ready" style="--a: 21; --b: 23"><b>Ready</b>~17:40</div>
+                </div>
+                <p class="wt__lab">dispatch · copies ready</p>
+                <div class="wt__row wt__band">
+                  <div class="wt__seg is-good" style="--a: 1; --b: 9"><span class="st st--good">3 of 3</span></div>
+                  <div class="wt__seg is-bad" style="--a: 9; --b: 13"><span class="st st--bad">3 of 9</span></div>
+                  <div class="wt__seg is-warn" style="--a: 13; --b: 21"><span class="st st--warn">6 of 9</span></div>
+                  <div class="wt__seg is-good" style="--a: 21; --b: 23"><span class="st st--good">9 of 9</span></div>
+                </div>
+              </div>
+              <div class="wt__narrow" aria-hidden="true">
+                <p class="wt__lhead">dispatch · copies ready, and each wait</p>
+                <ol class="wt__list">
+                  <li class="wt__li is-good"><span class="wt__lb"></span><span class="wt__lt">17:30</span><span class="wt__le"><b>Push sent</b><span class="st st--good">3 of 3 ready</span></span></li>
+                  <li class="wt__li is-good"><span class="wt__lb"></span><span class="wt__lt">to ~17:34</span><span class="wt__le"><span class="wm wm--read"></span><b>Reading climbs</b><em>orders arrive</em></span></li>
+                  <li class="wt__li is-bad"><span class="wt__lb"></span><span class="wt__lt">~17:34</span><span class="wt__le"><span class="wm wm--hpa"></span><b>HPA decides</b><em>HPA · under a minute</em><span class="st st--bad">3 of 9 ready</span></span></li>
+                  <li class="wt__li is-bad"><span class="wt__lb"></span><span class="wt__lt">seconds</span><span class="wt__le"><b>3 placed on node 06, 3 waiting</b><em>scheduler · seconds</em></span></li>
+                  <li class="wt__li is-bad"><span class="wt__lb"></span><span class="wt__lt">to ~17:36</span><span class="wt__le"><span class="wm wm--pod"></span><b>Pods on node 06 start</b> image, app, readiness check<em>node agent · about 1.5 min</em></span></li>
+                  <li class="wt__li is-warn"><span class="wt__lb"></span><span class="wt__lt">~17:36</span><span class="wt__le"><b>Those 3 ready</b><span class="st st--warn">6 of 9 ready</span></span></li>
+                  <li class="wt__li is-warn"><span class="wt__lb"></span><span class="wt__lt">~17:34:40 to ~17:38:30</span><span class="wt__le"><span class="wm wm--node"></span><b>Node 07 rented and starting</b> while 3 Pods wait, no room<em>provider · about 4 min</em></span></li>
+                  <li class="wt__li is-warn"><span class="wt__lb"></span><span class="wt__lt">to ~17:40</span><span class="wt__le"><span class="wm wm--pod"></span><b>Pods on node 07 start</b><em>node agent · about 1.5 min</em></span></li>
+                  <li class="wt__li is-good"><span class="wt__lb"></span><span class="wt__lt">~17:40</span><span class="wt__le"><b>All ready</b><span class="st st--good">9 of 9 ready</span></span></li>
+                </ol>
+              </div>
+            </div>
+          </div>
+          <figcaption id="f-04-cap"><span class="cp-label">Fig. 04</span><span>The decision took under a minute. Most of the seven went on starting a machine, then starting Pods on it. Fennel’s times are fiction built on default settings; yours depend mostly on your provider.</span></figcaption>
+        </figure>
+
+        <p>The decision was the quick part. Within a minute of the reading crossing its target, the HPA had asked for nine copies, and the scheduler and the cluster autoscaler each did their part seconds later. What cannot be hurried is everything the decisions set in motion. A Pod has to download its image, start its program and pass its readiness check before it takes any work, and a rented machine has to start and join the cluster before a Pod can even begin. As a rule of thumb, Pods that fit on room the cluster already has are typically working within a minute or two, and Pods that need a new node within roughly three to eight minutes, depending mostly on the provider. You have seen this shape before: when node 03 died in Chapter 4, its Pods were replaced in about six minutes, and there too each loop acted within seconds while the time went on the waiting in between. So the common belief that autoscaling is instant is half right. The deciding is close to instant, and the arriving is not.</p>
+        <p>Nothing failed that Friday, and seven minutes is what it looks like when everything works. It can take longer. If the provider has no machine of that kind free at that moment, the request typically fails and is tried again after a wait that is itself measured in minutes. And if the pool is already at its maximum, the loop doesn’t ask at all, and the Pods wait until a person raises the number.</p>
+
+        <!-- D4 (c-06 note, c-07 note, x-02): the vendor specifics -->
+        <details class="d-more cp-more">
+          <summary>Could it take twenty minutes?</summary>
+          <div class="cp-more__body"><p>It could, when delays stack up. On one provider, Google’s GKE, the first retry of a failed request for a node comes after five minutes, and the waits between retries can grow to thirty (its documentation, November 2026). In June 2026 AWS described a customer whose very large scale-up took 23 minutes because requests for machines kept failing and being retried. And by default the cluster autoscaler gives a node it has asked for up to 15 minutes to appear before it gives up on it. Twenty minutes is what several delays in a row look like. It isn’t what autoscaling normally costs.</p></div>
+        </details>
+      </div>
+    </section>

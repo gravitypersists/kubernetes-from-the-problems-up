@@ -1,0 +1,110 @@
+    <!-- s-02 · A loop that changes a number · o-1 · claims c-01, c-02, c-03 · what it measures (a share of what
+         each Pod reserves) BEFORE Fig. 02 · the rule, one case (6 copies at 90%) · k-02 (3 copies at 120%: a
+         different case from the prose and from Fig. 02's three rows) · the name, TERM 01 and the lens come
+         AFTER k-02 (ac-02, ac-04) · what it needs and its pace, hedged · D2 -->
+    <section id="s-02" data-segment="s-02">
+      <h2 id="a-loop-that-changes-a-number"><span class="cp-sec">§ 02 </span>A loop that changes a number</h2>
+      <p>Start with the first decision, the number of copies, and with something Kubernetes can measure. Each <code>dispatch</code> Pod reserves one processor core, as its team wrote in its requests in Chapter 5. An ordinary evening’s work, shared among three copies, would take about 0.4 of a core from each, which is 40% of what each reserved; at a Friday rush, with too few copies, the same Pod might be asked for more than its whole core. Kubernetes can read that share for every Pod. It is a share of the Pod’s own reservation, not of the machine, so a service whose team never set a request gives this measurement nothing to stand on.</p>
+      <p>The dispatch team, with Ari, puts that measurement to work. Beside <code>dispatch</code>’s Deployment they add one more short record, which says three things: keep the average across <code>dispatch</code>’s Pods at about 60%, never run fewer than 3 copies, and never run more than 10. The record switches on a loop that works for <code>dispatch</code> alone, and engineers call a loop of this kind an autoscaler. The figure below shows the record on the left and, on the right, what the loop makes of three different readings.</p>
+
+      <!-- f-02: static HTML. Left: Ch 04's manifest plate (c4 on c4-soft), annotations on the lines. Right: three
+           readings, each a gauge (outline = what a Pod reserves, solid c1 = the reading, hatched warn above
+           100%, c4 tick = the target), a row of copy marks with c4 MIN / MAX brackets, and the result. -->
+      <figure class="cp-fig d-wide" id="f-02" aria-labelledby="f-02-cap">
+        <div class="cp-fig__plate">
+          <div class="cp-fig__bar"><span class="cp-label">Fig. 02</span><span class="cp-label">dispatch’s autoscaler</span></div>
+          <div class="cp-blueprint hp">
+            <div class="hp__grid">
+              <div>
+                <p class="fg-head">Written by the dispatch team</p>
+                <div class="mf">
+                  <div class="cp-rec mf__code">
+                    <div class="mf__row mf__row--key"><code class="mf__line"><span class="mf__k">kind:</span> HorizontalPodAutoscaler</code><p class="mf__ann">one more record</p></div>
+                    <div class="mf__row"><code class="mf__line"><span class="mf__k">spec:</span></code></div>
+                    <div class="mf__row"><code class="mf__line">  <span class="mf__k">scaleTargetRef:</span></code><p class="mf__ann">whose number of copies it may change</p></div>
+                    <div class="mf__row"><code class="mf__line">    <span class="mf__k">kind:</span> Deployment</code></div>
+                    <div class="mf__row"><code class="mf__line">    <span class="mf__k">name:</span> dispatch</code></div>
+                    <div class="mf__row"><code class="mf__line">  <span class="mf__k">minReplicas:</span> 3</code><p class="mf__ann">never fewer copies than this</p></div>
+                    <div class="mf__row"><code class="mf__line">  <span class="mf__k">maxReplicas:</span> 10</code><p class="mf__ann">never more</p></div>
+                    <div class="mf__row"><code class="mf__line">  <span class="mf__k">metrics:</span></code></div>
+                    <div class="mf__row"><code class="mf__line">  - <span class="mf__k">resource:</span></code></div>
+                    <div class="mf__row"><code class="mf__line">      <span class="mf__k">name:</span> cpu</code><p class="mf__ann">what to measure: processor use</p></div>
+                    <div class="mf__row"><code class="mf__line">      <span class="mf__k">target:</span></code></div>
+                    <div class="mf__row"><code class="mf__line">        <span class="mf__k">averageUtilization:</span> 60</code><p class="mf__ann">the target: 60% of the processor each Pod reserves, on average</p></div>
+                  </div>
+                </div>
+              </div>
+              <div>
+                <p class="fg-head">Three readings</p>
+                <p class="hp__key" aria-hidden="true"><i class="is-now"></i>a copy running now<i class="is-add"></i>a copy the loop asks for</p>
+                <div class="hp__rd" role="img" aria-label="First reading. 6 copies, each using 90% of the processor it reserves, against a target of 60%. That is 1.5 times the target, so the loop wants 9 copies: three more than now, inside the minimum of 3 and the maximum of 10.">
+                  <p class="hp__case">6 copies · now 90%</p>
+                  <div class="gg" style="--v: 90; --t: 60">
+                    <span class="gg__target"><span class="fg-set">Target 60%</span></span>
+                    <div class="gg__track"><span class="gg__res"></span><span class="gg__use"></span><span class="gg__over"></span><span class="gg__tick"></span></div>
+                    <span class="gg__now">NOW 90%</span>
+                  </div>
+                  <div class="cm"><i class="is-now"></i><i class="is-now"></i><i class="is-now"></i><i class="is-now"></i><i class="is-now"></i><i class="is-now"></i><i class="is-add"></i><i class="is-add"></i><i class="is-add"></i><i></i><span class="cm__min"><b>MIN 3</b></span><span class="cm__max"><b>MAX 10</b></span></div>
+                  <p class="hp__res">1.5 × the target → <b>wants 9</b></p>
+                </div>
+                <div class="hp__rd" role="img" aria-label="Second reading. 3 copies, each using 40% of the processor it reserves, against a target of 60%. The rule would give 2 copies, but the minimum is 3, so the number stays 3.">
+                  <p class="hp__case">3 copies · now 40%</p>
+                  <div class="gg" style="--v: 40; --t: 60">
+                    <span class="gg__target"><span class="fg-set">Target 60%</span></span>
+                    <div class="gg__track"><span class="gg__res"></span><span class="gg__use"></span><span class="gg__over"></span><span class="gg__tick"></span></div>
+                    <span class="gg__now">NOW 40%</span>
+                  </div>
+                  <div class="cm"><i class="is-now"></i><i class="is-now"></i><i class="is-now"></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><span class="cm__min"><b>MIN 3</b></span><span class="cm__max"><b>MAX 10</b></span></div>
+                  <p class="hp__res">Would be 2 · minimum is 3 → <b>stays 3</b></p>
+                </div>
+                <div class="hp__rd" role="img" aria-label="Third reading. 6 copies, each using 150% of the processor it reserves, half as much again as its whole reservation, against a target of 60%. The rule would give 15 copies, but the maximum is 10, so the loop wants 10.">
+                  <p class="hp__case">6 copies · now 150%</p>
+                  <div class="gg" style="--v: 150; --t: 60">
+                    <span class="gg__target"><span class="fg-set">Target 60%</span></span>
+                    <div class="gg__track"><span class="gg__res"></span><span class="gg__use"></span><span class="gg__over"></span><span class="gg__tick"></span></div>
+                    <span class="gg__now gg__now--end gg__now--warn">NOW 150% · OVER</span>
+                  </div>
+                  <div class="cm"><i class="is-now"></i><i class="is-now"></i><i class="is-now"></i><i class="is-now"></i><i class="is-now"></i><i class="is-now"></i><i class="is-add"></i><i class="is-add"></i><i class="is-add"></i><i class="is-add"></i><span class="cm__min"><b>MIN 3</b></span><span class="cm__max"><b>MAX 10</b></span></div>
+                  <p class="hp__res">Would be 15 · maximum is 10 → <b>wants 10</b></p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <figcaption id="f-02-cap"><span class="cp-label">Fig. 02</span><span>The team writes a target and two limits; the loop turns each reading into a number of copies. Shortened.</span></figcaption>
+      </figure>
+
+      <p>The rule the loop follows is one of proportion. It compares the reading with the target and scales the number of copies by the same ratio, rounding up. Take the first reading in the figure: six copies, each at 90%. That is one and a half times the target, so the work would sit at the target if it were spread over one and a half times as many copies, and six become nine. The two limits fence the result in. The loop never goes below the minimum, however quiet the evening, and at the maximum it simply stops, however high the reading climbs.</p>
+
+      <div class="cp-check" role="group" aria-labelledby="k-02-q" data-check="k-02">
+        <div class="cp-check__head"><span class="cp-chip cp-chip--apply">APPLY</span><span class="cp-label">Check 02 / 08</span></div>
+        <p class="cp-check__q" id="k-02-q">It’s 17:50 on a Friday. <code>dispatch</code> has 3 copies, and its autoscaler (target 60%, minimum 3, maximum 10) reads an average of 120%. What does the autoscaler do?</p>
+        <ul class="cp-options">
+          <li><button type="button" class="cp-option" data-fb="It doesn’t feel its way up one copy at a time. A reading of twice the target makes it ask for twice the copies in one go: 6."><span class="cp-option__key">A</span><span>Adds one copy, waits to see the effect, and adds another if the reading is still high.</span><span class="cp-option__tag"></span></button></li>
+          <li><button type="button" class="cp-option" data-ok data-fb="Right. Twice the target, so twice the copies: it rewrites 3 to 6 in the record. The ReplicaSet loop, the scheduler and the node agents take it from there."><span class="cp-option__key">B</span><span>Changes the number of copies wanted to 6, and leaves the rest to other loops.</span><span class="cp-option__tag"></span></button></li>
+          <li><button type="button" class="cp-option" data-fb="The number is right, but this loop starts nothing and places nothing. It rewrites 3 to 6 in the record; the ReplicaSet loop writes the Pod records and the scheduler picks their nodes."><span class="cp-option__key">C</span><span>Starts three new <code>dispatch</code> Pods itself, on whichever node is emptiest.</span><span class="cp-option__tag"></span></button></li>
+        </ul>
+        <div class="cp-feedback" role="status" hidden></div>
+      </div>
+
+      <p>The loop’s full name is the one on the first line of the team’s record: the <dfn id="dfn-hpa" aria-describedby="term-01">HorizontalPodAutoscaler</dfn>. Engineers say “the HPA”, and so will the rest of this chapter.</p>
+
+      <div class="cp-term" id="term-01" role="note" aria-label="New term 1 of 3">
+        <p class="cp-term__kicker">New term · 01 / 03</p>
+        <p class="cp-term__term">HorizontalPodAutoscaler <span class="cp-term__sep">·</span> HPA</p>
+        <p class="cp-term__def">A loop that keeps one measurement of a service’s Pods near a target by raising or lowering the number of copies the service wants, between a minimum and a maximum.</p>
+        <p class="cp-term__back">Horizontal: more Pods, not bigger ones.</p>
+      </div>
+
+      <p>The HPA is one more implementation of the reconcile loop from Chapter 4, running in the control plane beside the others, and the loop lens fits it as it fits them. What it wants is its service’s Pods, on average, at the target. What it sees is how much processor each of those Pods is using. When the two differ, it rewrites one number in the record: the copies its Deployment wants. Everything that turns that number into running Pods is the work of loops you already know. The ReplicaSet loop writes the new Pod records, the scheduler gives each one a node, and the node agents start them.</p>
+      <p>Two practical things follow from how it measures. The first is its pace: by default the HPA looks about every fifteen seconds, and it leaves the number alone while the reading is within a tenth of the target, so small wobbles change nothing. The second is that requests matter again. Because the reading is a share of the request, a padded request of the kind Chapter 5 warned about makes a busy Pod look idle, and the loop acts late. The measurement doesn’t have to be processor use, though that is the common choice.</p>
+
+      <!-- D2 (c-02 note; the naming sentences in facts.md): the only place vertical and event-driven scaling appear -->
+      <details class="d-more cp-more">
+        <summary>Does it have to be processor use? And other kinds of autoscaling</summary>
+        <div class="cp-more__body">
+          <p>No. An HPA can read memory instead, or a measurement the team defines for itself, and when it is given several it works out a number for each and takes the largest. Where those measurements come from is a subject for Chapter 12.</p>
+          <p>You’ll also hear two other kinds of autoscaling named. Vertical autoscaling changes each Pod’s requests instead of the number of Pods; unlike the HPA, it isn’t built into Kubernetes and has to be installed separately. Event-driven scaling, for which KEDA is the usual tool, scales a service on events such as the length of a queue, and can take it all the way down to zero copies.</p>
+        </div>
+      </details>
+    </section>

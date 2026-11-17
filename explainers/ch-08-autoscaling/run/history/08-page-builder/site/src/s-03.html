@@ -1,0 +1,84 @@
+    <!-- s-03 · A loop that rents machines · o-1 · claims c-04, c-05 · the component grounded (what it is, who
+         switched it on) BEFORE k-03, without saying what it watches · k-03 (local-01) · everything after is
+         gated on k-03: what it watches (owner of that explanation), two callbacks, node pools, Fig. 03,
+         TERM 02 (payoff) and TERM 03, several pools, its lens, D3 (ac-03, ac-04) -->
+    <section id="s-03" data-segment="s-03">
+      <h2 id="a-loop-that-rents-machines"><span class="cp-sec">§ 03 </span>A loop that rents machines</h2>
+      <p>The HPA’s work ends at the record. When it raises <code>dispatch</code>’s number, the new Pods are placed like any others, by their requests, on whichever nodes have room. On the Friday in Chapter 5 that is exactly where things stopped: the nodes were full on paper, one new Pod had no room, and it waited for an hour until Ari’s team rented two more machines.</p>
+      <p>Managed Kubernetes offers a loop for that last step as well, usually as a setting that the platform team switches on: the <dfn id="dfn-cluster-autoscaler" aria-describedby="term-02">cluster autoscaler</dfn>, or your provider’s equivalent. It can do the two things that only people at Fennel could do before, which are to ask the provider for another node and to hand one back. Ari’s team switched it on in the same week that <code>dispatch</code> got its HPA.</p>
+
+      <div class="cp-check" role="group" aria-labelledby="k-03-q" data-check="k-03">
+        <div class="cp-check__head"><span class="cp-chip">PREDICT</span><span class="cp-label">Check 03 / 08</span></div>
+        <p class="cp-check__q" id="k-03-q">Fennel’s cluster now has a loop that can rent another node. On a busy evening every Pod has a node, and the four nodes’ processors are 85% busy. What does that loop do?</p>
+        <ul class="cp-options">
+          <li><button type="button" class="cp-option" data-fb="It’s a natural guess, because the HPA does react to busy Pods. This loop doesn’t look at how busy anything is. It acts only when the scheduler has a Pod it can’t place, and here every Pod has a node."><span class="cp-option__key">A</span><span>Rents a node now, before the processors run out.</span><span class="cp-option__tag"></span></button></li>
+          <li><button type="button" class="cp-option" data-ok data-fb="Right. This loop watches for Pods the scheduler couldn’t place, and there are none. How busy the nodes are doesn’t come into it."><span class="cp-option__key">B</span><span>Nothing: no Pod is waiting for room.</span><span class="cp-option__tag"></span></button></li>
+          <li><button type="button" class="cp-option" data-fb="Kubernetes never moves a Pod (Chapter 4), and no loop here evens out busy nodes. This one acts only when a Pod is waiting for room, and none is."><span class="cp-option__key">C</span><span>Moves a few Pods over to whichever node is least busy.</span><span class="cp-option__tag"></span></button></li>
+        </ul>
+        <div class="cp-feedback" role="status" hidden></div>
+      </div>
+
+      <div class="cp-gate" data-gate="k-03">
+        <p class="cp-gate__lock">Answer the question above to see what this loop watches</p>
+
+        <p>The cluster autoscaler watches for one thing: Pods that the scheduler has tried to place and couldn’t. It never looks at how busy the nodes are, for the same reason the scheduler doesn’t. Room in a cluster is counted in reservations, as Chapter 5 showed, so a node at 85% is not full as long as its Pods’ requests fit, and a new node would change nothing for Pods that already have one. The guess that it reacts to busy machines isn’t far off, because the first layer does: the HPA starts from a reading of use, and busy Pods are what make it ask for more copies. The second layer reacts only to what the first one leaves behind, which is Pods without a node.</p>
+        <p>That one trigger explains two earlier evenings. Had this loop been running on the Friday in Chapter 5, the waiting <code>dispatch</code> Pod would have been given a new node without anyone on Ari’s team having to notice it and rent one. But it would not have replaced node 03 when that machine died in Chapter 4, because every Pod from node 03 found room on the three nodes that were left, and so nothing was waiting.</p>
+        <p>Before it asks for a node, the loop works out whether a new one would actually give the waiting Pods room, which means it has to know what a new node would be: how much memory, how many cores. That is the job of a <dfn id="dfn-node-pool" aria-describedby="term-03">node pool</dfn>, a group of identical machines that the cluster can add to or shrink. Fennel has one, made of the 16 GB, 4-core machines it has rented all along, and Ari’s team gave it a minimum of 3 nodes and a maximum of 8. The loop moves the pool between those two numbers and never past them. The maximum in particular is a person’s decision, and it works as a cap on spending: when the pool reaches it, the loop stops asking, and any Pod that still has no room simply waits.</p>
+
+        <!-- f-03: static HTML. One CLUSTER frame (Ch 03's 3px ink frame) holding three pool frames. Rented nodes are
+             small solid node outlines (no Pods: this figure is about kinds of machine and limits); nodes the pool
+             may still add are dashed c6 slots; pools nobody has rented are wholly dashed c6, tagged. -->
+        <figure class="cp-fig d-wide" id="f-03" aria-labelledby="f-03-cap">
+          <div class="cp-fig__plate">
+            <div class="cp-fig__bar"><span class="cp-label">Fig. 03</span><span class="cp-label">Fennel’s node pools</span></div>
+            <div class="cp-blueprint np" role="img" aria-label="Fennel’s cluster drawn as node pools. The general node pool holds 16 GB, 4-core machines, with a minimum of 3 and a maximum of 8: four rented nodes, 01, 02, 04 and 06, and four empty slots it may still fill, the first marked as where the next node would go. The cluster autoscaler adds and gives back nodes of this kind, between 3 and 8. Two more pools are drawn dashed because nobody has rented them. A large-memory pool of 64 GB machines is an example, for the case where orders outgrew a 13 GB node. A spot pool of machines that are cheaper but can be taken back is proposed, for work that can be interrupted, not orders or payments.">
+              <div class="np__cluster">
+                <p class="np__cl">Cluster</p>
+                <div class="np__pool np__pool--main">
+                  <p class="np__head"><span>Node pool · general · 16 GB, 4-core machines</span><span class="fg-set">Min 3 · max 8</span></p>
+                  <p class="np__loop"><span class="cp-loop"><span class="cp-loop__mark">↻</span>cluster autoscaler</span><span>adds and gives back nodes of this kind, between 3 and 8</span></p>
+                  <div class="np__rows">
+                    <div class="np__set"><span class="np__node"><b>01</b></span><span class="np__node"><b>02</b></span><span class="np__node"><b>04</b></span><span class="np__node"><b>06</b></span></div>
+                    <div class="np__set"><span class="np__node np__node--slot"></span><span class="np__node np__node--slot"></span><span class="np__node np__node--slot"></span><span class="np__node np__node--slot"></span><p class="np__next">↑ Next node would go here</p></div>
+                  </div>
+                </div>
+                <div class="np__pool np__pool--none">
+                  <p class="np__head"><span>Node pool · large memory · 64 GB machines</span><span class="fg-tag">Example</span></p>
+                  <div class="np__set"><span class="np__node np__node--slot"></span><span class="np__node np__node--slot"></span></div>
+                  <p class="np__why">if <code>orders</code> outgrew a 13 GB node</p>
+                </div>
+                <div class="np__pool np__pool--none">
+                  <p class="np__head"><span>Node pool · spot · cheaper, can be taken back</span><span class="fg-tag">Proposed</span></p>
+                  <div class="np__set"><span class="np__node np__node--slot"></span><span class="np__node np__node--slot"></span></div>
+                  <p class="np__why">for work that can be interrupted; not <code>orders</code> or <code>payments</code></p>
+                </div>
+              </div>
+            </div>
+          </div>
+          <figcaption id="f-03-cap"><span class="cp-label">Fig. 03</span><span>Every node in a pool is the same kind of machine. The loop can only add kinds that someone has defined, up to the maximum that someone chose.</span></figcaption>
+        </figure>
+
+        <div class="cp-term cp-term--payoff cp-blueprint" id="term-02" role="note" aria-label="New term 2 of 3">
+          <p class="cp-term__kicker">New term · 02 / 03</p>
+          <p class="cp-term__term">cluster autoscaler</p>
+          <p class="cp-term__def">A loop that asks the provider for another node when a Pod has no room, and hands a node back when its Pods all fit elsewhere.</p>
+          <p class="cp-term__back">The loop Chapter 5 was missing.</p>
+        </div>
+
+        <div class="cp-term" id="term-03" role="note" aria-label="New term 3 of 3">
+          <p class="cp-term__kicker">New term · 03 / 03</p>
+          <p class="cp-term__term">node pool</p>
+          <p class="cp-term__def">A group of identical machines in a cluster, with a smallest and a largest size that people set; nodes are added to it and removed from it.</p>
+          <p class="cp-term__back">Some providers say node group.</p>
+        </div>
+
+        <p>A cluster can have several pools, one for each kind of machine, and the two dashed pools in the figure are there to show why it might. If <code>orders</code> ever outgrew the 13 GB that a general node can give its Pods, no number of general nodes would help, as Chapter 5 found, and the loop could add nothing useful until someone had defined a pool of bigger machines. Ari has also proposed a pool of <dfn id="dfn-spot">spot machines</dfn>, which cost less because the provider can take one back at short notice (AWS, for one, gives two minutes’ warning, as of November 2026). A service that can be interrupted, such as <code>notifications</code>, could live there. <code>orders</code> and <code>payments</code> would not.</p>
+        <p>Through the loop lens, the cluster autoscaler wants every Pod on a node, on no more nodes than that takes. It sees the Pods the scheduler couldn’t place, and how much of each node is reserved. When those differ from what it wants, it adds a node from a pool, up to the pool’s maximum, or it empties a node it can do without and gives it back. How carefully it does the second of those comes later in the chapter.</p>
+
+        <!-- D3 (c-04 note, c-07): the only place these names appear -->
+        <details class="d-more cp-more">
+          <summary>My engineers say Karpenter, or node auto-provisioning. Is that this loop?</summary>
+          <div class="cp-more__body"><p>It is the same job done by a different tool, and the names differ by provider. Some newer tools, such as Karpenter and the “node auto-provisioning” or fully managed modes that several providers build on it or model on it (names you may hear include Autopilot and Auto Mode), skip the pre-made pools. They pick a machine to fit the Pods that are waiting, within limits the team sets, and they tend to start nodes faster. What they react to is the same: Pods with no room.</p></div>
+        </details>
+      </div>
+    </section>

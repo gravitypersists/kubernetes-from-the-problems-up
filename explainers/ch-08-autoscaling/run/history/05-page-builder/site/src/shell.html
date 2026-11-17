@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The Friday dinner rush: autoscaling</title>
+<meta name="description" content="Chapter 08. Every Friday evening Fennel’s orders triple for two hours. This chapter follows the two loops that add copies and machines for the rush and take them away afterwards, the Friday they fell behind, and what it all did to the bill.">
+<link rel="stylesheet" href="pool/tokens.css">
+<link rel="stylesheet" href="pool/components.css">
+<link rel="stylesheet" href="pool/cluster/cluster.css">
+<link rel="stylesheet" href="assets/page.css">
+</head>
+<body class="d-body">
+
+<header class="cp-hero cp-blueprint">
+  <div class="cp-hero__inner">
+    <p class="cp-hero__kicker"><span class="cp-hero__idx">CHAPTER 08</span><span class="cp-label">Part II · Fennel, year 3</span></p>
+    <h1 class="cp-hero__title">The Friday dinner rush: autoscaling</h1>
+    <p class="cp-hero__standfirst">Every Friday evening Fennel’s orders triple for two hours. This chapter follows the two loops that add copies and machines for the rush and take them away afterwards, the Friday they weren’t fast enough, and what it all did to Morgan’s bill.</p>
+    <dl class="cp-meta">
+      <div><dt>Read</dt><dd>28 MIN</dd></div>
+      <div><dt>For</dt><dd>TECHNICAL MANAGERS</dd></div>
+      <div><dt>Chapter</dt><dd>08 / 15</dd></div>
+      <div><dt>Checks</dt><dd>08</dd></div>
+    </dl>
+  </div>
+</header>
+
+<div class="d-page">
+  <aside class="d-rail" data-toc data-minutes="28"></aside>
+  <main class="d-main" id="main">
+    <details class="d-toc-mobile" data-toc-mobile></details>
+
+    <!-- segment s-01 -->
+
+    <!-- segment s-02 -->
+
+    <!-- segment s-03 -->
+
+    <!-- segment s-04 -->
+
+    <!-- segment s-05 -->
+
+    <!-- segment s-06 -->
+
+    <!-- segment s-07 -->
+
+    <!-- segment s-08 -->
+
+    <!-- segment s-09 -->
+
+    <footer class="cp-sources" data-toc-skip>
+      <p class="cp-label">Sources</p>
+      <ol>
+        <li>Kubernetes documentation, <a href="https://kubernetes.io/docs/concepts/workloads/autoscaling/horizontal-pod-autoscale/">“Horizontal Pod Autoscaling”</a>: the calculation, the default 15-second interval and 10% tolerance; processor use measured as a share of each Pod’s request, and no action where a request is missing; the minimum and maximum; how Pods that aren’t ready yet are counted; the five-minute look-back before lowering the number; other measurements; and the <a href="https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale-walkthrough/">walkthrough</a>, on a number capped by the maximum.</li>
+        <li>Kubernetes Autoscaler project, <a href="https://github.com/kubernetes/autoscaler/blob/master/cluster-autoscaler/FAQ.md">Cluster Autoscaler FAQ</a>: nodes are added only for Pods that failed to schedule; the 10-second check; identical machines within a node group; when a node is removed (under half reserved, its Pods fit elsewhere, for 10 minutes) and what prevents it; the 15-minute wait for a requested node.</li>
+        <li>Kubernetes documentation, <a href="https://kubernetes.io/docs/concepts/cluster-administration/node-autoscaling/">“Node Autoscaling”</a>, and Karpenter, <a href="https://karpenter.sh/docs/concepts/">“Concepts”</a>: tools that choose a machine to fit the waiting Pods without pre-made groups.</li>
+        <li>Microsoft, <a href="https://learn.microsoft.com/en-us/azure/aks/cluster-autoscaler-overview">“Cluster autoscaling in Azure Kubernetes Service”</a>: a minimum and a maximum node count per node pool; waits of up to 30 minutes after failed requests; and <a href="https://learn.microsoft.com/en-us/azure/aks/node-auto-provisioning">“Node auto-provisioning”</a>.</li>
+        <li>Google Cloud, <a href="https://docs.cloud.google.com/kubernetes-engine/docs/concepts/cluster-autoscaler">“About GKE cluster autoscaling”</a>: a minimum and maximum size per node pool; a first retry after five minutes, growing to 30.</li>
+        <li>AWS, <a href="https://aws.github.io/aws-eks-best-practices/cluster-autoscaling/">EKS Best Practices Guide, “Cluster Autoscaler”</a>: new nodes can take multiple minutes; spare room kept with placeholder Pods trades cost for speed.</li>
+        <li>AWS Containers Blog, <a href="https://aws.amazon.com/blogs/containers/faster-nodes-smarter-scaling-whats-new-inside-amazon-elastic-kubernetes-service-amazon-eks-auto-mode/">“Faster nodes, smarter scaling: what’s new inside Amazon EKS Auto Mode”</a> (23 June 2026): nodes ready in under 25 seconds on most machine types, by AWS’s own measurement; one customer’s 23-minute delays; and the <a href="https://docs.aws.amazon.com/eks/latest/userguide/automode.html">EKS Auto Mode guide</a>.</li>
+        <li>AWS, <a href="https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/using-spot-instances.html">“Spot Instances”</a>, read 16 November 2026: a two-minute warning before a spot machine is taken back.</li>
+        <li>PostgreSQL documentation, <a href="https://www.postgresql.org/docs/current/runtime-config-connection.html">“Connections and Authentication”</a>: the maximum number of connections, typically 100 by default.</li>
+        <li>Kubernetes documentation, <a href="https://kubernetes.io/docs/concepts/workloads/autoscaling/vertical-pod-autoscale/">“Vertical Pod Autoscaling”</a>, and KEDA, <a href="https://keda.sh/docs/latest/concepts/">“KEDA Concepts”</a>: the two other kinds of autoscaling named in §02.</li>
+      </ol>
+      <p>Facts carried over from earlier chapters (the loops, requests and placement, pending Pods, readiness, a Service’s list of ready Pods and how a connection picks one) are sourced in Chapters 4 to 7.</p>
+      <p>Fennel, its people, services, nodes, settings, times, bills and incidents are fiction, made up to illustrate the mechanisms above. Its clock times are built on Kubernetes’ default settings and on a new node taking a few minutes; image download and start-up times, and the general ranges in §04, are typical figures, not measurements. <code>catalog</code>’s Sunday is an illustration worked out from the database’s documented limit, not a documented incident.</p>
+    </footer>
+  </main>
+</div>
+
+<script src="pool/toc.js"></script>
+<script src="pool/widget.js"></script>
+<script src="widgets/w-rush-scrolly/data.js"></script>
+<script src="pool/cluster/cluster.js"></script>
+<script src="pool/cluster/lanes.js"></script>
+<script src="assets/page.js"></script>
+</body>
+</html>

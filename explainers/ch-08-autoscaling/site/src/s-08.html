@@ -1,0 +1,22 @@
+    <!-- s-08 · The loops so far · o-1 · claims c-03, c-04, c-09, c-10 · one lead-in sentence, then Fig. 09: the
+         loop lens table built by assets/page.js from CH08_LOOPS (Ch 07's array copied forward; the HPA row and
+         the cluster autoscaler row tagged NEW IN CH 8; §2.3's header wording) (ac-13) -->
+    <section id="s-08" data-segment="s-08">
+      <h2 id="the-loops-so-far"><span class="cp-sec">§ 08 </span>The loops so far</h2>
+      <p>Scaling was the last of Sam’s jobs without a loop. It now has two: one changes how many copies a service wants, and one changes how many nodes there are to put them on.</p>
+
+      <figure class="cp-fig d-wide" id="f-09" aria-labelledby="f-09-cap">
+        <div class="cp-fig__plate">
+          <div class="cp-fig__bar"><span class="cp-label">Fig. 09</span><span class="cp-label">Which loop: wants, sees, does when they differ</span></div>
+          <div class="cp-blueprint lens">
+            <table data-labels="Wants (desired state)|Sees (real state)|Does when they differ|Sam’s job" data-new="New in Ch 8">
+              <thead><tr><th scope="col">Loop</th><th scope="col">Wants (desired state)</th><th scope="col">Sees (real state)</th><th scope="col">Does when they differ</th><th scope="col">Sam’s job, now a loop’s</th></tr></thead>
+              <tbody data-loop-lens></tbody>
+            </table>
+            <p class="lens__note">On a small screen, the loops from earlier chapters are listed by name and job only.</p>
+            <noscript><p class="cs-noscript">This table is drawn by JavaScript.</p></noscript>
+          </div>
+        </div>
+        <figcaption id="f-09-cap"><span class="cp-label">Fig. 09</span><span>Scaling, split between two loops. One changes a number in the record; the other changes how many nodes there are.</span></figcaption>
+      </figure>
+    </section>
