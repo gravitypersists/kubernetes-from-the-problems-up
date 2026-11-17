@@ -177,3 +177,12 @@ Stage: deliver → **done**
 
 ### 2026-10-25T18:48:58-04:00 · orchestrator · stage
 Stage: done → **human-review**
+
+### 2026-11-16T22:08:58-05:00 · verify · gate
+Gate (page) round 8: **PASS**. Reading ~17.6 min (brief: ~20 min; reported, not gated); 417 KB, 19 requests.
+- [gate/page-round-8.json](gate/page-round-8.json)
+- [screenshots/page-round-8](screenshots/page-round-8)
+
+### 2026-11-16T22:09:04-05:00 · orchestrator · editorial-pass
+Editorial pass at the user's request (outside the review loop; stage stays **human-review**). 17 prose edits in site/index.html (D1, k-01 and k-05 feedback, §01, §02, §03 incl. TERM 01's definition, §05, §06, §07, recap, bridge) and 1 in the lane's data.js (S3 step text). No check prompt, option, fact or figure layout changed. Gate round 8 PASS.
+- [gate/page-round-8.json](gate/page-round-8.json)

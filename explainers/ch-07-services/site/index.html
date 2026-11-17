@@ -54,7 +54,7 @@
         <div class="cp-more__body">
           <ul>
             <li>In Chapter 4, Fennel moved onto managed Kubernetes. The cluster keeps a record of what Fennel wants running, and many small loops each compare one part of that record with what is actually running, and act to close any gap. A Pod, Kubernetes’ wrapper around a running container, is never moved or repaired: when one is lost, a loop replaces it with a new one. When node 03 died one Saturday at 03:04, a loop replaced its <code>orders</code> Pod, <code>orders-5c8x</code>, with a new one, <code>orders-q2rw</code>, on node 04.</li>
-            <li>In Chapter 6, the <code>catalog</code> team began shipping two or three times a day. For each release, a Deployment’s loop replaces a service’s Pods with the new version a few at a time, and removes an old Pod only once a new one is ready, which means it passes a check that the team wrote. A Pod that isn’t ready keeps running, but it is sent no requests.</li>
+            <li>In Chapter 6, the <code>catalog</code> team began shipping two or three times a day. For each release, a Deployment’s loop replaces a service’s Pods with the new version a few at a time, and removes an old Pod only once a new one is ready. Ready means the Pod passes a check that the team wrote. A Pod that isn’t ready keeps running, but it is sent no requests.</li>
             <li>On one Thursday, a routine release at 10:15 took about a minute. A second, at 14:02, showed every price as $0.00 for six minutes, until Riley rolled back to the previous version.</li>
             <li>To understand any loop, ask four things: which loop is it, what does it want, what does it see, and what does it do about a gap?</li>
           </ul>
@@ -65,14 +65,14 @@
         <div class="cp-check__head"><span class="cp-chip">RETRIEVE</span><span class="cp-label">Check 01 / 07</span></div>
         <p class="cp-check__q" id="k-01-q">At 03:04 in Chapter 4, node 03 died with <code>orders-5c8x</code> on it, and by 03:10 the ReplicaSet loop’s replacement, <code>orders-q2rw</code>, was running on node 04. Through the loop lens: what does the ReplicaSet loop want, and does that include telling <code>storefront</code> where the new Pod is?</p>
         <ul class="cp-options">
-          <li><button type="button" class="cp-option" data-ok data-fb="Right. The ReplicaSet loop compares a count with a count. `orders-q2rw` was a new Pod with a new name and a new address, so something else had to make sure `storefront` found it, and nobody had to tell it."><span class="cp-option__key">A</span><span>A set number of <code>orders</code> Pods. Where callers send their calls isn’t part of it.</span><span class="cp-option__tag"></span></button></li>
+          <li><button type="button" class="cp-option" data-ok data-fb="Right. The ReplicaSet loop compares a count with a count. `orders-q2rw` was a new Pod with a new name and a new address, so something else had to make sure `storefront` found it. This chapter is about what does."><span class="cp-option__key">A</span><span>A set number of <code>orders</code> Pods. Where callers send their calls isn’t part of it.</span><span class="cp-option__tag"></span></button></li>
           <li><button type="button" class="cp-option" data-fb="Its lens has no callers in it: it wants a number of Pods and sees the Pod records it has. And a new Pod doesn’t inherit an address: `orders-q2rw` got its own."><span class="cp-option__key">B</span><span><code>orders</code> working for callers, so it gives the new Pod the old Pod’s address.</span><span class="cp-option__tag"></span></button></li>
           <li><button type="button" class="cp-option" data-fb="Kubernetes never moves a Pod (Chapter 4). The ReplicaSet loop wrote a new one, `orders-q2rw`, with a new name and a new address; all it checked was the count."><span class="cp-option__key">C</span><span>Every Pod back as it was, so it moves the old Pod’s name and address to node 04.</span><span class="cp-option__tag"></span></button></li>
         </ul>
         <div class="cp-feedback" role="status" hidden></div>
       </div>
 
-      <p>Think back further, to 03:04 on a Saturday in Chapter 3, before Fennel had Kubernetes. Machine 03 died and took <code>orders</code> with it. Sam started <code>orders</code> again on machine 04, the only running machine with room, but customers still couldn’t place an order, because <code>storefront</code>’s settings still named machine 03, and <code>storefront</code> went on sending orders there until Sam passed on the new address. Connecting the services to one another was one of Sam’s jobs, and Sam did it by hand, at three in the morning.</p>
+      <p>Think back further, to 03:04 on a Saturday in Chapter 3, before Fennel had Kubernetes. Machine 03 died and took <code>orders</code> with it. Sam started <code>orders</code> again on machine 04, the only running machine with room. Customers still couldn’t place an order, because <code>storefront</code>’s settings still named machine 03, and <code>storefront</code> went on sending orders there until Sam passed on the new address. Connecting the services to one another was one of Sam’s jobs, and Sam did it by hand, at three in the morning.</p>
       <p>On Kubernetes, addresses change far more often than machines die. Every replacement gives a service a new Pod at a new address, and every release gives it new Pods too: Riley’s team ships <code>catalog</code> two or three times a day, with three new Pods each time. Yet nobody passes on an address any more. Since <code>storefront</code> moved into the cluster, it has reached <code>orders</code> and <code>catalog</code> through every one of those changes without anyone touching its settings. That includes 03:10 on a second Saturday, in Chapter 4, when node 03 died again, this time on Kubernetes, and <code>orders-q2rw</code> replaced <code>orders-5c8x</code>.</p>
       <blockquote class="cp-dialog">
         <p><b>Jordan</b><span>“Sam used to pass on the new addresses. Who does that now?”</span></p>
@@ -158,7 +158,7 @@
           <figcaption id="f-01-cap"><span class="cp-label">Fig. 01</span><span>Each release, and the rollback, gave <code>catalog</code> three new Pods with new addresses. Going back to v63 brought back the version, not its addresses. Addresses are illustrative.</span></figcaption>
         </figure>
 
-        <p>An address belongs to the Pod, not to the node it runs on, and over that one Thursday, <code>catalog</code> had four complete sets of addresses. The rollback brought back version v63 but not one of its morning addresses, because a rollback makes new Pods from the ReplicaSet the Deployment kept, and new Pods are given new addresses. A caller still holding the copied addresses would usually have waited and then timed out, since nothing answered at them any more. A list kept by hand would have been wrong for most of that day, and the same would be true at every service, every day.</p>
+        <p>An address belongs to the Pod, not to the node it runs on. Over that one Thursday, <code>catalog</code> had four complete sets of addresses. The rollback brought back version v63 but not one of its morning addresses, because a rollback makes new Pods from the ReplicaSet the Deployment kept, and new Pods are given new addresses. A caller still holding the copied addresses would usually have waited and then timed out, since nothing answered at them any more. A list kept by hand would have been wrong for most of that day, and the same would be true for every service, every day.</p>
         <p>What callers need instead is one name and one address per service that stay the same however often its Pods change, with something else keeping track of which Pods are behind it at any moment. That’s what Ari meant by “it calls a name”.</p>
       </div>
     </section>
@@ -168,7 +168,7 @@
          of "service" said once · the DNS name (dfn) · D2 -->
     <section id="s-03" data-segment="s-03">
       <h2 id="one-name-that-stays-put"><span class="cp-sec">§ 03 </span>One name that stays put: the Service</h2>
-      <p>When Ari moved each of Fennel’s services into the cluster, they wrote one more short record beside it. For <code>orders</code>, the record gives a name, <code>orders</code>; a selector, <code>app: orders</code>, which says which Pods belong (any Pod carrying that label, and <code>orders</code>’ Deployment gives the label to every Pod it makes); and the port that callers connect to. Fig. 02 shows a shortened version of it, beside what Kubernetes adds.</p>
+      <p>When Ari moved each of Fennel’s services into the cluster, they wrote one more short record beside it. For <code>orders</code>, the record gives three things. The first is a name, <code>orders</code>. The second is a selector, <code>app: orders</code>, which says which Pods belong: any Pod carrying that label, and <code>orders</code>’ Deployment gives the label to every Pod it makes. The third is the port that callers connect to. Fig. 02 shows a shortened version of it, beside what Kubernetes adds.</p>
 
       <!-- f-02: static HTML. Left, WRITTEN BY ARI: Ch 04's manifest plate (c4 on c4-soft, annotations beside the
            lines from 900px, under them below), and the label from orders' Deployment. Right, ADDED AND KEPT BY
@@ -218,7 +218,7 @@
       <div class="cp-term cp-term--payoff cp-blueprint" id="term-01" role="note" aria-label="New term 1 of 3">
         <p class="cp-term__kicker">New term · 01 / 03</p>
         <p class="cp-term__term">Service</p>
-        <p class="cp-term__def">A record that gives a set of Pods, picked out by a selector, one name and address that stay the same while the Pods change, with a list of which of them are ready.</p>
+        <p class="cp-term__def">A record that gives one name and one address to a set of Pods picked out by a selector. Both stay the same while the Pods change, and Kubernetes keeps a list of which Pods are ready.</p>
         <p class="cp-term__back">What <code>storefront</code> has been calling since the move.</p>
       </div>
 
@@ -361,7 +361,7 @@
          with its breaks line, after f-03 (ac-14) -->
     <section id="s-05" data-segment="s-05">
       <h2 id="where-a-call-goes"><span class="cp-sec">§ 05 </span>Where a call goes</h2>
-      <p>Ari’s team likes anything that every order depends on to run in more than one copy, so that one failure can’t take it down. Every call from <code>storefront</code> to <code>orders</code> uses the <code>orders</code> Service. The Service has an address and a name, as a server does, and at Fennel the word “service” has always meant a program that runs. So it’s natural to picture the Service as a box in the middle, taking each call and passing it on.</p>
+      <p>Ari’s team likes to run more than one copy of anything that every order depends on, so that one failure can’t take it down. Every call from <code>storefront</code> to <code>orders</code> uses the <code>orders</code> Service. The Service has an address and a name, as a server does, and at Fennel the word “service” has always meant a program that runs. So it’s natural to picture the Service as a box in the middle, taking each call and passing it on.</p>
 
       <div class="cp-check" role="group" aria-labelledby="k-04-q" data-check="k-04">
         <div class="cp-check__head"><span class="cp-chip">PREDICT</span><span class="cp-label">Check 04 / 07</span></div>
@@ -529,7 +529,7 @@
         </figure>
 
         <p>There is no box in the middle. The address <code>10.96.0.25</code> belongs to no machine and no program. On every node, a small loop called <dfn id="dfn-kube-proxy">kube-proxy</dfn> reads each Service and its list from the record, and writes them into that node’s own forwarding rules, the instructions its operating system follows for where to send network traffic. So when <code>storefront</code> connects to <code>10.96.0.25</code>, the operating system on <code>storefront</code>’s own node catches the connection and sends it straight to one of the listed Pods. Nothing called “the <code>orders</code> Service” exists that could crash, slow down or need copies. It’s the <code>orders</code> Pods that need copies.</p>
-        <p>Despite its name, calls don’t pass through kube-proxy: it writes the rules that calls follow. Like the node agent, it runs on every node, and each copy acts only on its own node, working from the record. Unlike the endpoints loop, though, it doesn’t write the record: what it writes is its own node’s rules. Some providers replace it with a component of their own that does the same job.</p>
+        <p>Despite kube-proxy’s name, calls don’t pass through it: it writes the rules that calls follow. Like the node agent, it runs on every node, and each copy acts only on its own node, working from the record. Unlike the endpoints loop, though, it doesn’t write the record: what it writes is its own node’s rules. Some providers replace it with a component of their own that does the same job.</p>
         <p>The picture of something running wasn’t wrong, only misplaced. For Services to work, three things do have to run: the endpoints loop in the control plane, which the provider runs for Fennel; kube-proxy on every node; and the cluster’s DNS, which answers names like <code>orders</code>. None of them sits on a call’s path. A caller asks the DNS for the address first, and the call itself then goes straight to a Pod.</p>
 
         <!-- D3 (c-05 note; m-10's fair part) -->
@@ -566,7 +566,7 @@
         <p class="cp-check__q" id="k-05-q">On Tuesday at about 12:40, <code>orders-q2rw</code>, the only <code>orders</code> Pod, ran out of memory and the node agent restarted its container. For those seconds, <code>storefront</code>’s log shows <code>connection refused</code>. What refused the calls?</p>
         <ul class="cp-options">
           <li><button type="button" class="cp-option" data-fb="No Service program sits on the path to fill up (§05), and nothing held the calls. While the only `orders` Pod wasn’t ready, the `orders` list was empty, and the rule on `storefront`’s own node refused each call at once. See Fig. 04."><span class="cp-option__key">A</span><span>The <code>orders</code> Service, overloaded by calls that piled up while its only Pod restarted.</span><span class="cp-option__tag"></span></button></li>
-          <li><button type="button" class="cp-option" data-ok data-fb="Right. While the only `orders` Pod wasn’t ready, the endpoints loop had nothing to list, and with an empty list the rule on the caller’s node refuses a call at once rather than hold it, in most clusters, by default. Fig. 04 shows both moments."><span class="cp-option__key">B</span><span>The rules on <code>storefront</code>’s own node, since the <code>orders</code> list had no ready Pod on it.</span><span class="cp-option__tag"></span></button></li>
+          <li><button type="button" class="cp-option" data-ok data-fb="Right. While the only `orders` Pod wasn’t ready, the endpoints loop had nothing to list. In most clusters, by default, the rule on the caller’s node refuses a call at once when the list is empty, rather than hold it. Fig. 04 shows both moments."><span class="cp-option__key">B</span><span>The rules on <code>storefront</code>’s own node, since the <code>orders</code> list had no ready Pod on it.</span><span class="cp-option__tag"></span></button></li>
           <li><button type="button" class="cp-option" data-fb="A restart isn’t a replacement. The node agent restarted the container inside the same Pod, which kept its name and its address. For a few seconds the Pod wasn’t ready, so it wasn’t on the list. See Fig. 04."><span class="cp-option__key">C</span><span>The restarted Pod, which came back at a new address that <code>storefront</code> didn’t know yet.</span><span class="cp-option__tag"></span></button></li>
         </ul>
         <div class="cp-feedback" role="status" hidden></div>
@@ -616,7 +616,7 @@
           <figcaption id="f-04-cap"><span class="cp-label">Fig. 04</span><span>With one copy, each restart left the <code>orders</code> Service with no ready Pod, and calls were refused at once. The restarted Pod came back on the list at the same address: it was restarted, not replaced.</span></figcaption>
         </figure>
 
-        <p>While its container was down and starting again, <code>orders</code>’ only Pod wasn’t ready, so the endpoints loop took it off the list, and the <code>orders</code> Service was left with no Pod to send anything to. With an empty list, the rule on each caller’s node refuses a call at once rather than holding on to it, in most clusters, by default, and that refusal is what <code>storefront</code> logged. Seconds later the restarted container was running and the Pod was ready again, so it went back on the list, at the same address, because a restart keeps the Pod, and with it the address, where a replacement doesn’t. The same happened at 18:50, and again at 20:10.</p>
+        <p>While its container was down and starting again, <code>orders</code>’ only Pod wasn’t ready, so the endpoints loop took it off the list, and the <code>orders</code> Service was left with no Pod to send anything to. In most clusters, by default, the rule on each caller’s node refuses a call at once when the list is empty, rather than holding on to it, and that refusal is what <code>storefront</code> logged. Seconds later the restarted container was running and the Pod was ready again, so it went back on the list, at the same address. A restart keeps the Pod, and with it the address; a replacement doesn’t. The same happened at 18:50, and again at 20:10.</p>
         <p>The Service did exactly its job here: it sent calls to every ready <code>orders</code> Pod, and for a few seconds there weren’t any. So the fix is in the Pods, not in the Service. With two copies on different nodes, one restarting Pod would have left the other on the list, and new calls would have gone to it. Why <code>orders</code> keeps running out of memory is still Chapter 5’s open question, but Ari’s incident note ends with a proposal for the meantime: run a second copy of <code>orders</code>, on another node. It also gives Jordan a question to take to the engineers.</p>
         <blockquote class="cp-quote"><p>“Which of our services run a single copy, and what do their callers get while it restarts?”</p><cite>The question to ask</cite></blockquote>
 
@@ -635,7 +635,7 @@
     <section id="s-07" data-segment="s-07">
       <h2 id="from-a-phone-to-a-pod"><span class="cp-sec">§ 07 </span>From a customer’s phone to a Pod</h2>
       <p>By default, a Service’s address works only inside the cluster. That’s all <code>storefront</code> needs to call <code>orders</code>. Customers’ phones, though, are out on the internet.</p>
-      <p>One way to let them in is one Service at a time. A team can set a Service’s <code>type</code> to <code>LoadBalancer</code>, and the cloud provider then creates a load balancer for that one Service: a machine that the provider runs, with a public address, which passes incoming connections on to the Service’s Pods. Each Service set up this way gets its own <dfn id="dfn-load-balancer" aria-describedby="term-02">load balancer</dfn>, its own public address and its own hourly charge.</p>
+      <p>One way to let them in works one Service at a time. A team can set a Service’s <code>type</code> to <code>LoadBalancer</code>, and the cloud provider then creates a load balancer for that one Service: a machine that the provider runs, with a public address, which passes incoming connections on to the Service’s Pods. Each Service set up this way gets its own <dfn id="dfn-load-balancer" aria-describedby="term-02">load balancer</dfn>, its own public address and its own hourly charge.</p>
 
       <div class="cp-term" id="term-02" role="note" aria-label="New term 2 of 3">
         <p class="cp-term__kicker">New term · 02 / 03</p>
@@ -804,13 +804,13 @@
         <p class="cp-label">In short</p>
         <ul>
           <li>Every replacement and every release, rollbacks included, gives a service new Pods at new addresses, so callers use a name instead of an address.</li>
-          <li>A Service is a record that gives a set of Pods, picked out by a selector, one stable name and address.</li>
+          <li>A Service is a record that gives one stable name and address to a set of Pods picked out by a selector.</li>
           <li>The endpoints loop keeps each Service’s list of ready Pods current, copying each Pod’s own readiness answer and checking nothing itself.</li>
           <li>kube-proxy on every node turns the lists into forwarding rules, so a call goes from the caller’s node straight to one Pod, picked at random by default, with no server in between.</li>
-          <li>When a Service has no ready Pods, its callers are refused at once, in most clusters, by default. On Tuesday the fix was more copies of <code>orders</code>, not a different Service.</li>
-          <li>From the internet, a cloud load balancer is the provider’s machine, one for each Service of that type; one gateway can route many Services behind a single one.</li>
+          <li>In most clusters, by default, callers of a Service with no ready Pods are refused at once. On Tuesday the fix was more copies of <code>orders</code>, not a different Service.</li>
+          <li>To let callers in from the internet, each Service of type <code>LoadBalancer</code> gets a load balancer of its own, a machine the provider runs and bills by the hour. One gateway can route to many Services behind a single load balancer.</li>
         </ul>
-        <p>On a Friday evening, Fennel’s orders triple between five and seven. Every extra Pod that the cluster starts for the rush will join its Service’s list the moment it is ready, and <code>storefront</code> will never know that it was added. What decides to start those Pods, and whether they arrive in time, is Chapter 8.</p>
+        <p>On a Friday evening, Fennel’s orders triple between five and seven. Every extra Pod that the cluster starts for the rush will join its Service’s list the moment it is ready, and <code>storefront</code> will never know that it was added. What decides to start those Pods, and whether they arrive in time, is the subject of Chapter 8.</p>
       </div>
     </section>
 

@@ -156,12 +156,13 @@
     "gate:page": [
       [
         "console: [360, 768, 1280px] Failed to load resource: the server responded with a status of 404 (Not Found)",
-        "resources: [360, 768, 1280px] http://127.0.0.1:49839/__didactician/site/widgets/w-services-scrolly/index.css \u2192 HTTP 404"
+        "resources: [360, 768, 1280px] http://127.0.0.1:49839/__didactician/site/widgets/w-services-scrolly/index.css → HTTP 404"
       ],
       [
         "console: [360, 768px] Failed to load resource: the server responded with a status of 404 (Not Found)",
-        "resources: [360, 768px] http://127.0.0.1:51125/__didactician/site/widgets/w-services-scrolly/index.css \u2192 HTTP 404"
+        "resources: [360, 768px] http://127.0.0.1:51125/__didactician/site/widgets/w-services-scrolly/index.css → HTTP 404"
       ],
+      [],
       [],
       [],
       [],

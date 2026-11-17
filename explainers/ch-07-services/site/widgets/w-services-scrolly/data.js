@@ -170,7 +170,7 @@
             clock: '~10:15:20'
           },
           text: [
-            'The v63 Pod passes its check, and within seconds, usually, the endpoints loop has put its address on the list. Seeing the same Pod ready, the Deployment loop tells a v62 Pod on node 06 to stop.',
+            'The v63 Pod passes its check, and usually within seconds the endpoints loop has put its address on the list. Seeing the same Pod ready, the Deployment loop tells a v62 Pod on node 06 to stop.',
             'That Pod’s address comes off the list as soon as it is told to stop, while its container is still shutting down, so within a moment new calls stop going to a Pod on its way out. For now, `storefront`’s calls are answered by both versions.'
           ],
           ariaLabel: 'About 10:15:20. The catalog v63 Pod on node 05 is ready, and a catalog v62 Pod on node 06 is stopped. The catalog Service, 10.96.0.21, now lists three ready Pods: v62 at 10.4.5.12, v62 at 10.4.6.9 and v63 at 10.4.5.14. The stopped Pod’s entry, v62 at 10.4.6.8, is struck through: it has just left the list. The Deployment loop and the endpoints loop are acting: the endpoints loop sees the v63 Pod ready and a v62 Pod stopping, and adds one entry and removes one. Storefront’s calls to catalog are answered by the two v62 Pods and the v63 Pod, each new connection going to one of them at random.',
