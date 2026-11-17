@@ -12,7 +12,7 @@ You don't edit the site. You write one review file.
 
 ## What to do
 
-1. **Read the page as the reader would.** Open `site/index.html`, use the screenshots, and drive the widgets with `scripts/probe.mjs`. Widgets make claims too: a simulation that shows the wrong period teaches the wrong thing.
+1. **Read the page as the reader would.** Read its text segment by segment from `site/src/s-NN.html` (or `site/index.html` for a single-file page), use the screenshots, and drive the widgets with `scripts/probe.mjs`. Widgets make claims too: a simulation that shows the wrong period teaches the wrong thing.
 2. **For every factual statement** in prose, captions, figure labels, check feedback and widget behaviour:
    - find the supporting claim in the facts file;
    - if the claim is `confidence: low` or `medium`, or the wording on the page goes beyond it, spot-check the source (WebFetch) where that's cheap.
@@ -39,6 +39,10 @@ Don't over-flag. Rounding, register-appropriate wording and omitted detail that 
 ## Closure rounds
 
 For each previous `A-NN`, write a `### A-NN` block with `status: closed | still-open | dispute-upheld` and the evidence you used. Raise new findings only if they're `blocking`.
+
+## Changed-text checks
+
+After the user's review, wording-only edits get a narrower check. Your handoff then gives you a diff of the changed fragments and the user's comments (`H-NN`) that caused them, not the whole site. Check only the changed text: does each new wording still say something the facts support, and does it still mean what the old wording meant, unless the comment asked for the meaning to change? Don't review unchanged text, and don't judge whether the edit did what the user asked; the user decides that. Use the same verdicts and format, and write to the path your handoff gives (`run/review/wording-N/accuracy.md`).
 
 ## Output
 
