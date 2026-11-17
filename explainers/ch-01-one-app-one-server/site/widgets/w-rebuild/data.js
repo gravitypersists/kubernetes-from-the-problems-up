@@ -123,7 +123,7 @@
       prompt: 'All six steps in Sam’s notes ran without an error, and the code is the same version as on Sam’s server. Will the new machine work like the old one?',
       options: [
         /* review P-01: balanced lengths, every option a verdict with a partly-true reason; key at B */
-        { key: 'A', text: 'Yes. The notes are old, but same code and every step leaves nothing missing.',
+        { key: 'A', text: 'Yes. The notes are old, but with the same code and every step run, nothing is missing.',
           fb: 'That’s the trap. The notes list what Sam remembered to write down at setup. The code was never the problem; the question is what else was on Sam’s server. Run the checks and see.' },
         { key: 'B', text: 'It will start, but some features will be broken or missing.', ok: true,
           fb: 'Right. The notes cover what existed at setup. Anything added by hand since then isn’t in them. Run the checks to find out what.' },
