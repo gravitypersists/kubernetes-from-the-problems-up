@@ -279,3 +279,11 @@ Gate (page) round 15: **PASS**. Reading ~14.4 min (brief: ~17 min; reported, not
 Gate (page) round 16: **PASS**. Reading ~14.4 min (brief: ~17 min; reported, not gated); 260 KB, 16 requests.
 - [gate/page-round-16.json](gate/page-round-16.json)
 - [screenshots/page-round-16](screenshots/page-round-16)
+
+### 2026-11-16T22:16:16-05:00 · verify · gate
+Gate (page) round 17: **PASS**. Reading ~14.4 min (brief: ~17 min; reported, not gated); 258 KB, 16 requests.
+- [gate/page-round-17.json](gate/page-round-17.json)
+- [screenshots/page-round-17](screenshots/page-round-17)
+
+### 2026-11-16T22:16:16-05:00 · orchestrator · editorial-pass
+Editorial pass at the user's request, after shipping (stage stays **done**). 3 prose edits in site/index.html: §05's closing line no longer repeats §04's "how … is the next chapter"; §06 names Chapter 2 instead of "the last chapter on containers"; §07 "bring to" → "ask at" the planning meeting. Nothing else changed. Gate PASS.

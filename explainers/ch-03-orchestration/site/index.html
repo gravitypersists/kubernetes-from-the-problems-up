@@ -405,14 +405,14 @@
         <div class="cp-more__body"><p>Google’s own services ran on Borg, at least as of 2016, when the designers of Borg and Kubernetes described both in a paper. Kubernetes was built for developers outside Google, including the customers of Google’s cloud business.</p></div>
       </details>
       <p>Kubernetes isn’t the only orchestrator. Docker Swarm and Apache Mesos are two others, and Chapter 14 compares the options.</p>
-      <p>How Kubernetes does the six jobs with nobody at a keyboard is the next chapter. First, a name you’ll hear alongside it.</p>
+      <p>First, a name you’ll hear alongside Kubernetes.</p>
     </section>
 
     <!-- s-06 · Where Docker fits · o-3 · claims c-11, c-12 (D7 only), c-10, c-07 (D8) · m-02 owned · k-08 before
          f-02 and the prose -->
     <section id="s-06" data-segment="s-06">
       <h2 id="where-docker-fits"><span class="cp-sec">§ 06 </span>Where Docker fits</h2>
-      <p>You may already know the name Docker, and the last chapter on containers may have left you wondering how it fits in with Kubernetes. The two names come up together so often that they’re easy to mix up. So let’s introduce Docker properly, and see which job each one does.</p>
+      <p>You may already know the name Docker, and Chapter 2, on containers, may have left you wondering how it fits in with Kubernetes. The two names come up together so often that they’re easy to mix up. So let’s introduce Docker properly, and see which job each one does.</p>
 
       <div class="cp-check" role="group" aria-labelledby="k-08-q" data-check="k-08">
         <div class="cp-check__head"><span class="cp-chip">PREDICT</span><span class="cp-label">Check 08 / 09</span></div>
@@ -520,7 +520,7 @@
         <div class="cp-feedback" role="status" hidden></div>
       </div>
 
-      <p>Moving still costs something: the platform, and the time to learn and run it. So the question for Jordan to bring to the planning meeting is: “Which of these jobs is hurting us most today, and is that worth the cost of the platform?” Chapter 14 comes back to the cost side.</p>
+      <p>Moving still costs something: the platform, and the time to learn and run it. So the question for Jordan to ask at the planning meeting is: “Which of these jobs is hurting us most today, and is that worth the cost of the platform?” Chapter 14 comes back to the cost side.</p>
       <p>That’s the end of Part I. Since its first server, Fennel has been catching up: the disk filled, so Sam wrote a clean-up job; a release broke in production, so the team moved to containers; a machine died, so Sam moved containers by hand at 3 a.m. Each fix came after the pain. Part II is about getting ahead of it: telling Kubernetes what Fennel wants running, and letting it keep things that way.</p>
 
       <div class="cp-recap">
