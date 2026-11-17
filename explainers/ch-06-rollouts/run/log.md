@@ -209,3 +209,12 @@ Gate (page) round 10: **PASS**. Reading ~20.5 min (brief: ~20 min; reported, not
 
 ### 2026-10-25T18:48:58-04:00 · orchestrator · stage
 Stage: done → **human-review**
+
+### 2026-11-16T22:06:20-05:00 · verify · gate
+Gate (page) round 11: **PASS**. Reading ~20.5 min (brief: ~20 min; reported, not gated); 371 KB, 19 requests.
+- [gate/page-round-11.json](gate/page-round-11.json)
+- [screenshots/page-round-11](screenshots/page-round-11)
+
+### 2026-11-16T22:06:27-05:00 · orchestrator · editorial-pass
+Editorial pass at the user's request (outside the review loop; stage stays **human-review**). 12 prose edits in site/index.html (D1, §01, §02, §05, Fig. 03 caption, §06 aside, §07, §08, k-07 answer, recap) and 3 in the lane's data.js (R2 step text, R3 aria-label, R4 lens line). No check prompt, option, fact or figure layout changed. Gate round 11 PASS.
+- [gate/page-round-11.json](gate/page-round-11.json)

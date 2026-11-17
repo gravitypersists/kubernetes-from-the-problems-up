@@ -54,7 +54,7 @@
         <div class="cp-more__body">
           <ul>
             <li>In Chapter 4, Fennel moved onto managed Kubernetes. The cluster keeps a record of what Fennel wants running, and many small loops each compare one part of that record with what is actually running, and act to close any gap. The ReplicaSet loop keeps a set number of Pods (Kubernetes’ wrapper around a running container), the scheduler gives each new Pod a node (a machine in the cluster), and the node agent on that node starts it, and restarts it if it crashes.</li>
-            <li>In Chapter 5, Morgan asked why the first cloud bill after the move had gone up. The answer lay in two numbers each team writes down for its Pods: what each Pod reserves, its requests, in GB of memory and processor cores, which the scheduler places Pods by; and the most it may use, its limits. On a Friday at 17:45, a <code>dispatch</code> Pod waited, pending, because no node had room for it, until Ari’s team added two more nodes. The cluster has had five nodes since: 01, 02, 04, 05 and 06.</li>
+            <li>In Chapter 5, Morgan asked why the first cloud bill after the move had gone up. The answer lay in two numbers each team writes down for its Pods. Requests are what a Pod reserves, in GB of memory and processor cores, and the scheduler places Pods by them. Limits are the most a Pod may use. On a Friday at 17:45, a <code>dispatch</code> Pod waited, pending, because no node had room for it, until Ari’s team added two more nodes. The cluster has had five nodes since: 01, 02, 04, 05 and 06.</li>
             <li>To understand any loop, ask four things: which loop is it, what does it want, what does it see, and what does it do about a gap?</li>
           </ul>
         </div>
@@ -72,7 +72,7 @@
       </div>
 
       <p>In Fennel’s first years, a release was an event. Every team’s changes waited for a release night, when Sam put the new versions out by hand, one copy at a time, after posting in the team chat: “Nobody deploy anything, I’m updating storefront.” The update you may remember from Chapter 3, <code>storefront</code> from v12 to v13 on a Tuesday, went the same way. It took Sam the evening, and until it was done nobody else could ship anything.</p>
-      <p>Year 3 looks different. A few weeks after Morgan’s question about the bill, the team that looks after product listings and prices moved them out of <code>storefront</code> into a service of its own, <code>catalog</code>, so that it could change prices and listings without waiting for the website’s releases. Riley’s team now ships <code>catalog</code> two or three times a day. When one of their changes is merged, Fennel’s build pipeline builds a new image and hands it to the cluster, and the release happens while everyone keeps working. Nobody posts in the chat any more.</p>
+      <p>Year 3 looks different. A few weeks after Morgan’s question about the bill, the team that looks after product listings and prices moved them out of <code>storefront</code> into a separate service, <code>catalog</code>, so that it could change them without waiting for the website’s releases. Riley’s team now ships <code>catalog</code> two or three times a day. When one of their changes is merged, Fennel’s build pipeline builds a new image and hands it to the cluster, and the release happens while everyone keeps working. Nobody posts in the chat any more.</p>
       <p>This chapter follows one Thursday of those releases, and it starts with a question Jordan put to Ari a few days before.</p>
       <blockquote class="cp-dialog">
         <p><b>Jordan</b><span>“So who’s doing what Sam did on release nights?”</span></p>
@@ -89,7 +89,7 @@
          any step or figure shows the record changing (ac-03) -->
     <section id="s-02" data-segment="s-02">
       <h2 id="the-deployment"><span class="cp-sec">§ 02 </span>One record per service: the Deployment</h2>
-      <p>In Chapter 4, the manifest Ari applied for <code>storefront</code> described a ReplicaSet: a record that says “keep this many identical copies of this Pod”, together with the image each copy runs. The ReplicaSet loop then keeps that many Pods running and replaces any that disappear. That is all a ReplicaSet does: it keeps a number of copies of one Pod description, and engineers rarely write one themselves. What they write instead looks almost the same, and Fig. 01 shows a shortened version of <code>catalog</code>’s.</p>
+      <p>In Chapter 4, the manifest Ari applied for <code>storefront</code> described a ReplicaSet: a record that says “keep this many identical copies of this Pod”, together with the image each copy runs. The ReplicaSet loop then keeps that many Pods running and replaces any that disappear. That is all a ReplicaSet does, and engineers rarely write one themselves. What they write instead looks almost the same. Fig. 01 shows a shortened version of <code>catalog</code>’s.</p>
 
       <!-- f-01: static HTML, Ch 04's f-02 manifest plate (code on the record ground, c4 on c4-soft), annotations
            beside each line from 600px, under it below 600px. Two key annotations (kind, image), as the plan
@@ -130,8 +130,8 @@
         <p class="cp-term__back">What engineers write instead of Chapter 4’s ReplicaSet.</p>
       </div>
 
-      <p>A Deployment doesn’t run Pods itself. For the version it currently wants, it keeps a ReplicaSet, and Chapter 4’s ReplicaSet loop keeps that ReplicaSet’s Pods running. When someone changes the Pod description, which usually means the image line, the <dfn id="dfn-deployment-loop">Deployment loop</dfn> makes a new ReplicaSet for the new version and then, gradually, makes the new ReplicaSet bigger and the old one smaller. Changing only the number of copies doesn’t start any of this, because every copy is still the same version; changing what each copy is does. So engineers write and change the Deployment, and leave its ReplicaSets to it, as its machinery.</p>
-      <p>In Chapter 4’s terms, the Deployment loop is one more implementation of the same reconcile pattern, and you can fill in its loop lens. It wants the version and the number of copies that its record names. It sees its ReplicaSets, one per version, and how many of their Pods are ready. What it does about a gap is move copies from the old version’s ReplicaSet to the new one, a few at a time. What “a few at a time” means, and what “ready” means, are what the next three sections are about.</p>
+      <p>A Deployment doesn’t run Pods itself. For the version it currently wants, it keeps a ReplicaSet, and Chapter 4’s ReplicaSet loop keeps that ReplicaSet’s Pods running. When someone changes the Pod description, which usually means the image line, the <dfn id="dfn-deployment-loop">Deployment loop</dfn> makes a new ReplicaSet for the new version and then, gradually, makes the new ReplicaSet bigger and the old one smaller. Changing only the number of copies doesn’t start any of this, because every copy is still the same version. Only a change to the description of each copy does. So engineers write and change the Deployment, and leave the ReplicaSets to its loop.</p>
+      <p>In Chapter 4’s terms, the Deployment loop is one more implementation of the same reconcile pattern, and you can fill in its loop lens. It wants the version and the number of copies that its record names. It sees its ReplicaSets, one per version, and how many of their Pods are ready. What it does about a gap is move copies from the old version’s ReplicaSet to the new one, a few at a time. The next three sections explain what “a few at a time” and “ready” mean.</p>
       <p>Where does a new version come from? When Riley’s team merges a change, Fennel’s build pipeline, which engineers call CI, builds a new image, <code>catalog:v63</code>, and pushes it to Fennel’s registry, where images are kept and, as Chapter 2 showed, never change once they are built. Then the pipeline does one more thing: it writes the new tag into the image line of <code>catalog</code>’s Deployment. That one edit to the record is the whole release, and everything that happens after it is the loops’ work. (Pipelines differ from team to team; this is how Fennel’s works.)</p>
     </section>
 
@@ -354,7 +354,7 @@
       </div>
 
       <p><code>catalog</code>’s readiness probe asks its question by requesting a path, <code>/healthz</code>, from the app, and any success code counts as a pass. While the probe fails, the Pod keeps running, but it is sent no customer requests (that’s the work of a loop we’ll name in Chapter 7), and a rollout doesn’t count it as ready. The probe goes on running for the Pod’s whole life, not only when the Pod starts, so a Pod that stops being ready later is taken out of traffic, and put back once it passes again.</p>
-      <p>The right-hand check is the <dfn id="dfn-liveness-probe">liveness probe</dfn>, and it asks a different question: is the container still alive? When it fails, the node agent restarts the container, just as it restarted the crash-looping <code>notifications</code> after each crash in Chapter 4. It’s there for a job that Chapter 3 left for later, noticing a container that is running but stuck: one that has stopped making progress, for example because it is waiting for something that will never happen, which no crash would ever reveal.</p>
+      <p>The right-hand check is the <dfn id="dfn-liveness-probe">liveness probe</dfn>, and it asks a different question: is the container still alive? When it fails, the node agent restarts the container, just as it restarted the crash-looping <code>notifications</code> after each crash in Chapter 4. It’s there for a job that Chapter 3 left for later: noticing a container that is running but stuck. Such a container has stopped making progress, for example because it is waiting for something that will never happen. It never crashes, so without this check nothing would restart it.</p>
       <p>And if a team writes no probe at all? Then Kubernetes treats the missing check as passing. Without a readiness probe, a Pod counts as ready as soon as its container is running.</p>
 
       <div class="cp-check" role="group" aria-labelledby="k-05-q" data-check="k-05">
@@ -435,7 +435,7 @@
               </div>
             </div>
           </div>
-          <figcaption id="f-03-cap"><span class="cp-label">Fig. 03</span><span>The rollout stops a version whose Pods never become ready (one that started but failed its readiness check would stall the same way). A version that passes its check rolls out completely, whatever it shows customers.</span></figcaption>
+          <figcaption id="f-03-cap"><span class="cp-label">Fig. 03</span><span>The rollout stalls on a version whose Pods never become ready (one that started but failed its readiness check would stall it the same way). A version that passes its check rolls out completely, whatever it shows customers.</span></figcaption>
         </figure>
 
         <p>The right-hand panel is what happened on Thursday at 14:02. About a minute after the pipeline wrote <code>catalog:v64</code> into the record, every <code>catalog</code> Pod was running v64, and every customer was seeing prices of $0.00.</p>
@@ -450,7 +450,7 @@
         </details>
 
         <div class="cp-aside">
-          <p><b>ANALOGY</b>You know this from shift changes. A shop manager sends the morning cashier home only once the afternoon cashier has signed in and opened a till, so that the shop is never left without someone serving. Here, the Deployment loop works the same way: it removes an old Pod only once a new one has passed its check.</p>
+          <p><b>ANALOGY</b>You know this from shift changes. A shop manager sends the morning cashier home only once the afternoon cashier has signed in and opened a till, so that the shop is never left without someone serving. The Deployment loop works the same way: it removes an old Pod only once a new one has passed its check.</p>
           <p class="cp-breaks"><b>WHERE THIS ANALOGY BREAKS</b>A manager at the counter would notice a new cashier charging nothing for the groceries within a minute. The Deployment loop never sees a single sale. It sees only the result of the check the team wrote, and as long as that passes, it carries on.</p>
         </div>
 
@@ -540,7 +540,7 @@
           <figcaption id="f-05-cap"><span class="cp-label">Fig. 05</span><span>Rolling back changes the wanted version back to v63. The Deployment fills the v63 ReplicaSet it kept, as it would for any new version, and keeps v64’s in turn.</span></figcaption>
         </figure>
 
-        <p>Rolling back is a change to the record like any other. Riley’s edit put v63’s description of each Pod back into the Deployment, and the Deployment loop saw what it always looks for: a gap between the version the record wants and the version its Pods run. It closed that gap in the usual way. It already had a ReplicaSet for v63, kept with no Pods since about 14:03, so it used that one, and, with the default settings, it filled it and emptied v64’s in the same gradual way it handles any change of version. That’s why going back took about a minute too, and why it needed the same spare room.</p>
+        <p>Rolling back is a change to the record like any other. Riley’s edit put v63’s description of each Pod back into the Deployment, and the Deployment loop saw what it always looks for: a gap between the version the record wants and the version its Pods run. It closed that gap in the usual way. It already had a ReplicaSet for v63, kept with no Pods since about 14:03, so it used that one. With the default settings, it filled that ReplicaSet and emptied v64’s in the same gradual way it handles any change of version. That’s why going back took about a minute too, and why it needed the same spare room.</p>
         <p>Declaring an earlier version again like this is a <dfn id="dfn-rollback" aria-describedby="term-04">rollback</dfn>.</p>
 
         <div class="cp-term" id="term-04" role="note" aria-label="New term 4 of 4">
@@ -600,7 +600,7 @@
       </figure>
 
       <p>The second assumption is that <code>v63</code> still means the image it meant at 10:15. An image never changes once it is built (Chapter 2), but the tag that points at it can: a tag such as <code>v63</code> or <code>latest</code> can be moved to a different image, and Pods started from it at different times would then run different code. A <dfn id="dfn-digest">digest</dfn>, the image’s fingerprint, always names one exact image. Fennel’s pipeline never reuses a tag, and that is what makes “go back to v63” mean the same v63.</p>
-      <p>Beyond those two assumptions there is a limit that no amount of care removes: rolling back changes which version the Pods run, and nothing that the bad version already did. Twenty-three orders went through at $0.00 between 14:02 and 14:08, and they stayed that way, as would any emails sent or records written in those minutes. Jordan and Morgan decided to honour the orders. Data that has to outlive the Pods that wrote it is the subject of Chapter 10.</p>
+      <p>Beyond those two assumptions there is a limit that no amount of care removes: rolling back changes which version the Pods run. It changes nothing that the bad version already did. Twenty-three orders went through at $0.00 between 14:02 and 14:08, and they stayed that way, as would any emails sent or records written in those minutes. Jordan and Morgan decided to honour the orders. Data that has to outlive the Pods that wrote it is the subject of Chapter 10.</p>
       <p>Each of these points turns into a question for Jordan’s list:</p>
       <ul class="cp-qs">
         <li>“Do we keep old images for as long as we might need to go back, and do our tags ever move?”</li>
@@ -647,7 +647,7 @@
         <button type="button" class="cp-reveal" aria-expanded="false" aria-controls="k-07-a">Show the answer</button>
         <div class="cp-feedback" id="k-07-a" role="status" hidden>
           <p><b>ANSWER</b>“What do our health checks actually test? Would they catch wrong behaviour, or only crashes?”</p>
-          <p><code>catalog</code>’s readiness check passes when the app is up and can reach its database, and a check passes on a success code alone, so a version that shows $0 passes by design. “Passed health checks” only proves that v64 started and could reach its database. It was the deploy: the rollout did exactly what it is built to do, and it is built to protect availability, not correctness. A rollout that completes has proved only that every new Pod passed its checks, not that the release is good.</p>
+          <p><code>catalog</code>’s readiness check passes when the app is up and can reach its database, and a check passes on a success code alone, so a version that shows $0 passes by design. “Passed health checks” only proves that v64 started and could reach its database. It was the deploy. The rollout did exactly what it is built to do, but it is built to protect availability, not correctness. A rollout that completes has proved only that every new Pod passed its checks, not that the release is good.</p>
           <p>Then, to follow up:</p>
           <ul class="cp-answer">
             <li>“What would have caught wrong prices before every customer saw them: a check that tests a real price, or a release that goes to a small share of customers first while something watches, a canary?”</li>
@@ -662,7 +662,7 @@
       <div class="cp-recap">
         <p class="cp-label">In short</p>
         <ul>
-          <li>A Deployment is a record of which version of a service should run, and how many copies. Its loop keeps one ReplicaSet per version and shifts copies between them a few at a time, keeping enough Pods ready throughout (with three copies and the default settings, an old Pod goes only once a new one is ready), which needs spare room while both versions run.</li>
+          <li>A Deployment is a record of which version of a service should run, and how many copies. Its loop keeps one ReplicaSet per version and shifts copies between them a few at a time, keeping enough Pods ready throughout. With three copies and the default settings, an old Pod goes only once a new one is ready, which needs spare room while both versions run.</li>
           <li>The readiness probe decides whether a Pod is ready for traffic; the liveness probe decides whether it is still alive, or has to be restarted.</li>
           <li>A version whose Pods crash on start or never become ready stalls the rollout, with the old version still serving. A version that passes its checks and does the wrong thing rolls out completely.</li>
           <li>Rolling back is declaring the old version again. The same loop rolls it out the same way, from the ReplicaSet the Deployment kept if it still has one, as long as the old image is still there.</li>

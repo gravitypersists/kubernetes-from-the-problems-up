@@ -140,7 +140,7 @@
           },
           text: [
             'The ReplicaSet loop sees that the v63 ReplicaSet is one Pod short and writes a record for a new Pod. The scheduler puts that Pod on node 05, where there is room for it, and node 05’s agent starts its container.',
-            'For a moment `catalog` has four Pods, one more than the record wants, and that extra Pod is the spare room a rollout uses. The new Pod is running but isn’t ready, because it hasn’t passed its check yet, so customers are still sent only to the three v62 Pods.'
+            'For a moment `catalog` has four Pods, one more than the record wants. The extra Pod is deliberate, and it takes up spare room on node 05 while the rollout runs. The new Pod is running but isn’t ready, because it hasn’t passed its check yet, so customers are still sent only to the three v62 Pods.'
           ],
           ariaLabel: 'Seconds later. The ReplicaSet loop, seeing the v63 ReplicaSet 1 Pod short, has written a Pod record, and the scheduler placed it on node 05, whose agent started it. The catalog v63 Pod runs on node 05 but is not ready, so the v63 ReplicaSet has 1 Pod and 0 ready. Node 05 runs the dispatch Pod, a catalog v62 Pod and the new catalog v63 Pod, with 7 GB free; node 06 still runs two catalog v62 Pods. Catalog has four Pods where the record wants three. The v62 ReplicaSet still wants 3 and has 3 ready. Customers are served by the three v62 Pods.',
           highlight: ['p:n1', 'row:v63', 'lens']
@@ -159,7 +159,7 @@
             'A few seconds later the v63 Pod passes its check, and from then on it is sent customers’ requests along with the v62 Pods. Only now, with a new Pod ready, does the Deployment loop make v62’s ReplicaSet smaller, from three copies to two. The ReplicaSet loop marks one v62 Pod for deletion, and node 06’s agent stops it.',
             'Three `catalog` Pods were ready at every moment, and customers never noticed the swap.'
           ],
-          ariaLabel: 'About 10:15:20. The catalog v63 Pod on node 05 is ready and serving. The Deployment loop has lowered the v62 ReplicaSet to 2: it has 2 ready Pods, and the ReplicaSet loop has marked one for deletion, a v62 Pod on node 06 that node 06’s agent has now stopped. The v63 ReplicaSet wants 1 and has 1 ready. Three catalog Pods are ready: two v62 and one v63. Customers are served by v62 twice and v63 once.',
+          ariaLabel: 'About 10:15:20. The catalog v63 Pod on node 05 is ready and serving. The Deployment loop has lowered the v62 ReplicaSet to 2, and it has 2 ready Pods. The ReplicaSet loop has marked the third v62 Pod, on node 06, for deletion, and node 06’s agent has stopped it. The v63 ReplicaSet wants 1 and has 1 ready. Three catalog Pods are ready: two v62 and one v63. Customers are served by v62 twice and v63 once.',
           highlight: ['p:n1', 'p:c2', 'row:v62', 'note:customers', 'lens']
         },
         {
@@ -168,7 +168,7 @@
           state: {
             nodes: { '05': ['di7', 'c1:stopped', 'n1'], '06': ['c3', 'n2'] },
             record: { deployment: DEP63, rows: ['v62', 'v63'], want: { v62: 1, v63: 2 }, pods: { v62: ['c3'], v63: ['n1', 'n2'] }, deleting: { v62: ['c1'] } },
-            loops: { shown: SHOWN, active: ['deploy'], agents: [], lens: { watching: '2 v63 Pods ready', doing: 'v63 up to 2, then v62 down to 1' } },
+            loops: { shown: SHOWN, active: ['deploy'], agents: [], lens: { watching: '2 v63 Pods ready', doing: 'v62 down to 1' } },
             notes: [customers('served by v62 ×1 · v63 ×2'), HIDDEN],
             clock: '~10:15:40'
           },
